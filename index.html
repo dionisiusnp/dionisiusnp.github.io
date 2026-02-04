@@ -1,446 +1,402 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>DNP - My Curriculum Vitae</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Beasiswa Responsive</title>
+    <style>
+        /* --- VARIABLE & RESET --- */
+        :root {
+            --primary: #4338ca;
+            --primary-hover: #3730a3;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-dark: #1e293b;
+            --border-color: #cbd5e1;
+        }
 
-  <!-- Favicons -->
-  <link href="assets/img/favicon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+        /* --- CONTAINER UTAMA --- */
+        .main-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
 
-  <!-- Vendor CSS Files -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+        h2 {
+            text-align: center;
+            color: var(--text-dark);
+            margin-top: 0;
+            margin-bottom: 2rem;
+        }
 
-  <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+        /* --- LAYOUT SYSTEM (FLEXBOX) --- */
+        .matrix-container {
+            display: flex;
+            flex-direction: row;
+            /* Desktop: Berjajar ke samping */
+            gap: 15px;
+            align-items: stretch;
+        }
 
-  <!-- =======================================================
-  * Template Name: MyResume
-  * Template URL: https://bootstrapmade.com/free-html-bootstrap-template-my-resume/
-  * Updated: Jun 29 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+        /* 1. KOLOM LABEL (KIRI) */
+        .col-labels {
+            flex: 0 0 120px;
+            /* Lebar tetap untuk label */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-top: 42px;
+            /* Jarak agar sejajar dengan input di bawah header */
+        }
+
+        .label-text {
+            height: 45px;
+            /* Tinggi disamakan dengan input */
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        /* 2. KOLOM SEMESTER (INPUT) */
+        .col-semester {
+            flex: 1;
+            /* Lebar fleksibel */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sem-header {
+            text-align: center;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.9rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #f1f5f9;
+            height: 25px;
+            margin-bottom: 10px;
+            /* Jarak ke input pertama */
+        }
+
+        input[type="number"] {
+            width: 100%;
+            height: 45px;
+            /* Tinggi fix */
+            padding: 0 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            text-align: center;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1);
+        }
+
+        /* Label kecil khusus Mobile (Hidden di Desktop) */
+        .mobile-input-label {
+            display: none;
+        }
+
+        /* 3. TOMBOL (KANAN) */
+        .col-action {
+            display: flex;
+            align-items: stretch;
+            min-width: 120px;
+        }
+
+        .btn-calculate {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 4px 6px rgba(67, 56, 202, 0.3);
+            /* Agar tombol sejajar tingginya dengan total area input */
+            margin-top: 42px;
+            /* Kompensasi tinggi header */
+        }
+
+        .btn-calculate:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* --- RESPONSIVE MOBILE (DISINI PERUBAHANNYA) --- */
+        @media (max-width: 900px) {
+            .matrix-container {
+                flex-direction: column;
+                /* Ubah jadi tumpuk ke bawah */
+                gap: 20px;
+            }
+
+            /* Sembunyikan Kolom Label Kiri (Mata Pelajaran) */
+            .col-labels {
+                display: none;
+            }
+
+            /* Ubah Kolom Semester Jadi Kartu */
+            .col-semester {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                padding: 15px;
+                border-radius: 12px;
+            }
+
+            .sem-header {
+                border-bottom: none;
+                color: var(--primary);
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+                text-align: left;
+            }
+
+            /* Tampilkan Label di atas Input pada Mobile */
+            .mobile-input-label {
+                display: block;
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: #64748b;
+                margin-bottom: 4px;
+                margin-top: 5px;
+            }
+
+            /* Tombol jadi lebar penuh di bawah */
+            .col-action {
+                margin-top: 10px;
+            }
+
+            .btn-calculate {
+                margin-top: 0;
+                height: 55px;
+                /* Tinggi tombol mobile */
+            }
+        }
+
+        /* --- HASIL --- */
+        #result-box {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            background-color: #ecfdf5;
+            border: 1px solid #d1fae5;
+        }
+
+        .res-score {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 5px 0;
+        }
+
+        .res-cat {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .res-reward {
+            color: #059669;
+            font-weight: 600;
+        }
+    </style>
 </head>
 
-<body class="index-page">
+<body>
 
-  <header id="header" class="header d-flex flex-column justify-content-center">
+    <div class="main-card">
+        <h2>🎓 Cek Kriteria Beasiswa</h2>
 
-    <i class="header-toggle d-xl-none bi bi-list"></i>
+        <div class="matrix-container">
 
-    <nav id="navmenu" class="navmenu">
-      <ul>
-        <li><a href="#hero" class="active"><i class="bi bi-house navicon"></i><span>Intro</span></a></li>
-        <li><a href="#about"><i class="bi bi-person navicon"></i><span>About</span></a></li>
-        <li><a href="#resume"><i class="bi bi-file-earmark-text navicon"></i><span>Resume</span></a></li>
-        <li><a href="portfolio.html"><i class="bi bi-laptop navicon"></i><span>Portfolio</span></a></li>
-        <li><a href="#services"><i class="bi bi-hdd-stack navicon"></i><span>Services</span></a></li>
-        <li><a href="#contact"><i class="bi bi-envelope navicon"></i><span>Contact</span></a></li>
-      </ul>
-    </nav>
-
-  </header>
-
-  <main class="main">
-
-    <!-- Hero Section -->
-    <section id="hero" class="hero section light-background">
-
-      <img src="assets/img/hero-bg.jpg" alt="">
-
-      <div class="container" data-aos="zoom-out">
-        <div class="row justify-content-center">
-          <div class="col-lg-9">
-            <h2>call me, Dion</h2>
-            <p>I'm <span class="typed" data-typed-items="Software Engineer, Back End, Front End, DevOps, Human">Software Engineer</span><span class="typed-cursor typed-cursor--blink" aria-hidden="true"></span></p>
-            <div class="text-left mt-3">
-              <a href="assets/cv.pdf" target="_blank" class="btn btn-primary" download>Show CV</a>
+            <div class="col-labels">
+                <div class="label-text">Matematika</div>
+                <div class="label-text">B. Inggris</div>
+                <div class="label-text">Nilai Tertinggi</div>
             </div>
-            <div class="social-links">
-              <a href="https://www.instagram.com/dionisnp/" target="_blank"><i class="bi bi-instagram"></i></a>
-              <a href="https://www.linkedin.com/in/dionisius-nanda-priyadi/" target="_blank"><i class="bi bi-linkedin"></i></a>
+
+            <div class="col-semester">
+                <div class="sem-header">Kelas 10 - Sem 1</div>
+
+                <div>
+                    <span class="mobile-input-label">Nilai Matematika</span>
+                    <input type="number" class="score-input c1" placeholder="Nilai MTK">
+                </div>
+                <div>
+                    <span class="mobile-input-label">Nilai B. Inggris</span>
+                    <input type="number" class="score-input c1" placeholder="Nilai ING">
+                </div>
+                <div>
+                    <span class="mobile-input-label">Nilai Mata Pelajaran Tertinggi</span>
+                    <input type="number" class="score-input c1" placeholder="Nilai MAPEL Tertinggi">
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-    </section><!-- /Hero Section -->
+            <div class="col-semester">
+                <div class="sem-header">Kelas 10 - Sem 2</div>
 
-    <!-- About Section -->
-    <section id="about" class="about section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>About</h2>
-        <p>I am a software developer with experience in the IT field since 2016. I specialize in building Web and Mobile applications, with a strong familiarity in working with RESTful APIs. I am highly enthusiastic about exploring and learning Artificial Intelligence and its potential in modern software development.</p>
-      </div><!-- End Section Title -->
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row gy-4 justify-content-center">
-          <div class="col-lg-4">
-            <img src="assets/img/profile-img.jpg" class="img-fluid" alt="">
-          </div>
-          <div class="col-lg-8 content">
-            <h2>Web &amp; Mobile Developer.</h2>
-            <p class="fst-italic py-3">
-              Passionate about building digital solutions, exploring new technologies, and writing clean and efficient code.
-            </p>
-            <div class="row">
-              <div class="col-lg-6">
-                <ul>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Birthday:</strong> <span>1995, 28 March</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>City:</strong> <span>Malang, East Java, Indonesia</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Age:</strong> <span id="age"></span></li>
-                </ul>
-              </div>
-              <div class="col-lg-6">
-                <ul>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Mobile:</strong> <span>+62 857 0825 1737</span></li>
-                  <li><i class="bi bi-chevron-right"></i> <strong>Email:</strong> <span>dionisiusn1@gmail.com</span></li>
-                  <!-- <li><i class="bi bi-chevron-right"></i> <strong>Freelance:</strong> <span>Available</span></li> -->
-                </ul>
-              </div>
+                <div>
+                    <span class="mobile-input-label">Nilai Matematika</span>
+                    <input type="number" class="score-input c2" placeholder="Nilai MTK">
+                </div>
+                <div>
+                    <span class="mobile-input-label">Nilai B. Inggris</span>
+                    <input type="number" class="score-input c2" placeholder="Nilai ING">
+                </div>
+                <div>
+                    <span class="mobile-input-label">Nilai Mata Pelajaran Tertinggi</span>
+                    <input type="number" class="score-input c2" placeholder="Nilai MAPEL Tertinggi">
+                </div>
             </div>
-            <p class="py-3">
-              Since the beginning of my career in IT, I have continuously developed my skills in software engineering, particularly in building robust systems using RESTful APIs. Recently, I have started diving deeper into Artificial Intelligence and am excited about integrating intelligent features into future applications. I believe that lifelong learning and adaptability are key to being a relevant and innovative developer.
-            </p>
-          </div>
-        </div>
 
-      </div>
+            <div class="col-semester">
+                <div class="sem-header">Kelas 11 - Sem 1</div>
 
-    </section><!-- /About Section -->
-
-    <!-- Skills Section -->
-    <section id="skills" class="skills section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Skills</h2>
-        <p>An overview of my technical skills, covering backend frameworks, mobile development, server management, and AI exploration.</p>
-      </div><!-- End Section Title -->
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row skills-content skills-animation">
-
-          <div class="col-lg-6">
-
-            <div class="progress">
-              <span class="skill"><span>PHP-Laravel, Dart-Flutter, Java-Springboot</span> <i class="val">75%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div><!-- End Skills Item -->
-
-            <div class="progress">
-              <span class="skill"><span>SQL, No SQL</span> <i class="val">70%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div><!-- End Skills Item -->
-
-            <div class="progress">
-              <span class="skill"><span>Shared, VPS Hosting</span> <i class="val">80%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div><!-- End Skills Item -->
-
-          </div>
-
-          <div class="col-lg-6">
-
-            <div class="progress">
-              <span class="skill"><span>Payment Gateway, Google Cloud, AWS</span> <i class="val">60%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div><!-- End Skills Item -->
-
-            <div class="progress">
-              <span class="skill"><span>Artificial Intelligence</span> <i class="val">50%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div><!-- End Skills Item -->
-
-            <div class="progress">
-              <span class="skill"><span>Additional Tools (Git, Ngrok, Postman, Whimsical, SEO Tools, etc)</span> <i class="val">100%</i></span>
-              <div class="progress-bar-wrap">
-                <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div><!-- End Skills Item -->
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section><!-- /Skills Section -->
-
-    <!-- Resume Section -->
-    <section id="resume" class="resume section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Resume</h2>
-        <p>An overview of my professional background, education, and work experience. It highlights my journey in the IT field, showcasing key achievements, skills, and the projects I've contributed to as a Software Engineer, both in freelance and corporate environments.</p>
-        <p><a href="portfolio.html">Click here</a> to view a list of applications I have developed and contributed to.</p>
-      </div><!-- End Section Title -->
-
-      <div class="container">
-
-        <div class="row">
-
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-            <h3 class="resume-title">Summary</h3>
-
-            <div class="resume-item pb-0">
-              <h4>Dionisius NP</h4>
-              <p><em>Passionate and solution-oriented Web & Mobile Developer with experience since 2016. Skilled in building responsive applications, integrating RESTful APIs, and deploying to various environments. Enthusiastic about learning and applying Artificial Intelligence in real-world solutions.</em></p>
-              <ul>
-                <li>Sidoarjo, East Java, Indonesia</li>
-                <li>+62 857-0825-1737</li>
-                <li>dionisiusn1@gmail.com</li>
-              </ul>
-            </div><!-- Edn Resume Item -->
-
-          </div>
-
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-            <h3 class="resume-title">Education</h3>
-            <div class="resume-item">
-              <h4>Undergraduate Studies in Information Systems</h4>
-              <h5>2014 - 2021 (Unfinished)</h5>
-              <p><em>Airlangga University (UNAIR), Surabaya, Indonesia</em></p>
-              <p>Completed core coursework in software engineering, databases, and information systems analysis. Although the degree was not completed, the academic experience laid a strong foundation for a career in IT and software development.</p>
-            </div><!-- End Resume Item -->
-          </div>
-
-          <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
-            <h3 class="resume-title">Professional Experience</h3>
-            <div class="resume-item">
-              <h4>Software Engineer</h4>
-              <h5>Feb 2024 - Present</h5>
-              <p><em>Universitas Dinamika, Solusi Sistem Informasi, Surabaya, East Java, Indonesia</em></p>
-              <!-- <ul>
-                <li>Designing, developing, and maintaining custom software solutions for various clients, both internal and external.</li>
-                <li>Collaborating with cross-functional teams to define project requirements, scope, and deliverables.</li>
-                <li>Developing both frontend and backend systems using modern technologies.</li>
-                <li>Implementing and optimizing RESTful APIs to support seamless integration across various platforms.</li>
-                <li>Ensuring application scalability, security, and high performance across all stages of the software development lifecycle.</li>
-              </ul> -->
-            </div><!-- End Resume Item -->
-
-            <div class="resume-item">
-              <h4>Software Engineer</h4>
-              <h5>Jun 2022 - Present</h5>
-              <p><em>CV Mitra Super Teknologi, Depok, West Java, Indonesia</em></p>
-              <!-- <ul>
-                <li>Developed and maintained custom software solutions for various clients, focusing on both web and mobile applications.</li>
-                <li>Collaborated with clients to understand project requirements and provided tailored technical solutions to meet business needs.</li>
-                <li>Built and integrated APIs, ensuring smooth data exchange between frontend and backend systems.</li>
-                <li>Utilized modern technologies such as Laravel, Flutter, and MySQL to create scalable, high-performance applications.</li>
-                <li>Provided ongoing technical support and maintenance for deployed applications, optimizing them for performance and reliability.</li>
-              </ul> -->
-            </div><!-- End Resume Item -->            
-
-            <div class="resume-item">
-              <h4>Back End Engineer &amp; Project Leader</h4>
-              <h5>Sep 2021 - Feb 2024</h5>
-              <p><em>PT Hokky Sumber Makmur, Surabaya, East Java, Indonesia</em></p>
-              <!-- <ul>
-                <li>Led and managed software development projects for internal business systems, focusing on automation and efficiency.</li>
-                <li>Designed and implemented RESTful APIs for integration across multiple platforms.</li>
-                <li>Collaborated with cross-functional teams to gather requirements and deliver scalable backend solutions using Java Springboot and MySQL.</li>
-                <li>Collaborated closely with the DevOps team to ensure smooth deployment and stable application environments on VPS infrastructure.</li>
-                <li>Supervised junior developers and coordinated task distribution to ensure timely delivery.</li>
-              </ul> -->
-            </div><!-- End Resume Item -->
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section><!-- /Resume Section -->
-
-    <!-- Services Section -->
-    <section id="services" class="services section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Services</h2>
-        <p>I offer flexible project-based services, either individually or by joining an existing team. I specialize in delivering user-friendly applications for end-users. Additionally, I am actively involved in a community focused on learning and development, including participating in events organized by Google Developer Groups (GDG). I also offer guidance and mentorship through this community to help others grow their technical skills.</p>
-      </div><!-- End Section Title -->
-
-      <div class="container">
-        <div class="row gy-4">
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="service-item item-cyan position-relative">
-              <div class="icon">
-                <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,521.0016835830174C376.1290562159157,517.8887921683347,466.0731472004068,529.7835943286574,510.70327084640275,468.03025145048787C554.3714126377745,407.6079735673963,508.03601936045806,328.9844924480964,491.2728898941984,256.3432110539036C474.5976632858925,184.082847569629,479.9380746630129,96.60480741107993,416.23090153303,58.64404602377083C348.86323505073057,18.502131276798302,261.93793281208167,40.57373210992963,193.5410806939664,78.93577620505333C130.42746243093433,114.334589627462,98.30271207620316,179.96522072025542,76.75703585869454,249.04625023123273C51.97151888228291,328.5150500222984,13.704378332031375,421.85034740162234,66.52175969318436,486.19268352777647C119.04800174914682,550.1803526380478,217.28368757567262,524.383925680826,300,521.0016835830174"></path>
-                </svg>
-                <i class="bi bi-activity"></i>
-              </div>
-              <a href="#" class="stretched-link">
-                <h3>Project-Based Development</h3>
-              </a>
-              <p>Developing custom applications either as an individual contributor or as part of a team. I specialize in providing solutions tailored to the unique needs of the client and users.</p>
+                <div>
+                    <span class="mobile-input-label">Nilai Matematika</span>
+                    <input type="number" class="score-input c3" placeholder="Nilai MTK">
+                </div>
+                <div>
+                    <span class="mobile-input-label">Nilai B. Inggris</span>
+                    <input type="number" class="score-input c3" placeholder="Nilai ING">
+                </div>
+                <div>
+                    <span class="mobile-input-label">Nilai Mata Pelajaran Tertinggi</span>
+                    <input type="number" class="score-input c3" placeholder="Nilai MAPEL Tertinggi">
+                </div>
             </div>
-          </div><!-- End Service Item -->
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-            <div class="service-item item-orange position-relative">
-              <div class="icon">
-                <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,582.0697525312426C382.5290701553225,586.8405444964366,449.9789794690241,525.3245884688669,502.5850820975895,461.55621195738473C556.606425686781,396.0723002908107,615.8543463187945,314.28637112970534,586.6730223649479,234.56875336149918C558.9533121215079,158.8439757836574,454.9685369536778,164.00468322053177,381.49747125262974,130.76875717737553C312.15926192815925,99.40240125094834,248.97055460311594,18.661163978235184,179.8680185752513,50.54337015887873C110.5421016452524,82.52863877960104,119.82277516462835,180.83849132639028,109.12597500060166,256.43424936330496C100.08760227029461,320.3096726198365,92.17705696193138,384.0621239912766,124.79988738764834,439.7174275375508C164.83382741302287,508.01625554203684,220.96474134820875,577.5009287672846,300,582.0697525312426"></path>
-                </svg>
-                <i class="bi bi-broadcast"></i>
-              </div>
-              <a href="#" class="stretched-link">
-                <h3>User-Focused Applications</h3>
-              </a>
-              <p>Creating applications designed with the end-user in mind, ensuring functionality, usability, and performance are optimized for real-world usage.</p>
+            <div class="col-semester">
+                <div class="sem-header">Kelas 11 - Sem 2</div>
+
+                <div>
+                    <span class="mobile-input-label">Nilai Matematika</span>
+                    <input type="number" class="score-input c4" placeholder="Nilai MTK">
+                </div>
+                <div>
+                    <span class="mobile-input-label">Nilai B. Inggris</span>
+                    <input type="number" class="score-input c4" placeholder="Nilai ING">
+                </div>
+                <div>
+                    <span class="mobile-input-label">Nilai Mata Pelajaran Tertinggi</span>
+                    <input type="number" class="score-input c4" placeholder="Nilai MAPEL Tertinggi">
+                </div>
             </div>
-          </div><!-- End Service Item -->
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="service-item item-teal position-relative">
-              <div class="icon">
-                <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,541.5067337569781C382.14930387511276,545.0595476570109,479.8736841581634,548.3450877840088,526.4010558755058,480.5488172755941C571.5218469581645,414.80211281144784,517.5187510058486,332.0715597781072,496.52539010469104,255.14436215662573C477.37192572678356,184.95920475031193,473.57363656557914,105.61284051026155,413.0603344069578,65.22779650032875C343.27470386102294,18.654635553484475,251.2091493199835,5.337323636656869,175.0934190732945,40.62881213300186C97.87086631185822,76.43348514350839,51.98124368387456,156.15599469081315,36.44837278890362,239.84606092416172C21.716077023791087,319.22268207091537,43.775223500013084,401.1760424656574,96.891909868211,461.97329694683043C147.22146801428983,519.5804099606455,223.5754009179313,538.201503339737,300,541.5067337569781"></path>
-                </svg>
-                <i class="bi bi-easel"></i>
-              </div>
-              <a href="#" class="stretched-link">
-                <h3>Learning & Mentorship</h3>
-              </a>
-              <p>Being an active member of the GDG (Google Developer Group) community, I offer mentorship and support through community activities and events to help foster growth in tech.</p>
+            <div class="col-action">
+                <button class="btn-calculate" onclick="hitung()">
+                    HITUNG<br>HASIL
+                </button>
             </div>
-          </div><!-- End Service Item -->
-
-        </div>
-      </div>
-    </section><!-- /Services Section -->
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Contact</h2>
-        <p>Get in touch for project consultations, team collaborations, or to learn more about my app development community and involvement in tech events.</p>
-      </div><!-- End Section Title -->
-
-      <div class="container" data-aos="fade" data-aos-delay="100">
-
-        <div class="row gy-4 justify-content-center">
-
-          <div class="col-lg-6">
-            <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="200">
-              <i class="bi bi-geo-alt flex-shrink-0"></i>
-              <div>
-                <h3>Address</h3>
-                <p>Citra Pesona Buduran E1/09, Sidoarjo, East Java 61252</p>
-              </div>
-            </div><!-- End Info Item -->
-
-            <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="300">
-              <i class="bi bi-telephone flex-shrink-0"></i>
-              <div>
-                <h3>Call Me</h3>
-                <p>+62 857 0825 1737</p>
-              </div>
-            </div><!-- End Info Item -->
-
-            <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="400">
-              <i class="bi bi-envelope flex-shrink-0"></i>
-              <div>
-                <h3>Email Me</h3>
-                <p>dionisiusn1@gmail.com</p>
-              </div>
-            </div><!-- End Info Item -->
-
-          </div>
 
         </div>
 
-      </div>
-
-    </section><!-- /Contact Section -->
-
-  </main>
-
-  <footer id="footer" class="footer position-relative light-background">
-    <div class="container">
-      <h3 class="sitename">Dionisius NP</h3>
-      <p>A perfect application is not one that is expensive or error-free, but one that can be used effectively.</p>
-      <div class="social-links d-flex justify-content-center">
-        <a href="https://www.instagram.com/dionisnp/" target="_blank"><i class="bi bi-instagram"></i></a>
-        <a href="https://www.linkedin.com/in/dionisius-nanda-priyadi/" target="_blank"><i class="bi bi-linkedin"></i></a>
-      </div>
-      <div class="container">
-        <div class="copyright">
-          <span>Copyright</span> <strong class="px-1 sitename">DNP</strong> <span>All Rights Reserved</span>
+        <div id="result-box">
+            <div class="res-cat" id="txt-cat">Kategori 1</div>
+            <div class="res-score" id="txt-score">95.00</div>
+            <div class="res-reward" id="txt-reward">Mendapat Potongan...</div>
         </div>
-        <div class="credits">
-          <!-- All the links in the footer should remain intact. -->
-          <!-- You can delete the links only if you've purchased the pro version. -->
-          <!-- Licensing information: https://bootstrapmade.com/license/ -->
-          <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-          Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-        </div>
-      </div>
     </div>
-  </footer>
 
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+    <script>
+        const RULES = [
+            { min: 92.5, max: 100, label: "Kategori 1", reward: "Potongan Biaya 100% SPP & SKS Normal" },
+            { min: 85, max: 92.49, label: "Kategori 2", reward: "Potongan Biaya 100% SPP & SKS Normal" },
+            { min: 77.5, max: 84.99, label: "Kategori 3", reward: "Potongan Biaya 75% SPP & SKS Normal" },
+            { min: 70, max: 77.49, label: "Kategori 4", reward: "Potongan Biaya 50% SPP & SKS Normal" },
+            { min: 0, max: 69.99, label: "Kategori 5", reward: "Potongan Biaya 25% SPP & SKS Normal" }
+        ];
 
-  <!-- Preloader -->
-  <div id="preloader"></div>
+        function hitung() {
+            // Kita cek 4 kolom (c1, c2, c3, c4)
+            const cols = ['c1', 'c2', 'c3', 'c4'];
+            let totalAvg = 0;
+            let validCols = 0;
 
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/typed.js/typed.umd.js"></script>
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-  <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+            for (let c of cols) {
+                let inputs = document.querySelectorAll('.' + c);
+                let sum = 0, count = 0;
 
-  <!-- Main JS File -->
-  <script src="assets/js/main.js"></script>
-  <script>
-    const birthYear = 1995;
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - birthYear;
-    document.getElementById('age').textContent = age;
-  </script>
+                inputs.forEach(inp => {
+                    let v = parseFloat(inp.value);
+                    if (!isNaN(v) && v >= 0 && v <= 100) {
+                        sum += v;
+                        count++;
+                    }
+                });
+
+                // Syarat: Harus isi 3 mapel lengkap dalam 1 semester
+                if (count === 3) {
+                    totalAvg += (sum / 3);
+                    validCols++;
+                } else if (count > 0) {
+                    alert("Mohon lengkapi 3 nilai (MTK, ING, Tertinggi) pada semester yang ingin dihitung.");
+                    document.getElementById('result-box').style.display = 'none';
+                    return;
+                }
+            }
+
+            if (validCols === 0) {
+                alert("Isi minimal satu semester dengan lengkap!");
+                return;
+            }
+
+            let finalScore = totalAvg / validCols;
+
+            // Cari Kategori
+            let match = RULES.find(r => finalScore >= r.min && finalScore <= r.max);
+
+            // Tampil Hasil
+            const box = document.getElementById('result-box');
+            const tScore = document.getElementById('txt-score');
+            const tCat = document.getElementById('txt-cat');
+            const tRew = document.getElementById('txt-reward');
+
+            box.style.display = 'block';
+            tScore.innerText = finalScore.toFixed(2);
+
+            if (match) {
+                tCat.innerText = "Selamat! Masuk " + match.label;
+                tRew.innerText = match.reward;
+                box.style.backgroundColor = "#ecfdf5";
+                box.style.border = "1px solid #d1fae5";
+                tRew.style.color = "#059669";
+            } else {
+                tCat.innerText = "Diluar Kategori";
+                tRew.innerText = "Nilai tidak memenuhi syarat.";
+                box.style.backgroundColor = "#fff1f2";
+                box.style.border = "1px solid #ffe4e6";
+                tRew.style.color = "#be123c";
+            }
+        }
+    </script>
 </body>
 
 </html>
