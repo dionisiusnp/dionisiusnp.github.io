@@ -13,3 +13,19 @@ Berdasarkan latar belakang di atas, rumusan masalah dalam penelitian ini adalah:
 2.	Bagaimana mengintegrasikan framework Laravel dengan media pembelajaran koding pemrograman (menggunakan game development tool Greenfoot) berbasis Greenfoot atau Godot?
 3.	Bagaimana tingkat kelayakan, kepraktisan, dan efektivitas media pembelajaran yang dikembangkan dalam meningkatkan motivasi dan pemahaman konsep koding pemrograman siswa?
 
+Peneliti :
+bidang IT:
+Tri
+Panca
+
+Bidang Pendidikan:
+Prof Bambang
+
+Laboran :
+Bidang IT:
+Dion
+Atika
+
+Bidang Pendidikan:
+P. Fahmi
+P. Wawan
