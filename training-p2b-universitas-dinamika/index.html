@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java Spring Boot Bootcamp · 45 Hari — Universitas Dinamika</title>
+  <meta name="description" content="Belajar membangun aplikasi backend dengan Java Spring Boot dari konsep dasar hingga implementasi proyek nyata. Kelas eksklusif hanya 10 peserta." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:       #0a0a0a;
+      --bg-surface:    #0d1117;
+      --bg-card:       #111827;
+      --bg-card-hover: #1a2236;
+      --border:        #1e2d3d;
+      --border-bright: #2a3f57;
+      --green:         #22c55e;
+      --green-dim:     #16a34a;
+      --green-glow:    rgba(34,197,94,0.35);
+      --green-subtle:  rgba(34,197,94,0.08);
+      --orange:        #f97316;
+      --orange-dim:    #ea6c0a;
+      --orange-glow:   rgba(249,115,22,0.35);
+      --red-badge:     #ef4444;
+      --text-primary:  #f0f6fc;
+      --text-secondary:#8b949e;
+      --text-muted:    #484f58;
+      --mono:         'JetBrains Mono', monospace;
+      --sans:         'Inter', sans-serif;
+      --radius:        12px;
+      --radius-sm:     8px;
+      --radius-lg:     20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes pulse-ring {
+      0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+      70%  { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+      100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    }
+    @keyframes pulse-green {
+      0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+      70%  { box-shadow: 0 0 0 12px rgba(34,197,94,0); }
+      100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    }
+    @keyframes glow-cta {
+      0%, 100% { box-shadow: 0 0 20px var(--green-glow), 0 4px 15px rgba(0,0,0,0.4); }
+      50%       { box-shadow: 0 0 35px var(--green-glow), 0 0 60px rgba(34,197,94,0.15), 0 4px 15px rgba(0,0,0,0.4); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float-poster {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50%       { transform: translateY(-10px) rotate(-1deg); }
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--green);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo span { color: var(--text-secondary); font-weight: 400; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-primary); background: var(--bg-card); }
+    .nav-cta {
+      font-size: 13px;
+      font-weight: 600;
+      color: #000 !important;
+      background: var(--green) !important;
+      padding: 8px 16px !important;
+      border-radius: var(--radius-sm) !important;
+      transition: background 0.2s, transform 0.15s !important;
+    }
+    .nav-cta:hover { background: #16a34a !important; transform: translateY(-1px); }
+
+    /* ===== SECTION BASE ===== */
+    section { padding: 96px 24px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    /* ===== HERO ===== */
+    #hero {
+      padding-top: 80px;
+      padding-bottom: 96px;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(34,197,94,0.07) 0%, transparent 70%),
+                  linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 64px;
+      align-items: center;
+    }
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid;
+    }
+    .badge-green {
+      color: var(--green);
+      border-color: rgba(34,197,94,0.3);
+      background: var(--green-subtle);
+    }
+    .badge-red {
+      color: #ff6b6b;
+      border-color: rgba(239,68,68,0.35);
+      background: rgba(239,68,68,0.08);
+      animation: pulse-ring 2s ease-in-out infinite;
+    }
+    .badge-orange {
+      color: var(--orange);
+      border-color: rgba(249,115,22,0.3);
+      background: rgba(249,115,22,0.08);
+    }
+    .hero-title {
+      font-size: clamp(36px, 5.5vw, 64px);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .hero-title .accent-green { color: var(--green); }
+    .hero-title .accent-dim   { color: var(--text-secondary); font-weight: 400; font-size: 0.65em; letter-spacing: 0; }
+    .hero-tagline {
+      font-size: 17px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 520px;
+      margin-bottom: 36px;
+    }
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .stat-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      min-width: 90px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .stat-chip:hover { border-color: var(--green); background: var(--bg-card-hover); }
+    .stat-chip-value {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .stat-chip-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 15px;
+      color: #000;
+      background: var(--green);
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      animation: glow-cta 3s ease-in-out infinite;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: #16a34a; transform: translateY(-2px); }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid var(--border-bright);
+      padding: 13px 24px;
+      border-radius: var(--radius);
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--green); color: var(--green); background: var(--green-subtle); }
+    .hero-poster-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .hero-poster-inner {
+      position: relative;
+      animation: float-poster 6s ease-in-out infinite;
+    }
+    .hero-poster-inner::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(135deg, var(--green), transparent 60%, var(--orange));
+      border-radius: calc(var(--radius-lg) + 2px);
+      z-index: -1;
+      opacity: 0.6;
+    }
+    .hero-poster-inner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(34,197,94,0.15);
+      z-index: -1;
+    }
+    .hero-poster {
+      width: 100%;
+      max-width: 400px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+    .poster-placeholder {
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 1;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 32px;
+      text-align: center;
+    }
+    .poster-placeholder .poster-icon { font-size: 56px; }
+    .poster-placeholder .poster-title {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .poster-placeholder .poster-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .hero-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ===== DIVIDER ===== */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 24px;
+    }
+
+    /* ===== ROADMAP / CURRICULUM ===== */
+    #curriculum {
+      background: var(--bg-surface);
+    }
+    .curriculum-header { margin-bottom: 64px; }
+    .roadmap-timeline {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .roadmap-timeline::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 32px;
+      bottom: 32px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--green) 0%, var(--border) 100%);
+      z-index: 0;
+    }
+    .roadmap-stage {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 24px;
+      position: relative;
+      padding-bottom: 40px;
+    }
+    .roadmap-stage:last-child { padding-bottom: 0; }
+    .stage-dot-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 1;
+    }
+    .stage-dot {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      border: 2px solid;
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .stage-dot.active {
+      background: var(--green-subtle);
+      border-color: var(--green);
+      box-shadow: 0 0 20px rgba(34,197,94,0.3);
+    }
+    .stage-dot.dim {
+      background: var(--bg-card);
+      border-color: var(--border);
+    }
+    .roadmap-stage:hover .stage-dot { transform: scale(1.08); }
+    .stage-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .roadmap-stage:hover .stage-content {
+      border-color: var(--border-bright);
+      background: var(--bg-card-hover);
+    }
+    .stage-week {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .stage-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .stage-topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .topic-tag {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .roadmap-stage:hover .topic-tag {
+      color: var(--green);
+      border-color: rgba(34,197,94,0.25);
+      background: var(--green-subtle);
+    }
+    .stage-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    /* ===== REQUIREMENTS ===== */
+    #requirements { background: var(--bg-base); }
+    .req-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .req-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .req-card:hover { border-color: var(--green); transform: translateY(-4px); }
+    .req-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background: var(--green-subtle);
+      border: 1px solid rgba(34,197,94,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .req-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .req-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* ===== PRICING ===== */
+    #pricing {
+      background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(34,197,94,0.05) 0%, transparent 70%),
+                  var(--bg-surface);
+    }
+    .pricing-center { text-align: center; }
+    .pricing-center .section-sub { margin: 0 auto 48px; }
+    .price-card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .price-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green), #4ade80);
+    }
+    .price-card-header { margin-bottom: 32px; }
+    .price-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+    .price-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .price-desc { font-size: 14px; color: var(--text-secondary); }
+    .price-amount-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .price-contact {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    .discount-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--orange);
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.3);
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-bottom: 28px;
+    }
+    .price-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .price-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .price-features li .check {
+      color: var(--green);
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .btn-cta-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      font-weight: 800;
+      font-size: 16px;
+      color: #000;
+      background: var(--green);
+      padding: 16px 28px;
+      border-radius: var(--radius);
+      animation: glow-cta 3s ease-in-out infinite;
+      transition: background 0.2s, transform 0.15s;
+      margin-bottom: 14px;
+    }
+    .btn-cta-main:hover { background: #16a34a; transform: translateY(-2px); }
+    .seats-warning {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .seats-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--red-badge);
+      animation: pulse-ring 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      padding: 48px 24px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: start;
+    }
+    .footer-brand-logo {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+    .footer-brand-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 400px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .footer-orgs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .footer-org-chip {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 12px;
+    }
+    .footer-contact {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .footer-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .footer-contact-item:hover { color: var(--green); }
+    .footer-contact-icon { font-size: 15px; }
+    .footer-right { text-align: right; }
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--green); }
+    .footer-copy {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      .hero-poster-wrap { order: -1; }
+      .hero-poster, .poster-placeholder { max-width: 320px; margin: 0 auto; }
+      .req-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; }
+      .footer-right { text-align: left; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      section { padding: 64px 16px; }
+      .roadmap-timeline::before { left: 22px; }
+      .roadmap-stage { grid-template-columns: 50px 1fr; gap: 16px; }
+      .stage-dot { width: 46px; height: 46px; font-size: 18px; }
+      .price-card { padding: 28px 20px; }
+      .hero-stats { gap: 8px; }
+      .stat-chip { padding: 10px 14px; min-width: 76px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">
+      ☕ <span>Spring</span>Bootcamp
+    </a>
+    <ul class="nav-links">
+      <li><a href="#curriculum">Kurikulum</a></li>
+      <li><a href="#requirements">Syarat</a></li>
+      <li><a href="#pricing">Harga</a></li>
+      <li><a href="https://training.dinamika.ac.id" target="_blank" rel="noopener">training.dinamika.ac.id</a></li>
+      <li><a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="nav-cta">Daftar Sekarang →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+
+      <!-- Left: Text -->
+      <div class="hero-text" style="animation: fadeInUp 0.6s ease both;">
+        <div class="hero-badges">
+          <span class="badge badge-red">⬤&nbsp; Limited Seats</span>
+          <span class="badge badge-green">Exclusive Class</span>
+          <span class="badge badge-orange">45 Hari Intensif</span>
+        </div>
+
+        <h1 class="hero-title">
+          Java<br>
+          <span class="accent-green">Spring Boot</span><br>
+          <span class="accent-dim">Bootcamp</span>
+        </h1>
+
+        <p class="hero-tagline">
+          Pelajari cara membangun aplikasi backend production-ready dengan Java Spring Boot—dari konsep dasar hingga implementasi proyek nyata dengan arsitektur yang bersih.
+        </p>
+
+        <div class="hero-stats">
+          <div class="stat-chip">
+            <span class="stat-chip-value">45</span>
+            <span class="stat-chip-label">Hari</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-value">10</span>
+            <span class="stat-chip-label">Peserta</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-value">100%</span>
+            <span class="stat-chip-label">Hands-on</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-value">✓</span>
+            <span class="stat-chip-label">Certificate</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-primary">
+            Daftar Sekarang →
+          </a>
+          <a href="#curriculum" class="btn-secondary">
+            Lihat Kurikulum
+          </a>
+        </div>
+
+        <p class="hero-note">
+          🏛️ Diselenggarakan oleh <strong>Universitas Dinamika</strong> &amp; <strong>Solusi Sistem Informasi</strong>
+        </p>
+      </div>
+
+      <!-- Right: Poster -->
+      <div class="hero-poster-wrap" style="animation: fadeInUp 0.6s 0.2s ease both; opacity: 0; animation-fill-mode: forwards;">
+        <div class="hero-poster-inner">
+          <img
+            src="Java Spring Bootcamp (Instagram Post (45)) (2) (1).png"
+            alt="Java Spring Boot Bootcamp — Poster"
+            class="hero-poster"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          />
+          <div class="poster-placeholder" style="display:none;">
+            <div class="poster-icon">☕</div>
+            <div class="poster-title">Spring Boot<br>Bootcamp</div>
+            <div class="poster-sub" style="color:var(--green);font-family:var(--mono);font-size:15px;font-weight:700;">45 Hari · 10 Peserta</div>
+            <div class="poster-sub">Universitas Dinamika<br>× Solusi Sistem Informasi</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== CURRICULUM ===== -->
+<section id="curriculum">
+  <div class="container">
+    <div class="curriculum-header">
+      <p class="section-label">// Kurikulum</p>
+      <h2 class="section-title">Yang Akan Kamu Pelajari</h2>
+      <p class="section-sub">Kurikulum terstruktur 45 hari mengikuti Spring Boot developer roadmap—dari fondasi Java modern hingga deployment aplikasi production.</p>
+    </div>
+
+    <div class="roadmap-timeline">
+
+      <!-- Stage 1 -->
+      <div class="roadmap-stage">
+        <div class="stage-dot-col">
+          <div class="stage-dot active">☕</div>
+        </div>
+        <div class="stage-content">
+          <p class="stage-week">// Week 1 · Hari 1–7</p>
+          <h3 class="stage-title">Core Java &amp; OOP Foundation</h3>
+          <div class="stage-topics">
+            <span class="topic-tag">Java 17/21</span>
+            <span class="topic-tag">OOP Principles</span>
+            <span class="topic-tag">Collections &amp; Generics</span>
+            <span class="topic-tag">Lambda &amp; Streams</span>
+            <span class="topic-tag">Exception Handling</span>
+            <span class="topic-tag">Maven / Gradle</span>
+          </div>
+          <p class="stage-desc">Memastikan fondasi Java yang kuat: syntax modern, paradigma OOP, serta tooling yang dipakai di dunia profesional.</p>
+        </div>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="roadmap-stage">
+        <div class="stage-dot-col">
+          <div class="stage-dot active">🌱</div>
+        </div>
+        <div class="stage-content">
+          <p class="stage-week">// Week 1–2 · Hari 5–14</p>
+          <h3 class="stage-title">Spring Core &amp; Dependency Injection</h3>
+          <div class="stage-topics">
+            <span class="topic-tag">IoC Container</span>
+            <span class="topic-tag">Beans &amp; Scopes</span>
+            <span class="topic-tag">@Component, @Service</span>
+            <span class="topic-tag">@Autowired / DI</span>
+            <span class="topic-tag">ApplicationContext</span>
+            <span class="topic-tag">Spring AOP</span>
+          </div>
+          <p class="stage-desc">Memahami cara kerja Spring Framework dari dalam: IoC, DI, dan bagaimana Spring mengelola lifecycle komponen aplikasi.</p>
+        </div>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="roadmap-stage">
+        <div class="stage-dot-col">
+          <div class="stage-dot active">🚀</div>
+        </div>
+        <div class="stage-content">
+          <p class="stage-week">// Week 2–3 · Hari 8–21</p>
+          <h3 class="stage-title">Spring Boot Basics &amp; REST API</h3>
+          <div class="stage-topics">
+            <span class="topic-tag">Spring Boot Setup</span>
+            <span class="topic-tag">Auto-configuration</span>
+            <span class="topic-tag">@RestController</span>
+            <span class="topic-tag">@RequestMapping</span>
+            <span class="topic-tag">Request/Response Body</span>
+            <span class="topic-tag">Validation (Bean)</span>
+            <span class="topic-tag">Exception Handling</span>
+            <span class="topic-tag">Swagger / OpenAPI</span>
+          </div>
+          <p class="stage-desc">Membangun RESTful API yang bersih dan terdokumentasi dengan baik—inti dari pengembangan backend modern.</p>
+        </div>
+      </div>
+
+      <!-- Stage 4 -->
+      <div class="roadmap-stage">
+        <div class="stage-dot-col">
+          <div class="stage-dot active">🗄️</div>
+        </div>
+        <div class="stage-content">
+          <p class="stage-week">// Week 3–4 · Hari 15–28</p>
+          <h3 class="stage-title">Database, JPA &amp; Hibernate</h3>
+          <div class="stage-topics">
+            <span class="topic-tag">Spring Data JPA</span>
+            <span class="topic-tag">Hibernate ORM</span>
+            <span class="topic-tag">Entity &amp; Relationships</span>
+            <span class="topic-tag">JPQL &amp; Criteria API</span>
+            <span class="topic-tag">Repository Pattern</span>
+            <span class="topic-tag">Database Migration</span>
+            <span class="topic-tag">MySQL / PostgreSQL</span>
+            <span class="topic-tag">Transaction Management</span>
+          </div>
+          <p class="stage-desc">Mengelola data dengan benar: relasi antar tabel, query yang efisien, dan strategi transaksi untuk integritas data.</p>
+        </div>
+      </div>
+
+      <!-- Stage 5 -->
+      <div class="roadmap-stage">
+        <div class="stage-dot-col">
+          <div class="stage-dot active">🔐</div>
+        </div>
+        <div class="stage-content">
+          <p class="stage-week">// Week 4–5 · Hari 22–35</p>
+          <h3 class="stage-title">Security &amp; JWT Authentication</h3>
+          <div class="stage-topics">
+            <span class="topic-tag">Spring Security</span>
+            <span class="topic-tag">JWT (JSON Web Token)</span>
+            <span class="topic-tag">Authentication Flow</span>
+            <span class="topic-tag">Authorization &amp; Roles</span>
+            <span class="topic-tag">Password Encoding</span>
+            <span class="topic-tag">Filter Chain</span>
+            <span class="topic-tag">CORS Configuration</span>
+          </div>
+          <p class="stage-desc">Mengamankan API dengan Spring Security dan JWT—standar industri untuk autentikasi stateless pada aplikasi backend modern.</p>
+        </div>
+      </div>
+
+      <!-- Stage 6 -->
+      <div class="roadmap-stage">
+        <div class="stage-dot-col">
+          <div class="stage-dot dim">🏗️</div>
+        </div>
+        <div class="stage-content">
+          <p class="stage-week">// Week 5–6 · Hari 29–42</p>
+          <h3 class="stage-title">Clean Architecture &amp; Best Practices</h3>
+          <div class="stage-topics">
+            <span class="topic-tag">Layered Architecture</span>
+            <span class="topic-tag">DTO Pattern</span>
+            <span class="topic-tag">Service Layer</span>
+            <span class="topic-tag">Repository Pattern</span>
+            <span class="topic-tag">Unit Testing (JUnit)</span>
+            <span class="topic-tag">Integration Testing</span>
+            <span class="topic-tag">Logging (SLF4J)</span>
+            <span class="topic-tag">Error Handling Strategy</span>
+          </div>
+          <p class="stage-desc">Menulis kode yang maintainable, testable, dan scalable—pola arsitektur yang digunakan tim profesional di perusahaan teknologi.</p>
+        </div>
+      </div>
+
+      <!-- Stage 7 -->
+      <div class="roadmap-stage">
+        <div class="stage-dot-col">
+          <div class="stage-dot dim">🚢</div>
+        </div>
+        <div class="stage-content">
+          <p class="stage-week">// Week 6 · Hari 36–45</p>
+          <h3 class="stage-title">Deployment &amp; Final Project</h3>
+          <div class="stage-topics">
+            <span class="topic-tag">Docker &amp; Containerization</span>
+            <span class="topic-tag">Docker Compose</span>
+            <span class="topic-tag">Environment Config</span>
+            <span class="topic-tag">CI/CD Basics</span>
+            <span class="topic-tag">VPS / Cloud Deploy</span>
+            <span class="topic-tag">Final Project</span>
+            <span class="topic-tag">Code Review</span>
+          </div>
+          <p class="stage-desc">Mengemas dan mendeploy aplikasi ke server production menggunakan Docker—lalu membangun final project lengkap sebagai portofolio.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== REQUIREMENTS ===== -->
+<section id="requirements">
+  <div class="container">
+    <p class="section-label">// Prasyarat</p>
+    <h2 class="section-title">Siapa yang Cocok Ikut?</h2>
+    <p class="section-sub">Bootcamp ini dirancang untuk peserta yang sudah memiliki dasar dan siap naik level ke pengembangan backend profesional.</p>
+
+    <div class="req-grid">
+
+      <div class="req-card">
+        <div class="req-icon">💻</div>
+        <div>
+          <h3 class="req-title">Basic Programming</h3>
+          <p class="req-desc">Sudah memahami konsep dasar pemrograman. Pengalaman dengan Java sangat dianjurkan, namun developer dengan bahasa lain tetap dapat mengikuti dengan penyesuaian singkat.</p>
+        </div>
+      </div>
+
+      <div class="req-card">
+        <div class="req-icon">🧩</div>
+        <div>
+          <h3 class="req-title">Memahami OOP</h3>
+          <p class="req-desc">Mengerti fundamental Object-Oriented Programming: class, object, inheritance, encapsulation, dan polymorphism. Konsep ini menjadi fondasi seluruh materi Spring.</p>
+        </div>
+      </div>
+
+      <div class="req-card">
+        <div class="req-icon">🔥</div>
+        <div>
+          <h3 class="req-title">Siap Hands-on</h3>
+          <p class="req-desc">Komitmen untuk belajar aktif selama 45 hari. Setiap sesi mengharuskan coding langsung, mengerjakan latihan, dan berkontribusi pada proyek nyata.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing">
+  <div class="container pricing-center">
+    <p class="section-label">// Investasi</p>
+    <h2 class="section-title">Harga &amp; Pendaftaran</h2>
+    <p class="section-sub">Kelas eksklusif dengan jumlah peserta sangat terbatas untuk memastikan kualitas pembelajaran yang optimal.</p>
+
+    <div class="price-card">
+      <div class="price-card-header">
+        <p class="price-label">// Paket Bootcamp</p>
+        <h3 class="price-name">Java Spring Boot Bootcamp · 45 Hari</h3>
+        <p class="price-desc">Program intensif full-stack backend development</p>
+      </div>
+
+      <div class="discount-badge">
+        🏷️ &nbsp;Diskon 15% untuk Mahasiswa, Alumni &amp; Peserta Training Undika
+      </div>
+
+      <ul class="price-features">
+        <li><span class="check">✓</span> 45 hari pembelajaran terstruktur &amp; intensif</li>
+        <li><span class="check">✓</span> Kelas eksklusif — maksimal 10 peserta</li>
+        <li><span class="check">✓</span> Kurikulum berdasarkan Spring Boot developer roadmap</li>
+        <li><span class="check">✓</span> Proyek nyata untuk portofolio kerja</li>
+        <li><span class="check">✓</span> Certificate of Completion dari Universitas Dinamika</li>
+        <li><span class="check">✓</span> Akses materi &amp; rekaman sesi</li>
+        <li><span class="check">✓</span> Mentoring langsung dari praktisi industri</li>
+      </ul>
+
+      <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-cta-main">
+        Daftar Sekarang &nbsp;→
+      </a>
+
+      <div class="seats-warning">
+        <div class="seats-dot"></div>
+        Terbatas hanya <strong style="color:var(--text-primary);margin:0 4px;">10 peserta</strong> — segera amankan tempat Anda
+      </div>
+
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;justify-content:center;gap:16px;">
+        <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);transition:color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='var(--text-secondary)'">
+          📱 085183009828
+        </a>
+        <span style="color:var(--border-bright)">|</span>
+        <a href="https://training.dinamika.ac.id" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);transition:color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='var(--text-secondary)'">
+          🌐 training.dinamika.ac.id
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand-logo">☕ Spring Bootcamp</div>
+      <p class="footer-brand-desc">
+        Program pelatihan intensif pengembangan backend Java Spring Boot yang diselenggarakan bersama oleh Universitas Dinamika dan Solusi Sistem Informasi. Mencetak developer backend siap industri.
+      </p>
+      <div class="footer-orgs">
+        <span class="footer-org-chip">🏛️ Universitas Dinamika</span>
+        <span class="footer-org-chip">⚡ Solusi Sistem Informasi</span>
+      </div>
+      <div class="footer-contact">
+        <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" class="footer-contact-item">
+          <span class="footer-contact-icon">📱</span> 085183009828
+        </a>
+        <a href="https://training.dinamika.ac.id" target="_blank" rel="noopener" class="footer-contact-item">
+          <span class="footer-contact-icon">🌐</span> training.dinamika.ac.id
+        </a>
+        <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="footer-contact-item">
+          <span class="footer-contact-icon">🔗</span> bit.ly/UNDIKABootcampJavaSpring
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-right">
+      <div class="footer-links">
+        <a href="#curriculum">Kurikulum</a>
+        <a href="#requirements">Prasyarat</a>
+        <a href="#pricing">Harga</a>
+        <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" style="color:var(--green);">Daftar Sekarang</a>
+      </div>
+      <p class="footer-copy">
+        © 2025 Universitas Dinamika<br>
+        <span style="font-family:var(--mono);font-size:11px;">Java Spring Boot Bootcamp · 45 Days</span>
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
