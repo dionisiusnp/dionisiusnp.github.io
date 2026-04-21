@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PasarKu — Belanja Online Terpercaya</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8fafc;
+    --bg2: #ffffff;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --accent-light: #eff6ff;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --sidebar-w: 260px;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,.1);
+  }
+
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  a { text-decoration: none; color: inherit; }
+  button { cursor: pointer; font-family: inherit; }
+  input, select { font-family: inherit; }
+
+  .page { display: none; }
+
+  /* HEADER */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 64px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: var(--shadow);
+  }
+  .header-logo { font-size: 22px; font-weight: 800; color: var(--accent); cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .header-logo span { color: #f59e0b; }
+  .header-search { flex: 1; max-width: 520px; display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: box-shadow .2s; }
+  .header-search:focus-within { box-shadow: 0 0 0 3px #2563eb33; border-color: var(--accent); }
+  .header-search input { flex: 1; padding: 10px 14px; border: none; background: transparent; font-size: 14px; outline: none; color: var(--text); }
+  .header-search button { padding: 10px 16px; background: var(--accent); color: white; border: none; font-size: 14px; font-weight: 500; transition: background .2s; cursor: pointer; }
+  .header-search button:hover { background: var(--accent-dark); }
+  .header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .header-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; background: transparent; border: 1px solid var(--border); font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .header-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .badge-wrap { position: relative; }
+  .badge { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border-radius: 99px; font-size: 10px; font-weight: 700; padding: 1px 5px; min-width: 16px; text-align: center; }
+
+  /* LAYOUT */
+  .layout { display: flex; min-height: calc(100vh - 64px); }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--border); padding: 20px 16px; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .sidebar-section { margin-bottom: 24px; }
+  .sidebar-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 10px; }
+  .sidebar label { font-size: 13px; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer; color: var(--text); }
+  .sidebar label input[type=checkbox], .sidebar label input[type=radio] { accent-color: var(--accent); width: 15px; height: 15px; }
+  .sidebar select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: var(--bg); color: var(--text); margin-bottom: 8px; outline: none; transition: border-color .2s; }
+  .sidebar select:focus { border-color: var(--accent); }
+  .price-inputs { display: flex; gap: 8px; align-items: center; }
+  .price-inputs input { flex: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; width: 0; outline: none; transition: border-color .2s; }
+  .price-inputs input:focus { border-color: var(--accent); }
+  .price-sep { color: var(--text-muted); font-size: 12px; }
+  .filter-btn { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; margin-top: 4px; transition: background .2s; cursor: pointer; }
+  .filter-btn:hover { background: var(--accent-dark); }
+  .reset-btn { width: 100%; padding: 8px; background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; margin-top: 8px; transition: all .2s; cursor: pointer; }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MAIN */
+  .main { flex: 1; padding: 24px; overflow-x: hidden; }
+  .breadcrumb { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .breadcrumb span { color: var(--text); font-weight: 500; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-header h2 { font-size: 20px; font-weight: 700; }
+  .result-count { font-size: 13px; color: var(--text-muted); }
+  .sort-select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: var(--bg2); color: var(--text); outline: none; cursor: pointer; }
+
+  /* PRODUCT GRID */
+  .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .product-card { background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); transition: all .25s; cursor: pointer; position: relative; }
+  .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: #cbd5e1; }
+  .product-img-wrap { overflow: hidden; position: relative; }
+  .product-img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; transition: transform .3s; }
+  .product-card:hover .product-img { transform: scale(1.04); }
+  .product-badge { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; }
+  .product-badge.new { background: #10b981; }
+  .product-badge.used { background: #f59e0b; }
+  .product-info { padding: 12px; }
+  .product-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .product-price { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .product-price-old { font-size: 11px; color: var(--text-muted); text-decoration: line-through; margin-left: 4px; font-weight: 400; }
+  .stars { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+  .stars .s { color: #f59e0b; font-size: 12px; }
+  .stars .s.empty { color: #d1d5db; }
+  .star-count { font-size: 11px; color: var(--text-muted); }
+  .product-shop { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+
+  /* DETAIL */
+  .detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 1000px; }
+  .detail-main-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); border: 1px solid var(--border); }
+  .detail-thumbs { display: flex; gap: 8px; margin-top: 10px; }
+  .detail-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 2px solid var(--border); cursor: pointer; transition: border-color .2s; }
+  .detail-thumb.active, .detail-thumb:hover { border-color: var(--accent); }
+  .detail-info h1 { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 10px; }
+  .detail-rating { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .detail-price-box { background: var(--accent-light); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; }
+  .detail-price { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .detail-price-old { font-size: 14px; color: var(--text-muted); text-decoration: line-through; margin-left: 8px; }
+  .detail-discount { background: #ef4444; color: white; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-left: 8px; }
+  .detail-stock { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .detail-spec table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .detail-spec td { padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .detail-spec td:first-child { color: var(--text-muted); width: 40%; }
+  .detail-spec td:last-child { font-weight: 500; }
+  .qty-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .qty-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; }
+  .qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .qty-val { font-size: 16px; font-weight: 600; min-width: 32px; text-align: center; }
+  .detail-actions { display: flex; gap: 10px; }
+  .btn-cart { flex: 1; padding: 13px; border: 2px solid var(--accent); background: transparent; color: var(--accent); border-radius: 8px; font-size: 14px; font-weight: 700; transition: all .2s; cursor: pointer; }
+  .btn-cart:hover { background: var(--accent-light); }
+  .btn-buy { flex: 1; padding: 13px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; transition: background .2s; cursor: pointer; }
+  .btn-buy:hover { background: var(--accent-dark); }
+  .detail-shop-card { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-top: 16px; }
+  .shop-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .shop-name { font-size: 14px; font-weight: 600; }
+  .shop-loc { font-size: 12px; color: var(--text-muted); }
+  .shop-btn { padding: 6px 14px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; font-size: 12px; font-weight: 600; transition: all .2s; cursor: pointer; }
+  .shop-btn:hover { background: var(--accent-light); }
+
+  /* REVIEWS */
+  .reviews-section { margin-top: 32px; max-width: 1000px; }
+  .reviews-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .review-summary { display: flex; gap: 32px; align-items: center; background: var(--bg); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; border: 1px solid var(--border); }
+  .review-big-score { font-size: 48px; font-weight: 800; color: var(--accent); line-height: 1; text-align: center; }
+  .review-bar { flex: 1; }
+  .rbar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .rbar-label { font-size: 12px; color: var(--text-muted); width: 32px; }
+  .rbar-track { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .rbar-fill { height: 100%; background: #f59e0b; border-radius: 99px; }
+  .review-card { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .reviewer-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+  .reviewer-name { font-size: 13px; font-weight: 600; }
+  .review-date { font-size: 11px; color: var(--text-muted); }
+  .review-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* CHECKOUT */
+  .checkout-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; max-width: 1000px; }
+  .checkout-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .checkout-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .step-badge { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .03em; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text); outline: none; transition: border-color .2s; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 72px; }
+  .shipping-opts { display: flex; flex-direction: column; gap: 10px; }
+  .shipping-opt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .2s; }
+  .shipping-opt:hover, .shipping-opt.selected { border-color: var(--accent); background: var(--accent-light); }
+  .shipping-opt input[type=radio] { accent-color: var(--accent); }
+  .shipping-opt-info { flex: 1; }
+  .shipping-opt-name { font-size: 13px; font-weight: 600; }
+  .shipping-opt-desc { font-size: 11px; color: var(--text-muted); }
+  .shipping-opt-price { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .payment-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .payment-opt { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .2s; }
+  .payment-opt:hover, .payment-opt.selected { border-color: var(--accent); background: var(--accent-light); }
+  .payment-icon { width: 32px; height: 32px; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .payment-name { font-size: 13px; font-weight: 600; }
+  .payment-sub { font-size: 11px; color: var(--text-muted); }
+  .order-summary { position: sticky; top: 80px; }
+  .summary-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .summary-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .summary-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .summary-item img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; }
+  .summary-item-info { flex: 1; }
+  .summary-item-name { font-size: 12px; font-weight: 500; }
+  .summary-item-qty { font-size: 11px; color: var(--text-muted); }
+  .summary-item-price { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .summary-line { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
+  .summary-line.total { font-size: 15px; font-weight: 700; color: var(--text); padding-top: 10px; border-top: 1px solid var(--border); margin-top: 4px; }
+  .btn-order { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; margin-top: 16px; transition: background .2s; cursor: pointer; }
+  .btn-order:hover { background: var(--accent-dark); }
+
+  /* HISTORY */
+  .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .history-header h2 { font-size: 20px; font-weight: 700; }
+  .history-tabs { display: flex; gap: 4px; background: var(--bg); border-radius: 8px; padding: 4px; border: 1px solid var(--border); flex-wrap: wrap; }
+  .history-tab { padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--text-muted); transition: all .2s; }
+  .history-tab.active { background: var(--bg2); color: var(--accent); font-weight: 600; box-shadow: var(--shadow); }
+  .order-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); transition: box-shadow .2s; }
+  .order-card:hover { box-shadow: var(--shadow-lg); }
+  .order-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
+  .order-id { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  .order-date { font-size: 12px; color: var(--text-muted); }
+  .status-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+  .status-waiting { background: #fef3c7; color: #d97706; }
+  .status-process { background: #dbeafe; color: #2563eb; }
+  .status-shipped { background: #d1fae5; color: #059669; }
+  .status-done { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .status-cancel { background: #fee2e2; color: #dc2626; }
+  .order-items { display: flex; gap: 10px; }
+  .order-item-img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+  .order-item-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .order-item-qty { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .order-total { font-size: 13px; }
+  .order-total strong { color: var(--accent); }
+  .order-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .btn-sm { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-sm-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-sm-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm-primary { background: var(--accent); color: white; border: none; }
+  .btn-sm-primary:hover { background: var(--accent-dark); }
+  .back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--bg2); color: var(--text); transition: all .2s; margin-bottom: 20px; }
+  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all .3s; pointer-events: none; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo" onclick="showPage('page-list')">Pasar<span>Ku</span></div>
+  <div class="header-search">
+    <input type="text" placeholder="Cari produk, toko, atau kategori..." value="Smartphone">
+    <button>Cari</button>
+  </div>
+  <div class="header-actions">
+    <button class="header-btn" onclick="showPage('page-list')">&#127978; Beranda</button>
+    <button class="header-btn badge-wrap" onclick="showPage('page-checkout')">&#128722; Keranjang<span class="badge">3</span></button>
+    <button class="header-btn" onclick="showPage('page-history')">&#128230; Pesanan</button>
+  </div>
+</header>
+
+<!-- PAGE: LIST -->
+<div class="page" id="page-list">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Lokasi Toko</div>
+        <select>
+          <option>Semua Provinsi</option>
+          <option selected>DKI Jakarta</option>
+          <option>Jawa Barat</option>
+          <option>Jawa Tengah</option>
+          <option>Jawa Timur</option>
+          <option>Bali</option>
+          <option>Sumatera Utara</option>
+          <option>Sulawesi Selatan</option>
+        </select>
+        <select>
+          <option>Semua Kota</option>
+          <option selected>Jakarta Selatan</option>
+          <option>Jakarta Barat</option>
+          <option>Jakarta Pusat</option>
+          <option>Depok</option>
+          <option>Bekasi</option>
+          <option>Tangerang</option>
+        </select>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Kategori</div>
+        <label><input type="checkbox" checked> Elektronik</label>
+        <label><input type="checkbox"> Fashion</label>
+        <label><input type="checkbox"> Makanan &amp; Minuman</label>
+        <label><input type="checkbox"> Kecantikan</label>
+        <label><input type="checkbox"> Olahraga</label>
+        <label><input type="checkbox"> Rumah Tangga</label>
+        <label><input type="checkbox"> Otomotif</label>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Rentang Harga</div>
+        <div class="price-inputs">
+          <input type="number" placeholder="Min" value="500000">
+          <span class="price-sep">—</span>
+          <input type="number" placeholder="Max" value="5000000">
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Rating Minimum</div>
+        <label><input type="radio" name="rating"> &#11088;&#11088;&#11088;&#11088;&#11088; 5.0</label>
+        <label><input type="radio" name="rating" checked> &#11088;&#11088;&#11088;&#11088; 4.0+</label>
+        <label><input type="radio" name="rating"> &#11088;&#11088;&#11088; 3.0+</label>
+        <label><input type="radio" name="rating"> Semua Rating</label>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Kondisi Produk</div>
+        <label><input type="radio" name="cond" checked> Semua</label>
+        <label><input type="radio" name="cond"> Baru</label>
+        <label><input type="radio" name="cond"> Bekas</label>
+      </div>
+      <button class="filter-btn">Terapkan Filter</button>
+      <button class="reset-btn">Reset Filter</button>
+    </aside>
+    <main class="main">
+      <div class="breadcrumb">Beranda &rsaquo; Elektronik &rsaquo; <span>Smartphone</span></div>
+      <div class="section-header">
+        <div>
+          <h2>Hasil: <em style="color:var(--accent)">"Smartphone"</em></h2>
+          <div class="result-count">Menampilkan 8 dari 1.247 produk di Jakarta Selatan</div>
+        </div>
+        <select class="sort-select">
+          <option>Paling Relevan</option>
+          <option>Harga Terendah</option>
+          <option>Harga Tertinggi</option>
+          <option>Rating Tertinggi</option>
+          <option>Terbaru</option>
+        </select>
+      </div>
+      <div class="product-grid">
+        <div class="product-card" onclick="showPage('page-detail')">
+          <div class="product-img-wrap">
+            <img class="product-img" src="https://picsum.photos/seed/pkphone1/400/400" alt="Samsung A55">
+            <span class="product-badge new">Baru</span>
+          </div>
+          <div class="product-info">
+            <div class="product-name">Samsung Galaxy A55 5G 8/256GB — Awesome Navy</div>
+            <div class="product-price">Rp 4.899.000 <span class="product-price-old">Rp 5.499.000</span></div>
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="star-count">4.9 (2.341)</span></div>
+            <div class="product-shop">&#127978; SamsungOfficial &middot; Jakarta Selatan</div>
+          </div>
+        </div>
+        <div class="product-card" onclick="showPage('page-detail')">
+          <div class="product-img-wrap">
+            <img class="product-img" src="https://picsum.photos/seed/pkphone2/400/400" alt="iPhone 15">
+            <span class="product-badge new">Baru</span>
+          </div>
+          <div class="product-info">
+            <div class="product-name">Apple iPhone 15 128GB — Black Titanium</div>
+            <div class="product-price">Rp 13.499.000 <span class="product-price-old">Rp 14.999.000</span></div>
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="star-count">5.0 (8.102)</span></div>
+            <div class="product-shop">&#127978; iStore Indonesia &middot; Jakarta Pusat</div>
+          </div>
+        </div>
+        <div class="product-card" onclick="showPage('page-detail')">
+          <div class="product-img-wrap">
+            <img class="product-img" src="https://picsum.photos/seed/pkphone3/400/400" alt="Xiaomi">
+            <span class="product-badge" style="background:#ef4444;">Diskon 20%</span>
+          </div>
+          <div class="product-info">
+            <div class="product-name">Xiaomi Redmi Note 13 Pro 8/256GB — Forest Green</div>
+            <div class="product-price">Rp 2.799.000 <span class="product-price-old">Rp 3.499.000</span></div>
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s empty">&#9733;</span><span class="star-count">4.7 (5.670)</span></div>
+            <div class="product-shop">&#127978; XiaomiStore &middot; Depok</div>
+          </div>
+        </div>
+        <div class="product-card" onclick="showPage('page-detail')">
+          <div class="product-img-wrap">
+            <img class="product-img" src="https://picsum.photos/seed/pkphone4/400/400" alt="OPPO">
+            <span class="product-badge new">Baru</span>
+          </div>
+          <div class="product-info">
+            <div class="product-name">OPPO Reno 11 Pro 12/256GB — Misty Green</div>
+            <div class="product-price">Rp 6.299.000 <span class="product-price-old">Rp 7.199.000</span></div>
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s empty">&#9733;</span><span class="star-count">4.6 (1.890)</span></div>
+            <div class="product-shop">&#127978; OPPOIndonesia &middot; Bekasi</div>
+          </div>
+        </div>
+        <div class="product-card" onclick="showPage('page-detail')">
+          <div class="product-img-wrap">
+            <img class="product-img" src="https://picsum.photos/seed/pkphone5/400/400" alt="Vivo">
+            <span class="product-badge used">Bekas</span>
+          </div>
+          <div class="product-info">
+            <div class="product-name">Vivo V30 Pro 12/256GB — Peacock Green (Bekas Mulus)</div>
+            <div class="product-price">Rp 4.250.000 <span class="product-price-old">Rp 6.499.000</span></div>
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s empty">&#9733;</span><span class="star-count">4.5 (321)</span></div>
+            <div class="product-shop">&#127978; GadgetMurah88 &middot; Jakarta Barat</div>
+          </div>
+        </div>
+        <div class="product-card" onclick="showPage('page-detail')">
+          <div class="product-img-wrap">
+            <img class="product-img" src="https://picsum.photos/seed/pkphone6/400/400" alt="Realme">
+            <span class="product-badge new">Baru</span>
+          </div>
+          <div class="product-info">
+            <div class="product-name">Realme 12 Pro+ 5G 8/256GB — Navigator Beige</div>
+            <div class="product-price">Rp 3.999.000 <span class="product-price-old">Rp 4.599.000</span></div>
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s empty">&#9733;</span><span class="star-count">4.8 (2.104)</span></div>
+            <div class="product-shop">&#127978; RealmeMall &middot; Tangerang</div>
+          </div>
+        </div>
+        <div class="product-card" onclick="showPage('page-detail')">
+          <div class="product-img-wrap">
+            <img class="product-img" src="https://picsum.photos/seed/pkphone7/400/400" alt="OnePlus">
+          </div>
+          <div class="product-info">
+            <div class="product-name">OnePlus 12 12/256GB — Flowy Emerald</div>
+            <div class="product-price">Rp 11.499.000 <span class="product-price-old">Rp 12.999.000</span></div>
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="star-count">4.9 (988)</span></div>
+            <div class="product-shop">&#127978; OnePlusID &middot; Jakarta Selatan</div>
+          </div>
+        </div>
+        <div class="product-card" onclick="showPage('page-detail')">
+          <div class="product-img-wrap">
+            <img class="product-img" src="https://picsum.photos/seed/pkphone8/400/400" alt="Motorola">
+            <span class="product-badge" style="background:#ef4444;">Diskon 15%</span>
+          </div>
+          <div class="product-info">
+            <div class="product-name">Motorola Edge 50 Pro 12/512GB — Black Beauty</div>
+            <div class="product-price">Rp 5.949.000 <span class="product-price-old">Rp 6.999.000</span></div>
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s empty">&#9733;</span><span class="star-count">4.6 (744)</span></div>
+            <div class="product-shop">&#127978; MotorolaStore &middot; Jakarta Barat</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- PAGE: DETAIL -->
+<div class="page" id="page-detail">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Lokasi Toko</div>
+        <select><option selected>DKI Jakarta</option><option>Jawa Barat</option></select>
+        <select><option selected>Jakarta Selatan</option><option>Jakarta Pusat</option></select>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Kategori</div>
+        <label><input type="checkbox" checked> Elektronik</label>
+        <label><input type="checkbox"> Fashion</label>
+        <label><input type="checkbox"> Kecantikan</label>
+      </div>
+      <button class="filter-btn">Terapkan Filter</button>
+      <button class="reset-btn">Reset Filter</button>
+    </aside>
+    <main class="main">
+      <button class="back-btn" onclick="showPage('page-list')">&#8592; Kembali ke Hasil</button>
+      <div class="detail-layout">
+        <div>
+          <img class="detail-main-img" id="mainImg" src="https://picsum.photos/seed/pkphone1/600/600" alt="Samsung A55">
+          <div class="detail-thumbs">
+            <img class="detail-thumb active" src="https://picsum.photos/seed/pkphone1/400/400" onclick="switchImg(this)">
+            <img class="detail-thumb" src="https://picsum.photos/seed/pkphone1b/400/400" onclick="switchImg(this)">
+            <img class="detail-thumb" src="https://picsum.photos/seed/pkphone1c/400/400" onclick="switchImg(this)">
+            <img class="detail-thumb" src="https://picsum.photos/seed/pkphone1d/400/400" onclick="switchImg(this)">
+          </div>
+        </div>
+        <div class="detail-info">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Elektronik &rsaquo; Smartphone &rsaquo; Samsung</div>
+          <h1>Samsung Galaxy A55 5G 8/256GB — Awesome Navy</h1>
+          <div class="detail-rating">
+            <div class="stars"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span></div>
+            <span style="font-size:14px;font-weight:700;">4.9</span>
+            <span style="font-size:13px;color:var(--text-muted);">2.341 ulasan &middot; 10.429 terjual</span>
+          </div>
+          <div class="detail-price-box">
+            <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;">
+              <span class="detail-price">Rp 4.899.000</span>
+              <span class="detail-price-old">Rp 5.499.000</span>
+              <span class="detail-discount">11% OFF</span>
+            </div>
+            <div class="detail-stock">&#10003; Stok tersedia &middot; 147 unit tersisa</div>
+          </div>
+          <div class="detail-spec" style="margin-bottom:16px;">
+            <table>
+              <tr><td>Merek</td><td>Samsung</td></tr>
+              <tr><td>Kondisi</td><td><span style="color:#10b981;font-weight:600;">Baru</span></td></tr>
+              <tr><td>Layar</td><td>6.6" Super AMOLED 120Hz</td></tr>
+              <tr><td>Prosesor</td><td>Exynos 1480 Octa-core</td></tr>
+              <tr><td>RAM / ROM</td><td>8 GB / 256 GB</td></tr>
+              <tr><td>Kamera Utama</td><td>50 MP OIS + 12 MP Ultra Wide</td></tr>
+              <tr><td>Baterai</td><td>5.000 mAh, Fast Charge 25W</td></tr>
+              <tr><td>OS</td><td>Android 14, One UI 6.1</td></tr>
+              <tr><td>Garansi</td><td>Resmi Samsung 1 Tahun</td></tr>
+            </table>
+          </div>
+          <div class="qty-wrap">
+            <span style="font-size:13px;font-weight:600;">Jumlah:</span>
+            <button class="qty-btn" onclick="changeQty(-1)">&#8722;</button>
+            <span class="qty-val" id="qty">1</span>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+            <span style="font-size:12px;color:var(--text-muted);">(Maks. 10)</span>
+          </div>
+          <div class="detail-actions">
+            <button class="btn-cart" onclick="showToast('Produk ditambahkan ke keranjang!')">&#128722; Tambah ke Keranjang</button>
+            <button class="btn-buy" onclick="showPage('page-checkout')">&#9889; Beli Sekarang</button>
+          </div>
+          <div class="detail-shop-card">
+            <div class="shop-avatar">S</div>
+            <div style="flex:1;">
+              <div class="shop-name">SamsungOfficial</div>
+              <div class="shop-loc">&#128205; Jakarta Selatan &middot; Official Store &#10003;</div>
+            </div>
+            <button class="shop-btn">Kunjungi Toko</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="max-width:1000px;margin-top:28px;">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">Deskripsi Produk</h3>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin-bottom:10px;">Samsung Galaxy A55 5G hadir dengan desain premium yang menggunakan material metal di semua sisinya, memberikan tampilan yang lebih elegan dan modern. Layar Super AMOLED 6.6 inci dengan refresh rate 120Hz memberikan pengalaman visual yang sangat mulus dan responsif untuk aktivitas sehari-hari maupun gaming.</p>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.8;">Chipset Exynos 1480 terbaru memastikan performa handal untuk multitasking berat. Kamera utama 50MP dengan OIS menghasilkan foto tajam bahkan dalam kondisi cahaya rendah. Baterai 5.000mAh dengan fast charging 25W menjamin daya tahan seharian penuh tanpa khawatir kehabisan baterai.</p>
+      </div>
+
+      <div class="reviews-section">
+        <h3>Ulasan Pembeli (2.341)</h3>
+        <div class="review-summary">
+          <div>
+            <div class="review-big-score">4.9</div>
+            <div class="stars" style="justify-content:center;margin-top:4px;"><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span><span class="s">&#9733;</span></div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px;text-align:center;">2.341 ulasan</div>
+          </div>
+          <div class="review-bar">
+            <div class="rbar-row"><span class="rbar-label">5 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:86%"></div></div><span style="font-size:12px;color:var(--text-muted);width:32px;text-align:right;">86%</span></div>
+            <div class="rbar-row"><span class="rbar-label">4 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:9%"></div></div><span style="font-size:12px;color:var(--text-muted);width:32px;text-align:right;">9%</span></div>
+            <div class="rbar-row"><span class="rbar-label">3 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:3%"></div></div><span style="font-size:12px;color:var(--text-muted);width:32px;text-align:right;">3%</span></div>
+            <div class="rbar-row"><span class="rbar-label">2 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:1%"></div></div><span style="font-size:12px;color:var(--text-muted);width:32px;text-align:right;">1%</span></div>
+            <div class="rbar-row"><span class="rbar-label">1 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:1%"></div></div><span style="font-size:12px;color:var(--text-muted);width:32px;text-align:right;">1%</span></div>
+          </div>
+        </div>
+        <div class="review-card">
+          <div class="review-header">
+            <img class="reviewer-avatar" src="https://picsum.photos/seed/pkava1/100/100" alt="">
+            <div>
+              <div class="reviewer-name">Budi Santoso</div>
+              <div class="stars" style="margin:2px 0;"><span class="s" style="font-size:11px;">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+              <div class="review-date">14 April 2026 &middot; Warna: Navy</div>
+            </div>
+          </div>
+          <div class="review-text">Bagus banget! Layarnya jernih dan responsif. Kamera siang hari hasilnya tajam sekali, malam hari juga oke dengan Night Mode. Pengiriman cepat, packing rapi. Recommended seller!</div>
+        </div>
+        <div class="review-card">
+          <div class="review-header">
+            <img class="reviewer-avatar" src="https://picsum.photos/seed/pkava2/100/100" alt="">
+            <div>
+              <div class="reviewer-name">Siti Rahayu</div>
+              <div class="stars" style="margin:2px 0;"><span class="s" style="font-size:11px;">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+              <div class="review-date">10 April 2026 &middot; Warna: Navy</div>
+            </div>
+          </div>
+          <div class="review-text">Sudah 2 minggu pakai, sangat puas! Baterainya awet banget, bisa seharian full. Gaming juga tidak lag sama sekali. Desain premium, keliatan mahal. Worth it banget!</div>
+        </div>
+        <div class="review-card">
+          <div class="review-header">
+            <img class="reviewer-avatar" src="https://picsum.photos/seed/pkava3/100/100" alt="">
+            <div>
+              <div class="reviewer-name">Andi Wijaya</div>
+              <div class="stars" style="margin:2px 0;"><span class="s" style="font-size:11px;">&#9733;&#9733;&#9733;&#9733;</span><span class="s empty" style="font-size:11px;">&#9733;</span></div>
+              <div class="review-date">7 April 2026 &middot; Warna: Navy</div>
+            </div>
+          </div>
+          <div class="review-text">Overall bagus. Charger tidak termasuk dalam paket, perlu beli terpisah. Performa kencang, layar mantap. Kamera selfie di kondisi low light agak kurang, tapi kamera belakang sangat memuaskan.</div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- PAGE: CHECKOUT -->
+<div class="page" id="page-checkout">
+  <div style="background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 24px;font-size:13px;color:var(--text-muted);">
+    Beranda &rsaquo; Keranjang &rsaquo; <span style="color:var(--text);font-weight:600;">Checkout</span>
+  </div>
+  <div class="main" style="max-width:1100px;margin:0 auto;">
+    <button class="back-btn" onclick="showPage('page-list')">&#8592; Lanjut Belanja</button>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:20px;">Checkout Pesanan</h2>
+    <div class="checkout-layout">
+      <div>
+        <div class="checkout-card">
+          <h3><span class="step-badge">1</span> Alamat Pengiriman</h3>
+          <div class="form-row">
+            <div class="form-group"><label>Nama Penerima</label><input type="text" value="Budi Santoso"></div>
+            <div class="form-group"><label>No. HP</label><input type="text" value="0812-3456-7890"></div>
+          </div>
+          <div class="form-group"><label>Alamat Lengkap</label><textarea>Jl. Kemang Raya No. 45, RT 003/RW 005</textarea></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Provinsi</label>
+              <select><option selected>DKI Jakarta</option><option>Jawa Barat</option><option>Jawa Tengah</option></select>
+            </div>
+            <div class="form-group">
+              <label>Kota / Kabupaten</label>
+              <select><option selected>Jakarta Selatan</option><option>Jakarta Pusat</option><option>Jakarta Barat</option></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Kecamatan</label><input type="text" value="Kemang"></div>
+            <div class="form-group"><label>Kode Pos</label><input type="text" value="12730"></div>
+          </div>
+          <div class="form-group"><label>Catatan (Opsional)</label><input type="text" placeholder="Contoh: titip ke satpam jika tidak ada di rumah"></div>
+        </div>
+        <div class="checkout-card">
+          <h3><span class="step-badge">2</span> Pilih Pengiriman</h3>
+          <div class="shipping-opts" id="shippingOpts">
+            <label class="shipping-opt selected">
+              <input type="radio" name="ship" checked>
+              <div class="shipping-opt-info"><div class="shipping-opt-name">JNE Reguler (REG)</div><div class="shipping-opt-desc">Estimasi 2–3 hari kerja</div></div>
+              <div class="shipping-opt-price">Rp 18.000</div>
+            </label>
+            <label class="shipping-opt">
+              <input type="radio" name="ship">
+              <div class="shipping-opt-info"><div class="shipping-opt-name">JNE YES (Yakin Esok Sampai)</div><div class="shipping-opt-desc">Estimasi 1 hari kerja</div></div>
+              <div class="shipping-opt-price">Rp 35.000</div>
+            </label>
+            <label class="shipping-opt">
+              <input type="radio" name="ship">
+              <div class="shipping-opt-info"><div class="shipping-opt-name">J&amp;T Express</div><div class="shipping-opt-desc">Estimasi 2–4 hari kerja</div></div>
+              <div class="shipping-opt-price">Rp 15.000</div>
+            </label>
+            <label class="shipping-opt">
+              <input type="radio" name="ship">
+              <div class="shipping-opt-info"><div class="shipping-opt-name">SiCepat BEST</div><div class="shipping-opt-desc">Estimasi 1–2 hari kerja</div></div>
+              <div class="shipping-opt-price">Rp 22.000</div>
+            </label>
+          </div>
+        </div>
+        <div class="checkout-card">
+          <h3><span class="step-badge">3</span> Metode Pembayaran</h3>
+          <div class="payment-opts" id="paymentOpts">
+            <label class="payment-opt selected">
+              <input type="radio" name="pay" checked style="display:none">
+              <div class="payment-icon" style="background:#1d4ed8;">BCA</div>
+              <div><div class="payment-name">Transfer Bank</div><div class="payment-sub">BCA / Mandiri / BNI / BRI</div></div>
+            </label>
+            <label class="payment-opt">
+              <input type="radio" name="pay" style="display:none">
+              <div class="payment-icon" style="background:#059669;">QR</div>
+              <div><div class="payment-name">QRIS</div><div class="payment-sub">Scan QR semua bank/e-wallet</div></div>
+            </label>
+            <label class="payment-opt">
+              <input type="radio" name="pay" style="display:none">
+              <div class="payment-icon" style="background:#d97706;">COD</div>
+              <div><div class="payment-name">Bayar di Tempat (COD)</div><div class="payment-sub">Bayar tunai saat barang tiba</div></div>
+            </label>
+            <label class="payment-opt">
+              <input type="radio" name="pay" style="display:none">
+              <div class="payment-icon" style="background:#7c3aed;">PL</div>
+              <div><div class="payment-name">PayLater</div><div class="payment-sub">Cicilan 0% hingga 12 bulan</div></div>
+            </label>
+          </div>
+        </div>
+        <div class="checkout-card">
+          <h3><span class="step-badge">4</span> Voucher &amp; Promo</h3>
+          <div style="display:flex;gap:10px;">
+            <input type="text" placeholder="Masukkan kode voucher" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:var(--bg);">
+            <button style="padding:10px 18px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;" onclick="showToast('Voucher PASAR10 berhasil digunakan! Hemat Rp 50.000')">Pakai</button>
+          </div>
+        </div>
+      </div>
+      <div class="order-summary">
+        <div class="summary-card">
+          <h3>Ringkasan Pesanan</h3>
+          <div class="summary-item">
+            <img src="https://picsum.photos/seed/pkphone1/200/200" alt="">
+            <div class="summary-item-info">
+              <div class="summary-item-name">Samsung Galaxy A55 5G 8/256GB</div>
+              <div class="summary-item-qty">&times; 1 unit</div>
+            </div>
+            <div class="summary-item-price">Rp 4.899.000</div>
+          </div>
+          <div class="summary-item">
+            <img src="https://picsum.photos/seed/pkphone3/200/200" alt="">
+            <div class="summary-item-info">
+              <div class="summary-item-name">Xiaomi Redmi Note 13 Pro 8/256GB</div>
+              <div class="summary-item-qty">&times; 2 unit</div>
+            </div>
+            <div class="summary-item-price">Rp 5.598.000</div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+            <div class="summary-line"><span>Subtotal Produk</span><span>Rp 10.497.000</span></div>
+            <div class="summary-line"><span>Ongkos Kirim</span><span>Rp 18.000</span></div>
+            <div class="summary-line"><span>Biaya Layanan</span><span>Rp 5.000</span></div>
+            <div class="summary-line"><span style="color:#10b981;">Voucher PASAR10</span><span style="color:#10b981;">-Rp 50.000</span></div>
+            <div class="summary-line total"><span>Total Pembayaran</span><span style="color:var(--accent);">Rp 10.470.000</span></div>
+          </div>
+          <button class="btn-order" onclick="showPage('page-history');showToast('Pesanan berhasil dibuat! Segera selesaikan pembayaran.')">Buat Pesanan &rarr;</button>
+          <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:10px;">Dengan memesan, kamu menyetujui Syarat &amp; Ketentuan PasarKu</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: HISTORY -->
+<div class="page" id="page-history">
+  <div class="main" style="max-width:900px;margin:0 auto;">
+    <div class="history-header">
+      <h2>Riwayat Transaksi</h2>
+      <div class="history-tabs">
+        <button class="history-tab active" onclick="setTab(this)">Semua</button>
+        <button class="history-tab" onclick="setTab(this)">Menunggu</button>
+        <button class="history-tab" onclick="setTab(this)">Diproses</button>
+        <button class="history-tab" onclick="setTab(this)">Dikirim</button>
+        <button class="history-tab" onclick="setTab(this)">Selesai</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div><div class="order-id">&#128230; #PKU-20260419-00042</div><div class="order-date">19 April 2026 &middot; SamsungOfficial &middot; JNE Reguler</div></div>
+        <span class="status-badge status-shipped">&#128666; Dikirim</span>
+      </div>
+      <div class="order-items">
+        <img class="order-item-img" src="https://picsum.photos/seed/pkphone1/200/200" alt="">
+        <div>
+          <div class="order-item-name">Samsung Galaxy A55 5G 8/256GB — Awesome Navy</div>
+          <div class="order-item-qty">1 barang &middot; Warna: Navy</div>
+          <div class="order-total">Total: <strong>Rp 4.917.000</strong></div>
+        </div>
+      </div>
+      <div style="background:#f0f9ff;border-radius:8px;padding:10px 12px;margin-top:12px;border:1px solid #bae6fd;font-size:12px;color:#0369a1;">
+        &#128666; <strong>No. Resi:</strong> JNE1234567890 &middot; <strong>Estimasi tiba:</strong> 21 April 2026
+      </div>
+      <div class="order-actions">
+        <button class="btn-sm btn-sm-outline">Lacak Pesanan</button>
+        <button class="btn-sm btn-sm-primary" onclick="showToast('Pesanan dikonfirmasi diterima!')">Konfirmasi Diterima</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div><div class="order-id">&#128230; #PKU-20260415-00038</div><div class="order-date">15 April 2026 &middot; iStore Indonesia &middot; JNE YES</div></div>
+        <span class="status-badge status-done">&#10003; Selesai</span>
+      </div>
+      <div class="order-items">
+        <img class="order-item-img" src="https://picsum.photos/seed/pkphone2/200/200" alt="">
+        <div>
+          <div class="order-item-name">Apple iPhone 15 128GB — Black Titanium</div>
+          <div class="order-item-qty">1 barang &middot; Storage: 128GB</div>
+          <div class="order-total">Total: <strong>Rp 13.534.000</strong></div>
+        </div>
+      </div>
+      <div class="order-actions">
+        <button class="btn-sm btn-sm-outline">Tulis Ulasan</button>
+        <button class="btn-sm btn-sm-primary" onclick="showPage('page-detail')">Beli Lagi</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div><div class="order-id">&#128230; #PKU-20260418-00041</div><div class="order-date">18 April 2026 &middot; XiaomiStore &middot; J&amp;T Express</div></div>
+        <span class="status-badge status-process">&#9881; Diproses</span>
+      </div>
+      <div class="order-items">
+        <img class="order-item-img" src="https://picsum.photos/seed/pkphone3/200/200" alt="">
+        <div>
+          <div class="order-item-name">Xiaomi Redmi Note 13 Pro 8/256GB — Forest Green</div>
+          <div class="order-item-qty">2 barang</div>
+          <div class="order-total">Total: <strong>Rp 5.613.000</strong></div>
+        </div>
+      </div>
+      <div class="order-actions">
+        <button class="btn-sm btn-sm-outline">Hubungi Penjual</button>
+        <button class="btn-sm btn-sm-outline" style="color:#ef4444;border-color:#fecaca;">Batalkan</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div><div class="order-id">&#128230; #PKU-20260419-00043</div><div class="order-date">19 April 2026 &middot; OPPOIndonesia &middot; Transfer Bank</div></div>
+        <span class="status-badge status-waiting">&#9203; Menunggu Pembayaran</span>
+      </div>
+      <div class="order-items">
+        <img class="order-item-img" src="https://picsum.photos/seed/pkphone4/200/200" alt="">
+        <div>
+          <div class="order-item-name">OPPO Reno 11 Pro 12/256GB — Misty Green</div>
+          <div class="order-item-qty">1 barang</div>
+          <div class="order-total">Total: <strong>Rp 6.314.000</strong></div>
+        </div>
+      </div>
+      <div style="background:#fffbeb;border-radius:8px;padding:10px 12px;margin-top:12px;border:1px solid #fde68a;font-size:12px;color:#92400e;">
+        &#9203; Bayar sebelum <strong>19 April 2026, 23:59 WIB</strong> &middot; No. VA BCA: <strong>8277 0042 3198 5541</strong>
+      </div>
+      <div class="order-actions">
+        <button class="btn-sm btn-sm-primary" onclick="showToast('Menuju halaman pembayaran...')">Bayar Sekarang</button>
+        <button class="btn-sm btn-sm-outline" style="color:#ef4444;border-color:#fecaca;">Batalkan Pesanan</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div><div class="order-id">&#128230; #PKU-20260401-00029</div><div class="order-date">1 April 2026 &middot; GadgetMurah88 &middot; SiCepat BEST</div></div>
+        <span class="status-badge status-cancel">&#10007; Dibatalkan</span>
+      </div>
+      <div class="order-items">
+        <img class="order-item-img" src="https://picsum.photos/seed/pkphone5/200/200" alt="">
+        <div>
+          <div class="order-item-name">Vivo V30 Pro 12/256GB — Peacock Green (Bekas)</div>
+          <div class="order-item-qty">1 barang</div>
+          <div class="order-total">Dikembalikan: <strong>Rp 4.265.000</strong></div>
+        </div>
+      </div>
+      <div style="background:#fef2f2;border-radius:8px;padding:10px 12px;margin-top:12px;border:1px solid #fecaca;font-size:12px;color:#dc2626;">
+        Pesanan dibatalkan karena pembayaran tidak dikonfirmasi dalam 24 jam. Refund sudah dikirim ke saldo PasarKu.
+      </div>
+      <div class="order-actions">
+        <button class="btn-sm btn-sm-primary" onclick="showPage('page-detail')">Beli Lagi</button>
+        <button class="btn-sm btn-sm-outline">Lihat Detail</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+  function changeQty(d) {
+    const el = document.getElementById('qty');
+    let v = parseInt(el.textContent) + d;
+    if (v < 1) v = 1; if (v > 10) v = 10;
+    el.textContent = v;
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  function switchImg(el) {
+    document.getElementById('mainImg').src = el.src.replace('400/400','600/600');
+    document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function setTab(el) {
+    document.querySelectorAll('.history-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  document.querySelectorAll('.shipping-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.shipping-opt').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+  document.querySelectorAll('.payment-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.payment-opt').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+  document.addEventListener('DOMContentLoaded', () => showPage('page-list'));
+</script>
+</body>
+</html>

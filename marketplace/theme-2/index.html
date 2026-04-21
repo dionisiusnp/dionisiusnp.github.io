@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volt Market — Premium Dark Marketplace</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #09090b;
+    --bg2: #18181b;
+    --bg3: #27272a;
+    --text: #fafafa;
+    --text-muted: #a1a1aa;
+    --accent: #a855f7;
+    --accent-dark: #9333ea;
+    --accent-glow: rgba(168,85,247,.35);
+    --accent-light: rgba(168,85,247,.12);
+    --border: #3f3f46;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.6);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  button { cursor: pointer; font-family: inherit; }
+  input, select { font-family: inherit; }
+  .page { display: none; }
+
+  /* HEADER */
+  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 32px; height: 68px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; cursor: pointer; }
+  .logo .v { color: var(--accent); }
+  .logo .olt { color: var(--text); }
+  .logo .market { color: var(--text-muted); font-weight: 500; font-size: 14px; letter-spacing: 0; }
+  .header-search { flex: 1; max-width: 560px; display: flex; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: all .2s; }
+  .header-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .header-search input { flex: 1; padding: 11px 16px; border: none; background: transparent; font-size: 14px; outline: none; color: var(--text); }
+  .header-search input::placeholder { color: var(--text-muted); }
+  .header-search button { padding: 11px 18px; background: var(--accent); color: white; border: none; font-size: 14px; font-weight: 600; transition: background .2s; cursor: pointer; }
+  .header-search button:hover { background: var(--accent-dark); }
+  .header-icons { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  .icon-btn { display: flex; align-items: center; gap: 7px; padding: 9px 15px; border-radius: 9px; background: var(--bg3); border: 1px solid var(--border); font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--text); background: var(--accent-light); }
+  .icon-btn .bcount { background: var(--accent); color: white; border-radius: 99px; font-size: 10px; font-weight: 800; padding: 1px 6px; min-width: 18px; text-align: center; }
+
+  /* FILTER BAR */
+  .filter-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 32px; height: 52px; display: flex; align-items: center; gap: 12px; overflow-x: auto; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-pill { padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 500; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all .2s; }
+  .filter-pill.active, .filter-pill:hover { background: var(--accent); border-color: var(--accent); color: white; }
+  .filter-sort { margin-left: auto; flex-shrink: 0; padding: 7px 14px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border); color: var(--text-muted); font-size: 13px; outline: none; cursor: pointer; }
+  .filter-sort option { background: var(--bg2); }
+
+  /* PRODUCT GRID */
+  .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+  .product-card { background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; cursor: pointer; transition: all .3s; position: relative; }
+  .product-card:hover { transform: translateY(-6px); box-shadow: 0 0 0 1px var(--accent), 0 12px 40px var(--accent-glow); border-color: var(--accent); }
+  .product-img-wrap { position: relative; height: 240px; overflow: hidden; }
+  .product-img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+  .product-card:hover .product-img { transform: scale(1.06); }
+  .disc-badge { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 99px; z-index: 2; }
+  .new-badge { position: absolute; top: 12px; left: 12px; background: var(--accent); color: white; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px; z-index: 2; }
+  .product-body { padding: 14px 14px 16px; }
+  .product-cat { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: 5px; }
+  .product-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+  .price-now { font-size: 17px; font-weight: 800; color: var(--accent); }
+  .price-old { font-size: 11px; color: var(--text-muted); text-decoration: line-through; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .card-stars { display: flex; align-items: center; gap: 4px; }
+  .card-stars span { color: #f59e0b; font-size: 11px; }
+  .card-stars .cnt { color: var(--text-muted); font-size: 11px; }
+  .card-sold { font-size: 11px; color: var(--text-muted); }
+
+  /* DETAIL PAGE */
+  .detail-wrapper { max-width: 1100px; margin: 0 auto; padding: 28px 32px; }
+  .back-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border: 1px solid var(--border); border-radius: 9px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--bg2); color: var(--text-muted); transition: all .2s; margin-bottom: 24px; }
+  .back-btn:hover { border-color: var(--accent); color: var(--text); }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .detail-main-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); border: 1px solid var(--border); }
+  .detail-thumbs { display: flex; gap: 8px; margin-top: 10px; }
+  .detail-thumb { width: 68px; height: 68px; object-fit: cover; border-radius: 8px; border: 2px solid var(--border); cursor: pointer; transition: all .2s; }
+  .detail-thumb.active, .detail-thumb:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .detail-cat { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: 8px; }
+  .detail-title { font-size: 24px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; }
+  .detail-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+  .detail-meta .rating-num { font-size: 14px; font-weight: 700; }
+  .detail-meta .meta-sep { color: var(--border); }
+  .detail-meta .sold-cnt { font-size: 13px; color: var(--text-muted); }
+  .price-box { background: linear-gradient(135deg, rgba(168,85,247,.15), rgba(168,85,247,.05)); border: 1px solid rgba(168,85,247,.3); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 18px; }
+  .price-big { font-size: 32px; font-weight: 900; color: var(--accent); }
+  .price-old-big { font-size: 14px; color: var(--text-muted); text-decoration: line-through; margin-left: 10px; }
+  .disc-tag { background: #ef4444; color: white; font-size: 12px; font-weight: 800; padding: 2px 9px; border-radius: 99px; margin-left: 8px; }
+  .stock-info { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .spec-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 18px; }
+  .spec-table td { padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .spec-table td:first-child { color: var(--text-muted); width: 38%; }
+  .spec-table td:last-child { font-weight: 500; color: var(--text); }
+  .qty-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .qty-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; }
+  .qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .qty-num { font-size: 16px; font-weight: 700; min-width: 36px; text-align: center; }
+  .action-row { display: flex; gap: 12px; margin-bottom: 18px; }
+  .btn-cart-d { flex: 1; padding: 14px; border: 2px solid var(--accent); background: transparent; color: var(--accent); border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; }
+  .btn-cart-d:hover { background: var(--accent-light); }
+  .btn-buy-d { flex: 1; padding: 14px; background: linear-gradient(135deg, var(--accent), #7c3aed); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; box-shadow: 0 4px 16px var(--accent-glow); }
+  .btn-buy-d:hover { opacity: .9; transform: translateY(-1px); }
+  .shop-bar { display: flex; align-items: center; gap: 12px; background: var(--bg3); border-radius: var(--radius); padding: 13px 16px; border: 1px solid var(--border); }
+  .shop-av { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #7c3aed); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; }
+  .shop-nm { font-size: 14px; font-weight: 700; }
+  .shop-lo { font-size: 12px; color: var(--text-muted); }
+  .shop-visit { padding: 7px 16px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; margin-left: auto; }
+  .shop-visit:hover { background: var(--accent-light); }
+  .desc-block { margin-top: 32px; }
+  .desc-block h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .desc-text { font-size: 13px; color: var(--text-muted); line-height: 1.8; }
+  .reviews-wrap { margin-top: 32px; }
+  .reviews-wrap h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .review-sum { display: flex; gap: 32px; background: var(--bg3); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; border: 1px solid var(--border); }
+  .big-score { font-size: 52px; font-weight: 900; color: var(--accent); text-align: center; line-height: 1; }
+  .rbar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+  .rbar-label { font-size: 12px; color: var(--text-muted); width: 32px; }
+  .rbar-track { flex: 1; height: 6px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+  .rbar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #f59e0b); border-radius: 99px; }
+  .review-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .review-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .rev-av { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+  .rev-nm { font-size: 13px; font-weight: 600; }
+  .rev-dt { font-size: 11px; color: var(--text-muted); }
+  .rev-txt { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* CHECKOUT */
+  .checkout-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 32px; }
+  .checkout-cols { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+  .ck-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; }
+  .ck-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 9px; }
+  .ck-step { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #7c3aed); color: white; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .fg { margin-bottom: 14px; }
+  .fg label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: 6px; }
+  .fg input, .fg select, .fg textarea { width: 100%; padding: 10px 13px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; background: var(--bg3); color: var(--text); outline: none; transition: all .2s; }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .fg input::placeholder, .fg textarea::placeholder { color: var(--text-muted); }
+  .fg textarea { resize: vertical; min-height: 70px; }
+  .fg select option { background: var(--bg2); }
+  .ship-opts { display: flex; flex-direction: column; gap: 10px; }
+  .ship-opt { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all .2s; }
+  .ship-opt.selected, .ship-opt:hover { border-color: var(--accent); background: var(--accent-light); }
+  .ship-opt input[type=radio] { accent-color: var(--accent); }
+  .ship-opt-info { flex: 1; }
+  .ship-nm { font-size: 13px; font-weight: 600; }
+  .ship-desc { font-size: 11px; color: var(--text-muted); }
+  .ship-price { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pay-opt { display: flex; align-items: center; gap: 11px; padding: 13px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all .2s; }
+  .pay-opt.selected, .pay-opt:hover { border-color: var(--accent); background: var(--accent-light); }
+  .pay-icon { width: 36px; height: 36px; border-radius: 8px; color: white; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pay-nm { font-size: 13px; font-weight: 600; }
+  .pay-sub { font-size: 11px; color: var(--text-muted); }
+  .qris-box { background: linear-gradient(135deg, #059669, #0d9488); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 12px; }
+  .qris-inner { width: 100px; height: 100px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .qris-pattern { width: 80px; height: 80px; background: repeating-conic-gradient(#000 0% 25%, #fff 0% 50%) 0 0 / 12px 12px; }
+  .qris-label { font-size: 13px; font-weight: 700; color: white; }
+  .qris-sub { font-size: 11px; color: rgba(255,255,255,.7); }
+  .sum-sticky { position: sticky; top: 80px; }
+  .sum-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .sum-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .sum-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .sum-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+  .sum-nm { font-size: 12px; font-weight: 500; color: var(--text); }
+  .sum-qty { font-size: 11px; color: var(--text-muted); }
+  .sum-price { font-size: 13px; font-weight: 700; color: var(--accent); margin-left: auto; }
+  .sum-line { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
+  .sum-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; padding-top: 12px; border-top: 1px solid var(--border); margin-top: 4px; }
+  .sum-total span:last-child { color: var(--accent); }
+  .btn-order { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), #7c3aed); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; margin-top: 16px; cursor: pointer; transition: all .2s; box-shadow: 0 4px 20px var(--accent-glow); }
+  .btn-order:hover { opacity: .9; transform: translateY(-1px); }
+
+  /* HISTORY */
+  .history-wrap { max-width: 900px; margin: 0 auto; padding: 28px 32px; }
+  .history-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .history-hdr h2 { font-size: 22px; font-weight: 800; }
+  .htabs { display: flex; gap: 4px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 4px; flex-wrap: wrap; }
+  .htab { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--text-muted); transition: all .2s; }
+  .htab.active { background: var(--accent); color: white; font-weight: 700; }
+  .order-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; transition: all .2s; }
+  .order-card:hover { border-color: var(--border); box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+  .order-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+  .order-id { font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  .order-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .order-id-mono { font-family: 'Courier New', monospace; color: var(--accent); }
+  .st-badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px; white-space: nowrap; }
+  .st-wait { background: rgba(245,158,11,.15); color: #f59e0b; border: 1px solid rgba(245,158,11,.3); }
+  .st-proc { background: rgba(59,130,246,.15); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+  .st-ship { background: rgba(16,185,129,.15); color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+  .st-done { background: rgba(168,85,247,.15); color: var(--accent); border: 1px solid rgba(168,85,247,.3); }
+  .st-cancel { background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+  .order-items { display: flex; gap: 12px; }
+  .order-thumb { width: 68px; height: 68px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+  .oi-nm { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .oi-qty { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .oi-total { font-size: 13px; color: var(--text-muted); }
+  .oi-total strong { color: var(--accent); }
+  .order-acts { display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .abtn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .abtn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+  .abtn-ghost:hover { border-color: var(--accent); color: var(--text); }
+  .abtn-primary { background: linear-gradient(135deg, var(--accent), #7c3aed); color: white; border: none; }
+  .abtn-primary:hover { opacity: .85; }
+  .abtn-danger { background: transparent; border: 1px solid rgba(239,68,68,.4); color: #f87171; }
+  .abtn-danger:hover { background: rgba(239,68,68,.1); }
+  .info-box { border-radius: 9px; padding: 11px 14px; margin-top: 12px; font-size: 12px; }
+  .info-ship { background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.25); color: #34d399; }
+  .info-pay { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.25); color: #f59e0b; }
+  .info-cancel { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25); color: #f87171; }
+
+  .toast { position: fixed; bottom: 28px; right: 28px; background: var(--bg2); border: 1px solid var(--accent); color: var(--text); padding: 13px 22px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 9999; transform: translateY(90px); opacity: 0; transition: all .3s; pointer-events: none; box-shadow: 0 4px 20px var(--accent-glow); }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 1100px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 820px) { .product-grid { grid-template-columns: repeat(2, 1fr); } .detail-grid { grid-template-columns: 1fr; } .checkout-cols { grid-template-columns: 1fr; } .sum-sticky { position: static; } }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo" onclick="showPage('page-list')">
+    <span class="v">V</span><span class="olt">olt</span> <span class="market">MARKET</span>
+  </div>
+  <div class="header-search">
+    <input type="text" placeholder="Cari produk premium..." value="Laptop Gaming">
+    <button>Cari</button>
+  </div>
+  <div class="header-icons">
+    <button class="icon-btn" onclick="showPage('page-list')">&#8962; Beranda</button>
+    <button class="icon-btn" onclick="showPage('page-checkout')">&#128722; Keranjang <span class="bcount">4</span></button>
+    <button class="icon-btn" onclick="showPage('page-history')">&#128230; Pesanan</button>
+  </div>
+</header>
+
+<!-- PAGE: LIST -->
+<div class="page" id="page-list">
+  <div class="filter-bar">
+    <button class="filter-pill active">Semua</button>
+    <button class="filter-pill">Elektronik</button>
+    <button class="filter-pill">Laptop &amp; PC</button>
+    <button class="filter-pill">Smartphone</button>
+    <button class="filter-pill">Audio</button>
+    <button class="filter-pill">Gaming</button>
+    <button class="filter-pill">Kamera</button>
+    <button class="filter-pill">Aksesori</button>
+    <select class="filter-sort">
+      <option>Urutkan: Relevan</option>
+      <option>Harga Terendah</option>
+      <option>Harga Tertinggi</option>
+      <option>Rating Terbaik</option>
+      <option>Terlaris</option>
+    </select>
+  </div>
+  <div style="padding:24px 32px 8px;max-width:1400px;margin:0 auto;">
+    <div style="font-size:13px;color:var(--text-muted);">Menampilkan <strong style="color:var(--text);">8</strong> produk terbaik untuk <strong style="color:var(--accent);">"Laptop Gaming"</strong></div>
+  </div>
+  <div class="product-grid">
+    <div class="product-card" onclick="showPage('page-detail')">
+      <div class="product-img-wrap">
+        <img class="product-img" src="https://picsum.photos/seed/vmlaptop1/600/400" alt="ASUS ROG">
+        <span class="disc-badge">23% OFF</span>
+        <span class="new-badge">Baru</span>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Laptop Gaming</div>
+        <div class="product-name">ASUS ROG Strix G16 — RTX 4070 165Hz QHD</div>
+        <div class="price-row"><span class="price-now">Rp 23.999.000</span><span class="price-old">Rp 31.199.000</span></div>
+        <div class="card-footer"><div class="card-stars"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="cnt"> 4.9 (1.204)</span></div><span class="card-sold">2.1k terjual</span></div>
+      </div>
+    </div>
+    <div class="product-card" onclick="showPage('page-detail')">
+      <div class="product-img-wrap">
+        <img class="product-img" src="https://picsum.photos/seed/vmlaptop2/600/400" alt="Lenovo Legion">
+        <span class="disc-badge">18% OFF</span>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Laptop Gaming</div>
+        <div class="product-name">Lenovo Legion 5i Pro — Intel i9 RTX 4060 240Hz</div>
+        <div class="price-row"><span class="price-now">Rp 19.499.000</span><span class="price-old">Rp 23.799.000</span></div>
+        <div class="card-footer"><div class="card-stars"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="cnt"> 4.8 (988)</span></div><span class="card-sold">1.7k terjual</span></div>
+      </div>
+    </div>
+    <div class="product-card" onclick="showPage('page-detail')">
+      <div class="product-img-wrap">
+        <img class="product-img" src="https://picsum.photos/seed/vmphone1/600/400" alt="Headset">
+        <span class="new-badge">Baru</span>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Audio Gaming</div>
+        <div class="product-name">Sony WH-1000XM5 Wireless Noise Cancelling Headphones</div>
+        <div class="price-row"><span class="price-now">Rp 4.299.000</span><span class="price-old">Rp 5.499.000</span></div>
+        <div class="card-footer"><div class="card-stars"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="cnt"> 5.0 (4.520)</span></div><span class="card-sold">8.9k terjual</span></div>
+      </div>
+    </div>
+    <div class="product-card" onclick="showPage('page-detail')">
+      <div class="product-img-wrap">
+        <img class="product-img" src="https://picsum.photos/seed/vmgaming1/600/400" alt="MSI">
+        <span class="disc-badge">12% OFF</span>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Laptop Gaming</div>
+        <div class="product-name">MSI Titan GT77 HX — Core i9 RTX 4090 16GB VRAM</div>
+        <div class="price-row"><span class="price-now">Rp 54.899.000</span><span class="price-old">Rp 62.999.000</span></div>
+        <div class="card-footer"><div class="card-stars"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="cnt"> 4.9 (342)</span></div><span class="card-sold">450 terjual</span></div>
+      </div>
+    </div>
+    <div class="product-card" onclick="showPage('page-detail')">
+      <div class="product-img-wrap">
+        <img class="product-img" src="https://picsum.photos/seed/vmkeyboard1/600/400" alt="Keyboard">
+        <span class="new-badge">Baru</span>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Aksesori Gaming</div>
+        <div class="product-name">Razer BlackWidow V4 Pro Mechanical Gaming Keyboard RGB</div>
+        <div class="price-row"><span class="price-now">Rp 3.199.000</span><span class="price-old">Rp 3.899.000</span></div>
+        <div class="card-footer"><div class="card-stars"><span>&#9733;&#9733;&#9733;&#9733;</span><span class="cnt"> 4.7 (2.210)</span></div><span class="card-sold">5.4k terjual</span></div>
+      </div>
+    </div>
+    <div class="product-card" onclick="showPage('page-detail')">
+      <div class="product-img-wrap">
+        <img class="product-img" src="https://picsum.photos/seed/vmmonitor1/600/400" alt="Monitor">
+        <span class="disc-badge">20% OFF</span>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Monitor</div>
+        <div class="product-name">ASUS ROG Swift 32" 4K OLED 240Hz G-Sync Ultimate</div>
+        <div class="price-row"><span class="price-now">Rp 14.799.000</span><span class="price-old">Rp 18.499.000</span></div>
+        <div class="card-footer"><div class="card-stars"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="cnt"> 4.9 (892)</span></div><span class="card-sold">1.2k terjual</span></div>
+      </div>
+    </div>
+    <div class="product-card" onclick="showPage('page-detail')">
+      <div class="product-img-wrap">
+        <img class="product-img" src="https://picsum.photos/seed/vmmouse1/600/400" alt="Mouse">
+        <span class="new-badge">Baru</span>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Aksesori Gaming</div>
+        <div class="product-name">Logitech G Pro X Superlight 2 Wireless Gaming Mouse</div>
+        <div class="price-row"><span class="price-now">Rp 1.899.000</span><span class="price-old">Rp 2.299.000</span></div>
+        <div class="card-footer"><div class="card-stars"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="cnt"> 5.0 (6.341)</span></div><span class="card-sold">12k terjual</span></div>
+      </div>
+    </div>
+    <div class="product-card" onclick="showPage('page-detail')">
+      <div class="product-img-wrap">
+        <img class="product-img" src="https://picsum.photos/seed/vmchair1/600/400" alt="Chair">
+        <span class="disc-badge">15% OFF</span>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Gaming Furniture</div>
+        <div class="product-name">Secretlab TITAN Evo XL — SoftWeave Fabric Gaming Chair</div>
+        <div class="price-row"><span class="price-now">Rp 8.499.000</span><span class="price-old">Rp 9.999.000</span></div>
+        <div class="card-footer"><div class="card-stars"><span>&#9733;&#9733;&#9733;&#9733;&#9733;</span><span class="cnt"> 4.8 (1.780)</span></div><span class="card-sold">3.2k terjual</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: DETAIL -->
+<div class="page" id="page-detail">
+  <div class="detail-wrapper">
+    <button class="back-btn" onclick="showPage('page-list')">&#8592; Kembali</button>
+    <div class="detail-grid">
+      <div>
+        <img class="detail-main-img" id="vmMainImg" src="https://picsum.photos/seed/vmlaptop1/700/700" alt="ASUS ROG">
+        <div class="detail-thumbs">
+          <img class="detail-thumb active" src="https://picsum.photos/seed/vmlaptop1/200/200" onclick="vmSwitchImg(this)">
+          <img class="detail-thumb" src="https://picsum.photos/seed/vmlaptopad/200/200" onclick="vmSwitchImg(this)">
+          <img class="detail-thumb" src="https://picsum.photos/seed/vmlaptopad2/200/200" onclick="vmSwitchImg(this)">
+          <img class="detail-thumb" src="https://picsum.photos/seed/vmlaptopad3/200/200" onclick="vmSwitchImg(this)">
+        </div>
+      </div>
+      <div>
+        <div class="detail-cat">Laptop Gaming &rsaquo; ASUS ROG</div>
+        <div class="detail-title">ASUS ROG Strix G16 — RTX 4070 165Hz QHD Display</div>
+        <div class="detail-meta">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="color:#f59e0b;font-size:14px;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="rating-num">4.9</span>
+          </div>
+          <span class="meta-sep">|</span>
+          <span class="sold-cnt">1.204 ulasan</span>
+          <span class="meta-sep">|</span>
+          <span class="sold-cnt">2.100+ terjual</span>
+        </div>
+        <div class="price-box">
+          <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;">
+            <span class="price-big">Rp 23.999.000</span>
+            <span class="price-old-big">Rp 31.199.000</span>
+            <span class="disc-tag">23% OFF</span>
+          </div>
+          <div class="stock-info">&#9889; Stok terbatas &mdash; tersisa 23 unit</div>
+        </div>
+        <table class="spec-table">
+          <tr><td>Prosesor</td><td>Intel Core i9-14900HX 5.8GHz</td></tr>
+          <tr><td>GPU</td><td>NVIDIA GeForce RTX 4070 8GB GDDR6</td></tr>
+          <tr><td>RAM</td><td>32 GB DDR5 4800MHz</td></tr>
+          <tr><td>Storage</td><td>1 TB NVMe PCIe 4.0 SSD</td></tr>
+          <tr><td>Layar</td><td>16" QHD 2560x1600 165Hz IPS</td></tr>
+          <tr><td>OS</td><td>Windows 11 Home</td></tr>
+          <tr><td>Baterai</td><td>90Wh, Charger 330W</td></tr>
+          <tr><td>Garansi</td><td>ASUS Official 2 Tahun</td></tr>
+        </table>
+        <div class="qty-row">
+          <span style="font-size:13px;font-weight:600;">Jumlah:</span>
+          <button class="qty-btn" onclick="vmChangeQty(-1)">&#8722;</button>
+          <span class="qty-num" id="vmQty">1</span>
+          <button class="qty-btn" onclick="vmChangeQty(1)">+</button>
+          <span style="font-size:12px;color:var(--text-muted);">/ 10 maks.</span>
+        </div>
+        <div class="action-row">
+          <button class="btn-cart-d" onclick="showToast('&#128722; Ditambahkan ke keranjang!')">&#128722; Keranjang</button>
+          <button class="btn-buy-d" onclick="showPage('page-checkout')">&#9889; Beli Sekarang</button>
+        </div>
+        <div class="shop-bar">
+          <div class="shop-av">A</div>
+          <div>
+            <div class="shop-nm">ASUS Official Store</div>
+            <div class="shop-lo">&#128205; Jakarta Selatan &middot; Official Store &#10003;</div>
+          </div>
+          <button class="shop-visit">Kunjungi</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="desc-block">
+      <h3>Deskripsi Produk</h3>
+      <p class="desc-text">ASUS ROG Strix G16 adalah laptop gaming flagship yang dirancang untuk para hardcore gamer dan content creator profesional. Dipersenjatai dengan Intel Core i9-14900HX terbaru dan NVIDIA GeForce RTX 4070, laptop ini mampu menjalankan game AAA terbaru pada setting ultra dengan frame rate tinggi yang sangat mulus.</p>
+      <p class="desc-text" style="margin-top:10px;">Layar QHD 165Hz dengan teknologi IPS memberikan visual yang tajam dan warna akurat dengan cakupan warna 100% sRGB. Sistem pendingin ROG Intelligent Cooling dengan dual fan Arc Flow memastikan performa puncak bahkan dalam sesi gaming maraton berjam-jam.</p>
+    </div>
+
+    <div class="reviews-wrap">
+      <h3>Ulasan Pembeli (1.204)</h3>
+      <div class="review-sum">
+        <div>
+          <div class="big-score">4.9</div>
+          <div style="text-align:center;margin-top:6px;color:#f59e0b;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <div style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:4px;">1.204 ulasan</div>
+        </div>
+        <div style="flex:1;">
+          <div class="rbar-row"><span class="rbar-label">5 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:84%"></div></div><span style="font-size:12px;color:var(--text-muted);margin-left:8px;">84%</span></div>
+          <div class="rbar-row"><span class="rbar-label">4 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:11%"></div></div><span style="font-size:12px;color:var(--text-muted);margin-left:8px;">11%</span></div>
+          <div class="rbar-row"><span class="rbar-label">3 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:3%"></div></div><span style="font-size:12px;color:var(--text-muted);margin-left:8px;">3%</span></div>
+          <div class="rbar-row"><span class="rbar-label">2 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:1%"></div></div><span style="font-size:12px;color:var(--text-muted);margin-left:8px;">1%</span></div>
+          <div class="rbar-row"><span class="rbar-label">1 &#9733;</span><div class="rbar-track"><div class="rbar-fill" style="width:1%"></div></div><span style="font-size:12px;color:var(--text-muted);margin-left:8px;">1%</span></div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-hd">
+          <img class="rev-av" src="https://picsum.photos/seed/vmava1/100/100" alt="">
+          <div>
+            <div class="rev-nm">Rizky Firmansyah</div>
+            <div style="color:#f59e0b;font-size:12px;margin:2px 0;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <div class="rev-dt">16 April 2026 &middot; i9 / RTX 4070</div>
+          </div>
+        </div>
+        <div class="rev-txt">Laptop ini luar biasa! Main Cyberpunk 2077 di setting Ultra dengan RTX On bisa 90+ fps di resolusi QHD. Pendinginnya juga bagus, tidak terasa panas berlebihan. Layarnya sangat jernih dan warnanya akurat. Sangat puas!</div>
+      </div>
+      <div class="review-item">
+        <div class="review-hd">
+          <img class="rev-av" src="https://picsum.photos/seed/vmava2/100/100" alt="">
+          <div>
+            <div class="rev-nm">Dewi Permata</div>
+            <div style="color:#f59e0b;font-size:12px;margin:2px 0;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <div class="rev-dt">12 April 2026 &middot; i9 / RTX 4070</div>
+          </div>
+        </div>
+        <div class="rev-txt">Beli buat kerja editing video dan sesekali gaming. Performa render di Premiere Pro kencang banget. Layar QHD bagus untuk color grading. Baterainya lumayan, bisa 3-4 jam pemakaian ringan. Overall 10/10!</div>
+      </div>
+      <div class="review-item">
+        <div class="review-hd">
+          <img class="rev-av" src="https://picsum.photos/seed/vmava3/100/100" alt="">
+          <div>
+            <div class="rev-nm">Hendra Kurniawan</div>
+            <div style="color:#f59e0b;font-size:12px;margin:2px 0;">&#9733;&#9733;&#9733;&#9733;</div>
+            <div class="rev-dt">8 April 2026 &middot; i9 / RTX 4070</div>
+          </div>
+        </div>
+        <div class="rev-txt">Performanya top, tapi chargernya besar dan berat banget (330W). Untuk dibawa kemana-mana agak repot. Suara kipas juga lumayan kencang saat load berat. Tapi untuk performa gaming, tidak ada yang mengecewakan!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: CHECKOUT -->
+<div class="page" id="page-checkout">
+  <div class="checkout-wrap">
+    <button class="back-btn" onclick="showPage('page-list')">&#8592; Lanjut Belanja</button>
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:22px;">Checkout Pesanan</h2>
+    <div class="checkout-cols">
+      <div>
+        <div class="ck-card">
+          <h3><span class="ck-step">1</span> Alamat Pengiriman</h3>
+          <div class="form-2col">
+            <div class="fg"><label>Nama Penerima</label><input type="text" value="Rizky Firmansyah"></div>
+            <div class="fg"><label>Nomor HP</label><input type="text" value="0813-9988-7766"></div>
+          </div>
+          <div class="fg"><label>Alamat Lengkap</label><textarea>Jl. Sudirman Kav. 52-53, Kompleks Perkantoran Lt. 12</textarea></div>
+          <div class="form-2col">
+            <div class="fg"><label>Provinsi</label><select><option selected>DKI Jakarta</option><option>Jawa Barat</option></select></div>
+            <div class="fg"><label>Kota</label><select><option selected>Jakarta Pusat</option><option>Jakarta Selatan</option></select></div>
+          </div>
+          <div class="form-2col">
+            <div class="fg"><label>Kecamatan</label><input type="text" value="Tanah Abang"></div>
+            <div class="fg"><label>Kode Pos</label><input type="text" value="10250"></div>
+          </div>
+          <div class="fg"><label>Catatan Kurir</label><input type="text" placeholder="Contoh: Hubungi dulu sebelum antar"></div>
+        </div>
+
+        <div class="ck-card">
+          <h3><span class="ck-step">2</span> Pilih Pengiriman</h3>
+          <div class="ship-opts" id="vmShipOpts">
+            <label class="ship-opt selected">
+              <input type="radio" name="vmship" checked>
+              <div class="ship-opt-info"><div class="ship-nm">JNE Reguler (REG)</div><div class="ship-desc">Estimasi 2–3 hari kerja · Asuransi barang elektronik included</div></div>
+              <div class="ship-price">Rp 45.000</div>
+            </label>
+            <label class="ship-opt">
+              <input type="radio" name="vmship">
+              <div class="ship-opt-info"><div class="ship-nm">JNE YES (Yakin Esok Sampai)</div><div class="ship-desc">Estimasi besok tiba · Khusus area Jawa</div></div>
+              <div class="ship-price">Rp 75.000</div>
+            </label>
+            <label class="ship-opt">
+              <input type="radio" name="vmship">
+              <div class="ship-opt-info"><div class="ship-nm">J&amp;T Express — Same Day</div><div class="ship-desc">Tiba hari ini (order sebelum 12.00 WIB)</div></div>
+              <div class="ship-price">Rp 120.000</div>
+            </label>
+            <label class="ship-opt">
+              <input type="radio" name="vmship">
+              <div class="ship-opt-info"><div class="ship-nm">SiCepat BEST</div><div class="ship-desc">Estimasi 1–2 hari kerja · Tracking real-time</div></div>
+              <div class="ship-price">Rp 55.000</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="ck-card">
+          <h3><span class="ck-step">3</span> Metode Pembayaran</h3>
+          <div class="pay-grid" id="vmPayOpts">
+            <label class="pay-opt selected">
+              <input type="radio" name="vmpay" checked style="display:none">
+              <div class="pay-icon" style="background:linear-gradient(135deg,#1d4ed8,#2563eb);">BCA</div>
+              <div><div class="pay-nm">Transfer Bank</div><div class="pay-sub">BCA / Mandiri / BNI / BRI</div></div>
+            </label>
+            <label class="pay-opt" id="payQRIS">
+              <input type="radio" name="vmpay" style="display:none">
+              <div class="pay-icon" style="background:linear-gradient(135deg,#059669,#0d9488);">QR</div>
+              <div><div class="pay-nm">QRIS</div><div class="pay-sub">Semua bank &amp; e-wallet</div></div>
+            </label>
+            <label class="pay-opt">
+              <input type="radio" name="vmpay" style="display:none">
+              <div class="pay-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b);">COD</div>
+              <div><div class="pay-nm">Bayar di Tempat</div><div class="pay-sub">Max. Rp 2 juta per order</div></div>
+            </label>
+            <label class="pay-opt">
+              <input type="radio" name="vmpay" style="display:none">
+              <div class="pay-icon" style="background:linear-gradient(135deg,var(--accent),#7c3aed);">PL</div>
+              <div><div class="pay-nm">PayLater</div><div class="pay-sub">Cicilan 0% 3/6/12 bulan</div></div>
+            </label>
+          </div>
+          <div class="qris-box" id="qrisBox" style="display:none;">
+            <div class="qris-inner"><div class="qris-pattern"></div></div>
+            <div class="qris-label">Scan QR untuk Membayar</div>
+            <div class="qris-sub">Berlaku 15 menit &middot; Total: Rp 24.089.000</div>
+          </div>
+        </div>
+
+        <div class="ck-card">
+          <h3><span class="ck-step">4</span> Voucher Eksklusif</h3>
+          <div style="display:flex;gap:10px;">
+            <input type="text" placeholder="Kode voucher Volt Market" style="flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg3);color:var(--text);outline:none;">
+            <button style="padding:11px 20px;background:linear-gradient(135deg,var(--accent),#7c3aed);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;" onclick="showToast('Voucher VOLT20 berhasil! Diskon Rp 200.000')">Pakai</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sum-sticky">
+        <div class="sum-card">
+          <h3>Ringkasan Order</h3>
+          <div class="sum-item">
+            <img src="https://picsum.photos/seed/vmlaptopad/200/200" alt="">
+            <div style="flex:1;"><div class="sum-nm">ASUS ROG Strix G16 RTX 4070</div><div class="sum-qty">&times; 1 unit</div></div>
+            <div class="sum-price">Rp 23.999.000</div>
+          </div>
+          <div class="sum-item">
+            <img src="https://picsum.photos/seed/vmmouse1/200/200" alt="">
+            <div style="flex:1;"><div class="sum-nm">Logitech G Pro X Superlight 2</div><div class="sum-qty">&times; 1 unit</div></div>
+            <div class="sum-price">Rp 1.899.000</div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:6px;">
+            <div class="sum-line"><span>Subtotal Produk</span><span>Rp 25.898.000</span></div>
+            <div class="sum-line"><span>Ongkos Kirim JNE REG</span><span>Rp 45.000</span></div>
+            <div class="sum-line"><span>Biaya Layanan</span><span>Rp 10.000</span></div>
+            <div class="sum-line"><span style="color:#34d399;">Voucher VOLT20</span><span style="color:#34d399;">-Rp 200.000</span></div>
+            <div class="sum-total"><span>Total Bayar</span><span>Rp 25.753.000</span></div>
+          </div>
+          <button class="btn-order" onclick="showPage('page-history');showToast('&#9889; Pesanan berhasil dibuat!')">Pesan Sekarang &#8594;</button>
+          <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:10px;line-height:1.6;">Dengan memesan, kamu menyetujui Syarat &amp; Ketentuan Volt Market. Barang dilindungi Garansi Tiba Selamat.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: HISTORY -->
+<div class="page" id="page-history">
+  <div class="history-wrap">
+    <div class="history-hdr">
+      <h2>Riwayat Transaksi</h2>
+      <div class="htabs">
+        <button class="htab active" onclick="vmSetTab(this)">Semua</button>
+        <button class="htab" onclick="vmSetTab(this)">Menunggu</button>
+        <button class="htab" onclick="vmSetTab(this)">Diproses</button>
+        <button class="htab" onclick="vmSetTab(this)">Dikirim</button>
+        <button class="htab" onclick="vmSetTab(this)">Selesai</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div>
+          <div class="order-id">&#128230; Order <span class="order-id-mono">VM-20260419-A8F2</span></div>
+          <div class="order-date">19 April 2026 &middot; ASUS Official Store &middot; JNE Reguler</div>
+        </div>
+        <span class="st-badge st-ship">&#128666; Sedang Dikirim</span>
+      </div>
+      <div class="order-items">
+        <img class="order-thumb" src="https://picsum.photos/seed/vmlaptopad/200/200" alt="">
+        <div>
+          <div class="oi-nm">ASUS ROG Strix G16 — RTX 4070 165Hz QHD</div>
+          <div class="oi-qty">1 unit &middot; i9 / 32GB RAM / 1TB SSD</div>
+          <div class="oi-total">Total: <strong>Rp 24.089.000</strong></div>
+        </div>
+      </div>
+      <div class="info-box info-ship">
+        &#128666; <strong>Resi JNE:</strong> JNE2026041900123 &middot; Tiba estimasi: <strong>21 April 2026</strong>
+      </div>
+      <div class="order-acts">
+        <button class="abtn abtn-ghost">Lacak Paket</button>
+        <button class="abtn abtn-primary" onclick="showToast('Pesanan berhasil dikonfirmasi!')">Konfirmasi Diterima</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div>
+          <div class="order-id">&#128230; Order <span class="order-id-mono">VM-20260412-C3D9</span></div>
+          <div class="order-date">12 April 2026 &middot; Sony Official &middot; SiCepat BEST</div>
+        </div>
+        <span class="st-badge st-done">&#10003; Selesai</span>
+      </div>
+      <div class="order-items">
+        <img class="order-thumb" src="https://picsum.photos/seed/vmphone1/200/200" alt="">
+        <div>
+          <div class="oi-nm">Sony WH-1000XM5 Wireless Noise Cancelling</div>
+          <div class="oi-qty">1 unit &middot; Warna: Midnight Black</div>
+          <div class="oi-total">Total: <strong>Rp 4.354.000</strong></div>
+        </div>
+      </div>
+      <div class="order-acts">
+        <button class="abtn abtn-ghost">Tulis Ulasan</button>
+        <button class="abtn abtn-primary" onclick="showPage('page-detail')">Beli Lagi</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div>
+          <div class="order-id">&#128230; Order <span class="order-id-mono">VM-20260418-E5B1</span></div>
+          <div class="order-date">18 April 2026 &middot; Razer Official &middot; J&amp;T Express</div>
+        </div>
+        <span class="st-badge st-proc">&#9881; Diproses Penjual</span>
+      </div>
+      <div class="order-items">
+        <img class="order-thumb" src="https://picsum.photos/seed/vmkeyboard1/200/200" alt="">
+        <div>
+          <div class="oi-nm">Razer BlackWidow V4 Pro Mechanical Keyboard</div>
+          <div class="oi-qty">1 unit &middot; Green Switch</div>
+          <div class="oi-total">Total: <strong>Rp 3.254.000</strong></div>
+        </div>
+      </div>
+      <div class="order-acts">
+        <button class="abtn abtn-ghost">Chat Penjual</button>
+        <button class="abtn abtn-danger">Batalkan</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div>
+          <div class="order-id">&#128230; Order <span class="order-id-mono">VM-20260419-F9A4</span></div>
+          <div class="order-date">19 April 2026 &middot; ASUS Official &middot; PayLater BNI</div>
+        </div>
+        <span class="st-badge st-wait">&#9203; Menunggu Pembayaran</span>
+      </div>
+      <div class="order-items">
+        <img class="order-thumb" src="https://picsum.photos/seed/vmmonitor1/200/200" alt="">
+        <div>
+          <div class="oi-nm">ASUS ROG Swift 32" 4K OLED 240Hz Monitor</div>
+          <div class="oi-qty">1 unit &middot; Hitam</div>
+          <div class="oi-total">Total: <strong>Rp 14.864.000</strong></div>
+        </div>
+      </div>
+      <div class="info-box info-pay">
+        &#9203; Selesaikan pembayaran sebelum <strong>19 April 2026, 23:59 WIB</strong>. VA BNI: <strong>8888 1234 5678</strong>
+      </div>
+      <div class="order-acts">
+        <button class="abtn abtn-primary" onclick="showToast('Membuka halaman pembayaran...')">Bayar Sekarang</button>
+        <button class="abtn abtn-danger">Batalkan Pesanan</button>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-top">
+        <div>
+          <div class="order-id">&#128230; Order <span class="order-id-mono">VM-20260405-B2C7</span></div>
+          <div class="order-date">5 April 2026 &middot; Secretlab ID &middot; SiCepat BEST</div>
+        </div>
+        <span class="st-badge st-cancel">&#10007; Dibatalkan</span>
+      </div>
+      <div class="order-items">
+        <img class="order-thumb" src="https://picsum.photos/seed/vmchair1/200/200" alt="">
+        <div>
+          <div class="oi-nm">Secretlab TITAN Evo XL SoftWeave Chair</div>
+          <div class="oi-qty">1 unit &middot; Stealth Black</div>
+          <div class="oi-total">Dikembalikan: <strong>Rp 8.554.000</strong></div>
+        </div>
+      </div>
+      <div class="info-box info-cancel">
+        Dibatalkan oleh sistem — pembayaran tidak diterima. Dana sudah dikembalikan ke sumber pembayaran (1–3 hari kerja).
+      </div>
+      <div class="order-acts">
+        <button class="abtn abtn-primary" onclick="showPage('page-detail')">Beli Lagi</button>
+        <button class="abtn abtn-ghost">Detail Pembatalan</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="vmToast"></div>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+  function showToast(msg) {
+    const t = document.getElementById('vmToast');
+    t.innerHTML = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  function vmSwitchImg(el) {
+    document.getElementById('vmMainImg').src = el.src.replace('200/200', '700/700');
+    document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function vmChangeQty(d) {
+    const el = document.getElementById('vmQty');
+    let v = parseInt(el.textContent) + d;
+    if (v < 1) v = 1; if (v > 10) v = 10;
+    el.textContent = v;
+  }
+  function vmSetTab(el) {
+    document.querySelectorAll('.htab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  document.querySelectorAll('.ship-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.ship-opt').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+  document.querySelectorAll('.pay-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.pay-opt').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      const isQRIS = opt === document.getElementById('payQRIS');
+      document.getElementById('qrisBox').style.display = isQRIS ? 'flex' : 'none';
+    });
+  });
+  document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+  document.addEventListener('DOMContentLoaded', () => showPage('page-list'));
+</script>
+</body>
+</html>

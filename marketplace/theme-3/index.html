@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WarungKu — Belanja Mudah di Genggaman</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff;
+    --bg2: #f9fafb;
+    --accent: #f97316;
+    --accent-dark: #ea580c;
+    --accent-light: #fff7ed;
+    --accent-glow: rgba(249,115,22,.2);
+    --text: #111827;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --radius: 14px;
+    --shadow: 0 1px 4px rgba(0,0,0,.08);
+    --shadow-lg: 0 6px 24px rgba(0,0,0,.12);
+  }
+  html, body { background: #f3f4f6; font-family: 'Inter', sans-serif; color: var(--text); min-height: 100vh; }
+  button { cursor: pointer; font-family: inherit; }
+  input, select { font-family: inherit; }
+  .page { display: none; }
+
+  /* PHONE SHELL */
+  .app-shell { max-width: 430px; margin: 0 auto; background: var(--bg); min-height: 100vh; position: relative; overflow-x: hidden; padding-bottom: 72px; box-shadow: 0 0 60px rgba(0,0,0,.15); }
+
+  /* TOP BAR */
+  .top-bar { background: var(--bg); padding: 14px 16px 8px; position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border); }
+  .top-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .app-logo { font-size: 20px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
+  .app-logo span { color: var(--text); font-weight: 500; }
+  .loc-chip { display: flex; align-items: center; gap: 4px; background: var(--accent-light); border: 1px solid #fed7aa; border-radius: 99px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--accent); cursor: pointer; margin-left: auto; white-space: nowrap; }
+  .search-row { display: flex; gap: 8px; }
+  .search-box { flex: 1; display: flex; align-items: center; background: var(--bg2); border: 1.5px solid var(--border); border-radius: 12px; padding: 9px 13px; gap: 8px; transition: all .2s; }
+  .search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .search-box input { flex: 1; border: none; background: transparent; font-size: 13px; outline: none; color: var(--text); }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .search-icon { font-size: 14px; color: var(--text-muted); }
+  .filter-icon-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: white; border: none; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+
+  /* CATEGORY PILLS SCROLL */
+  .cat-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px 6px; scrollbar-width: none; }
+  .cat-scroll::-webkit-scrollbar { display: none; }
+  .cat-pill { padding: 7px 16px; border-radius: 99px; font-size: 13px; font-weight: 600; white-space: nowrap; border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer; transition: all .2s; }
+  .cat-pill.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* FLASH SALE BANNER */
+  .flash-banner { margin: 8px 16px 0; background: linear-gradient(135deg, #f97316, #ef4444); border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .flash-left { display: flex; align-items: center; gap: 8px; }
+  .flash-fire { font-size: 20px; }
+  .flash-title { font-size: 14px; font-weight: 800; color: white; }
+  .flash-sub { font-size: 11px; color: rgba(255,255,255,.8); }
+  .countdown { background: rgba(0,0,0,.25); border-radius: 8px; padding: 6px 12px; font-size: 16px; font-weight: 800; color: white; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
+
+  /* SECTION HEADER */
+  .sec-hdr { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 8px; }
+  .sec-hdr h3 { font-size: 15px; font-weight: 700; }
+  .see-all { font-size: 13px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; }
+
+  /* PRODUCT GRID 2-COL */
+  .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 8px; }
+  .prod-card { background: var(--bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: all .2s; }
+  .prod-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .prod-img-wrap { position: relative; aspect-ratio: 1; overflow: hidden; }
+  .prod-img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+  .prod-card:hover .prod-img { transform: scale(1.05); }
+  .prod-disc { position: absolute; top: 8px; left: 8px; background: #ef4444; color: white; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 99px; }
+  .prod-fav { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+  .prod-body { padding: 10px 10px 12px; }
+  .prod-nm { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .prod-price { font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 2px; }
+  .prod-price-old { font-size: 10px; color: var(--text-muted); text-decoration: line-through; }
+  .prod-meta { display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+  .prod-stars { font-size: 10px; color: #f59e0b; }
+  .prod-cnt { font-size: 10px; color: var(--text-muted); }
+  .prod-cart-btn { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: white; border: none; display: flex; align-items: center; justify-content: center; font-size: 13px; margin-left: auto; transition: background .2s; }
+  .prod-cart-btn:hover { background: var(--accent-dark); }
+
+  /* BOTTOM TAB BAR */
+  .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 430px; background: white; border-top: 1px solid var(--border); display: flex; height: 64px; z-index: 100; box-shadow: 0 -4px 16px rgba(0,0,0,.08); }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; border: none; background: transparent; transition: all .15s; }
+  .tab-item.active .tab-icon { color: var(--accent); }
+  .tab-item.active .tab-label { color: var(--accent); font-weight: 700; }
+  .tab-icon { font-size: 20px; color: var(--text-muted); transition: all .15s; }
+  .tab-label { font-size: 10px; font-weight: 500; color: var(--text-muted); }
+  .tab-badge { position: relative; }
+  .tab-dot { position: absolute; top: -3px; right: -5px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 1.5px solid white; }
+
+  /* DETAIL PAGE */
+  .detail-scroll { overflow-y: auto; }
+  .detail-img-wrap { position: relative; height: 300px; overflow: hidden; }
+  .detail-img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-img-overlay { position: absolute; top: 0; left: 0; right: 0; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .detail-back { width: 36px; height: 36px; background: rgba(255,255,255,.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; border: none; }
+  .detail-share { width: 36px; height: 36px; background: rgba(255,255,255,.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; border: none; }
+  .detail-thumbs-row { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; }
+  .detail-thumbs-row::-webkit-scrollbar { display: none; }
+  .dthumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; transition: all .2s; }
+  .dthumb.active { border-color: var(--accent); }
+  .detail-body { padding: 0 16px 16px; }
+  .detail-cat { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-bottom: 6px; }
+  .detail-nm { font-size: 18px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .detail-rating-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .detail-price-wrap { background: var(--accent-light); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .dp-now { font-size: 24px; font-weight: 900; color: var(--accent); }
+  .dp-old { font-size: 13px; color: var(--text-muted); text-decoration: line-through; }
+  .dp-disc { background: #ef4444; color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .detail-spec { margin-bottom: 14px; }
+  .dspec-row { display: flex; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .dspec-row:last-child { border-bottom: none; }
+  .dspec-label { color: var(--text-muted); width: 40%; }
+  .dspec-val { font-weight: 600; }
+  .detail-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-bottom: 14px; }
+  .detail-shop-row { display: flex; align-items: center; gap: 10px; background: var(--bg2); border-radius: 12px; padding: 12px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .ds-av { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+  .ds-nm { font-size: 13px; font-weight: 700; }
+  .ds-loc { font-size: 11px; color: var(--text-muted); }
+  .ds-chat { padding: 7px 14px; background: transparent; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-left: auto; }
+
+  /* REVIEW MINI */
+  .rev-mini { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .rev-mini:last-child { border: none; }
+  .rev-mini-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .rev-av-sm { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+  .rev-nm-sm { font-size: 12px; font-weight: 600; }
+  .rev-dt-sm { font-size: 10px; color: var(--text-muted); }
+  .rev-txt-sm { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* STICKY BOTTOM ACTION */
+  .sticky-action { position: sticky; bottom: 64px; background: white; border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; z-index: 40; }
+  .btn-cart-m { flex: 1; padding: 14px; border: 2px solid var(--accent); background: transparent; color: var(--accent); border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; }
+  .btn-cart-m:hover { background: var(--accent-light); }
+  .btn-buy-m { flex: 2; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .2s; }
+  .btn-buy-m:hover { background: var(--accent-dark); }
+
+  /* CHECKOUT */
+  .ck-top-bar { background: var(--bg); padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+  .ck-back { width: 36px; height: 36px; background: var(--bg2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; border: none; flex-shrink: 0; }
+  .ck-title { font-size: 16px; font-weight: 700; }
+  .progress-steps { display: flex; align-items: center; padding: 12px 16px; gap: 4px; overflow-x: auto; }
+  .progress-steps::-webkit-scrollbar { display: none; }
+  .ps-item { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .ps-dot { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; }
+  .ps-dot.done { background: var(--accent); color: white; }
+  .ps-dot.active { background: var(--accent); color: white; box-shadow: 0 0 0 3px var(--accent-glow); }
+  .ps-dot.pending { background: var(--border); color: var(--text-muted); }
+  .ps-label { font-size: 10px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+  .ps-label.active { color: var(--accent); }
+  .ps-line { flex: 1; height: 2px; background: var(--border); min-width: 16px; }
+  .ps-line.done { background: var(--accent); }
+  .ck-section { background: white; border-radius: var(--radius); border: 1px solid var(--border); margin: 12px 16px; padding: 16px; }
+  .ck-section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .ck-step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .fg-m { margin-bottom: 12px; }
+  .fg-m label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+  .fg-m input, .fg-m select, .fg-m textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 13px; font-family: inherit; background: var(--bg2); color: var(--text); outline: none; transition: all .2s; }
+  .fg-m input:focus, .fg-m select:focus, .fg-m textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .fg-m textarea { resize: vertical; min-height: 60px; }
+  .fg-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ship-opt-m { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: all .2s; }
+  .ship-opt-m.selected, .ship-opt-m:hover { border-color: var(--accent); background: var(--accent-light); }
+  .ship-opt-m input[type=radio] { accent-color: var(--accent); flex-shrink: 0; }
+  .som-info { flex: 1; }
+  .som-nm { font-size: 13px; font-weight: 700; }
+  .som-desc { font-size: 11px; color: var(--text-muted); }
+  .som-price { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .pay-opt-m { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: all .2s; }
+  .pay-opt-m.selected, .pay-opt-m:hover { border-color: var(--accent); background: var(--accent-light); }
+  .pom-icon { width: 34px; height: 34px; border-radius: 8px; color: white; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pom-nm { font-size: 13px; font-weight: 700; }
+  .pom-sub { font-size: 11px; color: var(--text-muted); }
+  .ck-sum-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .ck-sum-img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+  .ck-sum-nm { font-size: 12px; font-weight: 600; }
+  .ck-sum-qty { font-size: 11px; color: var(--text-muted); }
+  .ck-sum-price { font-size: 13px; font-weight: 700; color: var(--accent); margin-left: auto; white-space: nowrap; }
+  .sum-line-m { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .sum-line-m.total { font-size: 15px; font-weight: 800; color: var(--text); padding-top: 10px; border-top: 1px solid var(--border); margin-top: 4px; }
+  .sum-line-m.total span:last-child { color: var(--accent); }
+  /* STICKY TOTAL BAR */
+  .sticky-total { position: sticky; bottom: 64px; background: white; border-top: 1.5px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 40; }
+  .st-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .st-total { font-size: 18px; font-weight: 900; color: var(--accent); }
+  .btn-checkout { padding: 14px 24px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: background .2s; white-space: nowrap; }
+  .btn-checkout:hover { background: var(--accent-dark); }
+
+  /* HISTORY */
+  .hist-top { padding: 14px 16px; display: flex; align-items: center; gap: 12px; background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+  .hist-title { font-size: 17px; font-weight: 800; }
+  .hist-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px 0; scrollbar-width: none; }
+  .hist-tabs::-webkit-scrollbar { display: none; }
+  .ht-pill { padding: 7px 16px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all .2s; }
+  .ht-pill.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .horder-card { background: white; border-radius: var(--radius); border: 1px solid var(--border); margin: 10px 16px; padding: 14px; box-shadow: var(--shadow); }
+  .ho-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
+  .ho-id { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .ho-date { font-size: 10px; color: var(--text-muted); }
+  .hst-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+  .hst-wait { background: #fef3c7; color: #d97706; }
+  .hst-proc { background: #dbeafe; color: #2563eb; }
+  .hst-ship { background: #d1fae5; color: #059669; }
+  .hst-done { background: #fff7ed; color: var(--accent); border: 1px solid #fed7aa; }
+  .hst-cancel { background: #fee2e2; color: #dc2626; }
+  .ho-items { display: flex; gap: 10px; align-items: flex-start; }
+  .ho-img { width: 58px; height: 58px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+  .ho-nm { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+  .ho-qty { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .ho-tot { font-size: 12px; color: var(--text-muted); }
+  .ho-tot strong { color: var(--accent); }
+  .ho-acts { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .ha-btn { padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .2s; }
+  .ha-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); }
+  .ha-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .ha-primary { background: var(--accent); color: white; border: none; }
+  .ha-primary:hover { background: var(--accent-dark); }
+  .ha-danger { background: transparent; border: 1.5px solid #fca5a5; color: #ef4444; }
+
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1f2937; color: white; padding: 11px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 9999; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- TOP BAR (shown on list + other pages) -->
+  <div class="top-bar" id="topBar">
+    <div class="top-row">
+      <div class="app-logo" onclick="showPage('page-list')">Warung<span>Ku</span></div>
+      <div class="loc-chip" onclick="showToastW('Pilih lokasi pengiriman')">&#128205; Jakarta Selatan &#9660;</div>
+    </div>
+    <div class="search-row">
+      <div class="search-box">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" placeholder="Cari produk, toko..." value="Makanan sehat">
+      </div>
+      <button class="filter-icon-btn">&#9776;</button>
+    </div>
+  </div>
+
+  <!-- PAGE: LIST -->
+  <div class="page" id="page-list">
+    <div class="cat-scroll">
+      <button class="cat-pill active" onclick="wkSetCat(this)">Semua</button>
+      <button class="cat-pill" onclick="wkSetCat(this)">&#128241; Elektronik</button>
+      <button class="cat-pill" onclick="wkSetCat(this)">&#128084; Fashion</button>
+      <button class="cat-pill" onclick="wkSetCat(this)">&#127828; Makanan</button>
+      <button class="cat-pill" onclick="wkSetCat(this)">&#128150; Kecantikan</button>
+      <button class="cat-pill" onclick="wkSetCat(this)">&#9917; Olahraga</button>
+    </div>
+
+    <div class="flash-banner">
+      <div class="flash-left">
+        <span class="flash-fire">&#9889;</span>
+        <div>
+          <div class="flash-title">FLASH SALE</div>
+          <div class="flash-sub">Diskon hingga 80%</div>
+        </div>
+      </div>
+      <div class="countdown" id="countdown">02:14:33</div>
+    </div>
+
+    <div class="sec-hdr">
+      <h3>Produk Terlaris</h3>
+      <button class="see-all">Lihat Semua</button>
+    </div>
+
+    <div class="prod-grid">
+      <div class="prod-card" onclick="showPage('page-detail')">
+        <div class="prod-img-wrap">
+          <img class="prod-img" src="https://picsum.photos/seed/wkfood1/400/400" alt="">
+          <span class="prod-disc">-45%</span>
+          <span class="prod-fav">&#9829;</span>
+        </div>
+        <div class="prod-body">
+          <div class="prod-nm">Granola Almond Honey Crispy 500g Premium</div>
+          <div class="prod-price">Rp 45.000</div>
+          <div class="prod-price-old">Rp 82.000</div>
+          <div class="prod-meta">
+            <span class="prod-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="prod-cnt"> 4.9 (1.2k)</span>
+            <button class="prod-cart-btn" onclick="event.stopPropagation();showToastW('Ditambahkan ke keranjang!')">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card" onclick="showPage('page-detail')">
+        <div class="prod-img-wrap">
+          <img class="prod-img" src="https://picsum.photos/seed/wkelec1/400/400" alt="">
+          <span class="prod-disc">-30%</span>
+          <span class="prod-fav">&#9825;</span>
+        </div>
+        <div class="prod-body">
+          <div class="prod-nm">TWS Earbuds Pro Noise Cancelling</div>
+          <div class="prod-price">Rp 189.000</div>
+          <div class="prod-price-old">Rp 270.000</div>
+          <div class="prod-meta">
+            <span class="prod-stars">&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="prod-cnt"> 4.7 (876)</span>
+            <button class="prod-cart-btn" onclick="event.stopPropagation();showToastW('Ditambahkan ke keranjang!')">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card" onclick="showPage('page-detail')">
+        <div class="prod-img-wrap">
+          <img class="prod-img" src="https://picsum.photos/seed/wkbeauty1/400/400" alt="">
+          <span class="prod-disc">-25%</span>
+          <span class="prod-fav">&#9829;</span>
+        </div>
+        <div class="prod-body">
+          <div class="prod-nm">Serum Vitamin C Brightening 30ml BPOM</div>
+          <div class="prod-price">Rp 95.000</div>
+          <div class="prod-price-old">Rp 127.000</div>
+          <div class="prod-meta">
+            <span class="prod-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="prod-cnt"> 5.0 (3.4k)</span>
+            <button class="prod-cart-btn" onclick="event.stopPropagation();showToastW('Ditambahkan ke keranjang!')">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card" onclick="showPage('page-detail')">
+        <div class="prod-img-wrap">
+          <img class="prod-img" src="https://picsum.photos/seed/wksport1/400/400" alt="">
+          <span class="prod-fav">&#9825;</span>
+        </div>
+        <div class="prod-body">
+          <div class="prod-nm">Sepatu Running Lari Lightweight Mesh Sole</div>
+          <div class="prod-price">Rp 325.000</div>
+          <div class="prod-meta">
+            <span class="prod-stars">&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="prod-cnt"> 4.6 (520)</span>
+            <button class="prod-cart-btn" onclick="event.stopPropagation();showToastW('Ditambahkan ke keranjang!')">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card" onclick="showPage('page-detail')">
+        <div class="prod-img-wrap">
+          <img class="prod-img" src="https://picsum.photos/seed/wkfashion1/400/400" alt="">
+          <span class="prod-disc">-40%</span>
+          <span class="prod-fav">&#9829;</span>
+        </div>
+        <div class="prod-body">
+          <div class="prod-nm">Kaos Oversize Unisex Katun Combed 30s</div>
+          <div class="prod-price">Rp 79.000</div>
+          <div class="prod-price-old">Rp 132.000</div>
+          <div class="prod-meta">
+            <span class="prod-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="prod-cnt"> 4.8 (2.1k)</span>
+            <button class="prod-cart-btn" onclick="event.stopPropagation();showToastW('Ditambahkan ke keranjang!')">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card" onclick="showPage('page-detail')">
+        <div class="prod-img-wrap">
+          <img class="prod-img" src="https://picsum.photos/seed/wkfood2/400/400" alt="">
+          <span class="prod-disc">-20%</span>
+          <span class="prod-fav">&#9825;</span>
+        </div>
+        <div class="prod-body">
+          <div class="prod-nm">Susu Almond Original Unsweetened 1 Liter</div>
+          <div class="prod-price">Rp 38.000</div>
+          <div class="prod-price-old">Rp 48.000</div>
+          <div class="prod-meta">
+            <span class="prod-stars">&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="prod-cnt"> 4.5 (890)</span>
+            <button class="prod-cart-btn" onclick="event.stopPropagation();showToastW('Ditambahkan ke keranjang!')">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-hdr" style="margin-top:8px;">
+      <h3>Baru Ditambahkan</h3>
+      <button class="see-all">Lihat Semua</button>
+    </div>
+    <div class="prod-grid">
+      <div class="prod-card" onclick="showPage('page-detail')">
+        <div class="prod-img-wrap">
+          <img class="prod-img" src="https://picsum.photos/seed/wkelec2/400/400" alt="">
+          <span class="prod-disc">-15%</span>
+        </div>
+        <div class="prod-body">
+          <div class="prod-nm">Powerbank 20000mAh Fast Charge 65W</div>
+          <div class="prod-price">Rp 219.000</div>
+          <div class="prod-price-old">Rp 259.000</div>
+          <div class="prod-meta">
+            <span class="prod-stars">&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="prod-cnt"> 4.7 (445)</span>
+            <button class="prod-cart-btn" onclick="event.stopPropagation();showToastW('Ditambahkan ke keranjang!')">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card" onclick="showPage('page-detail')">
+        <div class="prod-img-wrap">
+          <img class="prod-img" src="https://picsum.photos/seed/wkhome1/400/400" alt="">
+        </div>
+        <div class="prod-body">
+          <div class="prod-nm">Botol Minum Stainless Steel 750ml Anti Bocor</div>
+          <div class="prod-price">Rp 55.000</div>
+          <div class="prod-meta">
+            <span class="prod-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="prod-cnt"> 4.9 (1.7k)</span>
+            <button class="prod-cart-btn" onclick="event.stopPropagation();showToastW('Ditambahkan ke keranjang!')">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="height:16px;"></div>
+  </div>
+
+  <!-- PAGE: DETAIL -->
+  <div class="page" id="page-detail">
+    <div class="detail-img-wrap">
+      <img class="detail-img" id="wkMainImg" src="https://picsum.photos/seed/wkfood1/500/500" alt="">
+      <div class="detail-img-overlay">
+        <button class="detail-back" onclick="showPage('page-list')">&#8592;</button>
+        <button class="detail-share" onclick="showToastW('Link berhasil disalin!')">&#8679;</button>
+      </div>
+    </div>
+    <div class="detail-thumbs-row">
+      <img class="dthumb active" src="https://picsum.photos/seed/wkfood1/200/200" onclick="wkSwitchImg(this)">
+      <img class="dthumb" src="https://picsum.photos/seed/wkfood1b/200/200" onclick="wkSwitchImg(this)">
+      <img class="dthumb" src="https://picsum.photos/seed/wkfood1c/200/200" onclick="wkSwitchImg(this)">
+      <img class="dthumb" src="https://picsum.photos/seed/wkfood1d/200/200" onclick="wkSwitchImg(this)">
+    </div>
+    <div class="detail-body">
+      <div class="detail-cat">Makanan Sehat &rsaquo; Granola &amp; Sereal</div>
+      <div class="detail-nm">Granola Almond Honey Crispy 500g Premium Grade A</div>
+      <div class="detail-rating-row">
+        <span style="color:#f59e0b;font-size:13px;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+        <span style="font-size:13px;font-weight:700;">4.9</span>
+        <span style="font-size:12px;color:var(--text-muted);">1.248 ulasan</span>
+        <span style="font-size:12px;color:var(--text-muted);">|</span>
+        <span style="font-size:12px;color:var(--text-muted);">4.500+ terjual</span>
+      </div>
+      <div class="detail-price-wrap">
+        <span class="dp-now">Rp 45.000</span>
+        <span class="dp-old">Rp 82.000</span>
+        <span class="dp-disc">-45%</span>
+      </div>
+
+      <div class="detail-spec">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Informasi Produk</h3>
+        <div class="dspec-row"><span class="dspec-label">Berat</span><span class="dspec-val">500 gram</span></div>
+        <div class="dspec-row"><span class="dspec-label">Kondisi</span><span class="dspec-val" style="color:#10b981;">Baru</span></div>
+        <div class="dspec-row"><span class="dspec-label">Komposisi</span><span class="dspec-val">Oat, Almond, Madu, Beras Merah</span></div>
+        <div class="dspec-row"><span class="dspec-label">Kalori</span><span class="dspec-val">380 kcal / 100g</span></div>
+        <div class="dspec-row"><span class="dspec-label">Sertifikasi</span><span class="dspec-val">BPOM RI MD 12345</span></div>
+        <div class="dspec-row"><span class="dspec-label">Kadaluarsa</span><span class="dspec-val">18 bulan dari tanggal produksi</span></div>
+      </div>
+
+      <div class="detail-desc">Granola premium kami terbuat dari oat rolled pilihan yang dipanggang sempurna dengan madu asli dan almond panggang. Tidak mengandung pengawet, pewarna buatan, atau gula tambahan. Cocok untuk sarapan sehat, campuran yogurt, atau snack bergizi kapan saja.</div>
+
+      <div class="detail-shop-row">
+        <div class="ds-av">H</div>
+        <div>
+          <div class="ds-nm">HerbalGrains Official</div>
+          <div class="ds-loc">&#128205; Bandung &middot; Toko Terverifikasi &#10003;</div>
+        </div>
+        <button class="ds-chat">Chat</button>
+      </div>
+
+      <div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">Ulasan (1.248)</h3>
+        <div class="rev-mini">
+          <div class="rev-mini-hd">
+            <img class="rev-av-sm" src="https://picsum.photos/seed/wkava1/100/100" alt="">
+            <div>
+              <div class="rev-nm-sm">Anisa Putri</div>
+              <div style="color:#f59e0b;font-size:10px;display:inline;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <span class="rev-dt-sm"> 17 April 2026</span>
+            </div>
+          </div>
+          <div class="rev-txt-sm">Enak banget! Crunchy dan tidak terlalu manis. Pas banget dimakan dengan susu almond. Packaging juga oke, tidak remuk waktu sampai.</div>
+        </div>
+        <div class="rev-mini">
+          <div class="rev-mini-hd">
+            <img class="rev-av-sm" src="https://picsum.photos/seed/wkava2/100/100" alt="">
+            <div>
+              <div class="rev-nm-sm">Yoga Pratama</div>
+              <div style="color:#f59e0b;font-size:10px;display:inline;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              <span class="rev-dt-sm"> 14 April 2026</span>
+            </div>
+          </div>
+          <div class="rev-txt-sm">Sudah langganan sejak setahun lalu. Kualitas konsisten, pengiriman selalu cepat. Beli 3 pack sekaligus lebih hemat!</div>
+        </div>
+        <div class="rev-mini">
+          <div class="rev-mini-hd">
+            <img class="rev-av-sm" src="https://picsum.photos/seed/wkava3/100/100" alt="">
+            <div>
+              <div class="rev-nm-sm">Mega Wulandari</div>
+              <div style="color:#f59e0b;font-size:10px;display:inline;">&#9733;&#9733;&#9733;&#9733;</div>
+              <span class="rev-dt-sm"> 10 April 2026</span>
+            </div>
+          </div>
+          <div class="rev-txt-sm">Rasanya enak, tapi almondnya sedikit. Mungkin bisa diperbanyak. Overall masih worth it untuk harganya yang terjangkau.</div>
+        </div>
+      </div>
+    </div>
+    <div class="sticky-action">
+      <button class="btn-cart-m" onclick="showToastW('Ditambahkan ke keranjang!')">&#128722; Keranjang</button>
+      <button class="btn-buy-m" onclick="showPage('page-checkout')">&#9889; Beli Sekarang</button>
+    </div>
+  </div>
+
+  <!-- PAGE: CHECKOUT -->
+  <div class="page" id="page-checkout">
+    <div class="ck-top-bar">
+      <button class="ck-back" onclick="showPage('page-list')">&#8592;</button>
+      <span class="ck-title">Checkout</span>
+    </div>
+
+    <div class="progress-steps">
+      <div class="ps-item">
+        <div class="ps-dot done">&#10003;</div>
+        <span class="ps-label active">Alamat</span>
+      </div>
+      <div class="ps-line done"></div>
+      <div class="ps-item">
+        <div class="ps-dot active">2</div>
+        <span class="ps-label active">Pengiriman</span>
+      </div>
+      <div class="ps-line"></div>
+      <div class="ps-item">
+        <div class="ps-dot pending">3</div>
+        <span class="ps-label">Pembayaran</span>
+      </div>
+      <div class="ps-line"></div>
+      <div class="ps-item">
+        <div class="ps-dot pending">4</div>
+        <span class="ps-label">Konfirmasi</span>
+      </div>
+    </div>
+
+    <div class="ck-section">
+      <div class="ck-section-title"><span class="ck-step-num">1</span> Alamat Pengiriman</div>
+      <div class="fg-2col">
+        <div class="fg-m"><label>Nama</label><input type="text" value="Anisa Putri"></div>
+        <div class="fg-m"><label>No. HP</label><input type="text" value="0878-1234-5678"></div>
+      </div>
+      <div class="fg-m"><label>Alamat</label><textarea>Jl. Melati No. 12, Kel. Cilandak Barat</textarea></div>
+      <div class="fg-2col">
+        <div class="fg-m"><label>Kecamatan</label><input type="text" value="Cilandak"></div>
+        <div class="fg-m"><label>Kode Pos</label><input type="text" value="12430"></div>
+      </div>
+      <div class="fg-m"><label>Kota</label>
+        <select><option selected>Jakarta Selatan</option><option>Jakarta Timur</option><option>Depok</option></select>
+      </div>
+      <div class="fg-m"><label>Catatan</label><input type="text" placeholder="Catatan untuk kurir..."></div>
+    </div>
+
+    <div class="ck-section">
+      <div class="ck-section-title"><span class="ck-step-num">2</span> Pilih Pengiriman</div>
+      <label class="ship-opt-m selected" id="wkShip1">
+        <input type="radio" name="wkship" checked>
+        <div class="som-info"><div class="som-nm">JNE Reguler (REG)</div><div class="som-desc">2–3 hari &middot; Asuransi tersedia</div></div>
+        <div class="som-price">Rp 12.000</div>
+      </label>
+      <label class="ship-opt-m">
+        <input type="radio" name="wkship">
+        <div class="som-info"><div class="som-nm">JNE YES</div><div class="som-desc">Estimasi esok tiba</div></div>
+        <div class="som-price">Rp 24.000</div>
+      </label>
+      <label class="ship-opt-m">
+        <input type="radio" name="wkship">
+        <div class="som-info"><div class="som-nm">J&amp;T Express</div><div class="som-desc">2–4 hari kerja</div></div>
+        <div class="som-price">Rp 10.000</div>
+      </label>
+      <label class="ship-opt-m">
+        <input type="radio" name="wkship">
+        <div class="som-info"><div class="som-nm">SiCepat BEST</div><div class="som-desc">1–2 hari kerja</div></div>
+        <div class="som-price">Rp 14.000</div>
+      </label>
+    </div>
+
+    <div class="ck-section">
+      <div class="ck-section-title"><span class="ck-step-num">3</span> Metode Pembayaran</div>
+      <label class="pay-opt-m selected">
+        <input type="radio" name="wkpay" checked style="display:none">
+        <div class="pom-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);">BCA</div>
+        <div><div class="pom-nm">Transfer Bank</div><div class="pom-sub">BCA / Mandiri / BNI / BRI</div></div>
+      </label>
+      <label class="pay-opt-m">
+        <input type="radio" name="wkpay" style="display:none">
+        <div class="pom-icon" style="background:linear-gradient(135deg,#059669,#10b981);">QR</div>
+        <div><div class="pom-nm">QRIS</div><div class="pom-sub">Scan QR semua bank &amp; e-wallet</div></div>
+      </label>
+      <label class="pay-opt-m">
+        <input type="radio" name="wkpay" style="display:none">
+        <div class="pom-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24);">COD</div>
+        <div><div class="pom-nm">Bayar di Tempat (COD)</div><div class="pom-sub">Bayar tunai saat barang tiba</div></div>
+      </label>
+      <label class="pay-opt-m">
+        <input type="radio" name="wkpay" style="display:none">
+        <div class="pom-icon" style="background:linear-gradient(135deg,var(--accent),#ef4444);">PL</div>
+        <div><div class="pom-nm">PayLater</div><div class="pom-sub">Cicil 0% 3/6/12 bulan</div></div>
+      </label>
+    </div>
+
+    <div class="ck-section">
+      <div class="ck-section-title"><span class="ck-step-num">4</span> Ringkasan Pesanan</div>
+      <div class="ck-sum-item">
+        <img class="ck-sum-img" src="https://picsum.photos/seed/wkfood1/200/200" alt="">
+        <div style="flex:1;">
+          <div class="ck-sum-nm">Granola Almond Honey Crispy 500g</div>
+          <div class="ck-sum-qty">&times; 2 pack</div>
+        </div>
+        <div class="ck-sum-price">Rp 90.000</div>
+      </div>
+      <div class="ck-sum-item">
+        <img class="ck-sum-img" src="https://picsum.photos/seed/wkbeauty1/200/200" alt="">
+        <div style="flex:1;">
+          <div class="ck-sum-nm">Serum Vitamin C Brightening 30ml</div>
+          <div class="ck-sum-qty">&times; 1 pcs</div>
+        </div>
+        <div class="ck-sum-price">Rp 95.000</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+        <div class="sum-line-m"><span>Subtotal Produk</span><span>Rp 185.000</span></div>
+        <div class="sum-line-m"><span>Ongkos Kirim JNE REG</span><span>Rp 12.000</span></div>
+        <div class="sum-line-m"><span>Biaya Layanan</span><span>Rp 1.000</span></div>
+        <div class="sum-line-m"><span style="color:var(--accent);">Voucher WARUNG15</span><span style="color:var(--accent);">-Rp 15.000</span></div>
+        <div class="sum-line-m total"><span>Total Bayar</span><span>Rp 183.000</span></div>
+      </div>
+    </div>
+
+    <div style="height:80px;"></div>
+    <div class="sticky-total">
+      <div>
+        <div class="st-label">Total Pembayaran</div>
+        <div class="st-total">Rp 183.000</div>
+      </div>
+      <button class="btn-checkout" onclick="showPage('page-history');showToastW('Pesanan berhasil dibuat!')">Pesan Sekarang &#8594;</button>
+    </div>
+  </div>
+
+  <!-- PAGE: HISTORY -->
+  <div class="page" id="page-history">
+    <div class="hist-top">
+      <span class="hist-title">Transaksi Saya</span>
+    </div>
+    <div class="hist-tabs">
+      <button class="ht-pill active" onclick="wkSetHTab(this)">Semua</button>
+      <button class="ht-pill" onclick="wkSetHTab(this)">Menunggu</button>
+      <button class="ht-pill" onclick="wkSetHTab(this)">Diproses</button>
+      <button class="ht-pill" onclick="wkSetHTab(this)">Dikirim</button>
+      <button class="ht-pill" onclick="wkSetHTab(this)">Selesai</button>
+    </div>
+    <div style="height:10px;"></div>
+
+    <div class="horder-card">
+      <div class="ho-top">
+        <div>
+          <div class="ho-id">&#128230; #WK-20260419-08812</div>
+          <div class="ho-date">19 Apr 2026 &middot; HerbalGrains &middot; JNE Reguler</div>
+        </div>
+        <span class="hst-badge hst-ship">&#128666; Dikirim</span>
+      </div>
+      <div class="ho-items">
+        <img class="ho-img" src="https://picsum.photos/seed/wkfood1/200/200" alt="">
+        <div>
+          <div class="ho-nm">Granola Almond Honey Crispy 500g &times; 2</div>
+          <div class="ho-qty">2 barang &middot; Transfer Bank</div>
+          <div class="ho-tot">Total: <strong>Rp 102.000</strong></div>
+        </div>
+      </div>
+      <div style="background:#ecfdf5;border-radius:8px;padding:8px 10px;margin-top:10px;border:1px solid #d1fae5;font-size:11px;color:#059669;">
+        &#128666; Resi JNE: JNE202604190023 &middot; Est. tiba: <strong>21 April 2026</strong>
+      </div>
+      <div class="ho-acts">
+        <button class="ha-btn ha-ghost">Lacak Paket</button>
+        <button class="ha-btn ha-primary" onclick="showToastW('Pesanan dikonfirmasi!')">Diterima</button>
+      </div>
+    </div>
+
+    <div class="horder-card">
+      <div class="ho-top">
+        <div>
+          <div class="ho-id">&#128230; #WK-20260415-07431</div>
+          <div class="ho-date">15 Apr 2026 &middot; BNBCosmetic &middot; SiCepat BEST</div>
+        </div>
+        <span class="hst-badge hst-done">&#10003; Selesai</span>
+      </div>
+      <div class="ho-items">
+        <img class="ho-img" src="https://picsum.photos/seed/wkbeauty1/200/200" alt="">
+        <div>
+          <div class="ho-nm">Serum Vitamin C Brightening 30ml BPOM</div>
+          <div class="ho-qty">1 barang &middot; QRIS</div>
+          <div class="ho-tot">Total: <strong>Rp 109.000</strong></div>
+        </div>
+      </div>
+      <div class="ho-acts">
+        <button class="ha-btn ha-ghost">Nilai Produk</button>
+        <button class="ha-btn ha-primary" onclick="showPage('page-detail')">Beli Lagi</button>
+      </div>
+    </div>
+
+    <div class="horder-card">
+      <div class="ho-top">
+        <div>
+          <div class="ho-id">&#128230; #WK-20260418-08210</div>
+          <div class="ho-date">18 Apr 2026 &middot; FashionHub &middot; J&amp;T Express</div>
+        </div>
+        <span class="hst-badge hst-proc">&#9881; Diproses</span>
+      </div>
+      <div class="ho-items">
+        <img class="ho-img" src="https://picsum.photos/seed/wkfashion1/200/200" alt="">
+        <div>
+          <div class="ho-nm">Kaos Oversize Unisex Katun Combed 30s</div>
+          <div class="ho-qty">3 barang &middot; COD</div>
+          <div class="ho-tot">Total: <strong>Rp 237.000</strong></div>
+        </div>
+      </div>
+      <div class="ho-acts">
+        <button class="ha-btn ha-ghost">Chat Toko</button>
+        <button class="ha-btn ha-danger">Batalkan</button>
+      </div>
+    </div>
+
+    <div class="horder-card">
+      <div class="ho-top">
+        <div>
+          <div class="ho-id">&#128230; #WK-20260419-08990</div>
+          <div class="ho-date">19 Apr 2026 &middot; GadgetZone &middot; Transfer Bank BNI</div>
+        </div>
+        <span class="hst-badge hst-wait">&#9203; Menunggu Bayar</span>
+      </div>
+      <div class="ho-items">
+        <img class="ho-img" src="https://picsum.photos/seed/wkelec1/200/200" alt="">
+        <div>
+          <div class="ho-nm">TWS Earbuds Pro Noise Cancelling</div>
+          <div class="ho-qty">1 barang &middot; Transfer Bank</div>
+          <div class="ho-tot">Total: <strong>Rp 199.000</strong></div>
+        </div>
+      </div>
+      <div style="background:#fffbeb;border-radius:8px;padding:8px 10px;margin-top:10px;border:1px solid #fde68a;font-size:11px;color:#92400e;">
+        &#9203; Bayar sebelum 19/04/2026 23:59 WIB &middot; VA BNI: <strong>8803 9912 2200</strong>
+      </div>
+      <div class="ho-acts">
+        <button class="ha-btn ha-primary" onclick="showToastW('Membuka pembayaran...')">Bayar</button>
+        <button class="ha-btn ha-danger">Batalkan</button>
+      </div>
+    </div>
+
+    <div class="horder-card">
+      <div class="ho-top">
+        <div>
+          <div class="ho-id">&#128230; #WK-20260402-06101</div>
+          <div class="ho-date">2 Apr 2026 &middot; SportKing &middot; SiCepat BEST</div>
+        </div>
+        <span class="hst-badge hst-cancel" style="background:#fee2e2;color:#dc2626;">&#10007; Dibatalkan</span>
+      </div>
+      <div class="ho-items">
+        <img class="ho-img" src="https://picsum.photos/seed/wksport1/200/200" alt="">
+        <div>
+          <div class="ho-nm">Sepatu Running Lari Lightweight Mesh</div>
+          <div class="ho-qty">1 barang &middot; UK 42</div>
+          <div class="ho-tot">Dikembalikan: <strong>Rp 335.000</strong></div>
+        </div>
+      </div>
+      <div style="background:#fef2f2;border-radius:8px;padding:8px 10px;margin-top:10px;border:1px solid #fecaca;font-size:11px;color:#dc2626;">
+        Stok habis saat diproses. Refund Rp 335.000 sudah masuk ke saldo WarungKu kamu.
+      </div>
+      <div class="ho-acts">
+        <button class="ha-btn ha-primary" onclick="showPage('page-detail')">Beli Lagi</button>
+        <button class="ha-btn ha-ghost">Detail</button>
+      </div>
+    </div>
+
+    <div style="height:16px;"></div>
+  </div>
+
+  <!-- PAGE: PROFIL (tab 5) -->
+  <div class="page" id="page-profil">
+    <div style="padding:20px 16px;text-align:center;">
+      <img src="https://picsum.photos/seed/wkprofil/200/200" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);margin-bottom:12px;">
+      <div style="font-size:18px;font-weight:800;">Anisa Putri</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">anisa.putri@email.com</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--accent);">27</div>
+          <div style="font-size:11px;color:var(--text-muted);">Pesanan</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--accent);">142</div>
+          <div style="font-size:11px;color:var(--text-muted);">Wishlist</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--accent);">15</div>
+          <div style="font-size:11px;color:var(--text-muted);">Ulasan</div>
+        </div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;text-align:left;">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="showToastW('Buka pengaturan profil')">&#128100; Ubah Profil <span style="margin-left:auto;color:var(--text-muted);">&#8250;</span></div>
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="showToastW('Buka pengaturan alamat')">&#128205; Alamat Saya <span style="margin-left:auto;color:var(--text-muted);">&#8250;</span></div>
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="showPage('page-history')">&#128230; Riwayat Transaksi <span style="margin-left:auto;color:var(--text-muted);">&#8250;</span></div>
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="showToastW('Buka pusat bantuan')">&#128172; Pusat Bantuan <span style="margin-left:auto;color:var(--text-muted);">&#8250;</span></div>
+        <div style="padding:14px 16px;font-size:13px;font-weight:600;color:#ef4444;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="showToastW('Keluar dari akun...')">&#128682; Keluar <span style="margin-left:auto;color:#fca5a5;">&#8250;</span></div>
+      </div>
+    </div>
+    <div style="height:80px;"></div>
+  </div>
+
+</div><!-- end app-shell -->
+
+<!-- TAB BAR (fixed, always visible) -->
+<div class="tab-bar">
+  <button class="tab-item active" id="tab0" onclick="wkTab(0,'page-list')">
+    <span class="tab-icon">&#8962;</span>
+    <span class="tab-label">Beranda</span>
+  </button>
+  <button class="tab-item" id="tab1" onclick="wkTab(1,'page-list')">
+    <span class="tab-icon">&#9776;</span>
+    <span class="tab-label">Kategori</span>
+  </button>
+  <button class="tab-item" id="tab2" onclick="wkTab(2,'page-checkout')">
+    <span class="tab-icon tab-badge">&#128722;<span class="tab-dot"></span></span>
+    <span class="tab-label">Keranjang</span>
+  </button>
+  <button class="tab-item" id="tab3" onclick="wkTab(3,'page-history')">
+    <span class="tab-icon">&#128230;</span>
+    <span class="tab-label">Transaksi</span>
+  </button>
+  <button class="tab-item" id="tab4" onclick="wkTab(4,'page-profil')">
+    <span class="tab-icon">&#128100;</span>
+    <span class="tab-label">Profil</span>
+  </button>
+</div>
+
+<div class="toast" id="wkToast"></div>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+    // Show/hide top bar
+    const topBar = document.getElementById('topBar');
+    const hideTopBar = ['page-detail','page-checkout','page-history','page-profil'];
+    topBar.style.display = hideTopBar.includes(id) ? 'none' : 'block';
+    window.scrollTo(0, 0);
+  }
+  function showToastW(msg) {
+    const t = document.getElementById('wkToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+  function wkTab(idx, page) {
+    document.querySelectorAll('.tab-item').forEach((t, i) => {
+      if (i === idx) t.classList.add('active');
+      else t.classList.remove('active');
+    });
+    showPage(page);
+  }
+  function wkSetCat(el) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function wkSetHTab(el) {
+    document.querySelectorAll('.ht-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function wkSwitchImg(el) {
+    document.getElementById('wkMainImg').src = el.src.replace('200/200','500/500');
+    document.querySelectorAll('.dthumb').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  // Shipping click
+  document.querySelectorAll('.ship-opt-m').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.ship-opt-m').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+  // Payment click
+  document.querySelectorAll('.pay-opt-m').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.pay-opt-m').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+  // Countdown (static display, visual only)
+  document.addEventListener('DOMContentLoaded', () => showPage('page-list'));
+</script>
+</body>
+</html>
