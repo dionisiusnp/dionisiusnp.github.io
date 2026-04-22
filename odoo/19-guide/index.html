@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Panduan Odoo 19 — Bahasa Indonesia</title>
+<style>
+:root{--p:#714B67;--pd:#5a3a52;--t:#1a1a2e;--m:#6b7280;--bg:#f5f6fa;--card:#fff;--bd:#e5e7eb;--r:12px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--t);line-height:1.65}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#3d1830,#714B67 50%,#1e4a7a);color:#fff;padding:72px 20px 56px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:5px 16px;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:20px}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:14px}
+.hero h1 em{font-style:normal;color:#f9c784}
+.hero > p{font-size:1rem;opacity:.8;max-width:520px;margin:0 auto 28px}
+.pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:7px 14px;font-size:.82rem}
+
+/* STATS */
+.stats{background:var(--card);border-bottom:1px solid var(--bd);padding:18px 0}
+.si{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.stat{text-align:center}.stat-n{font-size:1.7rem;font-weight:900;color:var(--p)}
+.stat-l{font-size:.7rem;color:var(--m);text-transform:uppercase;letter-spacing:.05em}
+
+/* LAYOUT */
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px}
+.sec{padding:44px 0 28px}
+.sec-hd{margin-bottom:24px}
+.stag{display:inline-block;border-radius:999px;padding:3px 12px;font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+.stag.v{background:#ede9fe;color:#5b21b6}.stag.g{background:#dcfce7;color:#166534}
+.stag.b{background:#dbeafe;color:#1e40af}.stag.o{background:#ffedd5;color:#9a3412}
+.stag.pk{background:#fce7f3;color:#9d174d}.stag.tl{background:#ccfbf1;color:#065f46}
+.stag.y{background:#fef3c7;color:#92400e}.stag.def{background:#f0e6ed;color:var(--p)}
+.sec-hd h2{font-size:1.55rem;font-weight:900}.sec-hd p{color:var(--m);margin-top:4px;font-size:.9rem}
+
+/* HIGHLIGHTS */
+.hl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.hl{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px;text-align:center}
+.hl-i{font-size:1.8rem;margin-bottom:8px}
+.hl-t{font-weight:800;font-size:.9rem;margin-bottom:4px}
+.hl-d{font-size:.78rem;color:var(--m);line-height:1.5}
+
+/* FEATURED CARDS */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:20px;cursor:pointer;display:flex;gap:13px;align-items:flex-start;transition:all .2s;position:relative;overflow:hidden}
+.card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--ca,var(--p));transform:scaleX(0);transition:transform .2s;transform-origin:left}
+.card:hover{border-color:transparent;box-shadow:0 10px 36px rgba(113,75,103,.18);transform:translateY(-2px)}
+.card:hover::after{transform:scaleX(1)}
+.cicon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;background:var(--ib,#f0e6ed)}
+.cbody{flex:1;min-width:0}
+.cnum{font-size:.68rem;font-weight:800;color:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px}
+.ctitle{font-size:.97rem;font-weight:800;margin-bottom:4px;line-height:1.3}
+.cdesc{font-size:.79rem;color:var(--m);line-height:1.5}
+.ctags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.tag{background:var(--bg);border:1px solid var(--bd);border-radius:999px;padding:2px 8px;font-size:.68rem;color:var(--m)}
+.tag.n{background:#dcfce7;border-color:#86efac;color:#166534}
+.tag.e{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+.tag.a{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6}
+.carr{position:absolute;top:16px;right:14px;opacity:.2;font-size:.8rem;transition:opacity .2s}
+.card:hover .carr{opacity:.5}
+
+/* MINI CARDS */
+.mini-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--m);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.mini-label::after{content:'';flex:1;height:1px;background:var(--bd)}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.mcard{background:#fafbfc;border:1px solid var(--bd);border-radius:10px;padding:11px 13px;display:flex;gap:9px;align-items:flex-start}
+.mcard.link{cursor:pointer;transition:all .15s}
+.mcard.link:hover{background:#f0e6ed20;border-color:var(--p)}
+.micon{font-size:1rem;flex-shrink:0;margin-top:2px}
+.mname{font-size:.83rem;font-weight:700;line-height:1.2}
+.mdesc{font-size:.72rem;color:var(--m);margin-top:2px;line-height:1.4}
+.mbab{font-size:.65rem;background:#ede9fe;color:#5b21b6;border-radius:4px;padding:1px 5px;font-weight:700;margin-top:3px;display:inline-block}
+
+/* HOW-TO */
+.hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.hcard{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px}
+.hnum{width:30px;height:30px;border-radius:50%;background:var(--p);color:#fff;font-size:.8rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.hcard h3{font-size:.9rem;font-weight:800;margin-bottom:5px}
+.hcard p{font-size:.79rem;color:var(--m);line-height:1.5}
+
+/* FOOTER */
+footer{background:var(--card);border-top:1px solid var(--bd);padding:28px 0;margin-top:50px;text-align:center}
+footer p{font-size:.82rem;color:var(--m);line-height:1.8}
+footer strong{color:var(--p)}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(10,5,20,.6);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:36px 16px;opacity:0;pointer-events:none;transition:opacity .22s,visibility .22s;visibility:hidden}
+.ov.open{opacity:1;pointer-events:all;backdrop-filter:blur(4px);visibility:visible}
+.modal{background:#fff;border-radius:18px;width:100%;max-width:760px;max-height:88vh;overflow-y:auto;box-shadow:0 28px 70px rgba(0,0,0,.22);transform:translateY(20px) scale(.98);transition:transform .26s cubic-bezier(.34,1.3,.64,1)}
+.ov.open .modal{transform:translateY(0) scale(1)}
+.mhd{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--bd);padding:18px 24px;display:flex;align-items:center;gap:12px}
+.mhicon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.mhtxt{flex:1}.mhtxt h2{font-size:1.08rem;font-weight:900;line-height:1.2}
+.mhtxt p{font-size:.76rem;color:var(--m);margin-top:2px}
+.mcl{width:34px;height:34px;border:none;background:#f3f4f6;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--m);transition:background .15s}
+.mcl:hover{background:#fee2e2;color:#dc2626}
+.mb{padding:22px 24px}
+
+/* Modal typography */
+.mb h3{font-size:1rem;font-weight:800;margin:20px 0 8px;padding-bottom:5px;border-bottom:2px solid var(--bd)}
+.mb h3:first-child{margin-top:0}
+.mb p{font-size:.85rem;color:#374151;line-height:1.7;margin-bottom:8px}
+.mb ul{padding-left:18px;margin-bottom:10px}
+.mb li{font-size:.84rem;color:#374151;line-height:1.7;margin-bottom:3px}
+.mb code{background:#f3f4f6;border:1px solid var(--bd);border-radius:4px;padding:1px 5px;font-size:.79rem;font-family:monospace;color:#5b21b6}
+
+/* Before/After */
+.ba{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin:14px 0;font-size:.83rem}
+.ba-b{background:#fff5f5;padding:14px;border-right:1px solid var(--bd)}
+.ba-a{background:#f0fdf4;padding:14px}
+.ba-lbl{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px}
+.ba-b .ba-lbl{color:#dc2626}.ba-a .ba-lbl{color:#16a34a}
+.ba ul{list-style:none;padding:0}
+.ba li{padding:3px 0 3px 16px;position:relative;font-size:.81rem;color:#374151;line-height:1.5}
+.ba-b li::before{content:'✗';position:absolute;left:0;color:#dc2626;font-weight:700}
+.ba-a li::before{content:'✓';position:absolute;left:0;color:#16a34a;font-weight:700}
+
+/* Metrics */
+.mets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.met{background:#f8fafc;border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center}
+.met strong{display:block;font-size:1.35rem;font-weight:900;color:var(--p)}
+.met span{font-size:.7rem;color:var(--m);line-height:1.4}
+
+/* Info box */
+.ibox{border-radius:8px;padding:12px 14px;margin:10px 0;font-size:.82rem;line-height:1.6}
+.ibox.tip{background:#f0fdf4;border-left:4px solid #22c55e;color:#166534}
+.ibox.warn{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e}
+
+/* Case header */
+.case-hd{background:linear-gradient(135deg,#faf5ff,#eff6ff);border:1px solid #c4b5fd;border-radius:10px;padding:14px 16px;margin:14px 0 6px}
+.case-hd .clabel{font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#7c3aed;margin-bottom:5px}
+.case-hd h4{font-size:.92rem;font-weight:800;color:#1a1a2e}
+
+@media(max-width:640px){
+  .hero{padding:48px 16px 40px}
+  .ba{grid-template-columns:1fr}
+  .ba-b{border-right:none;border-bottom:1px solid var(--bd)}
+  .mets{grid-template-columns:repeat(3,1fr)}
+  .ov{padding:0;align-items:flex-end}
+  .modal{border-radius:18px 18px 0 0;max-height:92vh}
+  .grid{grid-template-columns:1fr}
+  .mgrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-badge"><span class="dot"></span>Panduan Resmi Bahasa Indonesia</div>
+  <h1>Panduan Lengkap <em>Odoo 19</em></h1>
+  <p>Dokumentasi semua modul Odoo 19 — gambaran umum, konfigurasi, dan studi kasus sebelum vs sesudah — dalam Bahasa Indonesia.</p>
+  <div class="pills">
+    <div class="pill">📅 Odoo 19.0 · Sep 2025</div>
+    <div class="pill">📖 17 Bab + 50+ Modul</div>
+    <div class="pill">🤖 Fitur AI Tertanam</div>
+    <div class="pill">🇮🇩 Bahasa Indonesia</div>
+  </div>
+</header>
+
+<div class="stats"><div class="si">
+  <div class="stat"><div class="stat-n">17</div><div class="stat-l">Bab Panduan</div></div>
+  <div class="stat"><div class="stat-n">50+</div><div class="stat-l">Modul Dibahas</div></div>
+  <div class="stat"><div class="stat-n">7</div><div class="stat-l">Kelompok Modul</div></div>
+  <div class="stat"><div class="stat-n">19.0</div><div class="stat-l">Versi Odoo</div></div>
+</div></div>
+
+<div class="wrap">
+
+<!-- HIGHLIGHTS -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag v">Yang Baru di Odoo 19</span><h2>Fitur Unggulan</h2><p>Tema besar yang menjadi fondasi Odoo 19</p></div>
+  <div class="hl-grid">
+    <div class="hl"><div class="hl-i">🤖</div><div class="hl-t">AI-First Platform</div><div class="hl-d">AI bukan fitur tambahan — tertanam di setiap modul</div></div>
+    <div class="hl"><div class="hl-i">📱</div><div class="hl-t">Mobile-First</div><div class="hl-d">UI dioptimalkan untuk tablet &amp; smartphone</div></div>
+    <div class="hl"><div class="hl-i">⚡</div><div class="hl-t">Otomatisasi Tanpa Kode</div><div class="hl-d">Workflow otomatis dengan prompt bahasa alami</div></div>
+    <div class="hl"><div class="hl-i">🗂️</div><div class="hl-t">Gantt Cerdas</div><div class="hl-d">Smart zoom, tanggal tampil saat drag, critical path</div></div>
+    <div class="hl"><div class="hl-i">💼</div><div class="hl-t">Pay Runs Baru</div><div class="hl-d">Sistem penggajian terpandu menggantikan Payroll Batches</div></div>
+    <div class="hl"><div class="hl-i">🛒</div><div class="hl-t">eCommerce Modern</div><div class="hl-d">Layout toko baru, checkout mobile off-canvas</div></div>
+  </div>
+</section>
+
+<!-- PANDUAN UMUM -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag def">Panduan Umum</span><h2>Mulai dari Sini</h2><p>Pengantar sistem &amp; instalasi server sebelum masuk ke modul</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#714B67;--ib:#f0e6ed" onclick="openModal('m01')">
+      <div class="cicon">📘</div>
+      <div class="cbody"><div class="cnum">Bab 01</div><div class="ctitle">Pengantar &amp; Gambaran Umum</div><div class="cdesc">Apa itu Odoo 19, arsitektur sistem, semua modul, Community vs Enterprise, navigasi UI.</div><div class="ctags"><span class="tag">Pemula</span><span class="tag">Overview</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card" style="--ca:#34495e;--ib:#eaecee" onclick="openModal('m02')">
+      <div class="cicon">⚙️</div>
+      <div class="cbody"><div class="cnum">Bab 02</div><div class="ctitle">Instalasi &amp; Pengaturan Awal</div><div class="cdesc">Ubuntu 24.04, Docker, konfigurasi email, lokalisasi Indonesia, keamanan dasar.</div><div class="ctags"><span class="tag">Server</span><span class="tag">Sysadmin</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+</section>
+
+<!-- PENJUALAN & PEMASARAN -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag v">Penjualan &amp; Pemasaran</span><h2>Kelola Pendapatan &amp; Pelanggan</h2><p>Dari prospek pertama hingga invoice terbayar — 7 modul terintegrasi</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#e74c3c;--ib:#fdecea" onclick="openModal('m03')">
+      <div class="cicon">🎯</div>
+      <div class="cbody"><div class="cnum">Bab 03</div><div class="ctitle">CRM</div><div class="cdesc">Pipeline penjualan, skor lead AI, otomatisasi follow-up, prakiraan revenue.</div><div class="ctags"><span class="tag">Pipeline</span><span class="tag a">AI Scoring</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card" style="--ca:#2ecc71;--ib:#eafaf1" onclick="openModal('m04')">
+      <div class="cicon">💰</div>
+      <div class="cbody"><div class="cnum">Bab 04</div><div class="ctitle">Sales — Penjualan</div><div class="cdesc">Penawaran modern, drag &amp; drop produk, tanda tangan online, pricelist, margin realtime.</div><div class="ctags"><span class="tag">Quotation</span><span class="tag n">Seksi Baru</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card" style="--ca:#9b59b6;--ib:#f5eef8" onclick="openModal('m12')">
+      <div class="cicon">🖥️</div>
+      <div class="cbody"><div class="cnum">Bab 12</div><div class="ctitle">Point of Sale</div><div class="cdesc">Kasir toko &amp; restoran, floor plan meja, komisi penjual, integrasi appointments.</div><div class="ctags"><span class="tag">Kasir</span><span class="tag n">Komisi Baru</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card" style="--ca:#e67e22;--ib:#fef9e7" onclick="openModal('m14')">
+      <div class="cicon">📧</div>
+      <div class="cbody"><div class="cnum">Bab 14</div><div class="ctitle">Email Marketing &amp; Automation</div><div class="cdesc">Kampanye email, segmentasi, workflow nurturing multi-langkah berbasis trigger.</div><div class="ctags"><span class="tag">Email</span><span class="tag">Automation</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+  <div class="mini-label">Modul lainnya dalam kelompok ini</div>
+  <div class="mgrid">
+    <div class="mcard link" onclick="openModal('m14')"><span class="micon">🔁</span><div><div class="mname">Marketing Automation</div><div class="mdesc">Nurturing workflow multi-step</div><div class="mbab">→ Bab 14</div></div></div>
+    <div class="mcard link" onclick="openModal('mEvt')"><span class="micon">📅</span><div><div class="mname">Events</div><div class="mdesc">Manajemen acara &amp; pendaftaran peserta</div></div></div>
+    <div class="mcard link" onclick="openModal('mSrv')"><span class="micon">📋</span><div><div class="mname">Surveys</div><div class="mdesc">Survei, kuesioner, &amp; feedback form</div></div></div>
+  </div>
+</section>
+
+<!-- OPERASIONAL -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag g">Operasional</span><h2>Rantai Pasok &amp; Produksi</h2><p>Pembelian, stok, manufaktur, dan layanan lapangan — 7 modul terintegrasi</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#1abc9c;--ib:#e8f8f5" onclick="openModal('m05')">
+      <div class="cicon">🛒</div>
+      <div class="cbody"><div class="cnum">Bab 05</div><div class="ctitle">Purchase — Pembelian</div><div class="cdesc">RFQ, Call for Tender, perbandingan vendor, 3-Way Matching, auto-procurement.</div><div class="ctags"><span class="tag">RFQ</span><span class="tag">3-Way Match</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card" style="--ca:#f39c12;--ib:#fef9e7" onclick="openModal('m06')">
+      <div class="cicon">📦</div>
+      <div class="cbody"><div class="cnum">Bab 06</div><div class="ctitle">Inventory — Gudang</div><div class="cdesc">Multi-lokasi, barcode scanner, traceability lot/serial, replenishment otomatis.</div><div class="ctags"><span class="tag">Gudang</span><span class="tag">Barcode</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card" style="--ca:#e74c3c;--ib:#fdecea" onclick="openModal('m07')">
+      <div class="cicon">🏭</div>
+      <div class="cbody"><div class="cnum">Bab 07</div><div class="ctitle">Manufacturing — MRP</div><div class="cdesc">BOM multi-level, Master Production Schedule, subkontrak, biaya produksi realtime.</div><div class="ctags"><span class="tag">BOM</span><span class="tag">MPS</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+  <div class="mini-label">Modul lainnya dalam kelompok ini</div>
+  <div class="mgrid">
+    <div class="mcard link" onclick="openModal('mQual')"><span class="micon">✅</span><div><div class="mname">Quality</div><div class="mdesc">Kontrol kualitas &amp; pemeriksaan produk</div></div></div>
+    <div class="mcard link" onclick="openModal('mMnt')"><span class="micon">🔧</span><div><div class="mname">Maintenance</div><div class="mdesc">Perawatan preventif mesin &amp; aset</div></div></div>
+    <div class="mcard link" onclick="openModal('mFls')"><span class="micon">🚗</span><div><div class="mname">Field Service</div><div class="mdesc">Teknisi lapangan, jadwal &amp; laporan</div></div></div>
+    <div class="mcard link" onclick="openModal('mRnt')"><span class="micon">🏠</span><div><div class="mname">Rental</div><div class="mdesc">Manajemen sewa aset &amp; kontrak</div></div></div>
+  </div>
+</section>
+
+<!-- KEUANGAN -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag b">Keuangan</span><h2>Akuntansi &amp; Keuangan</h2><p>Double-entry, faktur, rekonsiliasi bank, dan laporan keuangan — 5 modul</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#2980b9;--ib:#ebf5fb" onclick="openModal('m08')">
+      <div class="cicon">📊</div>
+      <div class="cbody"><div class="cnum">Bab 08</div><div class="ctitle">Accounting — Akuntansi</div><div class="cdesc">Invoice, rekonsiliasi bank AI, multi-mata uang, PPN/PPh Indonesia, laporan keuangan.</div><div class="ctags"><span class="tag">Akuntansi</span><span class="tag n">Rekonsiliasi AI</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+  <div class="mini-label">Modul lainnya dalam kelompok ini</div>
+  <div class="mgrid">
+    <div class="mcard link" onclick="openModal('m08')"><span class="micon">🧾</span><div><div class="mname">Invoicing</div><div class="mdesc">Faktur sederhana tanpa akuntansi penuh</div><div class="mbab">→ Bab 08</div></div></div>
+    <div class="mcard link" onclick="openModal('m08')"><span class="micon">💳</span><div><div class="mname">Expenses</div><div class="mdesc">Klaim pengeluaran &amp; reimburse karyawan</div><div class="mbab">→ Bab 08</div></div></div>
+    <div class="mcard link" onclick="openModal('m09')"><span class="micon">💼</span><div><div class="mname">Payroll</div><div class="mdesc">Penggajian, slip gaji, PPh 21</div><div class="mbab">→ Bab 09</div></div></div>
+    <div class="mcard link" onclick="openModal('mSub')"><span class="micon">🔄</span><div><div class="mname">Subscriptions</div><div class="mdesc">Tagihan berlangganan berulang otomatis</div></div></div>
+  </div>
+</section>
+
+<!-- SDM -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag pk">Sumber Daya Manusia</span><h2>Kelola Tim &amp; Karyawan</h2><p>Rekrutmen, cuti, absensi, hingga penggajian — 7 modul</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#8e44ad;--ib:#f5eef8" onclick="openModal('m09')">
+      <div class="cicon">👥</div>
+      <div class="cbody"><div class="cnum">Bab 09</div><div class="ctitle">HR Suite — Sumber Daya Manusia</div><div class="cdesc">Employees, Recruitment ATS, Time Off, Attendance, &amp; Payroll dengan Pay Runs baru.</div><div class="ctags"><span class="tag n">Pay Runs</span><span class="tag n">ATS Baru</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+  <div class="mini-label">Modul lainnya dalam kelompok ini</div>
+  <div class="mgrid">
+    <div class="mcard link" onclick="openModal('mApr')"><span class="micon">⭐</span><div><div class="mname">Appraisals</div><div class="mdesc">Penilaian kinerja &amp; review periodik</div></div></div>
+    <div class="mcard link" onclick="openModal('mRef')"><span class="micon">🤝</span><div><div class="mname">Referrals</div><div class="mdesc">Program referral karyawan</div></div></div>
+    <div class="mcard link" onclick="openModal('mFlt')"><span class="micon">🚙</span><div><div class="mname">Fleet</div><div class="mdesc">Manajemen armada kendaraan dinas</div></div></div>
+  </div>
+</section>
+
+<!-- PROYEK & PRODUKTIVITAS -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag tl">Proyek &amp; Produktivitas</span><h2>Kelola Proyek &amp; Dukungan</h2><p>Dari perencanaan proyek hingga layanan pelanggan — 5 modul</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#16a085;--ib:#e8f8f5" onclick="openModal('m10')">
+      <div class="cicon">📋</div>
+      <div class="cbody"><div class="cnum">Bab 10</div><div class="ctitle">Project — Manajemen Proyek</div><div class="cdesc">Kanban, Gantt cerdas, milestone billing, timesheet terintegrasi, profitabilitas proyek.</div><div class="ctags"><span class="tag n">Gantt Baru</span><span class="tag">Milestone</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card" style="--ca:#c0392b;--ib:#fdecea" onclick="openModal('m13')">
+      <div class="cicon">🎧</div>
+      <div class="cbody"><div class="cnum">Bab 13</div><div class="ctitle">Helpdesk — Layanan Pelanggan</div><div class="cdesc">Tiket multi-saluran, SLA tracking, penugasan cerdas, AI smart response.</div><div class="ctags"><span class="tag a">AI Response</span><span class="tag">SLA</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+  <div class="mini-label">Modul lainnya dalam kelompok ini</div>
+  <div class="mgrid">
+    <div class="mcard link" onclick="openModal('m10')"><span class="micon">⏱️</span><div><div class="mname">Timesheets</div><div class="mdesc">Catat jam kerja per proyek/task</div><div class="mbab">→ Bab 10</div></div></div>
+    <div class="mcard link" onclick="openModal('mPln')"><span class="micon">📅</span><div><div class="mname">Planning</div><div class="mdesc">Perencanaan shift &amp; jadwal tim</div></div></div>
+    <div class="mcard link" onclick="openModal('mDoc')"><span class="micon">📁</span><div><div class="mname">Documents</div><div class="mdesc">DMS terintegrasi &amp; manajemen dokumen</div></div></div>
+  </div>
+</section>
+
+<!-- WEBSITE & ECOMMERCE -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag b">Website &amp; eCommerce</span><h2>Kehadiran Digital &amp; Toko Online</h2><p>Website builder, toko online, live chat, booking — 7 modul</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#3498db;--ib:#ebf5fb" onclick="openModal('m11')">
+      <div class="cicon">🛍️</div>
+      <div class="cbody"><div class="cnum">Bab 11</div><div class="ctitle">Website &amp; eCommerce</div><div class="cdesc">Builder halaman, toko online layout baru, checkout mobile off-canvas, Google Merchant.</div><div class="ctags"><span class="tag n">Layout Baru</span><span class="tag">Google Shopping</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+  <div class="mini-label">Modul lainnya dalam kelompok ini</div>
+  <div class="mgrid">
+    <div class="mcard link" onclick="openModal('mLch')"><span class="micon">💬</span><div><div class="mname">Live Chat</div><div class="mdesc">Chat langsung di halaman website</div></div></div>
+    <div class="mcard link" onclick="openModal('mApt')"><span class="micon">📆</span><div><div class="mname">Appointments</div><div class="mdesc">Booking janji temu &amp; jadwal online</div></div></div>
+    <div class="mcard link" onclick="openModal('mEln')"><span class="micon">🎓</span><div><div class="mname">eLearning</div><div class="mdesc">Platform kursus online &amp; sertifikasi</div></div></div>
+    <div class="mcard link" onclick="openModal('mFrm')"><span class="micon">💭</span><div><div class="mname">Forum</div><div class="mdesc">Forum diskusi komunitas terintegrasi</div></div></div>
+    <div class="mcard link" onclick="openModal('mBlg')"><span class="micon">✍️</span><div><div class="mname">Blog</div><div class="mdesc">Pengelolaan blog &amp; konten artikel</div></div></div>
+  </div>
+</section>
+
+<!-- PRODUKTIVITAS & TOOLS -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag o">AI, Studio &amp; Tools</span><h2>Produktivitas &amp; Kustomisasi</h2><p>AI, kustomisasi tanpa kode, dan alat kolaborasi — 8 modul</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#714B67;--ib:#f0e6ed" onclick="openModal('m15')">
+      <div class="cicon">🤖</div>
+      <div class="cbody"><div class="cnum">Bab 15</div><div class="ctitle">AI &amp; Otomatisasi Cerdas</div><div class="cdesc">AI Agents, Server Actions bahasa alami, OCR dokumen, Natural Language Search.</div><div class="ctags"><span class="tag a">AI Baru</span><span class="tag e">Enterprise</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card" style="--ca:#8e44ad;--ib:#f5eef8" onclick="openModal('m16')">
+      <div class="cicon">🎨</div>
+      <div class="cbody"><div class="cnum">Bab 16</div><div class="ctitle">Odoo Studio</div><div class="cdesc">Kustomisasi form, list, kanban tanpa coding. Tambah field, laporan PDF, aplikasi baru.</div><div class="ctags"><span class="tag e">Enterprise</span><span class="tag">No-Code</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+  <div class="mini-label">Modul lainnya dalam kelompok ini</div>
+  <div class="mgrid">
+    <div class="mcard link" onclick="openModal('mDsc')"><span class="micon">💬</span><div><div class="mname">Discuss</div><div class="mdesc">Pesan internal &amp; obrolan tim</div></div></div>
+    <div class="mcard link" onclick="openModal('mCal')"><span class="micon">📅</span><div><div class="mname">Calendar</div><div class="mdesc">Kalender &amp; jadwal pertemuan tim</div></div></div>
+    <div class="mcard link" onclick="openModal('mCnt')"><span class="micon">👤</span><div><div class="mname">Contacts</div><div class="mdesc">Direktori kontak &amp; perusahaan</div></div></div>
+    <div class="mcard link" onclick="openModal('mIoT')"><span class="micon">🔌</span><div><div class="mname">IoT</div><div class="mdesc">Integrasi perangkat IoT ke Odoo</div></div></div>
+    <div class="mcard link" onclick="openModal('mSgn')"><span class="micon">✍️</span><div><div class="mname">Sign</div><div class="mdesc">Tanda tangan digital dokumen</div></div></div>
+    <div class="mcard link" onclick="openModal('mSpr')"><span class="micon">📊</span><div><div class="mname">Spreadsheet</div><div class="mdesc">Spreadsheet terintegrasi data Odoo</div></div></div>
+  </div>
+</section>
+
+<!-- MIGRASI -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag y">Panduan Teknis</span><h2>Migrasi &amp; Upgrade</h2><p>Untuk yang upgrade dari Odoo 17/18 ke Odoo 19</p></div>
+  <div class="grid">
+    <div class="card" style="--ca:#e67e22;--ib:#fef9e7" onclick="openModal('m17')">
+      <div class="cicon">🔄</div>
+      <div class="cbody"><div class="cnum">Bab 17</div><div class="ctitle">Panduan Migrasi &amp; Breaking Changes</div><div class="cdesc">130+ model berganti nama, jalur upgrade, checklist teknis, strategi rollback.</div><div class="ctags"><span class="tag">Developer</span><span class="tag">Upgrade</span></div></div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO READ -->
+<section class="sec">
+  <div class="sec-hd"><span class="stag def">Mulai dari Mana?</span><h2>Panduan Membaca</h2></div>
+  <div class="hg">
+    <div class="hcard"><div class="hnum">1</div><h3>Pemula</h3><p>Bab 01 → Bab 02 → modul yang Anda butuhkan.</p></div>
+    <div class="hcard"><div class="hnum">2</div><h3>Upgrade dari 17/18</h3><p>Langsung Bab 17 (Migrasi), lalu review fitur baru tiap modul.</p></div>
+    <div class="hcard"><div class="hnum">3</div><h3>Developer / Admin</h3><p>Bab 15 (AI), Bab 16 (Studio), Bab 17 (Migrasi).</p></div>
+    <div class="hcard"><div class="hnum">4</div><h3>Manajer Bisnis</h3><p>Baca bagian Studi Kasus &amp; komparasi di setiap bab.</p></div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer><div class="wrap">
+  <p>Panduan <strong>Odoo 19.0</strong> (Community &amp; Enterprise) · Bahasa Indonesia · Diperbarui April 2026</p>
+  <p>Fitur Enterprise ditandai <span style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;border-radius:999px;padding:1px 8px;font-size:.73rem;font-weight:700;">Enterprise</span></p>
+</div></footer>
+
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- M01 PENGANTAR -->
+<div class="ov" id="m01" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f0e6ed">📘</div><div class="mhtxt"><h2>Bab 01 — Pengantar Odoo 19</h2><p>Fondasi sebelum memulai</p></div><button class="mcl" onclick="cm('m01')">✕</button></div>
+  <div class="mb">
+    <p><strong>Odoo 19</strong> adalah platform ERP open-source yang mengintegrasikan seluruh proses bisnis dalam satu sistem. Odoo 19 dirilis September 2025 dengan tema utama: AI-First, Mobile-First, dan otomatisasi tanpa kode. Tersedia dua edisi: <strong>Community</strong> (gratis) dan <strong>Enterprise</strong> (berbayar, fitur AI &amp; Studio).</p>
+    <h3>Perbandingan Community vs Enterprise</h3>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">Community (Gratis)</div><ul><li>Source code terbuka (LGPL)</li><li>Modul inti tersedia lengkap</li><li>Dukungan via komunitas</li><li>Tanpa AI &amp; Studio</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">Enterprise (Berbayar)</div><ul><li>Semua fitur Community +</li><li>AI Agents &amp; Automation</li><li>Odoo Studio (no-code)</li><li>Dukungan resmi Odoo SA</li></ul></div>
+    </div>
+    <h3>Studi Kasus — PT. Nusantara Jaya (Trading, 45 karyawan)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Migrasi dari Excel &amp; software terpisah ke Odoo 19 Community</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum Odoo</div><ul><li>Penjualan di Excel, akuntansi di software lain</li><li>Data harus diinput ulang di 2 sistem</li><li>Laporan stok tidak realtime, cek manual</li><li>Sering terjadi data tidak sinkron antar divisi</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19</div><ul><li>Satu platform untuk semua divisi</li><li>SO otomatis buat delivery order &amp; invoice</li><li>Stok realtime, laporan tersedia kapan saja</li><li>Tidak ada double-entry data lagi</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>70%</strong><span>Pengurangan waktu input data</span></div>
+      <div class="met"><strong>~0</strong><span>Error double-entry</span></div>
+      <div class="met"><strong>3 bln</strong><span>ROI mulai terasa</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M02 INSTALASI -->
+<div class="ov" id="m02" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#eaecee">⚙️</div><div class="mhtxt"><h2>Bab 02 — Instalasi &amp; Setup</h2><p>Self-hosted Ubuntu 24.04 atau Docker</p></div><button class="mcl" onclick="cm('m02')">✕</button></div>
+  <div class="mb">
+    <p>Odoo 19 dapat dijalankan di cloud (Odoo.com SaaS), Odoo.sh (PaaS), atau <strong>self-hosted</strong> di server sendiri. Untuk produksi, Ubuntu 24.04 LTS + PostgreSQL 16 + Nginx adalah stack yang direkomendasikan.</p>
+    <h3>Opsi Deployment</h3>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">SaaS / Odoo.com</div><ul><li>Trial 15 hari, tanpa instalasi</li><li>Cocok untuk evaluasi cepat</li><li>Data di server Odoo SA</li><li>Biaya bulanan per user</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">Self-Hosted (Rekomendasi)</div><ul><li>Kontrol penuh atas data</li><li>Ubuntu 24.04 + Python 3.12</li><li>Biaya server saja, tidak per user</li><li>Perlu tim IT untuk maintenance</li></ul></div>
+    </div>
+    <h3>Studi Kasus — CV. Sumber Makmur (Distributor)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Dari software akuntansi berbayar ke Odoo 19 self-hosted</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Bayar lisensi software Rp 24 juta/tahun</li><li>Data akuntansi &amp; inventaris terpisah</li><li>Backup manual setiap minggu</li><li>Update software menunggu vendor</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19</div><ul><li>Community Edition gratis (hemat Rp 24 juta/thn)</li><li>Semua data di satu server sendiri</li><li>Backup otomatis ke cloud setiap malam</li><li>Update bisa dilakukan mandiri</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>Rp 24jt</strong><span>Hemat lisensi/tahun</span></div>
+      <div class="met"><strong>100%</strong><span>Kontrol data</span></div>
+      <div class="met"><strong>3 env</strong><span>Dev / Staging / Prod</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M03 CRM -->
+<div class="ov" id="m03" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fdecea">🎯</div><div class="mhtxt"><h2>Bab 03 — CRM</h2><p>Pipeline penjualan &amp; skor lead AI</p></div><button class="mcl" onclick="cm('m03')">✕</button></div>
+  <div class="mb">
+    <p>Modul CRM Odoo 19 mengelola seluruh siklus penjualan dari lead masuk hingga deal tertutup. Fitur baru: <strong>AI Lead Scoring</strong> (skor 0–100 otomatis), prediksi probabilitas menang, dan Lead Mining untuk mencari prospek baru.</p>
+    <h3>Alur &amp; Fitur Utama</h3>
+    <ul>
+      <li><strong>AI Lead Scoring</strong> — skor otomatis berdasarkan perilaku &amp; data historis</li>
+      <li><strong>Pipeline visual</strong> — kanban per tahap: Kualifikasi → Proposal → Negosiasi → Menang</li>
+      <li><strong>Otomatisasi follow-up</strong> — rantai aktivitas: Telepon (H+1) → Email (H+3) → WA (H+7)</li>
+      <li><strong>Prakiraan revenue</strong> — proyeksi pendapatan berdasarkan pipeline &amp; probabilitas</li>
+    </ul>
+    <h3>Studi Kasus — PT. Prima Teknologi (IT Distributor, 200+ lead/bulan)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Mengelola 200+ lead/bulan dengan tim sales 5 orang</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Lead dicatat di spreadsheet bersama</li><li>Follow-up manual via reminder kalender</li><li>Banyak lead "tenggelam" tanpa ditindak</li><li>Tidak ada prioritas — semua lead diperlakukan sama</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 CRM</div><ul><li>AI scoring otomatis: skor &gt;70 → sales senior</li><li>Follow-up sequence berjalan otomatis</li><li>Pipeline visual — tidak ada lead yang terlewat</li><li>Prakiraan revenue bulanan tersedia realtime</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>+91%</strong><span>Lead tertindak (dari 22% → 100%)</span></div>
+      <div class="met"><strong>+23%</strong><span>Conversion rate deal</span></div>
+      <div class="met"><strong>−60%</strong><span>Waktu admin per lead</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M04 SALES -->
+<div class="ov" id="m04" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#eafaf1">💰</div><div class="mhtxt"><h2>Bab 04 — Sales</h2><p>Dari penawaran hingga pembayaran diterima</p></div><button class="mcl" onclick="cm('m04')">✕</button></div>
+  <div class="mb">
+    <p>Modul Sales Odoo 19 mengelola penawaran hingga pembayaran. Fitur baru: <strong>Seksi produk</strong> (kelompokkan dengan header drag &amp; drop), <strong>AI email drafting</strong>, dan <strong>tanda tangan online</strong> langsung di portal pelanggan.</p>
+    <h3>Alur &amp; Fitur Utama</h3>
+    <ul>
+      <li><strong>Penawaran modern</strong> — seksi, drag &amp; drop produk, margin realtime</li>
+      <li><strong>Tanda tangan online</strong> — pelanggan tanda tangan di portal, SO auto-confirm</li>
+      <li><strong>Pricelist fleksibel</strong> — harga berbeda per pelanggan, region, atau mata uang</li>
+      <li><strong>AI email drafting</strong> — saran isi email follow-up berdasarkan konteks deal</li>
+    </ul>
+    <h3>Studi Kasus — Toko Surya (Peralatan Kantor, B2B)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Siklus penawaran dari 3 hari menjadi 4 jam</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Penawaran dibuat manual di Word/Excel</li><li>Kirim via email, konfirmasi via telepon</li><li>Tidak ada tanda tangan resmi, hanya WA</li><li>Delivery order &amp; invoice diinput ulang manual</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Sales</div><ul><li>Penawaran dari katalog terintegrasi, 5 menit</li><li>Pelanggan tanda tangan digital di portal</li><li>SO dikonfirmasi → DO &amp; invoice otomatis</li><li>Margin keuntungan tampil realtime di penawaran</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−87%</strong><span>Waktu siklus penawaran (3 hari → 4 jam)</span></div>
+      <div class="met"><strong>100%</strong><span>Paperless, nol print</span></div>
+      <div class="met"><strong>+38%</strong><span>Deal tertutup per bulan</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M05 PURCHASE -->
+<div class="ov" id="m05" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#e8f8f5">🛒</div><div class="mhtxt"><h2>Bab 05 — Purchase</h2><p>RFQ, perbandingan vendor, 3-Way Matching</p></div><button class="mcl" onclick="cm('m05')">✕</button></div>
+  <div class="mb">
+    <p>Modul Purchase mengelola seluruh proses pembelian dari permintaan hingga penerimaan barang. Fitur andalan: <strong>Call for Tender</strong> (vendor bersaing online), <strong>3-Way Matching</strong> (PO ↔ Penerimaan ↔ Invoice), dan auto-procurement berbasis reorder rules.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Call for Tender</strong> — undang beberapa vendor, bandingkan penawaran dalam satu layar</li>
+      <li><strong>3-Way Matching</strong> — cegah pembayaran sebelum barang benar-benar diterima</li>
+      <li><strong>Rating vendor</strong> — evaluasi otomatis berdasarkan harga, kualitas, &amp; ketepatan</li>
+      <li><strong>Auto-procurement</strong> — PO otomatis saat stok menyentuh reorder point</li>
+    </ul>
+    <h3>Studi Kasus — PT. Konstruksi Andalan (Proyek senilai Rp 2,4 M)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Tender material bangunan 500 ton besi beton</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Negosiasi 1 vendor via telepon &amp; email</li><li>Perbandingan harga di Excel manual</li><li>Tidak ada jejak audit pemilihan vendor</li><li>Invoice vendor sering tidak sesuai PO</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Purchase</div><ul><li>8 vendor diundang, 6 submit via portal Odoo</li><li>Sistem bandingkan harga + lead time + rating</li><li>Audit trail lengkap setiap keputusan pembelian</li><li>3-Way Matching cegah pembayaran over/under</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>7.5%</strong><span>Hemat biaya vs vendor lama</span></div>
+      <div class="met"><strong>6×</strong><span>Lebih banyak vendor dibanding</span></div>
+      <div class="met"><strong>−95%</strong><span>Dispute invoice vendor</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M06 INVENTORY -->
+<div class="ov" id="m06" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fef9e7">📦</div><div class="mhtxt"><h2>Bab 06 — Inventory</h2><p>Multi-lokasi, barcode, replenishment otomatis</p></div><button class="mcl" onclick="cm('m06')">✕</button></div>
+  <div class="mb">
+    <p>Inventory Odoo 19 mengelola stok realtime di seluruh lokasi gudang. Fitur: multi-warehouse, barcode scanner via mobile, lot/serial traceability dengan expiry date, dan replenishment otomatis berbasis Min/Max rule.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Multi-gudang &amp; sub-lokasi</strong> — rak, laci, zona per gudang</li>
+      <li><strong>Lot &amp; Serial tracking</strong> — lacak batch (makanan/obat) atau unit individual (elektronik)</li>
+      <li><strong>Barcode mobile</strong> — petugas scan via smartphone, stok langsung update</li>
+      <li><strong>Replenishment</strong> — PO otomatis saat stok &lt; minimum yang ditentukan</li>
+    </ul>
+    <h3>Studi Kasus — CV. Berkah Distribusi (FMCG, 3.000+ SKU)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>2 gudang (Surabaya &amp; Jakarta) dengan barang kadaluarsa tak terkontrol</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Stok dicatat di buku fisik + Excel per gudang</li><li>Cek stok manual tiap pagi, sering tidak akurat</li><li>Tidak ada sistem expired date — barang kadaluarsa baru ketahuan saat opname</li><li>Reorder dilakukan manual berdasarkan perkiraan</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Inventory</div><ul><li>Stok realtime di 2 gudang tersinkronisasi otomatis</li><li>Petugas scan barcode via smartphone Odoo</li><li>Notifikasi H-30 sebelum expired (lot tracking)</li><li>PO otomatis saat stok &lt; 500 unit</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−85%</strong><span>Produk kadaluarsa terbuang</span></div>
+      <div class="met"><strong>97%</strong><span>Akurasi stok opname (dari 78%)</span></div>
+      <div class="met"><strong>−40%</strong><span>Kejadian stockout</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M07 MANUFACTURING -->
+<div class="ov" id="m07" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fdecea">🏭</div><div class="mhtxt"><h2>Bab 07 — Manufacturing</h2><p>BOM multi-level, MPS, subkontrak</p></div><button class="mcl" onclick="cm('m07')">✕</button></div>
+  <div class="mb">
+    <p>Modul Manufacturing Odoo 19 mengelola produksi end-to-end: dari Bill of Materials multi-level, perencanaan produksi (MPS), work orders per mesin/operator, hingga subkontrak ke pihak ketiga. Biaya produksi dihitung otomatis via landed cost.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>BOM multi-level</strong> — produk jadi → sub-assembly → bahan baku</li>
+      <li><strong>MPS (Master Production Schedule)</strong> — rencanakan produksi 3–12 bulan ke depan</li>
+      <li><strong>Subkontrak</strong> — kirim bahan ke vendor, terima hasil produksi dengan tracking biaya</li>
+      <li><strong>Work Center</strong> — assign work order ke mesin/operator spesifik</li>
+    </ul>
+    <h3>Studi Kasus — PT. Furnitura Nusantara (500 unit/bulan)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Proses finishing disubkontrakkan, WIP tidak pernah terlacak</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Production plan di whiteboard, sering berubah</li><li>WIP (work-in-progress) tidak terlacak — "hilang" di subkontraktor</li><li>Biaya produksi dihitung akhir bulan manual</li><li>Bahan yang dikirim ke subkon tidak dimonitor</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Manufacturing</div><ul><li>MO otomatis dari SO terkonfirmasi</li><li>Bahan ke subkon tercatat, status termonitor per tahap</li><li>Biaya subkon masuk COGS otomatis via landed cost</li><li>Dashboard WIP realtime per work center</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>100%</strong><span>Visibilitas WIP realtime</span></div>
+      <div class="met"><strong>−25%</strong><span>Scrap &amp; barang reject</span></div>
+      <div class="met"><strong>+95%</strong><span>On-time delivery ke customer</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M08 ACCOUNTING -->
+<div class="ov" id="m08" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#ebf5fb">📊</div><div class="mhtxt"><h2>Bab 08 — Accounting</h2><p>Double-entry, rekonsiliasi AI, laporan Indonesia</p></div><button class="mcl" onclick="cm('m08')">✕</button></div>
+  <div class="mb">
+    <p>Modul Accounting Odoo 19 menyediakan pembukuan double-entry lengkap, termasuk rekonsiliasi bank berbasis AI, multi-mata uang dengan kurs otomatis, dan chart of account standar Indonesia (l10n_id) dengan PPN 11% &amp; PPh.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Rekonsiliasi AI</strong> — cocokkan mutasi bank ke invoice secara otomatis</li>
+      <li><strong>Lokalisasi Indonesia</strong> — CoA l10n_id, PPN 11%, PPh 21/23/Final</li>
+      <li><strong>Multi-mata uang</strong> — kurs realtime dari ECB/bank sentral</li>
+      <li><strong>Laporan otomatis</strong> — Laba Rugi, Neraca, Arus Kas tersedia kapan saja</li>
+    </ul>
+    <h3>Studi Kasus — PT. Maju Bersama (Manufacturing, 2 divisi)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Tutup buku bulanan dari 5 hari ke 1 hari</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Rekonsiliasi 3 rekening bank manual, 2 hari penuh</li><li>Jurnal koreksi diinput satu per satu</li><li>Laporan konsolidasi 2 divisi dikompilasi manual</li><li>Tutup buku total 5 hari kerja/bulan</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Accounting</div><ul><li>Rekonsiliasi bank 3 akun selesai 20 menit (AI)</li><li>Semua transaksi SO/PO sudah otomatis terjurnal</li><li>Konsolidasi 2 divisi realtime tanpa kompilasi</li><li>CFO dapat laporan H+1 setelah akhir bulan</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−80%</strong><span>Waktu tutup buku (5 hari → 1 hari)</span></div>
+      <div class="met"><strong>−95%</strong><span>Error input jurnal</span></div>
+      <div class="met"><strong>100%</strong><span>Rekonsiliasi otomatis</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M09 SDM -->
+<div class="ov" id="m09" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f5eef8">👥</div><div class="mhtxt"><h2>Bab 09 — HR Suite</h2><p>Employees, Recruitment, Time Off, Attendance, Payroll</p></div><button class="mcl" onclick="cm('m09')">✕</button></div>
+  <div class="mb">
+    <p>Bab 09 mencakup seluruh ekosistem HR Odoo 19: data karyawan, rekrutmen dengan ATS modern, pengajuan cuti online, absensi via kiosk/mobile, hingga penggajian dengan <strong>Pay Runs baru</strong> yang menggantikan Payroll Batches lama.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>ATS Modern</strong> — pipeline rekrutmen kanban: Baru → Screening → Interview → Offer → Hired</li>
+      <li><strong>Time Off self-service</strong> — karyawan ajukan cuti online, atasan approve via mobile</li>
+      <li><strong>Attendance</strong> — check-in/out via kiosk, fingerprint, atau mobile app</li>
+      <li><strong>Pay Runs (baru!)</strong> — hitung gaji batch, review exception, transfer bank 1 klik</li>
+    </ul>
+    <h3>Studi Kasus — PT. Teknologi Maju (500 karyawan, 8 struktur gaji)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Payroll 500 karyawan: dari 3 hari ke 4 jam</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Payroll di Excel, 8 sheet berbeda per departemen</li><li>Hitung lembur manual, sering error</li><li>BPJS Kesehatan &amp; TK dihitung terpisah di kalkulator</li><li>Karyawan tidak bisa cek slip gaji sendiri</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 HR</div><ul><li>Struktur gaji dikonfigurasi sekali, hitung otomatis</li><li>Data lembur dari Attendance masuk slip otomatis</li><li>BPJS 4%+1% dan 3.7%+2% dihitung &amp; dilaporkan auto</li><li>Karyawan akses slip gaji via portal mandiri</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−87%</strong><span>Waktu proses payroll</span></div>
+      <div class="met"><strong>0</strong><span>Error payroll selama 6 bulan</span></div>
+      <div class="met"><strong>100%</strong><span>Karyawan self-service portal</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M10 PROJECT -->
+<div class="ov" id="m10" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#e8f8f5">📋</div><div class="mhtxt"><h2>Bab 10 — Project</h2><p>Kanban, Gantt cerdas, milestone billing, timesheet</p></div><button class="mcl" onclick="cm('m10')">✕</button></div>
+  <div class="mb">
+    <p>Manajemen proyek Odoo 19 menyediakan Kanban, Gantt dengan smart zoom baru, milestone billing, dan timesheet terintegrasi. Dashboard profitabilitas proyek menampilkan budget vs aktual secara realtime.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Gantt cerdas</strong> — smart zoom, tanggal tampil saat drag, dependencies antar task</li>
+      <li><strong>Milestone billing</strong> — invoice otomatis dibuat saat milestone tercapai</li>
+      <li><strong>Timesheets terintegrasi</strong> — developer log jam di Odoo mobile, masuk budget proyek otomatis</li>
+      <li><strong>Profitabilitas realtime</strong> — revenue vs biaya vs margin per proyek</li>
+    </ul>
+    <h3>Studi Kasus — PT. Digital Kreasi (Software House, proyek 6 bulan)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Proyek ERP Rp 480 juta: milestone invoice tidak pernah terlewat lagi</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Progress tracking di Google Spreadsheet terpisah</li><li>Timesheet ditulis tangan, dikompilasi akhir bulan</li><li>Invoice milestone sering terlambat karena tidak ada reminder</li><li>Profitabilitas baru diketahui setelah proyek selesai</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Project</div><ul><li>Gantt &amp; Kanban terupdate realtime oleh seluruh tim</li><li>8 developer log timesheet harian via mobile</li><li>Invoice dibuat otomatis saat milestone ditandai selesai</li><li>Margin proyek tersedia realtime setiap saat</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>34%</strong><span>Profitabilitas (target 28%)</span></div>
+      <div class="met"><strong>0</strong><span>Invoice milestone terlewat</span></div>
+      <div class="met"><strong>100%</strong><span>On-time delivery</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M11 WEBSITE -->
+<div class="ov" id="m11" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#ebf5fb">🛍️</div><div class="mhtxt"><h2>Bab 11 — Website &amp; eCommerce</h2><p>Toko online terintegrasi langsung dengan ERP</p></div><button class="mcl" onclick="cm('m11')">✕</button></div>
+  <div class="mb">
+    <p>Website &amp; eCommerce Odoo 19 hadir dengan layout toko yang didesain ulang, halaman produk modern, checkout off-canvas di mobile, dan sinkronisasi Google Merchant Center otomatis. Setiap order langsung masuk ke Odoo Sales &amp; Inventory.</p>
+    <h3>Integrasi ERP ↔ eCommerce (Otomatis)</h3>
+    <ul>
+      <li>Order di website → SO terbuat di Odoo Sales</li>
+      <li>Pembayaran berhasil → Invoice + Delivery Order otomatis</li>
+      <li>Stok berkurang → website update availability realtime</li>
+      <li>Produk baru di Odoo → publish ke website 1 klik</li>
+    </ul>
+    <h3>Studi Kasus — Toko Batik Jaya (dari Instagram ke toko online)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>250 produk batik: dari DM Instagram ke toko online terintegrasi</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Order via DM Instagram, konfirmasi manual</li><li>Transfer ke rekening, cek manual satu per satu</li><li>Stok sering oversold — tidak ada sistem realtime</li><li>Owner harus balas DM 5–6 jam/hari</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 eCommerce</div><ul><li>250 produk live di toko online dengan foto &amp; deskripsi</li><li>Pembayaran via Midtrans (QRIS, GoPay, kartu kredit)</li><li>Stok otomatis berkurang saat order dikonfirmasi</li><li>Label pengiriman JNE/J&amp;T ter-generate otomatis</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>3×</strong><span>Omzet online dalam 4 bulan</span></div>
+      <div class="met"><strong>−95%</strong><span>Komplain barang habis/oversold</span></div>
+      <div class="met"><strong>0 jam</strong><span>Balas DM order manual</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M12 POS -->
+<div class="ov" id="m12" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f5eef8">🖥️</div><div class="mhtxt"><h2>Bab 12 — Point of Sale</h2><p>Kasir toko, restoran, &amp; self-service kiosk</p></div><button class="mcl" onclick="cm('m12')">✕</button></div>
+  <div class="mb">
+    <p>POS Odoo 19 mendukung toko retail, restoran (dengan floor plan meja &amp; Kitchen Display System), dan self-service kiosk. Fitur baru: komisi penjual dihitung otomatis, integrasi appointments, dan offline mode saat internet mati.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Floor plan digital</strong> — tampilan meja restoran realtime (occupied/available)</li>
+      <li><strong>Komisi penjual (baru!)</strong> — hitung komisi per kasir otomatis berdasarkan aturan</li>
+      <li><strong>Offline mode</strong> — POS tetap berjalan saat internet mati, sync saat online</li>
+      <li><strong>Multi-cabang</strong> — kelola semua POS dari 1 backend Odoo terpusat</li>
+    </ul>
+    <h3>Studi Kasus — Kafe Kopi Nusantara (3 cabang Jakarta)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Laporan penjualan 3 cabang dari rekap malam manual ke dashboard realtime</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>3 cabang pakai software kasir berbeda-beda</li><li>Rekap penjualan dikompilasi manual setiap malam</li><li>Stok bahan baku tidak terpantau antar cabang</li><li>Menu update harus dilakukan 3x di tiap cabang</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 POS</div><ul><li>Satu sistem terhubung ke server Odoo pusat</li><li>Dashboard konsolidasi 3 cabang realtime</li><li>Stok kopi &amp; bahan sinkron antar cabang</li><li>Update menu sekali dari backend, langsung 3 cabang</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−3 jam</strong><span>Rekap manual per malam</span></div>
+      <div class="met"><strong>+4%</strong><span>Margin karena food cost terpantau</span></div>
+      <div class="met"><strong>100%</strong><span>Visibilitas 3 cabang realtime</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M13 HELPDESK -->
+<div class="ov" id="m13" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fdecea">🎧</div><div class="mhtxt"><h2>Bab 13 — Helpdesk</h2><p>Tiket multi-saluran, SLA, AI smart response</p></div><button class="mcl" onclick="cm('m13')">✕</button></div>
+  <div class="mb">
+    <p>Helpdesk Odoo 19 menerima tiket dari email, live chat, WhatsApp, dan portal pelanggan. SLA tracking otomatis, penugasan cerdas berdasarkan keahlian agen, dan AI menyarankan jawaban dari knowledge base.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>SLA tracking</strong> — alert merah saat tiket mendekati deadline resolusi</li>
+      <li><strong>AI smart response</strong> — saran jawaban dari riwayat tiket serupa</li>
+      <li><strong>Smart assignment</strong> — tiket VIP otomatis ke agen senior</li>
+      <li><strong>Merge duplikat</strong> — gabungkan tiket yang sama dari satu customer</li>
+    </ul>
+    <h3>Studi Kasus — PT. Solusi Perangkat Lunak (1.200 tiket/bulan, 5 agen)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>CSAT dari 3.4 ke 4.6 dalam 3 bulan</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Tiket via email biasa, tidak ada tracking SLA</li><li>Tiket urgent tenggelam di antara tiket biasa</li><li>Agen ketik jawaban dari nol setiap kali</li><li>Tidak ada laporan waktu resolusi rata-rata</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Helpdesk</div><ul><li>SLA tracker: merah jika &lt;2 jam tersisa</li><li>Tiket Enterprise client auto-prioritas High</li><li>AI saran jawaban dari FAQ — 40% selesai 1 balasan</li><li>Dashboard CSAT &amp; waktu resolusi realtime</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>+35%</strong><span>CSAT score (3.4 → 4.6 / 5)</span></div>
+      <div class="met"><strong>−68%</strong><span>Waktu resolusi rata-rata</span></div>
+      <div class="met"><strong>40%</strong><span>Tiket selesai dengan 1 balasan</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M14 MARKETING -->
+<div class="ov" id="m14" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fef9e7">📧</div><div class="mhtxt"><h2>Bab 14 — Email Marketing &amp; Automation</h2><p>Kampanye, segmentasi, workflow nurturing</p></div><button class="mcl" onclick="cm('m14')">✕</button></div>
+  <div class="mb">
+    <p>Email Marketing Odoo 19 memungkinkan blast email tersegmentasi ke ribuan kontak. Marketing Automation membangun workflow multi-langkah berbasis trigger (isi form, buka email, tidak respons) tanpa coding.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Segmentasi dinamis</strong> — filter by industri, lokasi, perilaku beli, nilai transaksi</li>
+      <li><strong>A/B Testing</strong> — uji 2 subject line, kirim versi pemenang otomatis</li>
+      <li><strong>Automation workflow</strong> — Trigger → Action → Condition → Cabang jika Ya/Tidak</li>
+      <li><strong>Tracking</strong> — open rate, click rate, unsubscribe, revenue per kampanye</li>
+    </ul>
+    <h3>Studi Kasus — Brand Skincare "Cahaya Alami" (15.000 kontak)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Kampanye Ramadan: blast semua vs segmentasi 3 grup</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Blast email ke 15.000 kontak tanpa segmentasi</li><li>Konten sama untuk semua, tidak relevan</li><li>Unsubscribe rate 4.2% per kampanye</li><li>Tidak bisa lacak siapa yang beli dari email</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Marketing</div><ul><li>Segmen A (aktif 6 bln): early access eksklusif</li><li>Segmen B (lama): win-back diskon 20%</li><li>Segmen C (prospek): edukasi + gratis ongkir</li><li>Revenue per kampanye terlacak via UTM</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>2.3×</strong><span>Revenue kampanye Ramadan</span></div>
+      <div class="met"><strong>−93%</strong><span>Unsubscribe rate (4.2% → 0.3%)</span></div>
+      <div class="met"><strong>+180%</strong><span>Click-to-open rate</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M15 AI -->
+<div class="ov" id="m15" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f0e6ed">🤖</div><div class="mhtxt"><h2>Bab 15 — AI &amp; Otomatisasi Cerdas</h2><p>AI Agents, OCR, Natural Language — Enterprise</p></div><button class="mcl" onclick="cm('m15')">✕</button></div>
+  <div class="mb">
+    <p>Odoo 19 menjadikan AI sebagai fondasi inti — bukan plugin. AI Agents dapat mengeksekusi aksi di Odoo berdasarkan instruksi bahasa alami. Document Intelligence (OCR + AI) memproses invoice vendor otomatis. Provider: OpenAI GPT-4o atau Google Gemini.</p>
+    <h3>Komponen AI Odoo 19</h3>
+    <ul>
+      <li><strong>AI Agents</strong> — chatbot yang bisa eksekusi: buat SO, kirim email, update field</li>
+      <li><strong>AI Server Actions</strong> — definisikan otomatisasi dengan kalimat biasa, bukan kode</li>
+      <li><strong>Document Intelligence</strong> — OCR + klasifikasi invoice, PO, kontrak masuk otomatis</li>
+      <li><strong>Natural Language Search</strong> — cari data Odoo dengan kalimat: "tunjukkan invoice jatuh tempo minggu ini"</li>
+    </ul>
+    <div class="ibox tip"><strong>Contoh perintah AI Agent:</strong> "Kirim pengingat pembayaran ke semua pelanggan dengan faktur overdue &gt;7 hari" → AI temukan invoice → draft email → kirim. Tanpa satu pun klik manual.</div>
+    <h3>Studi Kasus — PT. Logistik Cepat (300 invoice vendor/bulan)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Input 300 invoice vendor dari 2 hari kerja ke 2 jam review</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Staf AP input 300 invoice PDF manual ke sistem</li><li>2 orang × 1 hari kerja = 16 jam/bulan</li><li>Error typo: jumlah, nomor invoice, tanggal</li><li>Approval terlambat karena antrian input</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 AI</div><ul><li>Invoice dikirim ke inbox Odoo, OCR ekstrak otomatis</li><li>Draft vendor bill siap — staf hanya review &amp; approve</li><li>Akurasi ekstraksi 94% untuk vendor reguler</li><li>Approval bisa dilakukan dari mobile</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−90%</strong><span>Input invoice manual</span></div>
+      <div class="met"><strong>94%</strong><span>Akurasi OCR vendor reguler</span></div>
+      <div class="met"><strong>−16 jam</strong><span>Hemat jam kerja/bulan</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M16 STUDIO -->
+<div class="ov" id="m16" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f5eef8">🎨</div><div class="mhtxt"><h2>Bab 16 — Odoo Studio</h2><p>Kustomisasi tanpa kode — Enterprise</p></div><button class="mcl" onclick="cm('m16')">✕</button></div>
+  <div class="mb">
+    <p>Odoo Studio memungkinkan siapa saja (bukan hanya developer) mengkustomisasi tampilan, menambah field, membuat laporan PDF, dan bahkan membangun aplikasi Odoo baru dari nol — tanpa menulis satu baris kode pun.</p>
+    <h3>Yang Bisa Dilakukan</h3>
+    <ul>
+      <li>Tambah/ubah field di form, list, kanban, &amp; pivot view</li>
+      <li>Buat laporan PDF kustom (invoice, surat jalan, sertifikat)</li>
+      <li>Tambah menu &amp; sub-menu baru sesuai kebutuhan</li>
+      <li>Tambah AI Field — field yang terisi otomatis via prompt</li>
+    </ul>
+    <div class="ibox warn"><strong>Catatan:</strong> Kustomisasi Studio tersimpan di database. Saat upgrade Odoo, perlu review kompatibilitas manual.</div>
+    <h3>Studi Kasus — RS. Sehat Sejahtera (Form Pendaftaran Pasien)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Form kustom 8 field khusus RS — tanpa menyewa developer</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Field standar Odoo tidak sesuai kebutuhan RS</li><li>Workaround di kolom Notes — data tidak terstruktur</li><li>Custom development dikutip Rp 25 juta + 3 minggu</li><li>Laporan PDF tidak ada kop surat &amp; format RS</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo 19 Studio</div><ul><li>Admin IT RS tambah 8 field kustom sendiri</li><li>Golongan darah, BPJS, alergi, kontak darurat terstruktur</li><li>Laporan PDF "Rekam Medis Awal" dengan kop surat RS</li><li>Selesai 2 hari, biaya Rp 0 developer</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>Rp 25jt</strong><span>Biaya dev yang dihemat</span></div>
+      <div class="met"><strong>2 hari</strong><span>Implementasi (vs 3 minggu)</span></div>
+      <div class="met"><strong>8 field</strong><span>Kustom tanpa kode</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- M17 MIGRASI -->
+<div class="ov" id="m17" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fef9e7">🔄</div><div class="mhtxt"><h2>Bab 17 — Panduan Migrasi</h2><p>Upgrade dari Odoo 17/18 ke Odoo 19</p></div><button class="mcl" onclick="cm('m17')">✕</button></div>
+  <div class="mb">
+    <p>Odoo 19 membawa 130+ perubahan nama model, kebutuhan Python minimum 3.12, dan PostgreSQL minimum 13. Upgrade langsung dari v17/v18 didukung. Dari v16 ke bawah perlu upgrade bertahap.</p>
+    <h3>Breaking Changes Kritis</h3>
+    <ul>
+      <li>130+ model berganti nama — audit custom module sebelum upgrade</li>
+      <li>Python minimum 3.12 (3.10/3.11 tidak didukung)</li>
+      <li>PostgreSQL minimum 13 (v12 ke bawah tidak didukung)</li>
+      <li>Payroll Batches → Pay Runs (struktur data berubah)</li>
+      <li>eCommerce checkout flow template baru</li>
+    </ul>
+    <h3>Studi Kasus — PT. Industri Gemilang (200 user, upgrade v17 → v19)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Strategi blue-green deployment: zero downtime produksi</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Risiko tanpa perencanaan</div><ul><li>Upgrade langsung ke prod → downtime tidak terduga</li><li>Custom module tidak kompatibel → error produksi</li><li>Data rusak karena model rename tidak diantisipasi</li><li>User bingung UI baru tanpa pelatihan</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Dengan strategi yang benar</div><ul><li>Staging Odoo 19 disiapkan paralel 6 minggu</li><li>UAT 4 minggu — 12 bug custom ditemukan &amp; diperbaiki</li><li>Cutover Sabtu 22:00 → Minggu 03:00 (5 jam)</li><li>Senin pagi: 200 user langsung aktif produktif</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>0</strong><span>Downtime produksi tidak terencana</span></div>
+      <div class="met"><strong>97%</strong><span>Kustomisasi kompatibel setelah fix</span></div>
+      <div class="met"><strong>200</strong><span>User aktif di hari pertama go-live</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mEvt EVENTS -->
+<div class="ov" id="mEvt" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fef3c7">📅</div><div class="mhtxt"><h2>Events — Manajemen Acara</h2><p>Kelola pendaftaran, tiket, &amp; kehadiran peserta</p></div><button class="mcl" onclick="cm('mEvt')">✕</button></div>
+  <div class="mb">
+    <p>Modul Events Odoo memudahkan pengelolaan acara end-to-end: dari pembuatan halaman acara di website, pendaftaran &amp; penjualan tiket online, konfirmasi otomatis via email, hingga absensi peserta di hari H menggunakan barcode/QR code.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Halaman acara di website</strong> — publish otomatis dengan form pendaftaran online</li>
+      <li><strong>Tiket berbayar</strong> — integrasi payment gateway, multi-tipe tiket (VIP, Regular)</li>
+      <li><strong>Email otomatis</strong> — konfirmasi pendaftaran, reminder H-1, follow-up pasca acara</li>
+      <li><strong>Absensi QR</strong> — scan barcode tiket di pintu masuk via smartphone</li>
+    </ul>
+    <h3>Studi Kasus — PT. Indo Konferensi (Event Organizer)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Konferensi tahunan 800 peserta: dari Google Form ke sistem terintegrasi</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Pendaftaran via Google Form, transfer manual ke rekening</li><li>Konfirmasi pembayaran diverifikasi satu per satu</li><li>Absensi di hari H pakai daftar Excel, antrian panjang</li><li>Tidak ada data peserta yang bisa dianalisis pasca acara</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Events</div><ul><li>Pendaftaran online + bayar tiket di website langsung</li><li>Konfirmasi &amp; e-tiket QR terkirim otomatis</li><li>Absensi scan QR &lt;5 detik per peserta</li><li>Laporan peserta, revenue, &amp; demografi tersedia realtime</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−85%</strong><span>Waktu proses pendaftaran manual</span></div>
+      <div class="met"><strong>0</strong><span>Antrian panjang di pintu masuk</span></div>
+      <div class="met"><strong>+40%</strong><span>Peserta mendaftar (kemudahan online)</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mSrv SURVEYS -->
+<div class="ov" id="mSrv" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f0fdf4">📋</div><div class="mhtxt"><h2>Surveys — Survei &amp; Kuesioner</h2><p>Kumpulkan feedback &amp; lakukan riset secara online</p></div><button class="mcl" onclick="cm('mSrv')">✕</button></div>
+  <div class="mb">
+    <p>Modul Surveys memungkinkan pembuatan survei, kuesioner, dan kuis interaktif yang dapat dibagikan via link atau email. Hasilnya terintegrasi langsung dengan data Odoo — misalnya survei kepuasan pasca acara, penilaian karyawan, atau CSAT pelanggan.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Builder drag &amp; drop</strong> — berbagai tipe pertanyaan: pilihan ganda, rating, teks, NPS</li>
+      <li><strong>Kondisional</strong> — tampilkan pertanyaan berbeda berdasarkan jawaban sebelumnya</li>
+      <li><strong>Mode ujian (Quiz)</strong> — skor otomatis, batas waktu, sertifikat otomatis</li>
+      <li><strong>Analitik</strong> — grafik &amp; statistik jawaban realtime, export Excel</li>
+    </ul>
+    <h3>Studi Kasus — PT. Riset Prima (Lembaga Riset Pasar)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Survei konsumen 2.000 responden: dari kertas ke digital terintegrasi</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Survei dicetak, disebarkan oleh enumerator lapangan</li><li>Entri data manual dari kertas ke Excel — 3 hari/survei</li><li>Error entri data 8–12% dari total responden</li><li>Laporan dibuat manual di PowerPoint</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Surveys</div><ul><li>Link survei disebar via WhatsApp &amp; email</li><li>Jawaban masuk realtime ke dashboard Odoo</li><li>Error entri 0% — data langsung dari responden</li><li>Grafik &amp; laporan otomatis tersedia setelah survei tutup</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−100%</strong><span>Biaya cetak &amp; enumerator lapangan</span></div>
+      <div class="met"><strong>0%</strong><span>Error entri data</span></div>
+      <div class="met"><strong>−3 hari</strong><span>Waktu kompilasi hasil survei</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mQual QUALITY -->
+<div class="ov" id="mQual" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dcfce7">✅</div><div class="mhtxt"><h2>Quality — Kontrol Kualitas</h2><p>Inspeksi produk di setiap tahap rantai pasok</p></div><button class="mcl" onclick="cm('mQual')">✕</button></div>
+  <div class="mb">
+    <p>Modul Quality terintegrasi dengan Inventory &amp; Manufacturing untuk melakukan inspeksi kualitas di titik-titik kritis: penerimaan barang dari vendor, antar tahap produksi, dan sebelum pengiriman ke pelanggan. Cacat ditemukan lebih awal sebelum menjadi masalah mahal.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Quality Points</strong> — definisikan kapan &amp; apa yang perlu diinspeksi (penerimaan, produksi, pengiriman)</li>
+      <li><strong>Checklist inspeksi</strong> — form digital yang harus diisi operator di lapangan</li>
+      <li><strong>Non-conformance (NCR)</strong> — catat &amp; track produk reject dengan root cause analysis</li>
+      <li><strong>Statistik kualitas</strong> — tingkat reject, top defect, trend per vendor/produk</li>
+    </ul>
+    <h3>Studi Kasus — PT. Farmasi Sejahtera (Produksi Obat, GMP Compliant)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Inspeksi bahan baku 200+ item masuk/minggu tanpa sistem digital</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Checklist inspeksi di kertas, disimpan di folder fisik</li><li>Produk cacat baru ketahuan di tahap akhir — kerugian besar</li><li>Tidak ada statistik reject per vendor/batch</li><li>Audit GMP butuh waktu berhari-hari kumpulkan dokumen</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Quality</div><ul><li>QC inspector isi checklist digital via tablet di gudang</li><li>Produk reject otomatis masuk karantina &amp; NCR dibuat</li><li>Dashboard reject rate per vendor tersedia realtime</li><li>Semua rekaman QC tersimpan digital, audit GMP &lt;1 hari</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−72%</strong><span>Produk cacat lolos ke tahap akhir</span></div>
+      <div class="met"><strong>−90%</strong><span>Waktu persiapan dokumen audit GMP</span></div>
+      <div class="met"><strong>+35%</strong><span>Efisiensi proses inspeksi harian</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mMnt MAINTENANCE -->
+<div class="ov" id="mMnt" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fef3c7">🔧</div><div class="mhtxt"><h2>Maintenance — Perawatan Mesin &amp; Aset</h2><p>Preventif &amp; korektif maintenance terintegrasi</p></div><button class="mcl" onclick="cm('mMnt')">✕</button></div>
+  <div class="mb">
+    <p>Modul Maintenance mengelola perawatan mesin, peralatan, dan aset perusahaan — baik preventif (terjadwal) maupun korektif (darurat). Terintegrasi dengan Manufacturing sehingga work order bisa otomatis terhenti saat mesin dalam perbaikan.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Preventive maintenance</strong> — jadwal perawatan berkala otomatis berdasarkan jam pakai/kalender</li>
+      <li><strong>Maintenance Request</strong> — operator laporkan kerusakan langsung dari mobile, otomatis buat tiket</li>
+      <li><strong>Spare parts tracking</strong> — lacak penggunaan suku cadang per mesin</li>
+      <li><strong>KPI mesin</strong> — MTBF (Mean Time Between Failure), MTTR (Mean Time To Repair)</li>
+    </ul>
+    <h3>Studi Kasus — PT. Tekstil Makmur (Pabrik, 120 mesin produksi)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Downtime mesin tak terduga turun drastis dengan jadwal preventif</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Perawatan reaktif — mesin baru diperbaiki setelah rusak</li><li>Catatan kerusakan di buku fisik, sulit dilacak</li><li>Suku cadang sering kehabisan saat dibutuhkan darurat</li><li>Downtime rata-rata 18 jam/bulan per mesin utama</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Maintenance</div><ul><li>Jadwal preventif otomatis tiap 200 jam pakai</li><li>Operator laporkan anomali via mobile → tiket otomatis</li><li>Stok suku cadang termonitor, reorder otomatis</li><li>Dashboard MTBF &amp; MTTR per mesin tersedia realtime</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−65%</strong><span>Downtime mesin tak terduga</span></div>
+      <div class="met"><strong>−40%</strong><span>Biaya perbaikan darurat</span></div>
+      <div class="met"><strong>+28%</strong><span>OEE (Overall Equipment Effectiveness)</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mFls FIELD SERVICE -->
+<div class="ov" id="mFls" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dbeafe">🚗</div><div class="mhtxt"><h2>Field Service — Layanan Lapangan</h2><p>Kelola teknisi lapangan, jadwal, &amp; laporan servis</p></div><button class="mcl" onclick="cm('mFls')">✕</button></div>
+  <div class="mb">
+    <p>Modul Field Service mengoptimalkan pengelolaan teknisi yang bekerja di lokasi pelanggan. Dari penjadwalan otomatis berbasis lokasi dan keahlian, hingga laporan servis digital yang ditandatangani pelanggan langsung di tablet teknisi.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Penjadwalan cerdas</strong> — assign teknisi terdekat dengan keahlian yang sesuai</li>
+      <li><strong>Mobile app teknisi</strong> — cek jadwal, navigasi, isi laporan, &amp; foto bukti kerja</li>
+      <li><strong>Tanda tangan pelanggan</strong> — pelanggan tanda tangan di tablet saat serah terima</li>
+      <li><strong>Otomatis invoice</strong> — laporan servis selesai → invoice dibuat langsung ke Accounting</li>
+    </ul>
+    <h3>Studi Kasus — PT. AC Dingin Nusantara (50 teknisi, 200+ kunjungan/bulan)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Koordinasi 50 teknisi lapangan dari WhatsApp Group ke sistem terpusat</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Jadwal teknisi via WhatsApp Group — sering tumpang tindih</li><li>Laporan servis ditulis tangan, difoto, kirim ke kantor</li><li>Invoice dibuat manual di kantor dari foto laporan</li><li>Pelanggan sering komplain waktu tunggu tidak pasti</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Field Service</div><ul><li>Jadwal teknisi di peta — manager lihat posisi realtime</li><li>Teknisi isi laporan digital + foto di mobile app</li><li>Invoice otomatis dari laporan servis yang diselesaikan</li><li>Pelanggan terima notifikasi ETA teknisi</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−80%</strong><span>Waktu koordinasi &amp; admin dispatcher</span></div>
+      <div class="met"><strong>+45%</strong><span>Kunjungan per teknisi per hari</span></div>
+      <div class="met"><strong>+52%</strong><span>Kepuasan pelanggan (CSAT)</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mRnt RENTAL -->
+<div class="ov" id="mRnt" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fce7f3">🏠</div><div class="mhtxt"><h2>Rental — Manajemen Sewa Aset</h2><p>Kontrak sewa, ketersediaan aset, &amp; penagihan</p></div><button class="mcl" onclick="cm('mRnt')">✕</button></div>
+  <div class="mb">
+    <p>Modul Rental mengelola penyewaan aset perusahaan — alat berat, kendaraan, properti, atau peralatan. Fitur kalender ketersediaan mencegah double-booking, dan penagihan sewa dihitung otomatis berdasarkan durasi kontrak.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Kalender ketersediaan</strong> — lihat aset mana yang tersedia pada tanggal tertentu</li>
+      <li><strong>Kontrak sewa</strong> — harian, mingguan, bulanan, dengan deposit &amp; denda keterlambatan</li>
+      <li><strong>Return &amp; kondisi</strong> — catat kondisi aset saat dikembalikan, foto bukti</li>
+      <li><strong>Penagihan otomatis</strong> — invoice sewa terbuat berdasarkan durasi aktual pakai</li>
+    </ul>
+    <h3>Studi Kasus — PT. Alat Berat Nusantara (Fleet 80 unit alat berat)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>80 unit alat berat: dari papan whiteboard ke sistem digital</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Jadwal sewa dicatat di whiteboard — sering double-booking</li><li>Kontrak dicetak &amp; disimpan di ordner fisik</li><li>Penagihan manual di akhir periode, sering salah hitung</li><li>Tidak ada jejak kondisi alat saat kembali</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Rental</div><ul><li>Kalender digital — tidak ada double-booking lagi</li><li>Kontrak digital dengan tanda tangan online</li><li>Invoice otomatis sesuai durasi aktual pemakaian</li><li>Foto &amp; catatan kondisi alat tercatat di sistem</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>0</strong><span>Kasus double-booking alat berat</span></div>
+      <div class="met"><strong>−90%</strong><span>Sengketa penagihan dengan penyewa</span></div>
+      <div class="met"><strong>+22%</strong><span>Utilisasi rata-rata armada</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mSub SUBSCRIPTIONS -->
+<div class="ov" id="mSub" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dbeafe">🔄</div><div class="mhtxt"><h2>Subscriptions — Tagihan Berlangganan</h2><p>MRR, renewal otomatis, &amp; churn prevention</p></div><button class="mcl" onclick="cm('mSub')">✕</button></div>
+  <div class="mb">
+    <p>Modul Subscriptions mengelola model bisnis berlangganan — SaaS, media, jasa bulanan, atau maintenance contract. Invoice dibuat dan dikirim otomatis setiap periode, dengan dashboard MRR, ARR, dan churn rate realtime.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Recurring billing</strong> — invoice otomatis harian/mingguan/bulanan/tahunan</li>
+      <li><strong>Upgrade/Downgrade</strong> — ubah paket berlangganan mid-period dengan prorate otomatis</li>
+      <li><strong>Dashboard MRR</strong> — Monthly Recurring Revenue, churn, &amp; new subscription realtime</li>
+      <li><strong>Integrasi CRM</strong> — trial berakhir → otomatis buat peluang di CRM untuk konversi</li>
+    </ul>
+    <h3>Studi Kasus — SaaS Platform Indonesia (B2B, 300+ subscriber)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>300 klien berlangganan: invoice manual setiap bulan ke otomatis penuh</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Invoice dibuat manual untuk 300 klien tiap awal bulan — 2 hari kerja</li><li>Klien lupa bayar tidak ada pengingat otomatis</li><li>Tidak ada angka MRR yang akurat &amp; realtime</li><li>Upgrade/downgrade paket dihitung manual &amp; sering salah</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Subscriptions</div><ul><li>Invoice 300 klien terbuat &amp; terkirim otomatis tanggal 1</li><li>Reminder pembayaran H-3, H+3, H+7 berjalan sendiri</li><li>Dashboard MRR &amp; churn tersedia realtime</li><li>Prorate upgrade/downgrade dihitung otomatis tepat</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−100%</strong><span>Waktu buat invoice manual (2 hari → 0)</span></div>
+      <div class="met"><strong>−35%</strong><span>Keterlambatan pembayaran klien</span></div>
+      <div class="met"><strong>+18%</strong><span>Revenue karena churn terdeteksi lebih awal</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mApr APPRAISALS -->
+<div class="ov" id="mApr" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fef3c7">⭐</div><div class="mhtxt"><h2>Appraisals — Penilaian Kinerja</h2><p>Review karyawan 360°, KPI, &amp; rencana pengembangan</p></div><button class="mcl" onclick="cm('mApr')">✕</button></div>
+  <div class="mb">
+    <p>Modul Appraisals menyederhanakan proses penilaian kinerja karyawan — dari penjadwalan review otomatis, pengisian formulir penilaian (self-assessment + atasan), hingga penetapan target &amp; rencana pengembangan individu.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Siklus otomatis</strong> — jadwal review semester/tahunan berjalan otomatis per departemen</li>
+      <li><strong>360° feedback</strong> — penilaian dari atasan, rekan kerja, &amp; self-assessment</li>
+      <li><strong>Goal setting</strong> — tetapkan target OKR/KPI per individu, pantau progress</li>
+      <li><strong>Rencana pengembangan</strong> — link hasil appraisal ke program pelatihan</li>
+    </ul>
+    <h3>Studi Kasus — PT. Bank Maju Sejahtera (600 karyawan, review 2x setahun)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Review 600 karyawan: dari formulir Word ke platform digital</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Form penilaian di Word, dikirim email, dikembalikan via email</li><li>HR kompilasi hasil dari 600 form secara manual</li><li>Proses review berlangsung 6 minggu karena koordinasi sulit</li><li>Data penilaian tidak terhubung ke keputusan promosi/gaji</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Appraisals</div><ul><li>Karyawan isi form digital di portal Odoo kapan saja</li><li>Atasan diberi notifikasi &amp; deadline reminder otomatis</li><li>HR pantau progress submission realtime per departemen</li><li>Hasil appraisal terhubung ke data kenaikan gaji &amp; promosi</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−60%</strong><span>Durasi proses review (6 minggu → 2.5 minggu)</span></div>
+      <div class="met"><strong>98%</strong><span>Tingkat penyelesaian form (dari 74%)</span></div>
+      <div class="met"><strong>−95%</strong><span>Pekerjaan kompilasi manual HR</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mRef REFERRALS -->
+<div class="ov" id="mRef" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dcfce7">🤝</div><div class="mhtxt"><h2>Referrals — Program Referral Karyawan</h2><p>Rekrut via jaringan karyawan dengan sistem poin</p></div><button class="mcl" onclick="cm('mRef')">✕</button></div>
+  <div class="mb">
+    <p>Modul Referrals memotivasi karyawan untuk merekomendasikan kandidat berkualitas dari jaringan mereka. Karyawan mendapat poin/bonus saat referral mereka dipekerjakan, dengan sistem gamifikasi yang transparan dan menyenangkan.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Portal referral karyawan</strong> — lihat lowongan, share link unik ke kontak</li>
+      <li><strong>Sistem poin &amp; level</strong> — karyawan naik level dan tukar poin dengan reward</li>
+      <li><strong>Tracking otomatis</strong> — siapa mereferensikan siapa, di tahap mana kandidat</li>
+      <li><strong>Integrasi Recruitment</strong> — kandidat referral otomatis masuk pipeline ATS</li>
+    </ul>
+    <h3>Studi Kasus — PT. Startup Berkembang (150 karyawan, ekspansi cepat)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Rekrut 30 posisi dalam 3 bulan: agen rekruter vs program referral internal</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum (via agen rekruter)</div><ul><li>Fee rekruter 15–20% dari gaji tahunan per kandidat</li><li>Kandidat tidak mengenal budaya perusahaan</li><li>Proses placement 6–8 minggu per posisi</li><li>Retensi kandidat rekruter lebih rendah</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Referrals</div><ul><li>Karyawan share 80 referral dalam 3 bulan pertama</li><li>Kandidat sudah familiar dengan budaya via teman</li><li>Waktu hiring turun — sudah ada referensi terpercaya</li><li>Karyawan dapat bonus, perusahaan hemat biaya rekrut</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−70%</strong><span>Biaya rekrutmen per posisi</span></div>
+      <div class="met"><strong>+35%</strong><span>Retensi karyawan dari jalur referral</span></div>
+      <div class="met"><strong>−45%</strong><span>Time-to-hire rata-rata</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mFlt FLEET -->
+<div class="ov" id="mFlt" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#e0f2fe">🚙</div><div class="mhtxt"><h2>Fleet — Manajemen Armada Kendaraan</h2><p>Kelola kendaraan dinas, BBM, servis, &amp; asuransi</p></div><button class="mcl" onclick="cm('mFlt')">✕</button></div>
+  <div class="mb">
+    <p>Modul Fleet mengelola armada kendaraan dinas perusahaan secara komprehensif — dari data kendaraan, kontrak, penugasan driver, pencatatan BBM &amp; odometer, jadwal servis berkala, hingga pengelolaan asuransi &amp; SIM/STNK karyawan.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Profil kendaraan</strong> — data lengkap: plat, tahun, BPKB, asuransi, jadwal servis</li>
+      <li><strong>Pencatatan BBM</strong> — catat pengisian, hitung konsumsi &amp; cost per km</li>
+      <li><strong>Servis otomatis</strong> — reminder servis berkala berdasarkan odometer/waktu</li>
+      <li><strong>Penugasan driver</strong> — assign kendaraan ke karyawan, kontrak pemakaian</li>
+    </ul>
+    <h3>Studi Kasus — PT. Logistik Express (85 kendaraan operasional)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Armada 85 kendaraan: dari catatan manual ke dashboard terpusat</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Data kendaraan di Excel terpisah per admin cabang</li><li>STNK &amp; asuransi sering expire tidak ketahuan</li><li>Biaya BBM diklaim manual — sulit diverifikasi</li><li>Servis dilakukan saat kendaraan sudah bermasalah</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Fleet</div><ul><li>Semua 85 kendaraan terpantau dari 1 dashboard</li><li>Alert otomatis 30 hari sebelum STNK/asuransi habis</li><li>Klaim BBM via form digital dengan foto struk</li><li>Jadwal servis otomatis berdasarkan odometer</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−25%</strong><span>Biaya operasional armada total</span></div>
+      <div class="met"><strong>0</strong><span>Kendaraan dengan STNK/asuransi kedaluwarsa</span></div>
+      <div class="met"><strong>−55%</strong><span>Downtime kendaraan karena kerusakan mendadak</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mPln PLANNING -->
+<div class="ov" id="mPln" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#ccfbf1">📅</div><div class="mhtxt"><h2>Planning — Perencanaan Shift &amp; Jadwal</h2><p>Scheduling karyawan, shift, &amp; alokasi sumber daya</p></div><button class="mcl" onclick="cm('mPln')">✕</button></div>
+  <div class="mb">
+    <p>Modul Planning memudahkan penjadwalan shift kerja karyawan, alokasi tim ke proyek/lokasi, dan manajemen kapasitas tenaga kerja. Karyawan melihat jadwal mereka di portal dan bisa request swap shift secara mandiri.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Gantt scheduling</strong> — drag &amp; drop karyawan ke shift/lokasi yang diinginkan</li>
+      <li><strong>Template shift</strong> — salin jadwal minggu lalu sebagai template, edit sesuai kebutuhan</li>
+      <li><strong>Notifikasi karyawan</strong> — karyawan terima jadwal via email/notif app setelah dipublish</li>
+      <li><strong>Integrasi Attendance</strong> — jadwal dibandingkan dengan kehadiran aktual</li>
+    </ul>
+    <h3>Studi Kasus — RS. Medika Utama (350 tenaga medis, 3 shift/hari)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Jadwal 350 tenaga medis bulanan: dari Excel ke scheduling digital</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Jadwal dibuat di Excel oleh kepala unit — 2 hari/bulan</li><li>Perubahan jadwal mendadak koordinasi via WA — kacau</li><li>Karyawan tidak tahu jadwal sampai ditempel di papan</li><li>Konflik jadwal (double-booking orang) sering terjadi</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Planning</div><ul><li>Template shift mingguan, edit &amp; publish dalam 30 menit</li><li>Perubahan mendadak → notifikasi realtime ke karyawan</li><li>Karyawan lihat jadwal di portal/app kapan saja</li><li>Sistem deteksi otomatis konflik jadwal sebelum publish</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−85%</strong><span>Waktu buat jadwal bulanan (2 hari → 30 menit)</span></div>
+      <div class="met"><strong>0</strong><span>Konflik jadwal lolos ke staff</span></div>
+      <div class="met"><strong>+90%</strong><span>Kepuasan staff terhadap transparansi jadwal</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mDoc DOCUMENTS -->
+<div class="ov" id="mDoc" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f5f3ff">📁</div><div class="mhtxt"><h2>Documents — Manajemen Dokumen</h2><p>DMS terintegrasi dengan seluruh modul Odoo</p></div><button class="mcl" onclick="cm('mDoc')">✕</button></div>
+  <div class="mb">
+    <p>Modul Documents menyediakan Document Management System (DMS) terintegrasi di dalam Odoo — simpan, kategorikan, dan bagikan dokumen (kontrak, invoice, laporan, SOP) tanpa meninggalkan aplikasi. Dokumen terhubung langsung ke record terkait (pelanggan, proyek, karyawan).</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Folder terstruktur</strong> — hierarki folder dengan permission per user/grup</li>
+      <li><strong>Attach ke record</strong> — dokumen terhubung langsung ke customer, SO, proyek, dsb.</li>
+      <li><strong>OCR &amp; pencarian teks</strong> — cari isi dokumen PDF sekalipun</li>
+      <li><strong>Workflow dokumen</strong> — routing untuk review &amp; approval sebelum dokumen difinalisasi</li>
+    </ul>
+    <h3>Studi Kasus — Kantor Notaris Hukum Jaya (8 notaris, 500+ akta/bulan)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>500 akta notaris per bulan: dari ordner fisik ke DMS digital</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Akta disimpan di ordner fisik, cari dokumen lama bisa 1 jam</li><li>Dokumen dikirim via email tanpa version control</li><li>Klien minta copy dokumen — scan manual &amp; kirim email</li><li>Tidak ada backup digital — risiko kebakaran/banjir fatal</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Documents</div><ul><li>Semua akta tersimpan digital, cari dengan nama/kata kunci &lt;5 detik</li><li>Klien akses dokumen mereka sendiri via portal aman</li><li>Version control — selalu tahu versi terbaru dokumen</li><li>Backup cloud otomatis, dokumen aman dari bencana fisik</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−99%</strong><span>Waktu cari dokumen lama (1 jam → &lt;5 detik)</span></div>
+      <div class="met"><strong>0</strong><span>Risiko kehilangan dokumen fisik</span></div>
+      <div class="met"><strong>−70%</strong><span>Permintaan copy dokumen manual</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mLch LIVE CHAT -->
+<div class="ov" id="mLch" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dbeafe">💬</div><div class="mhtxt"><h2>Live Chat — Chat di Website</h2><p>Konversasi realtime dengan pengunjung website</p></div><button class="mcl" onclick="cm('mLch')">✕</button></div>
+  <div class="mb">
+    <p>Modul Live Chat menambahkan widget chat di website Odoo untuk berkomunikasi langsung dengan pengunjung. Agen menjawab dari dashboard Odoo Discuss, dan percakapan bisa dikonversi ke lead CRM atau tiket Helpdesk secara otomatis.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Widget pop-up</strong> — muncul otomatis setelah pengunjung X detik di halaman tertentu</li>
+      <li><strong>Chatbot</strong> — auto-reply jam di luar jam kerja, kumpulkan nama &amp; email pengunjung</li>
+      <li><strong>Konversi ke lead/tiket</strong> — 1 klik ubah percakapan menjadi lead CRM atau tiket support</li>
+      <li><strong>Riwayat chat</strong> — semua percakapan tersimpan &amp; terhubung ke profil kontak</li>
+    </ul>
+    <h3>Studi Kasus — Toko Online Elektronik Mega</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Konversi pengunjung website naik dengan live chat proaktif</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Pengunjung hanya bisa hubungi via form email — respon &gt;24 jam</li><li>Calon pembeli kabur karena tidak ada yang bisa ditanya</li><li>Tidak ada data pengunjung yang meninggalkan website</li><li>80% leads dari website tidak pernah ditindaklanjuti</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Live Chat</div><ul><li>Agen menjawab pertanyaan dalam &lt;2 menit</li><li>Chatbot kumpulkan email pengunjung di luar jam kerja</li><li>Percakapan hot prospect langsung jadi lead di CRM</li><li>Pengunjung yang bertanya 5× lebih mungkin beli</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>+5×</strong><span>Konversi pengunjung chat vs tidak chat</span></div>
+      <div class="met"><strong>−85%</strong><span>Waktu respon pertanyaan pelanggan</span></div>
+      <div class="met"><strong>+28%</strong><span>Lead masuk dari website per bulan</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mApt APPOINTMENTS -->
+<div class="ov" id="mApt" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fce7f3">📆</div><div class="mhtxt"><h2>Appointments — Booking Online</h2><p>Pelanggan booking jadwal sendiri 24/7</p></div><button class="mcl" onclick="cm('mApt')">✕</button></div>
+  <div class="mb">
+    <p>Modul Appointments memungkinkan pelanggan memesan janji temu secara online kapan saja — sesuai ketersediaan staf yang dikonfigurasi. Konfirmasi, reminder, dan reschedule berjalan otomatis, menghemat waktu admin yang biasanya dihabiskan untuk koordinasi jadwal.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Halaman booking publik</strong> — pelanggan pilih layanan, tanggal, jam, &amp; staf</li>
+      <li><strong>Sinkronisasi kalender</strong> — terhubung ke Google Calendar / Outlook staf</li>
+      <li><strong>Reminder otomatis</strong> — email/SMS H-1 &amp; H-2 jam sebelum appointment</li>
+      <li><strong>Buffer waktu</strong> — atur jeda antar appointment untuk persiapan</li>
+    </ul>
+    <h3>Studi Kasus — Klinik Kecantikan Aura (4 dokter, 80+ konsultasi/hari)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Booking via telepon & WhatsApp ke self-service online 24/7</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Booking via telepon &amp; WA — 1 staf khusus untuk ini saja</li><li>Double-booking sering terjadi karena catatan terpisah per dokter</li><li>No-show rate 25% — tidak ada reminder otomatis</li><li>Klinik tutup = tidak bisa terima booking</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Appointments</div><ul><li>Pasien booking sendiri via website 24/7</li><li>Kalender 4 dokter tersinkronisasi — tidak ada double-booking</li><li>Reminder otomatis H-1 → no-show rate turun drastis</li><li>Staf booking dialihkan ke tugas pelayanan langsung</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−75%</strong><span>No-show rate (25% → 6%)</span></div>
+      <div class="met"><strong>+40%</strong><span>Kapasitas konsultasi terisi</span></div>
+      <div class="met"><strong>1 staf</strong><span>Dibebaskan dari tugas booking manual</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mEln ELEARNING -->
+<div class="ov" id="mEln" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fef3c7">🎓</div><div class="mhtxt"><h2>eLearning — Platform Kursus Online</h2><p>LMS terintegrasi: kursus, kuis, &amp; sertifikat</p></div><button class="mcl" onclick="cm('mEln')">✕</button></div>
+  <div class="mb">
+    <p>Modul eLearning menyediakan Learning Management System (LMS) yang terintegrasi langsung di website Odoo — buat kursus, upload video/materi, buat kuis, dan terbitkan sertifikat otomatis saat peserta lulus. Cocok untuk pelatihan karyawan internal maupun kursus berbayar untuk pelanggan.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Builder kursus</strong> — susun modul, slide, video, &amp; dokumen PDF per chapter</li>
+      <li><strong>Kuis interaktif</strong> — nilai minimum untuk lanjut ke chapter berikutnya</li>
+      <li><strong>Sertifikat otomatis</strong> — PDF sertifikat ter-generate saat peserta lulus</li>
+      <li><strong>Kursus berbayar</strong> — integrasi dengan eCommerce &amp; payment gateway</li>
+    </ul>
+    <h3>Studi Kasus — Lembaga Pelatihan Profesional Indonesia (B2B training)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Migrasi 20 kursus dari Zoom/LMS terpisah ke Odoo eLearning</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Kursus via Zoom — peserta harus hadir on-time, tidak bisa replay</li><li>Materi dikirim via email satu per satu ke peserta</li><li>Sertifikat dibuat manual di Word, tandatangan fisik, kirim pos</li><li>Tidak ada data siapa sudah selesai kursus mana</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo eLearning</div><ul><li>Peserta akses kursus kapan saja, di perangkat apa saja</li><li>Semua materi tersusun rapi per chapter di platform</li><li>Sertifikat digital ter-generate otomatis saat lulus</li><li>Dashboard completion rate per kursus &amp; peserta</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>+3×</strong><span>Kapasitas peserta tanpa biaya tambahan</span></div>
+      <div class="met"><strong>−90%</strong><span>Waktu admin distribusi materi &amp; sertifikat</span></div>
+      <div class="met"><strong>+65%</strong><span>Completion rate kursus (self-paced)</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mFrm FORUM -->
+<div class="ov" id="mFrm" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f5f3ff">💭</div><div class="mhtxt"><h2>Forum — Diskusi Komunitas</h2><p>Platform Q&amp;A &amp; diskusi terintegrasi di website</p></div><button class="mcl" onclick="cm('mFrm')">✕</button></div>
+  <div class="mb">
+    <p>Modul Forum menambahkan platform diskusi Q&amp;A (seperti Stack Overflow) di website Odoo — pelanggan atau komunitas bisa bertanya, menjawab, dan vote jawaban terbaik. Konten forum meningkatkan SEO dan mengurangi beban tim support.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Q&amp;A terintegrasi</strong> — pertanyaan, jawaban, voting, &amp; mark sebagai "Terjawab"</li>
+      <li><strong>Gamifikasi</strong> — poin &amp; karma untuk kontributor aktif</li>
+      <li><strong>Tag &amp; kategori</strong> — organisir diskusi berdasarkan topik</li>
+      <li><strong>Moderasi</strong> — filter spam, hide post, ban user dari dashboard backend</li>
+    </ul>
+    <h3>Studi Kasus — Komunitas Developer Indonesia (Platform Tech)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Dari grup Telegram 5.000 member ke forum terstruktur</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum (Telegram Group)</div><ul><li>Pertanyaan tenggelam di antara pesan lain dalam jam</li><li>Tidak bisa cari jawaban lama — semua menguap</li><li>Anggota aktif tidak mendapat pengakuan</li><li>Moderasi sulit, spam dan iklan sering muncul</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Forum</div><ul><li>Pertanyaan terstruktur, jawaban terbaik di-pin otomatis</li><li>Search engine — cari jawaban lama dalam detik</li><li>Karma &amp; badge untuk kontributor aktif</li><li>Moderasi terpusat, konten spam dihapus otomatis</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−60%</strong><span>Pertanyaan berulang ke tim support</span></div>
+      <div class="met"><strong>3×</strong><span>Konten terindeks Google vs grup Telegram</span></div>
+      <div class="met"><strong>+85%</strong><span>Anggota aktif berkontribusi jawaban</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mBlg BLOG -->
+<div class="ov" id="mBlg" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fef3c7">✍️</div><div class="mhtxt"><h2>Blog — Pengelolaan Konten</h2><p>Publish artikel &amp; konten marketing terintegrasi website</p></div><button class="mcl" onclick="cm('mBlg')">✕</button></div>
+  <div class="mb">
+    <p>Modul Blog di Odoo Website memungkinkan pembuatan &amp; pengelolaan artikel blog langsung dari backend Odoo — dengan SEO tools bawaan, jadwal publish, dan CTA terintegrasi ke produk atau form lead generation.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Editor WYSIWYG</strong> — tulis &amp; format artikel langsung di website (no HTML needed)</li>
+      <li><strong>SEO tools</strong> — meta title, description, &amp; keyword suggestion bawaan</li>
+      <li><strong>Jadwal publish</strong> — tulis sekarang, publish otomatis di tanggal tertentu</li>
+      <li><strong>CTA terintegrasi</strong> — sisipkan form lead, produk eCommerce, atau tombol appointment</li>
+    </ul>
+    <h3>Studi Kasus — Agensi Digital Marketing "Kreasi Digital"</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Content marketing dari WordPress terpisah ke Odoo terintegrasi</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum (WordPress terpisah)</div><ul><li>Blog di WordPress, CRM di sistem lain — tidak terhubung</li><li>Tidak tahu artikel mana yang menghasilkan lead terbanyak</li><li>Update produk harus dilakukan di 2 tempat berbeda</li><li>Lead dari blog diinput manual ke CRM</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Blog</div><ul><li>Blog &amp; CRM dalam 1 sistem — lead artikel langsung ke pipeline</li><li>Analytics: artikel mana → berapa lead → berapa konversi</li><li>Update produk di Odoo → otomatis tampil di blog CTA</li><li>Jadwal konten 1 bulan ke depan, publish otomatis</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>+120%</strong><span>Lead organik dari blog per bulan</span></div>
+      <div class="met"><strong>−100%</strong><span>Input lead manual dari artikel</span></div>
+      <div class="met"><strong>2×</strong><span>Produktivitas tim konten (satu platform)</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mDsc DISCUSS -->
+<div class="ov" id="mDsc" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dbeafe">💬</div><div class="mhtxt"><h2>Discuss — Komunikasi Internal Tim</h2><p>Chat, channel, &amp; notifikasi terintegrasi Odoo</p></div><button class="mcl" onclick="cm('mDsc')">✕</button></div>
+  <div class="mb">
+    <p>Modul Discuss adalah platform komunikasi internal Odoo — menggantikan kebutuhan Slack/Teams untuk diskusi seputar pekerjaan. Setiap record Odoo (SO, proyek, tiket) memiliki chatter bawaan sehingga konteks diskusi selalu terhubung ke data.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Channel &amp; DM</strong> — channel per departemen/proyek, pesan langsung antar karyawan</li>
+      <li><strong>Chatter di record</strong> — diskusi &amp; log aktivitas langsung di SO, task, tiket, dsb.</li>
+      <li><strong>Mention &amp; notifikasi</strong> — @mention kolega, notifikasi realtime di browser/mobile</li>
+      <li><strong>Voice &amp; video call</strong> — panggilan langsung dari Discuss tanpa software eksternal</li>
+    </ul>
+    <h3>Studi Kasus — Startup Remote-First "TechNova" (50 karyawan, 3 kota)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Koordinasi tim remote: dari multi-tools ke Odoo Discuss terintegrasi</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>WA untuk chat, email untuk update SO, Trello untuk task — 3 tools</li><li>Konteks proyek terpencar — harus cari di 3 tempat berbeda</li><li>Notifikasi penting tenggelam di antara notif WA pribadi</li><li>Biaya berlangganan Slack + alat lain Rp 8 juta/bulan</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Discuss</div><ul><li>Satu aplikasi untuk chat, task, SO, &amp; tiket</li><li>Diskusi SO langsung di record SO — konteks tidak hilang</li><li>Notifikasi hanya dari hal relevan pekerjaan</li><li>Termasuk dalam Odoo — tidak ada biaya tambahan</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>Rp 8jt</strong><span>Hemat biaya tools komunikasi/bulan</span></div>
+      <div class="met"><strong>−45%</strong><span>Waktu cari konteks diskusi lama</span></div>
+      <div class="met"><strong>+30%</strong><span>Respon antar tim lebih cepat</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mCal CALENDAR -->
+<div class="ov" id="mCal" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dbeafe">📅</div><div class="mhtxt"><h2>Calendar — Kalender &amp; Jadwal</h2><p>Meeting, kegiatan, &amp; sinkronisasi Google/Outlook</p></div><button class="mcl" onclick="cm('mCal')">✕</button></div>
+  <div class="mb">
+    <p>Modul Calendar Odoo terintegrasi dengan seluruh aktivitas di sistem — jadwal meeting, follow-up CRM, deadline proyek, hingga appointment pelanggan semuanya tampil dalam satu kalender terpadu. Sinkronisasi dua arah dengan Google Calendar dan Outlook.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Kalender terpadu</strong> — aktivitas dari CRM, Proyek, &amp; Helpdesk tampil bersama</li>
+      <li><strong>Undang peserta</strong> — kirim undangan meeting, peserta konfirmasi via email</li>
+      <li><strong>Sinkronisasi 2 arah</strong> — Google Calendar / Outlook selalu update dengan kalender Odoo</li>
+      <li><strong>Reminder</strong> — notifikasi pop-up &amp; email sebelum meeting dimulai</li>
+    </ul>
+    <h3>Studi Kasus — Firma Konsultan Manajemen (25 konsultan, klien di 5 kota)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Jadwal 25 konsultan: dari konflik meeting ke visibilitas penuh</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Setiap konsultan punya kalender Google sendiri, tidak terhubung</li><li>Booking meeting harus tanya satu per satu ketersediaan</li><li>Jadwal meeting klien tidak terhubung ke data CRM/proyek</li><li>Konflik jadwal baru ketahuan saat hari H</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Calendar</div><ul><li>Lihat ketersediaan semua konsultan dalam satu tampilan</li><li>Booking meeting langsung dari record CRM pelanggan</li><li>Sinkronisasi Google Calendar — semua konsultan update realtime</li><li>Deteksi konflik otomatis saat buat jadwal baru</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−80%</strong><span>Waktu koordinasi jadwal meeting</span></div>
+      <div class="met"><strong>0</strong><span>Konflik jadwal tidak terdeteksi</span></div>
+      <div class="met"><strong>+25%</strong><span>Produktivitas konsultan (lebih banyak meeting klien)</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mCnt CONTACTS -->
+<div class="ov" id="mCnt" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f5f3ff">👤</div><div class="mhtxt"><h2>Contacts — Direktori Kontak</h2><p>Database pelanggan, vendor, &amp; mitra terpusat</p></div><button class="mcl" onclick="cm('mCnt')">✕</button></div>
+  <div class="mb">
+    <p>Modul Contacts adalah pusat data semua relasi bisnis dalam Odoo — pelanggan, vendor, mitra, karyawan, dan prospek. Setiap kontak menampilkan riwayat lengkap: SO, invoice, tiket, meeting, email, dan aktivitas — semuanya dalam satu profil.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Profil lengkap</strong> — perusahaan induk, kontak anak, NPWP, bank, &amp; custom fields</li>
+      <li><strong>Riwayat 360°</strong> — semua transaksi, komunikasi, &amp; aktivitas per kontak</li>
+      <li><strong>Import/Export</strong> — import dari Excel/CSV, sinkronisasi dengan sistem lain</li>
+      <li><strong>Segmentasi</strong> — filter &amp; grup kontak untuk kampanye marketing</li>
+    </ul>
+    <h3>Studi Kasus — PT. Distributor Nasional (Tim Sales B2B, 3.000+ pelanggan)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Database 3.000 pelanggan: dari Excel berisi duplikat ke Odoo terpusat</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Data pelanggan di 3 Excel berbeda per divisi — banyak duplikat</li><li>Sales tidak tahu riwayat pembelian pelanggan sebelum meeting</li><li>Update data pelanggan di satu file tidak terupdate di file lain</li><li>Tidak ada gambaran siapa pelanggan terbesar &amp; paling loyal</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Contacts</div><ul><li>Satu database kontak untuk semua divisi, tanpa duplikat</li><li>Sales buka profil pelanggan → lihat semua SO &amp; riwayat sebelum meeting</li><li>Update di satu tempat → langsung berlaku di seluruh sistem</li><li>Segmentasi: filter pelanggan dengan transaksi &gt; Rp 100 juta/thn</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−100%</strong><span>Duplikat data pelanggan</span></div>
+      <div class="met"><strong>+40%</strong><span>Efektivitas meeting sales (persiapan lebih baik)</span></div>
+      <div class="met"><strong>1 sumber</strong><span>Data tunggal untuk semua divisi</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mIoT IOT -->
+<div class="ov" id="mIoT" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#ccfbf1">🔌</div><div class="mhtxt"><h2>IoT — Internet of Things</h2><p>Hubungkan perangkat fisik langsung ke Odoo</p></div><button class="mcl" onclick="cm('mIoT')">✕</button></div>
+  <div class="mb">
+    <p>Modul IoT (via IoT Box) menghubungkan perangkat fisik — timbangan, printer label, barcode scanner, mesin produksi, layar display — langsung ke Odoo. Data dari perangkat masuk ke Odoo secara realtime tanpa input manual.</p>
+    <h3>Perangkat yang Didukung</h3>
+    <ul>
+      <li><strong>POS peripherals</strong> — receipt printer, cash drawer, barcode reader, kartu kredit terminal</li>
+      <li><strong>Gudang</strong> — timbangan digital, scanner palet, label printer</li>
+      <li><strong>Manufaktur</strong> — mesin produksi, sensor suhu/tekanan, display work order</li>
+      <li><strong>Kustom</strong> — perangkat apapun via protokol HTTP, MQTT, atau serial</li>
+    </ul>
+    <h3>Studi Kasus — PT. Pabrik Plastik Mandiri (Smart Manufacturing)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Data produksi 12 mesin injeksi: dari catat manual ke sensor realtime</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Operator catat output mesin setiap jam di kertas log</li><li>Data produksi baru diketahui keesokan hari setelah dikompilasi</li><li>Kerusakan mesin baru ketahuan setelah kualitas produk turun</li><li>Tidak ada data akurat untuk hitung OEE mesin</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo IoT</div><ul><li>Sensor di 12 mesin kirim data output &amp; status realtime ke Odoo</li><li>Dashboard produksi update setiap menit</li><li>Alert otomatis jika mesin output &lt; threshold → cegah defect</li><li>OEE dihitung akurat berdasarkan data sensor aktual</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−100%</strong><span>Input data produksi manual</span></div>
+      <div class="met"><strong>+18%</strong><span>OEE mesin (dari monitoring realtime)</span></div>
+      <div class="met"><strong>−65%</strong><span>Produk cacat karena anomali mesin tidak terdeteksi</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mSgn SIGN -->
+<div class="ov" id="mSgn" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f5f3ff">✍️</div><div class="mhtxt"><h2>Sign — Tanda Tangan Digital</h2><p>Kontrak &amp; dokumen ditandatangani online</p></div><button class="mcl" onclick="cm('mSgn')">✕</button></div>
+  <div class="mb">
+    <p>Modul Sign (Enterprise) memungkinkan pengiriman dokumen PDF untuk ditandatangani secara digital — sah secara hukum, dengan audit trail lengkap. Cocok untuk kontrak penjualan, NDA, perjanjian kerja, dan dokumen legal lainnya.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Template dokumen</strong> — definisikan posisi tanda tangan, nama, tanggal di template</li>
+      <li><strong>Multi-signer</strong> — kirim ke beberapa pihak, tentukan urutan tanda tangan</li>
+      <li><strong>Audit trail</strong> — log lengkap: siapa buka, kapan, dari IP mana, kapan ditandatangani</li>
+      <li><strong>Integrasi Sales</strong> — kirim penawaran untuk ditandatangani langsung dari modul Sales</li>
+    </ul>
+    <h3>Studi Kasus — PT. Properti Nusantara (PPJB &amp; kontrak sewa)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Kontrak PPJB &amp; sewa properti: dari tanda tangan fisik ke digital</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Dokumen dicetak, dikirim pos/kurir ke pembeli, tunggu balik</li><li>Proses tanda tangan 5–14 hari untuk klien luar kota</li><li>Dokumen asli sering hilang atau rusak dalam perjalanan</li><li>Tidak ada bukti kapan tepatnya dokumen ditandatangani</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Sign</div><ul><li>Link dokumen dikirim via email, ditandatangani di browser</li><li>Proses selesai dalam jam, bukan minggu</li><li>Dokumen tersimpan digital, tidak bisa hilang</li><li>Audit trail: bukti hukum kapan &amp; siapa menandatangani</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−95%</strong><span>Waktu proses tanda tangan kontrak</span></div>
+      <div class="met"><strong>−100%</strong><span>Biaya cetak, pos &amp; kurir dokumen</span></div>
+      <div class="met"><strong>+40%</strong><span>Deal closed lebih cepat karena tidak ada hambatan TTD</span></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- mSpr SPREADSHEET -->
+<div class="ov" id="mSpr" onclick="cbg(event,this)"><div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dcfce7">📊</div><div class="mhtxt"><h2>Spreadsheet — Analisis Data Terintegrasi</h2><p>Excel-like langsung terhubung ke data Odoo</p></div><button class="mcl" onclick="cm('mSpr')">✕</button></div>
+  <div class="mb">
+    <p>Odoo Spreadsheet adalah tool analisis data seperti Excel/Google Sheets yang terintegrasi langsung ke data Odoo realtime — tanpa perlu export/import. Buat dashboard, laporan keuangan, analisis penjualan, dan pivot table dengan data yang selalu up-to-date.</p>
+    <h3>Fitur Utama</h3>
+    <ul>
+      <li><strong>Koneksi data realtime</strong> — formula Odoo langsung ambil data dari modul Sales, Accounting, dsb.</li>
+      <li><strong>Pivot &amp; chart</strong> — buat pivot table &amp; grafik dari data transaksi Odoo</li>
+      <li><strong>Collaborative</strong> — beberapa user edit spreadsheet bersama secara realtime</li>
+      <li><strong>Template</strong> — template laporan keuangan, cashflow, &amp; P&amp;L siap pakai</li>
+    </ul>
+    <h3>Studi Kasus — Divisi Finance PT. Multi Grup (Konglomerasi 5 anak usaha)</h3>
+    <div class="case-hd"><div class="clabel">Komparasi Sebelum vs Sesudah</div><h4>Laporan konsolidasi 5 anak usaha: dari export manual ke Odoo Spreadsheet</h4></div>
+    <div class="ba">
+      <div class="ba-b"><div class="ba-lbl">❌ Sebelum</div><ul><li>Export data 5 anak usaha ke Excel → gabungkan manual tiap bulan</li><li>Proses konsolidasi 3 hari karena format berbeda-beda</li><li>Error formula Excel ditemukan setelah laporan dikirim ke direksi</li><li>Data sudah "basi" saat laporan jadi karena lambat prosesnya</li></ul></div>
+      <div class="ba-a"><div class="ba-lbl">✅ Sesudah Odoo Spreadsheet</div><ul><li>Formula terhubung langsung ke Accounting 5 anak usaha</li><li>Laporan konsolidasi update otomatis setiap hari</li><li>Tidak ada export/import — tidak ada risiko error formula</li><li>CFO buka spreadsheet kapan saja, data selalu realtime</li></ul></div>
+    </div>
+    <div class="mets">
+      <div class="met"><strong>−100%</strong><span>Waktu kompilasi manual (3 hari → 0)</span></div>
+      <div class="met"><strong>0</strong><span>Error formula dari copy-paste Excel</span></div>
+      <div class="met"><strong>Realtime</strong><span>Data selalu terkini untuk direksi</span></div>
+    </div>
+  </div>
+</div></div>
+
+<script>
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden'}
+function cm(id){document.getElementById(id).classList.remove('open');document.body.style.overflow=''}
+function cbg(e,el){if(e.target===el)cm(el.id)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.ov.open').forEach(o=>cm(o.id))})
+</script>
+</body>
+</html>
