@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Simulasi MRP Odoo 19 — Supply Chain Management</title>
+<style>
+:root{--p:#714B67;--g:#16a34a;--b:#2563eb;--o:#ea580c;--r:#dc2626;--y:#d97706;--t:#111827;--m:#6b7280;--bg:#f3f4f6;--card:#fff;--bd:#e5e7eb}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--t);font-size:.9rem;line-height:1.6}
+.top{background:linear-gradient(135deg,#1e3a5f,#714B67);color:#fff}
+.top-inner{max-width:1200px;margin:0 auto;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.top-brand{display:flex;align-items:center;gap:12px}
+.top-logo{width:42px;height:42px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.top-name{font-size:1.1rem;font-weight:800}.top-sub{font-size:.75rem;opacity:.7;margin-top:1px}
+.top-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 14px;font-size:.78rem;font-weight:700}
+.ctrl{background:#fff;border-bottom:2px solid var(--bd);padding:12px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.ctrl-inner{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ctrl label{font-size:.8rem;font-weight:700;color:var(--m)}
+.qty-box{display:flex;align-items:center;gap:8px}
+.qty-box input{width:80px;padding:7px 10px;border:2px solid var(--bd);border-radius:8px;font-size:.95rem;font-weight:700;text-align:center;outline:none}
+.qty-box input:focus{border-color:var(--p)}
+.btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:.83rem;transition:all .15s}
+.btn-primary{background:var(--p);color:#fff}.btn-primary:hover{background:#5a3a52}
+.btn-outline{background:#fff;border:2px solid var(--bd);color:var(--t)}.btn-outline:hover{border-color:var(--p);color:var(--p)}
+.ctrl-info{margin-left:auto;display:flex;gap:16px;flex-wrap:wrap}
+.ci{text-align:center}.ci-v{font-size:1.1rem;font-weight:900;color:var(--p)}.ci-l{font-size:.68rem;color:var(--m);text-transform:uppercase;letter-spacing:.05em}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.tab-nav{display:flex;gap:4px;padding:16px 0 0;overflow-x:auto}
+.tab-btn{padding:9px 18px;border:none;border-radius:8px 8px 0 0;cursor:pointer;font-weight:700;font-size:.82rem;background:#e5e7eb;color:var(--m);white-space:nowrap;transition:all .15s;border-bottom:3px solid transparent}
+.tab-btn.active{background:#fff;color:var(--p);border-bottom:3px solid var(--p)}
+.tab-content{display:none;background:#fff;border-radius:0 12px 12px 12px;border:1px solid var(--bd);padding:24px;margin-bottom:24px}
+.tab-content.active{display:block}
+.sec-title{font-size:1rem;font-weight:800;margin-bottom:4px;color:var(--t)}
+.sec-sub{font-size:.8rem;color:var(--m);margin-bottom:16px}
+.tbl{width:100%;border-collapse:collapse;font-size:.83rem}
+.tbl th{background:#f9fafb;text-align:left;padding:9px 12px;font-weight:700;border-bottom:2px solid var(--bd);color:var(--t);white-space:nowrap}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.tbl tbody tr:hover td{background:#fafafa}
+.tbl tfoot td{background:#f9fafb;font-weight:700;border-top:2px solid var(--bd)}
+.num{text-align:right;font-variant-numeric:tabular-nums}.mono{font-family:monospace;font-size:.85rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700}
+.badge-ok{background:#dcfce7;color:#166534}.badge-warn{background:#fef3c7;color:#92400e}
+.badge-err{background:#fee2e2;color:#991b1b}.badge-info{background:#dbeafe;color:#1e40af}.badge-gray{background:#f3f4f6;color:#374151}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:16px;border-left:4px solid var(--p)}
+.kpi.green{border-left-color:var(--g)}.kpi.blue{border-left-color:var(--b)}.kpi.orange{border-left-color:var(--o)}.kpi.red{border-left-color:var(--r)}
+.kpi-label{font-size:.7rem;color:var(--m);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.kpi-val{font-size:1.35rem;font-weight:900;color:var(--t);line-height:1}.kpi-sub{font-size:.7rem;color:var(--m);margin-top:3px}
+.bom-level2 td{color:var(--m)}.bom-level2 td:first-child{padding-left:36px}
+.bom-badge{background:#ede9fe;color:#5b21b6;border-radius:6px;padding:1px 7px;font-size:.7rem;font-weight:700;margin-left:6px}
+.alert{border-radius:10px;padding:12px 16px;margin:12px 0;font-size:.83rem;line-height:1.6}
+.alert.info{background:#eff6ff;border-left:4px solid #3b82f6;color:#1e40af}
+.alert.warn{background:#fffbeb;border-left:4px solid #f59e0b;color:#92400e}
+.alert.ok{background:#f0fdf4;border-left:4px solid #22c55e;color:#166534}
+.formula{background:#1e1e2e;color:#cdd6f4;border-radius:10px;padding:14px 16px;font-family:monospace;font-size:.8rem;line-height:1.9;margin:12px 0;overflow-x:auto}
+.formula .kw{color:#cba6f7}.formula .val{color:#fab387}.formula .cmt{color:#6c7086}
+.gantt-wrap{overflow-x:auto}
+.gantt{width:100%;border-collapse:collapse;font-size:.78rem;min-width:680px}
+.gantt th{padding:7px 10px;background:#f9fafb;border:1px solid var(--bd);font-weight:700;text-align:center;white-space:nowrap}
+.gantt td{border:1px solid var(--bd);padding:5px 8px}
+.gantt .wc-name{font-weight:700;background:#f9fafb;padding:7px 12px;white-space:nowrap}
+.gantt .day-hdr{font-size:.68rem;color:var(--m);font-weight:400}
+.g-block{border-radius:5px;padding:3px 6px;text-align:center;font-size:.72rem;font-weight:700;color:#fff}
+.g-weld{background:#e74c3c}.g-assm{background:#2563eb}.g-qc{background:#16a34a}.g-pack{background:#d97706}.g-idle{background:#f3f4f6;color:#9ca3af;font-weight:400;text-align:center;font-size:.72rem;padding:3px 6px;border-radius:5px}
+.cost-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.cost-label{width:200px;font-size:.82rem;flex-shrink:0}
+.cost-bar-wrap{flex:1;background:#f3f4f6;border-radius:4px;height:22px;overflow:hidden}
+.cost-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:.72rem;font-weight:700;color:#fff;transition:width .5s;min-width:40px}
+.cost-value{width:110px;text-align:right;font-size:.82rem;font-weight:700;flex-shrink:0}
+.mat-bar{background:#2563eb}.lab-bar{background:#714B67}.ovh-bar{background:#d97706}.mgn-bar{background:#16a34a}
+.price-card{background:linear-gradient(135deg,#1e3a5f,#714B67);color:#fff;border-radius:14px;padding:20px;margin-top:20px}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.price-item{text-align:center;background:rgba(255,255,255,.1);border-radius:10px;padding:14px}
+.price-val{font-size:1.25rem;font-weight:900}.price-lbl{font-size:.72rem;opacity:.8;margin-top:3px}
+.wc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.wc-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px}
+.wc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.wc-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.wc-id{font-size:.68rem;font-weight:700;color:var(--m);letter-spacing:.06em}.wc-nm{font-size:.9rem;font-weight:800}
+.wc-row{display:flex;justify-content:space-between;font-size:.78rem;margin-top:6px}
+.wc-row-label{color:var(--m)}.wc-row-val{font-weight:700}
+.util-bar{height:7px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin:6px 0}
+.util-fill{height:100%;border-radius:3px;background:var(--b)}
+@media(max-width:700px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.price-grid{grid-template-columns:1fr}.wc-grid{grid-template-columns:1fr}.ctrl-info{display:none}}
+
+/* MODULE BAR */
+.mod-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-size:.78rem}
+.mod-bar-label{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--m);margin-right:4px;white-space:nowrap}
+.mod-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:.73rem;font-weight:700;white-space:nowrap}
+.mc-mrp{background:#f3e8ff;color:#7c3aed;border:1px solid #e9d5ff}
+.mc-inv{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
+.mc-pur{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.mc-acc{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.mc-qc{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.mc-pln{background:#fce7f3;color:#9d174d;border:1px solid #fbcfe8}
+.mc-mnt{background:#f3f4f6;color:#374151;border:1px solid #e5e7eb}
+.mod-path{font-size:.72rem;color:var(--m);font-family:monospace;margin-left:auto}
+/* MODULE INTEGRATION TABLE */
+.mod-table{width:100%;border-collapse:collapse;font-size:.82rem;margin:12px 0}
+.mod-table th{background:#f9fafb;text-align:left;padding:9px 12px;font-weight:700;border-bottom:2px solid var(--bd);font-size:.78rem}
+.mod-table td{padding:8px 12px;border-bottom:1px solid var(--bd);vertical-align:top}
+.mod-table tr:hover td{background:#fafafa}
+.flow-diagram{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:16px 0;padding:16px;background:#f8fafc;border:1px solid var(--bd);border-radius:12px}
+.flow-node{background:#fff;border:2px solid var(--bd);border-radius:10px;padding:8px 14px;text-align:center;font-size:.78rem;font-weight:700;min-width:110px}
+.flow-node .fn-module{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.flow-node .fn-name{font-size:.78rem}
+.flow-arrow{color:#9ca3af;font-size:1.2rem;font-weight:900;flex-shrink:0}
+.fn-mrp{border-color:#7c3aed;background:#faf5ff}.fn-mrp .fn-module{color:#7c3aed}
+.fn-inv{border-color:#2563eb;background:#eff6ff}.fn-inv .fn-module{color:#2563eb}
+.fn-pur{border-color:#16a34a;background:#f0fdf4}.fn-pur .fn-module{color:#16a34a}
+.fn-acc{border-color:#d97706;background:#fffbeb}.fn-acc .fn-module{color:#d97706}
+.fn-qc{border-color:#0369a1;background:#f0f9ff}.fn-qc .fn-module{color:#0369a1}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="top-inner">
+  <div class="top-brand">
+    <div class="top-logo">🏭</div>
+    <div><div class="top-name">PT. Furni Ergonomis Indonesia</div><div class="top-sub">Simulasi MRP Odoo 19 · Supply Chain Management</div></div>
+  </div>
+  <div class="top-badge">📚 Mata Kuliah SCM — Simulasi Interaktif</div>
+</div></div>
+
+<div class="ctrl"><div class="ctrl-inner">
+  <div class="qty-box">
+    <label>Jumlah Produksi (unit):</label>
+    <input type="number" id="qty" value="15" min="1" max="100" onchange="recalc()"/>
+  </div>
+  <button class="btn btn-primary" onclick="recalc()">▶ Jalankan MRP</button>
+  <button class="btn btn-outline" onclick="setQ(10)">10</button>
+  <button class="btn btn-outline" onclick="setQ(20)">20</button>
+  <button class="btn btn-outline" onclick="setQ(50)">50</button>
+  <div class="ctrl-info">
+    <div class="ci"><div class="ci-v" id="hdr-cost">—</div><div class="ci-l">Biaya/Unit</div></div>
+    <div class="ci"><div class="ci-v" id="hdr-total">—</div><div class="ci-l">Total Biaya</div></div>
+    <div class="ci"><div class="ci-v" id="hdr-lt">—</div><div class="ci-l">Lead Time</div></div>
+    <div class="ci"><div class="ci-v" id="hdr-margin">—</div><div class="ci-l">Gross Margin</div></div>
+  </div>
+</div></div>
+
+<div class="wrap">
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab-btn" onclick="showTab('bom',this)">📋 Bill of Materials</button>
+  <button class="tab-btn" onclick="showTab('stock',this)">📦 Stok &amp; MRP</button>
+  <button class="tab-btn" onclick="showTab('schedule',this)">📅 Penjadwalan Produksi</button>
+  <button class="tab-btn" onclick="showTab('workcenter',this)">🔧 Work Center</button>
+  <button class="tab-btn" onclick="showTab('cost',this)">💰 Analisis Biaya &amp; Harga</button>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div class="tab-content active" id="tab-dashboard">
+  <div class="sec-title">Manufacturing Order — MO/2025/04-001</div>
+  <div class="sec-sub">Kursi Kantor Ergonomis Pro-X · Status: <span class="badge badge-info">Terkonfirmasi</span> · Tanggal Mulai: Senin, 28 Apr 2025</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Jumlah Produksi</div><div class="kpi-val" id="kpi-qty">15</div><div class="kpi-sub">unit Kursi Ergonomis</div></div>
+    <div class="kpi green"><div class="kpi-label">Biaya Material</div><div class="kpi-val" id="kpi-mat">—</div><div class="kpi-sub">total semua komponen BOM</div></div>
+    <div class="kpi blue"><div class="kpi-label">Biaya Tenaga Kerja</div><div class="kpi-val" id="kpi-lab">—</div><div class="kpi-sub">4 work center</div></div>
+    <div class="kpi orange"><div class="kpi-label">Overhead Pabrik</div><div class="kpi-val" id="kpi-ovh">—</div><div class="kpi-sub">35% dari BTK</div></div>
+    <div class="kpi"><div class="kpi-label">HPP Total</div><div class="kpi-val" id="kpi-hpp">—</div><div class="kpi-sub" id="kpi-hppunit">= — / unit</div></div>
+    <div class="kpi green"><div class="kpi-label">Revenue (target)</div><div class="kpi-val" id="kpi-rev">—</div><div class="kpi-sub">@ Rp 1.250.000 / unit</div></div>
+    <div class="kpi green"><div class="kpi-label">Gross Profit</div><div class="kpi-val" id="kpi-gp">—</div><div class="kpi-sub" id="kpi-gppct">margin —%</div></div>
+    <div class="kpi blue"><div class="kpi-label">Lead Time</div><div class="kpi-val" id="kpi-lt">—</div><div class="kpi-sub">hari kerja (1 shift)</div></div>
+  </div>
+  <div class="sec-title">Produk</div>
+  <table class="tbl" style="margin-bottom:20px"><thead><tr><th>Nama Produk</th><th>Kode</th><th>Kategori</th><th>Rute</th><th class="num">Harga Jual</th><th>Status</th></tr></thead>
+  <tbody><tr><td><strong>Kursi Kantor Ergonomis Pro-X</strong></td><td class="mono">FEI-CHAIR-PROX</td><td>Furnitur Kantor</td><td>Make to Order (MTO)</td><td class="num"><strong>Rp 1.250.000</strong></td><td><span class="badge badge-ok">Aktif</span></td></tr></tbody></table>
+
+  <div class="sec-title">Integrasi Modul Odoo 19 dalam Proses Simulasi</div>
+  <div class="sec-sub" style="margin-bottom:10px">Alur data antar modul saat Manufacturing Order diproses</div>
+  <div class="flow-diagram">
+    <div class="flow-node fn-pur"><div class="fn-module">Purchase</div><div class="fn-name">🛒 Auto PO<br><span style="font-size:.68rem;color:#6b7280">jika stok kurang</span></div></div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node fn-inv"><div class="fn-module">Inventory</div><div class="fn-name">📦 Stok Bahan<br><span style="font-size:.68rem;color:#6b7280">raw material</span></div></div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node fn-mrp"><div class="fn-module">Manufacturing</div><div class="fn-name">🏭 MO + BOM<br><span style="font-size:.68rem;color:#6b7280">work orders</span></div></div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node fn-inv"><div class="fn-module">Inventory</div><div class="fn-name">✅ Barang Jadi<br><span style="font-size:.68rem;color:#6b7280">finished goods</span></div></div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node fn-acc"><div class="fn-module">Accounting</div><div class="fn-name">💰 COGM<br><span style="font-size:.68rem;color:#6b7280">jurnal biaya</span></div></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px"><div class="flow-node fn-qc" style="min-width:90px;padding:6px 10px"><div class="fn-module">Quality</div><div class="fn-name" style="font-size:.72rem">🔍 Inspeksi</div></div><div class="flow-node fn-mrp" style="min-width:90px;padding:6px 10px"><div class="fn-module">Planning</div><div class="fn-name" style="font-size:.72rem">📅 Kapasitas</div></div><div class="flow-node fn-mnt" style="min-width:90px;padding:6px 10px;border-color:#9ca3af;background:#f9fafb"><div class="fn-module" style="color:#6b7280">Maintenance</div><div class="fn-name" style="font-size:.72rem">🔧 Mesin</div></div></div>
+
+  <table class="mod-table" style="margin-top:16px">
+    <thead><tr><th>Modul Odoo 19</th><th>Fungsi dalam Simulasi MRP</th><th>Navigasi di Odoo</th><th>Tab Simulasi</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mod-chip mc-mrp">🏭 Manufacturing (MRP)</span></td><td>Manufacturing Order, Bill of Materials, Work Orders, Routing, Work Center</td><td class="mono" style="font-size:.75rem">Manufacturing → Operations → Manufacturing Orders<br>Manufacturing → Products → Bills of Materials<br>Manufacturing → Configuration → Work Centers</td><td><span class="badge badge-info">Dashboard</span> <span class="badge badge-info">BOM</span> <span class="badge badge-info">Penjadwalan</span> <span class="badge badge-info">Work Center</span></td></tr>
+      <tr><td><span class="mod-chip mc-inv">📦 Inventory</span></td><td>Stok bahan baku, konsumsi material saat MO divalidasi, penerimaan barang jadi ke gudang</td><td class="mono" style="font-size:.75rem">Inventory → Products → Products<br>Inventory → Operations → Transfers<br>Inventory → Configuration → Locations</td><td><span class="badge badge-info">Stok &amp; MRP</span></td></tr>
+      <tr><td><span class="mod-chip mc-pur">🛒 Purchase</span></td><td>Auto-procurement: Odoo buat RFQ/PO otomatis saat stok bahan baku &lt; kebutuhan MRP</td><td class="mono" style="font-size:.75rem">Purchase → Orders → Purchase Orders<br>Inventory → Configuration → Reordering Rules</td><td><span class="badge badge-info">Stok &amp; MRP</span></td></tr>
+      <tr><td><span class="mod-chip mc-acc">💰 Accounting</span></td><td>Pencatatan COGM (Cost of Goods Manufactured): Dr. WIP ← Cr. Raw Material; Dr. Finished Goods ← Cr. WIP</td><td class="mono" style="font-size:.75rem">Accounting → Reporting → Profit &amp; Loss<br>Inventory → Configuration → Product Categories (costing method)</td><td><span class="badge badge-info">Analisis Biaya</span></td></tr>
+      <tr><td><span class="mod-chip mc-qc">🔍 Quality</span></td><td>Quality Control Points di setiap tahap produksi: penerimaan bahan, antar WC, sebelum pengiriman</td><td class="mono" style="font-size:.75rem">Quality → Control → Quality Control Points<br>Quality → Control → Quality Checks</td><td><span class="badge badge-info">Work Center</span></td></tr>
+      <tr><td><span class="mod-chip mc-pln">📅 Planning</span></td><td>Kapasitas work center, jadwal shift operator, visibility beban kerja harian/mingguan</td><td class="mono" style="font-size:.75rem">Manufacturing → Planning → Planning<br>Manufacturing → Configuration → Work Centers (capacity)</td><td><span class="badge badge-info">Penjadwalan</span></td></tr>
+      <tr><td><span class="mod-chip mc-mnt">🔧 Maintenance</span></td><td>Perawatan mesin work center, downtime tracking, preventive maintenance schedule</td><td class="mono" style="font-size:.75rem">Maintenance → Maintenance → Maintenance Requests<br>Maintenance → Equipment → Equipment</td><td><span class="badge badge-info">Work Center</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert info"><strong>📖 Konsep SCM — Manufacturing Order (MO)</strong><br>Manufacturing Order adalah dokumen resmi perintah produksi di Odoo. MO berisi: produk yang dibuat, jumlah, tanggal mulai/selesai, dan BOM yang digunakan. MO terhubung ke modul Inventory (konsumsi bahan) dan Accounting (pencatatan biaya) secara otomatis saat divalidasi. Satu MO menghasilkan satu atau lebih <strong>Work Orders</strong> — satu per operasi di Work Center.</div>
+</div>
+
+<!-- ══════════ BOM ══════════ -->
+<div class="tab-content" id="tab-bom">
+  <div class="mod-bar"><span class="mod-bar-label">Modul Odoo 19:</span><span class="mod-chip mc-mrp">🏭 Manufacturing (MRP)</span><span class="mod-path">Manufacturing → Products → Bills of Materials</span></div>
+  <div class="sec-title">Bill of Materials — Kursi Kantor Ergonomis Pro-X</div>
+  <div class="sec-sub">BOM/FEI-001 · 2 Level · Berlaku 1 Jan 2025 · Qty BOM: 1 unit</div>
+  <table class="tbl" id="bom-tbl">
+    <thead><tr><th>Komponen</th><th>Kode</th><th>Lvl</th><th class="num">Qty/Unit</th><th>Satuan</th><th class="num">Harga Satuan</th><th class="num">Biaya/Unit Produk</th><th class="num" id="bom-th">Total (15 unit)</th><th>Jenis</th></tr></thead>
+    <tbody id="bom-body"></tbody>
+    <tfoot><tr><td colspan="6"><strong>Total Biaya Material Langsung</strong></td><td class="num"><strong>Rp 560.000</strong></td><td class="num" id="bom-total"><strong>—</strong></td><td></td></tr></tfoot>
+  </table>
+  <div class="alert info" style="margin-top:16px"><strong>📖 Konsep SCM — Bill of Materials (BOM)</strong><br>BOM mendefinisikan SEMUA komponen dan jumlah untuk membuat 1 unit produk. BOM multi-level: ada sub-assembly (Rangka Baja) yang dibuat terpisah sebelum masuk proses utama. Odoo menggunakan BOM untuk menghitung kebutuhan material (MRP) secara otomatis — termasuk sub-assembly explosion.</div>
+  <div class="formula">
+    <span class="cmt"># Rumus MRP — Material Requirements Planning</span><br>
+    <span class="kw">Gross Requirement</span>  = Qty BOM/unit × <span class="kw">Jumlah Produksi</span><br>
+    <span class="kw">Net Requirement</span>    = Gross Requirement − Stok Tersedia + Safety Stock<br>
+    <span class="kw">Purchase Order qty</span> = <span class="kw">Net Requirement</span> jika &gt; 0 → buat PO ke vendor
+  </div>
+</div>
+
+<!-- ══════════ STOK & MRP ══════════ -->
+<div class="tab-content" id="tab-stock">
+  <div class="mod-bar"><span class="mod-bar-label">Modul Odoo 19:</span><span class="mod-chip mc-inv">📦 Inventory</span><span class="mod-chip mc-pur">🛒 Purchase</span><span class="mod-chip mc-mrp">🏭 Manufacturing</span><span class="mod-path">Inventory → Products → Products &nbsp;|&nbsp; Purchase → Orders → Purchase Orders</span></div>
+  <div class="sec-title">Material Requirements Planning (MRP)</div>
+  <div class="sec-sub">Ketersediaan stok &amp; kebutuhan pengadaan untuk <span id="mrp-qty">15</span> unit</div>
+  <table class="tbl"><thead><tr><th>Material</th><th>Satuan</th><th class="num">Stok Tersedia</th><th class="num">Kebutuhan Bruto</th><th class="num">Safety Stock (10%)</th><th class="num">Kebutuhan Neto</th><th>Status</th><th>Tindakan Odoo</th></tr></thead>
+  <tbody id="stock-body"></tbody></table>
+  <div id="stock-alert" class="alert ok" style="margin-top:14px"></div>
+  <div class="sec-title" style="margin-top:20px">Proyeksi Stok Setelah Produksi</div>
+  <table class="tbl"><thead><tr><th>Material</th><th class="num">Stok Awal</th><th class="num">Dikonsumsi</th><th class="num">Sisa Stok</th><th>Perlu Reorder?</th></tr></thead>
+  <tbody id="stock-after"></tbody></table>
+  <div class="alert info" style="margin-top:12px"><strong>📖 Konsep SCM — Safety Stock &amp; Reorder Point</strong><br><strong>Safety Stock</strong> = buffer untuk mengantisipasi ketidakpastian demand &amp; lead time supplier. Formula: SS = Z × σ_demand × √L_supplier. <strong>Reorder Point (ROP)</strong> = Demand_rata × Lead_time + Safety_stock. Odoo otomatis buat PO atau Manufacturing Order saat stok menyentuh ROP melalui fitur <em>Replenishment Rules</em>.</div>
+</div>
+
+<!-- ══════════ SCHEDULE ══════════ -->
+<div class="tab-content" id="tab-schedule">
+  <div class="mod-bar"><span class="mod-bar-label">Modul Odoo 19:</span><span class="mod-chip mc-mrp">🏭 Manufacturing — Work Orders</span><span class="mod-chip mc-pln">📅 Planning</span><span class="mod-path">Manufacturing → Operations → Work Orders &nbsp;|&nbsp; Manufacturing → Planning → Planning</span></div>
+  <div class="sec-title">Penjadwalan Produksi — Gantt Chart</div>
+  <div class="sec-sub">1 shift/hari · 8 jam/shift · Senin–Jumat · <span id="sch-qty">15</span> unit · Lead time: <span id="sch-lt">—</span> hari kerja</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+    <div class="kpi red"><div class="kpi-label">WC01 Welding</div><div class="kpi-val" id="sch-d1">—</div><div class="kpi-sub" id="sch-h1">—</div></div>
+    <div class="kpi blue"><div class="kpi-label">WC02 Assembly ⚠️ Bottleneck</div><div class="kpi-val" id="sch-d2">—</div><div class="kpi-sub" id="sch-h2">—</div></div>
+    <div class="kpi green"><div class="kpi-label">WC03 QC</div><div class="kpi-val" id="sch-d3">—</div><div class="kpi-sub" id="sch-h3">—</div></div>
+    <div class="kpi orange"><div class="kpi-label">WC04 Packaging</div><div class="kpi-val" id="sch-d4">—</div><div class="kpi-sub" id="sch-h4">—</div></div>
+  </div>
+  <div class="gantt-wrap"><table class="gantt" id="gantt-tbl"><thead id="gantt-head"></thead><tbody id="gantt-body"></tbody></table></div>
+  <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap;font-size:.78rem">
+    <span><span style="background:#e74c3c;display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:4px;vertical-align:middle"></span>WC01 Welding</span>
+    <span><span style="background:#2563eb;display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:4px;vertical-align:middle"></span>WC02 Assembly</span>
+    <span><span style="background:#16a34a;display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:4px;vertical-align:middle"></span>WC03 QC</span>
+    <span><span style="background:#d97706;display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:4px;vertical-align:middle"></span>WC04 Packaging</span>
+  </div>
+  <div class="alert info" style="margin-top:16px"><strong>📖 Konsep SCM — Bottleneck &amp; Theory of Constraints (TOC)</strong><br><strong>Bottleneck</strong> adalah work center dengan kapasitas paling rendah yang menentukan kecepatan seluruh sistem produksi. Dalam simulasi ini, <strong>WC02 Assembly</strong> adalah bottleneck (1.5 jam/unit — paling lama). Sesuai Teori TOC (Goldratt): throughput sistem = throughput bottleneck. Solusi: (1) tambah kapasitas WC02, (2) pindahkan operasi non-kritis, atau (3) kurangi downtime WC02.</div>
+  <div class="formula" id="sch-formula"></div>
+</div>
+
+<!-- ══════════ WORK CENTER ══════════ -->
+<div class="tab-content" id="tab-workcenter">
+  <div class="mod-bar"><span class="mod-bar-label">Modul Odoo 19:</span><span class="mod-chip mc-mrp">🏭 Manufacturing — Work Centers</span><span class="mod-chip mc-qc">🔍 Quality</span><span class="mod-chip mc-mnt">🔧 Maintenance</span><span class="mod-path">Manufacturing → Configuration → Work Centers &nbsp;|&nbsp; Quality → Control → Quality Control Points</span></div>
+  <div class="sec-title">Work Center (Pusat Kerja)</div>
+  <div class="sec-sub">4 work center aktif · 1 shift · 8 jam/hari · Senin–Jumat</div>
+  <div class="wc-grid" id="wc-grid"></div>
+  <div style="margin-top:24px">
+    <div class="sec-title">Ringkasan Operasi per Work Center</div>
+    <table class="tbl"><thead><tr><th>Work Center</th><th>Operasi</th><th class="num">Jam/Unit</th><th class="num">Total Jam</th><th class="num">Hari Kerja</th><th class="num">Tarif/Jam</th><th class="num">Efisiensi</th><th class="num">Biaya TK</th><th>Utilisasi</th></tr></thead>
+    <tbody id="wc-op-body"></tbody>
+    <tfoot><tr><td colspan="3"><strong>Total</strong></td><td class="num" id="wc-totalhrs">—</td><td></td><td></td><td></td><td class="num" id="wc-totallab">—</td><td></td></tr></tfoot></table>
+  </div>
+  <div class="alert info" style="margin-top:16px"><strong>📖 Konsep SCM — OEE &amp; Utilisasi Work Center</strong><br><strong>OEE (Overall Equipment Effectiveness)</strong> = Availability × Performance × Quality. OEE world-class = ≥85%. <strong>Utilisasi</strong> = jam terpakai / jam tersedia × 100%. Utilisasi ideal: 75–85%. Di bawah 60% = kapasitas berlebih (biaya overhead tinggi). Di atas 90% = risiko breakdown &amp; bottleneck. Odoo mencatat OEE setiap Work Order selesai untuk analisis kapasitas berkelanjutan.</div>
+  <div class="formula" id="wc-formula"></div>
+</div>
+
+<!-- ══════════ COST ══════════ -->
+<div class="tab-content" id="tab-cost">
+  <div class="mod-bar"><span class="mod-bar-label">Modul Odoo 19:</span><span class="mod-chip mc-acc">💰 Accounting</span><span class="mod-chip mc-inv">📦 Inventory — Product Costing</span><span class="mod-path">Accounting → Reporting → P&amp;L &nbsp;|&nbsp; Inventory → Config → Product Categories (AVCO / Standard Price)</span></div>
+  <div class="sec-title">Analisis Biaya Produksi &amp; Penetapan Harga</div>
+  <div class="sec-sub">Full Cost Costing · <span id="cost-qty">15</span> unit · Harga jual target: Rp 1.250.000/unit</div>
+  <div id="cost-bars" style="max-width:700px;margin-bottom:24px"></div>
+  <table class="tbl" id="cost-tbl">
+    <thead><tr><th>Komponen Biaya</th><th>Rincian</th><th class="num">Per Unit</th><th class="num" id="cost-th">Total (15 unit)</th><th class="num">% dari HPP</th></tr></thead>
+    <tbody id="cost-body"></tbody>
+  </table>
+  <div class="price-card" id="price-card">
+    <div style="font-size:1rem;font-weight:800">Penetapan Harga Jual — Cost-Plus Pricing</div>
+    <div style="font-size:.78rem;opacity:.75;margin-top:4px" id="price-sub">—</div>
+    <div class="price-grid" id="price-grid"></div>
+  </div>
+  <div class="alert info" style="margin-top:16px"><strong>📖 Konsep SCM — Full Cost Costing &amp; Cost-Plus Pricing</strong><br><strong>Full Cost Costing</strong> memperhitungkan SEMUA biaya: material langsung + tenaga kerja langsung + overhead pabrik. <strong>Cost-Plus Pricing</strong>: Harga Jual = HPP × (1 + Markup%). Di Odoo, HPP dihitung otomatis dari BOM valuation + Work Center routing cost setiap kali Manufacturing Order divalidasi.</div>
+
+  <div class="sec-title" style="margin-top:20px">Jurnal Akuntansi Otomatis Odoo 19 (Accounting Module)</div>
+  <div class="sec-sub">Pencatatan otomatis saat Manufacturing Order diproses</div>
+  <table class="mod-table">
+    <thead><tr><th>Tahap di Odoo</th><th>Debit (Dr)</th><th>Kredit (Cr)</th><th>Nilai (15 unit)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1. Konfirmasi MO</strong><br><span style="font-size:.75rem;color:var(--m)">Manufacturing → Confirm</span></td><td>Work In Progress (WIP)</td><td>—</td><td style="text-align:right">— (belum posting)</td></tr>
+      <tr><td><strong>2. Konsumsi Bahan Baku</strong><br><span style="font-size:.75rem;color:var(--m)">Manufacturing → Produce → Material tab</span></td><td>Work In Progress (WIP)</td><td>Raw Material Stock</td><td class="num" id="jrn-mat">Rp 8.400.000</td></tr>
+      <tr><td><strong>3. Biaya Work Center (TK + Overhead)</strong><br><span style="font-size:.75rem;color:var(--m)">Manufacturing → Produce → Work Order tab</span></td><td>Work In Progress (WIP)</td><td>Production Cost Account</td><td class="num" id="jrn-lab">Rp 2.090.813</td></tr>
+      <tr><td><strong>4. Validasi MO → Barang Jadi</strong><br><span style="font-size:.75rem;color:var(--m)">Manufacturing → Validate</span></td><td>Finished Goods Stock</td><td>Work In Progress (WIP)</td><td class="num" id="jrn-hpp">Rp 10.490.813</td></tr>
+      <tr><td><strong>5. Penjualan Barang Jadi</strong><br><span style="font-size:.75rem;color:var(--m)">Sales → Confirm → Deliver → Invoice</span></td><td>Cost of Goods Sold (COGS)<br>Accounts Receivable</td><td>Finished Goods Stock<br>Revenue</td><td class="num" id="jrn-cogs">Rp 10.490.813<br>Rp 18.750.000</td></tr>
+    </tbody>
+  </table>
+  <div class="formula" id="cost-formula"></div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ═══════════ DATA MASTER ═══════════
+const SELL = 1250000;
+const FIXED_COST = 5000000;
+const BOM_DATA = [
+  {name:'Sub-Assembly: Rangka Baja',code:'RM-FRAME',lvl:1,qty:1,unit:'unit',price:113400,buy:false},
+  {name:'└ Pipa Baja Hollow (sub-assy)',code:'RM-PIPE',lvl:2,qty:3,unit:'meter',price:35000,buy:true},
+  {name:'└ Cat Bubuk Powder Coat (sub-assy)',code:'RM-COAT',lvl:2,qty:0.3,unit:'kg',price:28000,buy:true},
+  {name:'Busa Dudukan (Seat Foam)',code:'RM-FOAM',lvl:1,qty:2.5,unit:'kg',price:42000,buy:true},
+  {name:'Kain Pelapis Mesh',code:'RM-MESH',lvl:1,qty:1.2,unit:'meter',price:78000,buy:true},
+  {name:'Roda Kaster Nylon',code:'RM-CAST',lvl:1,qty:5,unit:'pcs',price:11500,buy:true},
+  {name:'Piston Hidrolik (Gas Lift)',code:'RM-LIFT',lvl:1,qty:1,unit:'unit',price:92000,buy:true},
+  {name:'Armrest Set',code:'RM-ARM',lvl:1,qty:2,unit:'pcs',price:45000,buy:true},
+  {name:'Baut & Mur Set',code:'RM-BOLT',lvl:1,qty:1,unit:'set',price:8500,buy:true},
+];
+const STOCK_DATA = {
+  'RM-PIPE':{stock:60},'RM-COAT':{stock:12},'RM-FOAM':{stock:28},
+  'RM-MESH':{stock:22},'RM-CAST':{stock:90},'RM-LIFT':{stock:18},
+  'RM-ARM':{stock:35},'RM-BOLT':{stock:25},
+};
+const WCS = [
+  {id:'WC01',name:'Pengelasan & Pembentukan',op:'Welding',icon:'🔥',bg:'#fee2e2',time:0.75,rate:45000,eff:0.85,cls:'g-weld',color:'#e74c3c'},
+  {id:'WC02',name:'Perakitan Utama',op:'Assembly',icon:'🔩',bg:'#dbeafe',time:1.50,rate:32000,eff:0.90,cls:'g-assm',color:'#2563eb'},
+  {id:'WC03',name:'Kontrol Kualitas',op:'Quality Check',icon:'✅',bg:'#dcfce7',time:0.40,rate:35000,eff:0.95,cls:'g-qc',color:'#16a34a'},
+  {id:'WC04',name:'Finishing & Packaging',op:'Packaging',icon:'📦',bg:'#fef3c7',time:0.30,rate:25000,eff:0.88,cls:'g-pack',color:'#d97706'},
+];
+const DAYS = ['Senin','Selasa','Rabu','Kamis','Jumat','Senin+','Selasa+','Rabu+','Kamis+','Jumat+'];
+
+// ═══════════ UTILS ═══════════
+const fmt = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+const fmtN = (n,d=2) => (+n).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d});
+const ceil8 = h => Math.ceil(h/8);
+const getQ = () => Math.max(1, parseInt(document.getElementById('qty').value)||15);
+function setQ(v){document.getElementById('qty').value=v;recalc();}
+
+// ═══════════ MAIN ═══════════
+function recalc(){
+  const Q = getQ();
+  const matPU = 560000;
+  const labPU = WCS.reduce((s,w)=>s+(w.time*w.rate/w.eff),0);
+  const ovhPU = labPU*0.35;
+  const hppPU = matPU+labPU+ovhPU;
+  const hppT = hppPU*Q;
+  const revT = SELL*Q;
+  const gpPU = SELL-hppPU;
+  const gpt = gpPU*Q;
+  const margPct = gpPU/SELL*100;
+  const sch = WCS.map(w=>({...w,totalHrs:Q*w.time,days:ceil8(Q*w.time)}));
+  const ltDays = Math.max(sch[0].days,sch[1].days)+sch[2].days+sch[3].days-1;
+  const bep = FIXED_COST/(SELL-hppPU);
+
+  // HEADER
+  document.getElementById('hdr-cost').textContent = fmt(hppPU);
+  document.getElementById('hdr-total').textContent = fmt(hppT);
+  document.getElementById('hdr-lt').textContent = ltDays+' Hari';
+  document.getElementById('hdr-margin').textContent = Math.round(margPct)+'%';
+
+  // DASHBOARD
+  document.getElementById('kpi-qty').textContent = Q;
+  document.getElementById('kpi-mat').textContent = fmt(matPU*Q);
+  document.getElementById('kpi-lab').textContent = fmt(labPU*Q);
+  document.getElementById('kpi-ovh').textContent = fmt(ovhPU*Q);
+  document.getElementById('kpi-hpp').textContent = fmt(hppT);
+  document.getElementById('kpi-hppunit').textContent = '= '+fmt(hppPU)+'/unit';
+  document.getElementById('kpi-rev').textContent = fmt(revT);
+  document.getElementById('kpi-gp').textContent = fmt(gpt);
+  document.getElementById('kpi-gppct').textContent = 'margin '+Math.round(margPct)+'%';
+  document.getElementById('kpi-lt').textContent = ltDays;
+
+  // BOM
+  renderBOM(Q);
+
+  // STOCK
+  renderStock(Q);
+
+  // SCHEDULE
+  renderSchedule(Q, sch, ltDays);
+
+  // WORK CENTER
+  renderWC(Q, sch, labPU);
+
+  // COST
+  renderCost(Q, matPU, labPU, ovhPU, hppPU, hppT, revT, gpPU, gpt, margPct, bep);
+}
+
+function renderBOM(Q){
+  document.getElementById('bom-th').textContent = 'Total ('+Q+' unit)';
+  const rows = BOM_DATA.map(b=>{
+    const costPU = b.qty*b.price;
+    const costT = costPU*Q;
+    const lvlBadge = b.lvl===1?'<span class="badge badge-info">L1</span>':'<span class="badge badge-gray">L2</span>';
+    const typeBadge = b.buy?'<span class="badge badge-ok">Beli</span>':'<span class="badge badge-info" style="background:#ede9fe;color:#5b21b6">Diproduksi</span>';
+    const tr = b.lvl===2?'class="bom-level2"':'';
+    return `<tr ${tr}><td><strong>${b.name}</strong>${b.buy?'':' <span class="bom-badge">Sub-Assy</span>'}</td>
+      <td class="mono">${b.code}</td><td>${lvlBadge}</td>
+      <td class="num">${fmtN(b.qty,1)}</td><td>${b.unit}</td>
+      <td class="num">${fmt(b.price)}</td>
+      <td class="num">${fmt(costPU)}</td>
+      <td class="num">${fmt(costT)}</td>
+      <td>${typeBadge}</td></tr>`;
+  }).join('');
+  document.getElementById('bom-body').innerHTML = rows;
+  document.getElementById('bom-total').innerHTML = '<strong>'+fmt(560000*Q)+'</strong>';
+}
+
+function renderStock(Q){
+  document.getElementById('mrp-qty').textContent = Q;
+  const buyable = BOM_DATA.filter(b=>b.buy);
+  let needPO = false;
+  let rows='', afterRows='';
+  buyable.forEach(b=>{
+    const s = STOCK_DATA[b.code] || {stock:0};
+    const gross = b.qty*Q;
+    const safety = Math.ceil(gross*0.1);
+    const net = Math.max(0, gross+safety-s.stock);
+    const rem = s.stock-gross;
+    needPO = needPO||net>0;
+    const st = net>0?'<span class="badge badge-err">Kurang</span>':'<span class="badge badge-ok">Cukup</span>';
+    const act = net>0?`<strong style="color:#dc2626">Buat PO: ${fmtN(net,1)} ${b.unit}</strong>`:'<span style="color:#6b7280">—</span>';
+    rows+=`<tr><td><strong>${b.name.replace('└ ','')}</strong><br><span style="font-size:.72rem;color:#6b7280">${b.code}</span></td>
+      <td>${b.unit}</td><td class="num">${fmtN(s.stock,1)}</td><td class="num">${fmtN(gross,1)}</td>
+      <td class="num">${fmtN(safety,1)}</td><td class="num" style="font-weight:700;color:${net>0?'#dc2626':'#16a34a'}">${fmtN(net,1)}</td>
+      <td>${st}</td><td>${act}</td></tr>`;
+    const reorder = rem<s.stock*0.2?'<span class="badge badge-warn">Ya</span>':'<span class="badge badge-ok">Tidak</span>';
+    const remStr = rem>=0?`<span class="badge badge-ok">Sisa ${fmtN(rem,1)} ${b.unit}</span>`:`<span class="badge badge-err">Defisit ${fmtN(-rem,1)} ${b.unit}</span>`;
+    afterRows+=`<tr><td><strong>${b.name.replace('└ ','')}</strong></td><td class="num">${fmtN(s.stock,1)}</td><td class="num">${fmtN(gross,1)}</td><td class="num">${remStr}</td><td>${reorder}</td></tr>`;
+  });
+  document.getElementById('stock-body').innerHTML = rows;
+  document.getElementById('stock-after').innerHTML = afterRows;
+  const al = document.getElementById('stock-alert');
+  if(needPO){al.className='alert warn';al.innerHTML='⚠️ Beberapa material <strong>tidak mencukupi</strong>. Odoo akan otomatis membuat <strong>Purchase Order</strong> ke vendor.';}
+  else{al.className='alert ok';al.innerHTML='✅ Semua material tersedia — tidak perlu Purchase Order tambahan.';}
+}
+
+function renderSchedule(Q, sch, ltDays){
+  document.getElementById('sch-qty').textContent=Q;
+  document.getElementById('sch-lt').textContent=ltDays;
+  const keys=['sch-d1','sch-d2','sch-d3','sch-d4'];
+  const ks=['sch-h1','sch-h2','sch-h3','sch-h4'];
+  sch.forEach((w,i)=>{
+    document.getElementById(keys[i]).textContent=w.days+' Hari';
+    document.getElementById(ks[i]).textContent=fmtN(w.totalHrs,2)+' jam total';
+  });
+  // Gantt: pipeline scheduling
+  const wc1s=1,wc1e=sch[0].days;
+  const wc2s=2,wc2e=1+sch[1].days;
+  const wc3s=wc2e+1,wc3e=wc2e+sch[2].days;
+  const wc4s=wc3e+1,wc4e=wc3e+sch[3].days;
+  const maxD = Math.max(ltDays+1,6);
+  let hdr='<tr><th style="width:190px">Work Center / Operasi</th>';
+  for(let d=1;d<=maxD;d++) hdr+=`<th style="min-width:80px">${DAYS[d-1]||'Hari '+d}<div class="day-hdr">Hari ${d}</div></th>`;
+  hdr+='</tr>';
+  document.getElementById('gantt-head').innerHTML=hdr;
+  const ranges=[[wc1s,wc1e],[wc2s,wc2e],[wc3s,wc3e],[wc4s,wc4e]];
+  let body='';
+  sch.forEach((w,i)=>{
+    const [s,e]=ranges[i];
+    body+=`<tr><td class="wc-name"><span style="background:${w.color};color:#fff;border-radius:4px;padding:1px 6px;font-size:.72rem">${w.id}</span> ${w.name}</td>`;
+    for(let d=1;d<=maxD;d++){
+      if(d>=s&&d<=e){
+        const hrs = (d===e&&(w.totalHrs%8)>0) ? (w.totalHrs%8) : 8;
+        body+=`<td><div class="${w.cls}">${fmtN(hrs,1)}h</div></td>`;
+      } else body+=`<td><div class="g-idle">—</div></td>`;
+    }
+    body+='</tr>';
+  });
+  document.getElementById('gantt-body').innerHTML=body;
+  // Formula
+  document.getElementById('sch-formula').innerHTML=
+    `<span class="cmt"># Perhitungan Lead Time (Pipeline Production)</span>\n`+
+    sch.map(w=>`<span class="kw">${w.id}</span> = ${Q} × ${fmtN(w.time,2)} jam = <span class="val">${fmtN(w.totalHrs,2)} jam</span> → ${w.days} hari kerja`).join('\n')+
+    `\n<span class="cmt"># Pipeline: WC01 & WC02 overlap (unit pertama dari WC01 langsung ke WC02)</span>\n`+
+    `<span class="kw">Lead Time</span>   = max(WC01:${sch[0].days}d, WC02:${sch[1].days}d) + WC03:${sch[2].days}d + WC04:${sch[3].days}d − 1 overlap = <span class="val">${ltDays} hari</span>`;
+}
+
+function renderWC(Q, sch, labPU){
+  const wc = sch.map(w=>{
+    const hrs=w.totalHrs; const avail=w.days*8;
+    const util=Math.min(100,hrs/avail*100);
+    const lab=w.time*w.rate/w.eff*Q;
+    const color=util>85?'#dc2626':util>65?'#2563eb':'#16a34a';
+    return {w,hrs,avail,util,lab,color};
+  });
+  document.getElementById('wc-grid').innerHTML=wc.map(({w,hrs,util,lab,color})=>`
+    <div class="wc-card">
+      <div class="wc-head"><div class="wc-icon" style="background:${w.bg}">${w.icon}</div><div><div class="wc-id">${w.id}</div><div class="wc-nm">${w.name}</div></div></div>
+      <div class="wc-row"><span class="wc-row-label">Operasi</span><span class="wc-row-val">${w.op}</span></div>
+      <div class="wc-row"><span class="wc-row-label">Waktu/Unit</span><span class="wc-row-val">${fmtN(w.time,2)} jam</span></div>
+      <div class="wc-row"><span class="wc-row-label">Tarif/Jam</span><span class="wc-row-val">${fmt(w.rate)}</span></div>
+      <div class="wc-row"><span class="wc-row-label">Efisiensi</span><span class="wc-row-val">${(w.eff*100).toFixed(0)}%</span></div>
+      <div class="wc-row"><span class="wc-row-label">Total Jam (${Q}u)</span><span class="wc-row-val">${fmtN(hrs,2)} jam</span></div>
+      <div class="wc-row"><span class="wc-row-label">Biaya TK</span><span class="wc-row-val">${fmt(lab)}</span></div>
+      <div style="font-size:.72rem;color:var(--m);margin-top:8px">Utilisasi Work Center</div>
+      <div class="util-bar"><div class="util-fill" style="width:${util.toFixed(1)}%;background:${color}"></div></div>
+      <div style="font-size:.78rem;font-weight:700;color:${color}">${util.toFixed(1)}% — ${util>85?'⚠️ Tinggi (Bottleneck Risk)':util>65?'✅ Optimal':'🔵 Rendah (Under-utilized)'}</div>
+    </div>`).join('');
+  let totHrs=0,totLab=0;
+  const rows=wc.map(({w,hrs,util,lab})=>{totHrs+=hrs;totLab+=lab;
+    return `<tr><td><strong>${w.id}</strong> — ${w.name}</td><td>${w.op}</td>
+      <td class="num">${fmtN(w.time,2)}</td><td class="num">${fmtN(hrs,2)}</td>
+      <td class="num">${w.days}</td><td class="num">${fmt(w.rate)}</td>
+      <td class="num">${(w.eff*100).toFixed(0)}%</td><td class="num">${fmt(lab)}</td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;background:#e5e7eb;border-radius:3px;height:8px;overflow:hidden"><div style="width:${util.toFixed(0)}%;height:100%;background:${util>85?'#dc2626':util>65?'#2563eb':'#16a34a'}"></div></div>
+        <span style="font-size:.75rem;font-weight:700;min-width:36px">${util.toFixed(0)}%</span>
+      </div></td></tr>`;
+  }).join('');
+  document.getElementById('wc-op-body').innerHTML=rows;
+  document.getElementById('wc-totalhrs').textContent=fmtN(totHrs,2)+' jam';
+  document.getElementById('wc-totallab').innerHTML='<strong>'+fmt(totLab)+'</strong>';
+  document.getElementById('wc-formula').innerHTML=
+    `<span class="cmt"># Biaya Tenaga Kerja = Qty × Waktu/Unit × Tarif/Jam ÷ Efisiensi</span>\n`+
+    sch.map(w=>`<span class="kw">${w.id}</span> = ${Q} × ${fmtN(w.time,2)} × ${fmt(w.rate).replace('Rp ','')} ÷ ${(w.eff*100).toFixed(0)}% = <span class="val">${fmt(w.time*w.rate/w.eff*Q)}</span>`).join('\n')+
+    `\n<span class="kw">Total BTK</span>  = <span class="val">${fmt(labPU*Q)}</span>`;
+}
+
+function renderCost(Q,matPU,labPU,ovhPU,hppPU,hppT,revT,gpPU,gpt,margPct,bep){
+  document.getElementById('cost-qty').textContent=Q;
+  document.getElementById('cost-th').textContent='Total ('+Q+' unit)';
+  // Cost bars
+  const bars=[
+    {label:'Material Langsung',val:matPU,cls:'mat-bar'},
+    {label:'Tenaga Kerja Langsung',val:labPU,cls:'lab-bar'},
+    {label:'Overhead Pabrik (35% BTK)',val:ovhPU,cls:'ovh-bar'},
+    {label:'Markup / Keuntungan',val:gpPU,cls:'mgn-bar'},
+  ];
+  document.getElementById('cost-bars').innerHTML=
+    `<div style="margin-bottom:8px;font-size:.78rem;color:var(--m)">Komposisi per unit dari harga jual ${fmt(SELL)}</div>`+
+    bars.map(b=>`<div class="cost-row"><span class="cost-label">${b.label}</span>
+      <div class="cost-bar-wrap"><div class="cost-bar-fill ${b.cls}" style="width:${(b.val/SELL*100).toFixed(1)}%">${(b.val/SELL*100).toFixed(1)}%</div></div>
+      <span class="cost-value">${fmt(b.val)}</span></div>`).join('');
+  // Cost table body
+  const l1=WCS[0].time*WCS[0].rate/WCS[0].eff,l2=WCS[1].time*WCS[1].rate/WCS[1].eff,
+        l3=WCS[2].time*WCS[2].rate/WCS[2].eff,l4=WCS[3].time*WCS[3].rate/WCS[3].eff;
+  document.getElementById('cost-body').innerHTML=`
+    <tr><td><strong>1. Biaya Material Langsung</strong></td><td style="font-size:.78rem;color:var(--m)">9 baris BOM (8 komponen unik)</td><td class="num">${fmt(560000)}</td><td class="num">${fmt(560000*Q)}</td><td class="num">${(560000/hppPU*100).toFixed(1)}%</td></tr>
+    <tr style="background:#f9fafb"><td style="padding-left:28px;font-size:.8rem;color:var(--m)">— Rangka Baja (sub-assy: pipa+cat)</td><td></td><td class="num" style="color:var(--m)">${fmt(113400)}</td><td class="num" style="color:var(--m)">${fmt(113400*Q)}</td><td></td></tr>
+    <tr style="background:#f9fafb"><td style="padding-left:28px;font-size:.8rem;color:var(--m)">— Busa+Mesh+Roda+Piston+Armrest+Baut</td><td></td><td class="num" style="color:var(--m)">${fmt(446600)}</td><td class="num" style="color:var(--m)">${fmt(446600*Q)}</td><td></td></tr>
+    <tr><td><strong>2. Biaya Tenaga Kerja Langsung</strong></td><td style="font-size:.78rem;color:var(--m)">4 work center (adj. efisiensi)</td><td class="num">${fmt(labPU)}</td><td class="num">${fmt(labPU*Q)}</td><td class="num">${(labPU/hppPU*100).toFixed(1)}%</td></tr>
+    <tr style="background:#f9fafb"><td style="padding-left:28px;font-size:.8rem;color:var(--m)">— WC01 Welding (0.75h×Rp45.000÷85%)</td><td></td><td class="num" style="color:var(--m)">${fmt(l1)}</td><td class="num" style="color:var(--m)">${fmt(l1*Q)}</td><td></td></tr>
+    <tr style="background:#f9fafb"><td style="padding-left:28px;font-size:.8rem;color:var(--m)">— WC02 Assembly (1.5h×Rp32.000÷90%)</td><td></td><td class="num" style="color:var(--m)">${fmt(l2)}</td><td class="num" style="color:var(--m)">${fmt(l2*Q)}</td><td></td></tr>
+    <tr style="background:#f9fafb"><td style="padding-left:28px;font-size:.8rem;color:var(--m)">— WC03 QC (0.4h×Rp35.000÷95%)</td><td></td><td class="num" style="color:var(--m)">${fmt(l3)}</td><td class="num" style="color:var(--m)">${fmt(l3*Q)}</td><td></td></tr>
+    <tr style="background:#f9fafb"><td style="padding-left:28px;font-size:.8rem;color:var(--m)">— WC04 Packaging (0.3h×Rp25.000÷88%)</td><td></td><td class="num" style="color:var(--m)">${fmt(l4)}</td><td class="num" style="color:var(--m)">${fmt(l4*Q)}</td><td></td></tr>
+    <tr><td><strong>3. Overhead Pabrik (35% × BTK)</strong></td><td style="font-size:.78rem;color:var(--m)">Listrik, depresiasi, sewa, utilitas</td><td class="num">${fmt(ovhPU)}</td><td class="num">${fmt(ovhPU*Q)}</td><td class="num">${(ovhPU/hppPU*100).toFixed(1)}%</td></tr>
+    <tr style="border-top:2px solid #e5e7eb"><td colspan="2"><strong>HARGA POKOK PRODUKSI (HPP)</strong></td><td class="num"><strong>${fmt(hppPU)}</strong></td><td class="num"><strong>${fmt(hppT)}</strong></td><td class="num"><strong>100%</strong></td></tr>`;
+  // Price card
+  const markup=SELL-hppPU;
+  document.getElementById('price-sub').textContent=`Markup dari HPP: ${(markup/hppPU*100).toFixed(1)}% · Margin dari harga jual: ${margPct.toFixed(1)}%`;
+  document.getElementById('price-grid').innerHTML=`
+    <div class="price-item"><div class="price-val">${fmt(hppPU)}</div><div class="price-lbl">HPP per Unit</div></div>
+    <div class="price-item"><div class="price-val">+ ${fmt(markup)}</div><div class="price-lbl">Markup (${(markup/hppPU*100).toFixed(1)}%)</div></div>
+    <div class="price-item" style="background:rgba(255,255,255,.25)"><div class="price-val">${fmt(SELL)}</div><div class="price-lbl">🏷️ Harga Jual</div></div>
+    <div class="price-item"><div class="price-val">${fmt(gpPU)}</div><div class="price-lbl">Gross Profit/Unit</div></div>
+    <div class="price-item"><div class="price-val">${margPct.toFixed(1)}%</div><div class="price-lbl">Gross Margin</div></div>
+    <div class="price-item" style="background:rgba(255,255,255,.25)"><div class="price-val">${fmt(revT)}</div><div class="price-lbl">💰 Revenue (${Q} unit)</div></div>`;
+  // Formula
+  document.getElementById('cost-formula').innerHTML=
+    `<span class="cmt"># Full Cost Costing</span>\n`+
+    `<span class="kw">HPP/unit</span>       = Material + BTK + Overhead = ${fmt(560000).replace('Rp ','')} + ${fmt(labPU).replace('Rp ','')} + ${fmt(ovhPU).replace('Rp ','')} = <span class="val">${fmt(hppPU)}</span>\n`+
+    `<span class="kw">Harga Jual</span>     = HPP × (1 + ${(markup/hppPU*100).toFixed(1)}%) = <span class="val">${fmt(SELL)}</span>\n`+
+    `<span class="kw">Gross Margin</span>   = (${fmt(SELL).replace('Rp ','')} − ${fmt(hppPU).replace('Rp ','')}}) / ${fmt(SELL).replace('Rp ','')} = <span class="val">${margPct.toFixed(1)}%</span>\n`+
+    `\n<span class="cmt"># Break-Even Point (asumsi biaya tetap batch Rp 5.000.000)</span>\n`+
+    `<span class="kw">BEP</span>            = Rp 5.000.000 / (${fmt(SELL).replace('Rp ','')} − ${fmt(hppPU).replace('Rp ','')}) = <span class="val">${fmtN(bep,2)} unit</span>\n`+
+    `<span class="kw">Total Profit</span>   = ${Q} unit × ${fmt(gpPU).replace('Rp ','')} − Rp 5.000.000 = <span class="val">${fmt(gpPU*Q-FIXED_COST)}</span>`;
+  // Update accounting journal values
+  const labOvhTotal = (labPU+ovhPU)*Q;
+  const jMat = document.getElementById('jrn-mat');
+  const jLab = document.getElementById('jrn-lab');
+  const jHpp = document.getElementById('jrn-hpp');
+  const jCogs = document.getElementById('jrn-cogs');
+  if(jMat) jMat.textContent = fmt(560000*Q);
+  if(jLab) jLab.textContent = fmt(labOvhTotal);
+  if(jHpp) jHpp.textContent = fmt(hppT);
+  if(jCogs) jCogs.innerHTML = fmt(hppT)+'<br>'+fmt(revT);
+}
+
+function showTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+recalc();
+</script>
+</body>
+</html>
