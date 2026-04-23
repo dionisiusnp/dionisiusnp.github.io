@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SSI Universitas Dinamika — Sewa Ruang & Training Profesional</title>
+<style>
+:root{
+  --red:#df271d;
+  --red-d:#b81e15;
+  --red-l:#f04038;
+  --dark:#1e1e1e;
+  --dark2:#2e2e2e;
+  --white:#fff;
+  --bg:#f7f7f8;
+  --card:#fff;
+  --bd:#e5e7eb;
+  --muted:#6b7280;
+  --light:#f0f0f1;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--dark);line-height:1.6;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{text-decoration:none}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#f0f0f0}
+::-webkit-scrollbar-thumb{background:var(--red);border-radius:3px}
+
+/* ════ NAV ════ */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:var(--dark);
+  border-bottom:3px solid var(--red);
+  padding:0 24px;
+}
+.nav-in{
+  max-width:1200px;margin:0 auto;height:64px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.nav-logo{display:flex;align-items:center;gap:12px}
+.nav-logo img{height:34px;width:auto;filter:brightness(0) invert(1)}
+.nav-sep{width:1px;height:24px;background:rgba(255,255,255,.2)}
+.nav-tagline{font-size:.72rem;color:rgba(255,255,255,.5);letter-spacing:.02em}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.nbtn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 20px;border-radius:8px;
+  font-size:.82rem;font-weight:700;
+  transition:all .2s;white-space:nowrap;
+}
+.nbtn.ghost{border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.85)}
+.nbtn.ghost:hover{border-color:var(--red);color:var(--white);background:rgba(223,39,29,.15)}
+.nbtn.red{background:var(--red);color:#fff}
+.nbtn.red:hover{background:var(--red-d);transform:translateY(-1px)}
+@media(max-width:560px){
+  .nav-tagline,.nav-sep{display:none}
+  .nbtn.ghost{display:none} /* hide sewa ruang on tiny nav, keep training */
+  .nbtn{padding:8px 14px;font-size:.78rem}
+}
+
+/* ════ HERO ════ */
+.hero{
+  position:relative;min-height:92vh;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background-image:url('/universitas-dinamika/assets/img/room-dinamika.webp');
+  background-size:cover;background-position:center 30%;
+  transform:scale(1.04);
+  animation:herozoom 18s ease-in-out infinite alternate;
+}
+@keyframes herozoom{from{transform:scale(1.04)}to{transform:scale(1.12)}}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(10,10,10,.96) 0%,
+    rgba(20,10,10,.7) 40%,
+    rgba(0,0,0,.3) 100%
+  );
+}
+.hero-red-bar{
+  position:absolute;bottom:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--red),var(--red-l),var(--red));
+}
+.hero-content{
+  position:relative;z-index:1;
+  max-width:1200px;margin:0 auto;width:100%;
+  padding:0 28px 72px;
+  display:grid;grid-template-columns:1fr 420px;gap:48px;align-items:end;
+}
+@media(max-width:900px){.hero-content{grid-template-columns:1fr;gap:28px;padding:0 20px 52px}}
+@media(max-width:600px){
+  .hero{min-height:100svh}
+  .hero-left h1{letter-spacing:-.03em}
+  .hero-left p{font-size:.9rem;margin-bottom:24px}
+  .hero-btns{flex-direction:column;gap:10px}
+  .hbtn{justify-content:center;width:100%}
+  /* stack hero cards horizontally on mobile */
+  .hero-cards{flex-direction:row;overflow-x:auto;gap:10px;padding-bottom:4px;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .hero-cards::-webkit-scrollbar{display:none}
+  .hfc{min-width:220px;scroll-snap-align:start;flex-shrink:0}
+}
+
+.hero-left{color:#fff}
+.hero-kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(223,39,29,.2);border:1px solid rgba(223,39,29,.4);
+  border-radius:6px;padding:5px 14px;
+  font-size:.7rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:20px;color:rgba(255,255,255,.9);
+}
+.live{
+  width:7px;height:7px;border-radius:50%;background:var(--red);
+  box-shadow:0 0 0 0 rgba(223,39,29,.6);
+  animation:ripple 1.8s infinite;
+}
+@keyframes ripple{0%{box-shadow:0 0 0 0 rgba(223,39,29,.6)}70%{box-shadow:0 0 0 8px rgba(223,39,29,0)}100%{box-shadow:0 0 0 0 rgba(223,39,29,0)}}
+.hero-left h1{
+  font-size:clamp(2.4rem,5vw,4.2rem);
+  font-weight:900;letter-spacing:-.04em;line-height:1.02;
+  margin-bottom:16px;
+}
+.hero-left h1 .accent{color:var(--red)}
+.hero-left p{
+  font-size:1rem;color:rgba(255,255,255,.7);
+  max-width:520px;margin-bottom:32px;line-height:1.7;
+}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.hbtn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:14px 28px;border-radius:10px;
+  font-size:.9rem;font-weight:700;
+  transition:all .25s;
+}
+.hbtn.red{background:var(--red);color:#fff;box-shadow:0 4px 20px rgba(223,39,29,.5)}
+.hbtn.red:hover{background:var(--red-d);transform:translateY(-3px);box-shadow:0 8px 32px rgba(223,39,29,.6)}
+.hbtn.outline{border:2px solid rgba(255,255,255,.3);color:#fff}
+.hbtn.outline:hover{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.1)}
+.hbtn svg{transition:transform .2s}
+.hbtn:hover svg{transform:translateX(3px)}
+
+/* floating service cards on hero right */
+.hero-cards{display:flex;flex-direction:column;gap:14px}
+.hfc{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;padding:20px;color:#fff;
+  backdrop-filter:blur(12px);
+  transition:all .3s;
+  display:flex;align-items:center;gap:16px;
+}
+.hfc:hover{background:rgba(255,255,255,.15);border-color:var(--red);transform:translateX(-6px)}
+.hfc-thumb{
+  width:72px;height:56px;border-radius:10px;
+  object-fit:cover;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.15);
+}
+.hfc-info{flex:1}
+.hfc-label{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:3px}
+.hfc-title{font-size:.92rem;font-weight:800;margin-bottom:2px}
+.hfc-sub{font-size:.73rem;opacity:.6}
+.hfc-arrow{font-size:1rem;opacity:.4;transition:all .3s;flex-shrink:0}
+.hfc:hover .hfc-arrow{opacity:1;transform:translateX(4px)}
+
+/* ════ STATS ════ */
+.stats{background:var(--red);padding:0 24px}
+.stats-in{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:stretch;
+}
+.st{
+  flex:1;padding:22px 16px;text-align:center;
+  border-right:1px solid rgba(255,255,255,.2);
+}
+.st:last-child{border-right:none}
+.st-n{font-size:1.9rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-.03em}
+.st-l{font-size:.65rem;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.07em;margin-top:5px}
+@media(max-width:580px){
+  .stats-in{flex-wrap:wrap}
+  .st{flex:0 0 50%;border-bottom:1px solid rgba(255,255,255,.2)}
+  .st:nth-child(odd){border-right:1px solid rgba(255,255,255,.2)}
+  .st:nth-last-child(-n+2){border-bottom:none}
+}
+
+/* ════ SECTION SHARED ════ */
+.section{padding:72px 24px}
+@media(max-width:600px){.section{padding:48px 16px}}
+.section.dark{background:var(--dark);color:#fff}
+.section.light{background:var(--bg)}
+.section.white{background:var(--white)}
+
+.sec-wrap{max-width:1200px;margin:0 auto}
+.sec-head{margin-bottom:48px}
+.sec-head.center{text-align:center}
+.sec-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:10px;
+}
+.sec-eyebrow.red{color:var(--red)}
+.sec-eyebrow.white{color:rgba(255,255,255,.6)}
+.eyebrow-line{width:24px;height:2px;border-radius:2px;background:currentColor}
+.sec-head h2{
+  font-size:clamp(1.8rem,3.5vw,2.6rem);
+  font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:10px;
+}
+.sec-head h2 .red{color:var(--red)}
+.sec-head p{color:var(--muted);max-width:520px;font-size:.92rem;line-height:1.7}
+.sec-head.dark p{color:rgba(255,255,255,.6)}
+
+/* ════ SEWA RUANG ════ */
+/* Feature banner */
+.room-feature{
+  position:relative;border-radius:20px;overflow:hidden;
+  height:380px;margin-bottom:28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.15);
+}
+@media(max-width:600px){.room-feature{height:260px;border-radius:14px}}
+.room-feature img{width:100%;height:100%;object-fit:cover}
+.room-feature-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to right, rgba(0,0,0,.75) 40%, transparent 80%);
+  display:flex;align-items:center;padding:40px;
+}
+@media(max-width:600px){.room-feature-overlay{padding:20px;align-items:flex-end;
+  background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.4) 60%,transparent 100%)}}
+.rfo-content{color:#fff;max-width:380px}
+.rfo-tag{
+  display:inline-block;background:var(--red);
+  border-radius:6px;padding:3px 12px;
+  font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:14px;
+}
+.rfo-content h3{font-size:clamp(1.4rem,2.5vw,2rem);font-weight:900;letter-spacing:-.02em;margin-bottom:8px;line-height:1.15}
+.rfo-content p{font-size:.85rem;opacity:.8;margin-bottom:20px;line-height:1.6}
+.rfo-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--red);color:#fff;
+  padding:11px 22px;border-radius:9px;
+  font-size:.84rem;font-weight:700;
+  transition:all .2s;
+}
+.rfo-btn:hover{background:var(--red-d);transform:translateY(-2px)}
+
+/* Room photo grid */
+.rooms-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:auto auto;
+  gap:14px;
+}
+@media(max-width:720px){.rooms-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.rooms-grid{grid-template-columns:1fr}}
+
+.room-card{
+  border-radius:14px;overflow:hidden;
+  background:var(--card);
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+  transition:transform .3s,box-shadow .3s;
+  position:relative;
+}
+.room-card:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(0,0,0,.14)}
+.room-card.featured{grid-column:span 2}
+@media(max-width:720px){.room-card.featured{grid-column:span 1}}
+.room-card img{
+  width:100%;height:180px;object-fit:cover;
+  transition:transform .4s;
+}
+.room-card.featured img{height:220px}
+.room-card:hover img{transform:scale(1.05)}
+.room-card-body{padding:14px 16px}
+.rc-name{font-size:.88rem;font-weight:700;margin-bottom:2px}
+.rc-cap{font-size:.73rem;color:var(--muted);margin-bottom:6px}
+.rc-price{
+  font-size:.78rem;font-weight:800;color:var(--red);
+  display:flex;align-items:center;gap:5px;
+}
+.rc-price::before{content:'Rp';font-size:.65rem;font-weight:600;opacity:.7}
+
+/* ════ TRAINING ════ */
+.training-hero-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:32px;
+  align-items:center;margin-bottom:48px;
+}
+@media(max-width:800px){.training-hero-row{grid-template-columns:1fr}}
+.training-hero-img{
+  border-radius:20px;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.3);
+  position:relative;
+}
+.training-hero-img img{width:100%;height:320px;object-fit:cover}
+.training-hero-img-badge{
+  position:absolute;bottom:16px;left:16px;
+  background:var(--red);color:#fff;
+  border-radius:8px;padding:8px 14px;
+  font-size:.75rem;font-weight:700;
+  backdrop-filter:blur(8px);
+}
+.training-hero-text{color:#fff}
+.training-hero-text h3{
+  font-size:clamp(1.4rem,2.5vw,1.9rem);
+  font-weight:900;letter-spacing:-.02em;margin-bottom:12px;
+}
+.training-hero-text p{opacity:.7;font-size:.9rem;line-height:1.7;margin-bottom:24px}
+.training-features{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.tf{display:flex;align-items:center;gap:10px;font-size:.85rem}
+.tf-check{
+  width:22px;height:22px;border-radius:6px;flex-shrink:0;
+  background:rgba(223,39,29,.2);border:1px solid rgba(223,39,29,.4);
+  display:flex;align-items:center;justify-content:center;color:var(--red);
+  font-size:.8rem;font-weight:900;
+}
+
+/* Courses grid */
+.courses-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px;margin-bottom:48px;
+}
+@media(max-width:480px){.courses-grid{grid-template-columns:1fr 1fr;gap:10px}}
+.course-card{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;overflow:hidden;
+  transition:all .3s;
+}
+.course-card:hover{transform:translateY(-5px);border-color:var(--red);background:rgba(255,255,255,.1)}
+.course-card img{width:100%;height:150px;object-fit:cover}
+.course-card-body{padding:14px}
+.course-tag{
+  font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--red);margin-bottom:5px;
+}
+.course-name{font-size:.88rem;font-weight:700;color:#fff;line-height:1.35}
+
+/* Gallery strip */
+.gallery-strip{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;
+}
+@media(max-width:720px){.gallery-strip{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.gallery-strip{grid-template-columns:1fr}}
+.gallery-item{
+  border-radius:12px;overflow:hidden;position:relative;
+  aspect-ratio:4/3;
+}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.gallery-item:hover img{transform:scale(1.07)}
+.gallery-item-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.6),transparent 60%);
+  display:flex;align-items:flex-end;padding:12px;
+  opacity:0;transition:opacity .3s;
+}
+.gallery-item:hover .gallery-item-overlay{opacity:1}
+.gallery-item-label{font-size:.73rem;font-weight:700;color:#fff}
+
+/* ════ PARTNERS ════ */
+.partners{padding:40px 0;background:var(--white);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+.partners-label{
+  text-align:center;font-size:.68rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:24px;
+}
+/* marquee — each logo sits in a fixed-width slot so gap is always equal */
+.marquee-wrap{overflow:hidden;position:relative;user-select:none}
+.marquee-wrap::before,.marquee-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none;
+}
+.marquee-wrap::before{left:0;background:linear-gradient(to right,var(--white),transparent)}
+.marquee-wrap::after{right:0;background:linear-gradient(to left,var(--white),transparent)}
+.marquee-inner{
+  display:flex;align-items:center;
+  width:max-content;
+  animation:marquee 32s linear infinite;
+}
+.marquee-inner:hover{animation-play-state:paused}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.marquee-slot{
+  /* fixed slot width = logo + equal padding on both sides */
+  flex-shrink:0;
+  width:144px;height:64px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 20px;
+}
+.marquee-slot img{
+  max-width:100%;max-height:40px;
+  width:auto;height:auto;
+  object-fit:contain;
+  opacity:.45;filter:grayscale(100%);
+  transition:opacity .3s,filter .3s;display:block;
+}
+.marquee-slot img:hover{opacity:1;filter:none}
+/* ════ SPRINGBOOT HIGHLIGHT ════ */
+.sb-highlight{
+  position:relative;
+  height:300px;          /* explicit height — card tidak ikut tinggi konten */
+  border-radius:16px;
+  overflow:hidden;       /* clip image + overlay agar tidak keluar */
+  margin-bottom:28px;
+  border:2px solid var(--red);
+  box-shadow:0 0 0 4px rgba(223,39,29,.15),0 8px 32px rgba(0,0,0,.25);
+  cursor:pointer;
+  transition:transform .3s,box-shadow .3s;
+  text-decoration:none;
+  display:block;
+}
+.sb-highlight:hover{transform:translateY(-4px);box-shadow:0 0 0 6px rgba(223,39,29,.2),0 16px 48px rgba(0,0,0,.35)}
+/* image mengisi penuh card — position absolute agar tidak tambah tinggi */
+.sb-highlight img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;object-position:center top;
+  display:block;
+}
+.sb-overlay{
+  position:absolute;inset:0;
+  overflow:hidden;       /* double-clip overlay agar konten teks tidak meluber */
+  background:linear-gradient(to right,rgba(0,0,0,.82) 0%,rgba(0,0,0,.55) 55%,rgba(0,0,0,.15) 100%);
+  display:flex;align-items:center;
+  padding:32px 40px;
+}
+.sb-content{color:#fff;max-width:420px;min-width:0}
+.sb-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--red);border-radius:6px;
+  padding:4px 12px;font-size:.65rem;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;
+  white-space:nowrap;
+}
+.sb-badge::before{content:'★';font-size:.7rem}
+.sb-content h3{
+  font-size:clamp(1.1rem,2.2vw,1.6rem);font-weight:900;
+  letter-spacing:-.02em;line-height:1.2;margin-bottom:8px;
+}
+.sb-content p{
+  font-size:.82rem;opacity:.78;line-height:1.55;
+  margin-bottom:16px;max-width:340px;
+  /* clamp text agar tidak meluber jika card pendek */
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.sb-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--red);color:#fff;
+  padding:10px 20px;border-radius:9px;
+  font-size:.82rem;font-weight:700;
+  transition:all .2s;white-space:nowrap;
+  text-decoration:none;
+}
+.sb-btn:hover{background:var(--red-d)}
+@media(max-width:720px){
+  .sb-highlight{height:240px}
+  .sb-overlay{padding:20px 24px}
+  .sb-content p{-webkit-line-clamp:2}
+}
+@media(max-width:480px){
+  .sb-highlight{height:200px}
+  .sb-overlay{padding:16px 18px}
+  .sb-content p{display:none}  /* sembunyikan paragraf, cukup badge+judul+btn */
+  .sb-content h3{margin-bottom:10px}
+}
+
+/* ════ CONTACT ════ */
+.contact-sec{
+  background:var(--dark);padding:72px 24px;
+  position:relative;overflow:hidden;
+}
+.contact-sec::before{
+  content:'';position:absolute;
+  top:-200px;right:-200px;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(223,39,29,.12),transparent 70%);
+  pointer-events:none;
+}
+.contact-sec::after{
+  content:'';position:absolute;
+  bottom:-150px;left:-100px;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(223,39,29,.06),transparent 70%);
+  pointer-events:none;
+}
+.contact-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
+.contact-top{
+  display:grid;grid-template-columns:1fr auto;gap:32px;
+  align-items:center;margin-bottom:40px;
+}
+@media(max-width:640px){.contact-top{grid-template-columns:1fr}}
+.contact-top h2{
+  font-size:clamp(1.8rem,3vw,2.4rem);
+  font-weight:900;letter-spacing:-.03em;color:#fff;margin-bottom:8px;
+}
+.contact-top h2 span{color:var(--red)}
+.contact-top p{color:rgba(255,255,255,.6);font-size:.9rem;max-width:420px}
+.contact-logo img{height:36px;filter:brightness(0) invert(1);opacity:.5}
+.contact-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;
+}
+.ccard{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:18px 20px;color:#fff;
+  transition:all .25s;
+}
+.ccard:hover{background:rgba(223,39,29,.15);border-color:rgba(223,39,29,.4);transform:translateY(-3px)}
+.ccard-ico{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  background:rgba(223,39,29,.15);border:1px solid rgba(223,39,29,.3);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.ccard-lbl{font-size:.63rem;opacity:.5;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px}
+.ccard-val{font-size:.86rem;font-weight:700}
+
+/* ════ FOOTER ════ */
+footer{
+  background:#111;padding:28px 24px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.footer-in{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+}
+.footer-logos{display:flex;align-items:center;gap:16px}
+.footer-logos img{height:22px;filter:brightness(0) invert(1);opacity:.3}
+.footer-logos .sep{width:1px;height:18px;background:rgba(255,255,255,.15)}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-links a{color:rgba(255,255,255,.4);font-size:.78rem;transition:color .2s}
+.footer-links a:hover{color:rgba(255,255,255,.85)}
+.footer-copy{font-size:.73rem;color:rgba(255,255,255,.25)}
+@media(max-width:600px){
+  .footer-in{flex-direction:column;align-items:flex-start;gap:12px}
+  .footer-links{gap:14px}
+  .footer-copy{display:none}
+}
+
+/* ════ REVEAL ════ */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .65s ease,transform .65s ease}
+.reveal-l{opacity:0;transform:translateX(-30px);transition:opacity .65s ease,transform .65s ease}
+.reveal-r{opacity:0;transform:translateX(30px);transition:opacity .65s ease,transform .65s ease}
+.reveal.on,.reveal-l.on,.reveal-r.on{opacity:1;transform:none}
+.delay-1{transition-delay:.1s}
+.delay-2{transition-delay:.2s}
+.delay-3{transition-delay:.3s}
+.delay-4{transition-delay:.4s}
+</style>
+</head>
+<body>
+
+<!-- ════ NAV ════ -->
+<nav>
+  <div class="nav-in">
+    <div class="nav-logo">
+      <img src="/universitas-dinamika/assets/img/logo-ssi.png" alt="SSI"/>
+      <div class="nav-sep"></div>
+      <span class="nav-tagline">Universitas Dinamika Surabaya</span>
+    </div>
+    <div class="nav-actions">
+      <a href="https://ssi.dinamika.ac.id/persewaan" target="_blank" class="nbtn ghost">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        Sewa Ruang
+      </a>
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="nbtn red">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        Training
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════ HERO ════ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-red-bar"></div>
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-kicker"><span class="live"></span>Layanan Aktif · Surabaya</div>
+      <h1>
+        Fasilitas &amp;<br/>
+        Pelatihan<br/>
+        <span class="accent">Profesional</span>
+      </h1>
+      <p>Sewa venue modern berkapasitas 700+ kursi dan ikuti program training bersertifikat — hadir untuk mendukung pertumbuhan bisnis dan SDM Anda.</p>
+      <div class="hero-btns">
+        <a href="https://ssi.dinamika.ac.id/persewaan" target="_blank" class="hbtn red">
+          Sewa Ruang
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+        <a href="https://training.dinamika.ac.id/" target="_blank" class="hbtn outline">
+          Lihat Program Training
+        </a>
+      </div>
+    </div>
+    <div class="hero-cards">
+      <a href="https://ssi.dinamika.ac.id/persewaan" target="_blank" class="hfc">
+        <img class="hfc-thumb" src="/universitas-dinamika/assets/img/room-ap.webp" alt="Auditorium"/>
+        <div class="hfc-info">
+          <div class="hfc-label">Sewa Ruang</div>
+          <div class="hfc-title">Arena Prestasi</div>
+          <div class="hfc-sub">700 kursi · Mulai Rp 7,5jt</div>
+        </div>
+        <div class="hfc-arrow">→</div>
+      </a>
+      <a href="https://ssi.dinamika.ac.id/persewaan" target="_blank" class="hfc">
+        <img class="hfc-thumb" src="/universitas-dinamika/assets/img/room-lab.webp" alt="Lab Komputer"/>
+        <div class="hfc-info">
+          <div class="hfc-label">Sewa Ruang</div>
+          <div class="hfc-title">Lab Komputer</div>
+          <div class="hfc-sub">20–40 unit · Mulai Rp 2jt</div>
+        </div>
+        <div class="hfc-arrow">→</div>
+      </a>
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="hfc">
+        <img class="hfc-thumb" src="/universitas-dinamika/assets/img/course-flutter.jpg" alt="Training"/>
+        <div class="hfc-info">
+          <div class="hfc-label">Training</div>
+          <div class="hfc-title">30+ Program</div>
+          <div class="hfc-sub">Bersertifikat · Mulai Rp 50rb</div>
+        </div>
+        <div class="hfc-arrow">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ════ STATS ════ -->
+<div class="stats reveal">
+  <div class="stats-in">
+    <div class="st"><div class="st-n">700+</div><div class="st-l">Kursi Terbesar</div></div>
+    <div class="st"><div class="st-n">30+</div><div class="st-l">Program Training</div></div>
+    <div class="st"><div class="st-n">350+</div><div class="st-l">Peserta Terlatih</div></div>
+    <div class="st"><div class="st-n">20+</div><div class="st-l">Mitra Institusi</div></div>
+  </div>
+</div>
+
+<!-- ════ SEWA RUANG ════ -->
+<section class="section white" id="sewa">
+  <div class="sec-wrap">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow red"><div class="eyebrow-line"></div>Fasilitas Kampus</div>
+      <h2>Sewa Ruang &amp; <span class="red">Fasilitas</span></h2>
+      <p>Venue profesional dengan standar tinggi — dilengkapi WiFi, AC, LCD, sound system, dan microphone tanpa biaya tambahan.</p>
+    </div>
+
+    <!-- Feature: Auditorium -->
+    <div class="room-feature reveal">
+      <img src="/universitas-dinamika/assets/img/room-ipdn.jpg" alt="Event di Universitas Dinamika"/>
+      <div class="room-feature-overlay">
+        <div class="rfo-content">
+          <span class="rfo-tag">Venue Unggulan</span>
+          <h3>Arena Prestasi &amp; Ruang Serbaguna</h3>
+          <p>Ideal untuk wisuda, seminar besar, konferensi, dan acara korporat. Kapasitas 700 kursi dengan fasilitas lengkap kelas dunia.</p>
+          <a href="https://ssi.dinamika.ac.id/persewaan" target="_blank" class="rfo-btn">
+            Cek Ketersediaan
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room grid -->
+    <div class="rooms-grid">
+      <div class="room-card featured reveal-l">
+        <img src="/universitas-dinamika/assets/img/room-ap.webp" alt="Arena Prestasi"/>
+        <div class="room-card-body">
+          <div class="rc-name">Arena Prestasi (Auditorium)</div>
+          <div class="rc-cap">700 kursi · Suara &amp; Cahaya Profesional</div>
+          <div class="rc-price"> 7.500.000 – 8.500.000 / sesi</div>
+        </div>
+      </div>
+      <div class="room-card reveal-r">
+        <img src="/universitas-dinamika/assets/img/room-sg.webp" alt="Ruang Serbaguna"/>
+        <div class="room-card-body">
+          <div class="rc-name">Ruang Serbaguna</div>
+          <div class="rc-cap">400 kursi · 4 jam/sesi</div>
+          <div class="rc-price"> 3.000.000 – 3.500.000</div>
+        </div>
+      </div>
+      <div class="room-card reveal-l delay-1">
+        <img src="/universitas-dinamika/assets/img/room-laksda.webp" alt="Ruang Laksda Mardiono"/>
+        <div class="room-card-body">
+          <div class="rc-name">Ruang Laksda Mardiono</div>
+          <div class="rc-cap">300 kursi · 4 jam/sesi</div>
+          <div class="rc-price"> 3.000.000 – 3.500.000</div>
+        </div>
+      </div>
+      <div class="room-card reveal delay-1">
+        <img src="/universitas-dinamika/assets/img/room-ufl.webp" alt="Kelas Futuristic"/>
+        <div class="room-card-body">
+          <div class="rc-name">Kelas Futuristic Learning</div>
+          <div class="rc-cap">20 kursi · Teknologi Modern</div>
+          <div class="rc-price"> 2.000.000 – 2.250.000</div>
+        </div>
+      </div>
+      <div class="room-card reveal-r delay-1">
+        <img src="/universitas-dinamika/assets/img/room-lab1.webp" alt="Lab Komputer"/>
+        <div class="room-card-body">
+          <div class="rc-name">Lab Komputer Standar</div>
+          <div class="rc-cap">20–40 unit PC</div>
+          <div class="rc-price"> 2.000.000 – 4.500.000</div>
+        </div>
+      </div>
+      <div class="room-card reveal-l delay-2">
+        <img src="/universitas-dinamika/assets/img/room-lab2.webp" alt="Lab Desain"/>
+        <div class="room-card-body">
+          <div class="rc-name">Lab Desain (iMac/Lenovo)</div>
+          <div class="rc-cap">20–40 unit iMac/Lenovo</div>
+          <div class="rc-price"> 3.000.000 – 6.500.000</div>
+        </div>
+      </div>
+      <div class="room-card reveal delay-2">
+        <img src="/universitas-dinamika/assets/img/room-basket.webp" alt="Lapangan Basket"/>
+        <div class="room-card-body">
+          <div class="rc-name">Lapangan Basket</div>
+          <div class="rc-cap">Lantai 12</div>
+          <div class="rc-price"> 2.400.000 – 3.200.000 / bln</div>
+        </div>
+      </div>
+      <div class="room-card reveal-r delay-2">
+        <img src="/universitas-dinamika/assets/img/room-badmin.webp" alt="Lapangan Badminton"/>
+        <div class="room-card-body">
+          <div class="rc-name">Lapangan Badminton</div>
+          <div class="rc-cap">Lantai 9</div>
+          <div class="rc-price"> 400.000 – 520.000 / bln</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:36px" class="reveal">
+      <a href="https://ssi.dinamika.ac.id/persewaan" target="_blank" class="hbtn red" style="display:inline-flex">
+        Lihat Semua Ruangan &amp; Pesan
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ════ TRAINING ════ -->
+<section class="section dark" id="training">
+  <div class="sec-wrap">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow white"><div class="eyebrow-line"></div>Pusat Pelatihan</div>
+      <h2 style="color:#fff">Training <span class="red">Profesional</span></h2>
+      <p>30+ program bersertifikat oleh instruktur praktisi dan akademisi. Dapat diselenggaran secara in-house untuk institusi dan perusahaan Anda.</p>
+    </div>
+
+    <!-- Hero row: AI image + text -->
+    <div class="training-hero-row">
+      <div class="training-hero-img reveal-l">
+        <img src="/universitas-dinamika/assets/img/training-ai.png" alt="AI Training Center"/>
+        <div class="training-hero-img-badge">🤖 AI Generative Training Center</div>
+      </div>
+      <div class="training-hero-text reveal-r">
+        <h3>Kurikulum Industri,<br/>Instruktur Praktisi</h3>
+        <p>Setiap program dirancang bersama para profesional industri untuk memastikan relevansi dan kesiapan kerja peserta di era teknologi terkini.</p>
+        <div class="training-features">
+          <div class="tf"><div class="tf-check">✓</div> Instruktur bersertifikat internasional</div>
+          <div class="tf"><div class="tf-check">✓</div> Online &amp; offline — fleksibel sesuai kebutuhan</div>
+          <div class="tf"><div class="tf-check">✓</div> Kurikulum dapat disesuaikan (in-house)</div>
+          <div class="tf"><div class="tf-check">✓</div> Dokumentasi kegiatan tersedia</div>
+          <div class="tf"><div class="tf-check">✓</div> Materi dari vendor berlisensi</div>
+        </div>
+        <a href="https://training.dinamika.ac.id/" target="_blank" class="hbtn red" style="display:inline-flex">
+          Daftar Sekarang
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Java Spring Boot Highlight -->
+    <a href="/universitas-dinamika/training/java-springboot/" class="sb-highlight reveal">
+      <img src="/universitas-dinamika/training/java-springboot/Java Spring Bootcamp (Instagram Post (45)) (2) (1).png"
+           alt="Java Spring Boot Bootcamp"/>
+      <div class="sb-overlay">
+        <div class="sb-content">
+          <div class="sb-badge">Program Unggulan</div>
+          <h3>Java Spring Boot<br/>Bootcamp — 45 Hari</h3>
+          <p>Program intensif backend development menggunakan Java Spring Boot. Didesain untuk pemula hingga menengah yang ingin menguasai backend profesional.</p>
+          <div class="sb-btn">
+            Lihat Program
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Courses grid -->
+    <div style="margin-bottom:16px;color:rgba(255,255,255,.5);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase" class="reveal">
+      Program Pilihan
+    </div>
+    <div class="courses-grid">
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="course-card reveal delay-1">
+        <img src="/universitas-dinamika/assets/img/course-flutter.jpg" alt="Flutter"/>
+        <div class="course-card-body">
+          <div class="course-tag">Mobile Development</div>
+          <div class="course-name">Flutter &amp; Mobile App Development</div>
+        </div>
+      </a>
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="course-card reveal delay-2">
+        <img src="/universitas-dinamika/assets/img/course-figma.jpg" alt="UI/UX Figma"/>
+        <div class="course-card-body">
+          <div class="course-tag">Desain</div>
+          <div class="course-name">UI/UX Design dengan Figma</div>
+        </div>
+      </a>
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="course-card reveal delay-3">
+        <img src="/universitas-dinamika/assets/img/course-web.jpg" alt="Web Programming"/>
+        <div class="course-card-body">
+          <div class="course-tag">Teknologi</div>
+          <div class="course-name">Web Programming &amp; Laravel</div>
+        </div>
+      </a>
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="course-card reveal delay-1">
+        <img src="/universitas-dinamika/assets/img/course-office.jpg" alt="Microsoft Office"/>
+        <div class="course-card-body">
+          <div class="course-tag">Profesional</div>
+          <div class="course-name">Microsoft Office Basic &amp; Advanced</div>
+        </div>
+      </a>
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="course-card reveal delay-2">
+        <img src="/universitas-dinamika/assets/img/course-plc.jpg" alt="PLC Automation"/>
+        <div class="course-card-body">
+          <div class="course-tag">Otomasi</div>
+          <div class="course-name">PLC-Omron Automation</div>
+        </div>
+      </a>
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="course-card reveal delay-3">
+        <img src="/universitas-dinamika/assets/img/course-misc.jpg" alt="Data Analisis"/>
+        <div class="course-card-body">
+          <div class="course-tag">Analisis Data</div>
+          <div class="course-name">Analisis Data &amp; SEM-PLS</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Gallery -->
+    <div style="margin-bottom:16px;color:rgba(255,255,255,.5);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase" class="reveal">
+      Dokumentasi Kegiatan
+    </div>
+    <div class="gallery-strip">
+      <div class="gallery-item reveal-l">
+        <img src="/universitas-dinamika/assets/img/gallery-1.jpg" alt="Dokumentasi Training"/>
+        <div class="gallery-item-overlay"><span class="gallery-item-label">Sesi Pelatihan</span></div>
+      </div>
+      <div class="gallery-item reveal">
+        <img src="/universitas-dinamika/assets/img/gallery-2.jpg" alt="Training of Trainer"/>
+        <div class="gallery-item-overlay"><span class="gallery-item-label">Training of Trainer</span></div>
+      </div>
+      <div class="gallery-item reveal-r">
+        <img src="/universitas-dinamika/assets/img/gallery-3.jpg" alt="Workshop"/>
+        <div class="gallery-item-overlay"><span class="gallery-item-label">Workshop Intensif</span></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:40px" class="reveal">
+      <a href="https://training.dinamika.ac.id/" target="_blank" class="hbtn outline" style="display:inline-flex;border-color:rgba(255,255,255,.3);color:#fff">
+        Lihat Semua Program &amp; Daftar
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ════ PARTNERS ════ -->
+<div class="partners reveal">
+  <div class="partners-label">Dipercaya oleh Institusi &amp; Perusahaan</div>
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      <!-- set 1 -->
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-kemendikbud.png" alt="Kemendikbud"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-polinema.png" alt="Polinema"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-uiii.png" alt="UIII"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-aal.jpg" alt="Akademi Angkatan Laut"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-gresik.png" alt="Kab. Gresik"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-bojonegoro.png" alt="Kab. Bojonegoro"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-poltekpel.png" alt="Poltekpel"/></div>
+      <!-- set 2 — exact duplicate for seamless loop -->
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-kemendikbud.png" alt="Kemendikbud"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-polinema.png" alt="Polinema"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-uiii.png" alt="UIII"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-aal.jpg" alt="Akademi Angkatan Laut"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-gresik.png" alt="Kab. Gresik"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-bojonegoro.png" alt="Kab. Bojonegoro"/></div>
+      <div class="marquee-slot"><img src="/universitas-dinamika/assets/img/partner-poltekpel.png" alt="Poltekpel"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CONTACT ════ -->
+<section class="contact-sec reveal" id="contact">
+  <div class="contact-inner">
+    <div class="contact-top">
+      <div>
+        <h2>Siap <span>Melayani</span> Anda</h2>
+        <p>Hubungi kami untuk informasi harga, ketersediaan ruangan, atau konsultasi program pelatihan yang tepat untuk institusi Anda.</p>
+      </div>
+      <div class="contact-logo">
+        <img src="/universitas-dinamika/assets/img/logo-ssi.png" alt="SSI"/>
+      </div>
+    </div>
+    <div class="contact-grid">
+      <a href="https://wa.me/6285183009828" target="_blank" class="ccard">
+        <div class="ccard-ico">💬</div>
+        <div><span class="ccard-lbl">WhatsApp</span><span class="ccard-val">+62 851-8300-9828</span></div>
+      </a>
+      <a href="mailto:ssi@dinamika.ac.id" class="ccard">
+        <div class="ccard-ico">✉️</div>
+        <div><span class="ccard-lbl">Email</span><span class="ccard-val">ssi@dinamika.ac.id</span></div>
+      </a>
+      <a href="https://www.instagram.com/ssi_dinamika/" target="_blank" class="ccard">
+        <div class="ccard-ico">📸</div>
+        <div><span class="ccard-lbl">Instagram</span><span class="ccard-val">@ssi_dinamika</span></div>
+      </a>
+      <div class="ccard" style="cursor:default">
+        <div class="ccard-ico">📍</div>
+        <div><span class="ccard-lbl">Alamat</span><span class="ccard-val">Jl. Raya Kedung Baruk 98, Surabaya</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FOOTER ════ -->
+<footer>
+  <div class="footer-in">
+    <div class="footer-logos">
+      <img src="/universitas-dinamika/assets/img/logo-ssi.png" alt="SSI"/>
+      <div class="sep"></div>
+      <img src="/universitas-dinamika/assets/img/logo-undika.svg" alt="Universitas Dinamika"/>
+    </div>
+    <div class="footer-links">
+      <a href="https://ssi.dinamika.ac.id/persewaan" target="_blank">Sewa Ruang</a>
+      <a href="https://training.dinamika.ac.id/" target="_blank">Training Center</a>
+      <a href="https://www.dinamika.ac.id/" target="_blank">Universitas Dinamika</a>
+    </div>
+    <span class="footer-copy">© 2026 SSI Universitas Dinamika</span>
+  </div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.07 });
+document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
