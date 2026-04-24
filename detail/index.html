@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CV — Dionisius Nanda Priyadi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090f;--dark:#0f0f18;
+  --card:rgba(255,255,255,.04);--bd:rgba(255,255,255,.08);
+  --text:#e2e2ee;--muted:#8888aa;
+  --accent:#6366f1;--a2:#a855f7;--a3:#22d3ee;
+  --green:#34d399;--gold:#fbbf24;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+/* ══ BACK BAR ══ */
+.back-bar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:14px;
+  padding:12px 40px;
+  background:rgba(9,9,15,.92);backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--bd);
+}
+.back-btn{
+  display:flex;align-items:center;gap:7px;
+  font-size:.72rem;font-weight:600;color:var(--muted);
+  padding:5px 13px;border-radius:7px;border:1px solid var(--bd);
+  transition:all .2s;
+}
+.back-btn:hover{color:var(--accent);border-color:rgba(99,102,241,.3)}
+.back-btn svg{flex-shrink:0}
+.bar-name{font-size:.8rem;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(135deg,var(--text),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.bar-spacer{flex:1}
+.bar-dl{
+  display:flex;align-items:center;gap:6px;
+  font-size:.7rem;font-weight:600;
+  background:linear-gradient(135deg,var(--accent),var(--a2));
+  color:#fff;padding:5px 14px;border-radius:7px;
+  transition:all .2s;
+}
+.bar-dl:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(99,102,241,.3)}
+
+/* ══ ABSTRACT DOT NAV ══ */
+.abs-nav{
+  position:fixed;right:22px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;
+  z-index:100;
+}
+.abs-track{
+  position:absolute;top:10px;bottom:10px;left:50%;
+  width:1px;transform:translateX(-50%);
+  background:linear-gradient(to bottom,transparent,var(--bd) 15%,var(--bd) 85%,transparent);
+}
+.abs-node{
+  position:relative;display:flex;align-items:center;
+  cursor:pointer;padding:7px 0;
+}
+.abs-node:hover .abs-label,.abs-node.active .abs-label{opacity:1;transform:translateX(0)}
+.abs-dot{
+  width:9px;height:9px;border-radius:50%;
+  border:1.5px solid var(--bd);background:var(--bg);
+  transition:all .25s;position:relative;z-index:1;flex-shrink:0;
+}
+.abs-node:hover .abs-dot{border-color:var(--accent);background:rgba(99,102,241,.18)}
+.abs-node.active .abs-dot{
+  width:11px;height:11px;
+  border-color:var(--accent);background:var(--accent);
+  box-shadow:0 0 0 3px rgba(99,102,241,.18),0 0 12px rgba(99,102,241,.35);
+}
+.abs-label{
+  position:absolute;right:20px;
+  font-size:.63rem;font-weight:600;color:var(--muted);
+  white-space:nowrap;pointer-events:none;
+  opacity:0;transform:translateX(4px);
+  transition:opacity .2s,transform .2s;
+  background:rgba(9,9,15,.88);border:1px solid var(--bd);
+  padding:3px 9px;border-radius:6px;backdrop-filter:blur(8px);
+}
+.abs-node.active .abs-label{color:var(--accent);border-color:rgba(99,102,241,.28)}
+
+/* ══ HERO ══ */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;position:relative;overflow:hidden}
+.hero-photo-col{position:relative;overflow:hidden;background:var(--dark)}
+.hero-photo-col::after{content:'';position:absolute;top:0;right:0;bottom:0;width:100px;background:linear-gradient(to right,transparent,var(--bg));z-index:2;pointer-events:none}
+.hero-photo{width:100%;height:100%;object-fit:cover;object-position:center top;filter:grayscale(10%)}
+.hero-photo-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(160deg,rgba(9,9,15,.1),rgba(9,9,15,.35))}
+.hero-info-col{display:flex;flex-direction:column;justify-content:center;padding:64px 52px 64px 44px;background:linear-gradient(160deg,var(--bg),rgba(15,15,24,.97));position:relative;z-index:1}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);border-radius:100px;padding:5px 13px;font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;width:fit-content}
+.live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}}
+.hero-name{font-size:clamp(2rem,3.5vw,3.4rem);font-weight:900;letter-spacing:-.04em;line-height:1.05;margin-bottom:8px}
+.hero-name-grad{background:linear-gradient(135deg,var(--text) 20%,var(--accent) 65%,var(--a2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-title{font-size:.95rem;color:var(--muted);margin-bottom:26px;line-height:1.6}
+.hero-title strong{color:var(--text);font-weight:600}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.hstat{background:var(--card);border:1px solid var(--bd);border-radius:11px;padding:13px 15px}
+.hstat-n{font-size:1.5rem;font-weight:900;letter-spacing:-.03em;background:linear-gradient(135deg,var(--accent),var(--a3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hstat-l{font-size:.62rem;color:var(--muted);margin-top:2px;letter-spacing:.04em;text-transform:uppercase}
+.hero-btns{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:9px;font-size:.82rem;font-weight:700;transition:all .22s;cursor:pointer;border:none}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;box-shadow:0 3px 18px rgba(99,102,241,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 26px rgba(99,102,241,.5)}
+.btn-ghost{background:transparent;border:1.5px solid var(--bd);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.06)}
+.hero-socials{display:flex;gap:8px}
+.soc{width:34px;height:34px;border-radius:8px;border:1px solid var(--bd);background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .2s;font-size:14px}
+.soc:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.08)}
+
+/* ══ SECTIONS ══ */
+section{padding:72px 56px;border-top:1px solid var(--bd)}
+.sec-label{font-family:'JetBrains Mono',monospace;font-size:.66rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}
+.sec-title{font-size:clamp(1.5rem,2.8vw,2rem);font-weight:900;letter-spacing:-.03em;margin-bottom:32px;line-height:1.1}
+.sec-title span{background:linear-gradient(135deg,var(--accent),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ══ ABOUT ══ */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
+.about-bio{font-size:.88rem;color:var(--muted);line-height:1.8;margin-bottom:18px}
+.about-bio strong{color:var(--text)}
+.about-quote{background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(168,85,247,.05));border:1px solid rgba(99,102,241,.16);border-radius:14px;padding:22px;font-size:.86rem;font-style:italic;line-height:1.7;color:rgba(255,255,255,.68);position:relative}
+.about-quote::before{content:'"';position:absolute;top:-14px;left:14px;font-size:72px;color:rgba(99,102,241,.1);font-weight:900;line-height:1}
+.about-quote cite{display:block;margin-top:10px;font-size:.68rem;font-style:normal;color:var(--accent)}
+.meta-list{display:flex;flex-direction:column;gap:11px}
+.meta-row{display:flex;align-items:flex-start;gap:11px;font-size:.82rem}
+.meta-ico{width:30px;height:30px;border-radius:7px;flex-shrink:0;background:rgba(99,102,241,.09);border:1px solid rgba(99,102,241,.18);display:flex;align-items:center;justify-content:center;font-size:13px}
+.meta-lbl{font-size:.62rem;color:var(--muted);margin-bottom:1px;letter-spacing:.04em;text-transform:uppercase}
+.meta-val{color:var(--text);font-size:.82rem}
+
+/* ══ SKILLS ══ */
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.skill-card{background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:16px;transition:border-color .2s}
+.skill-card:hover{border-color:rgba(99,102,241,.3)}
+.skill-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.skill-name{font-size:.82rem;font-weight:600}
+.skill-pct{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)}
+.skill-bar{height:3px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.skill-fill{height:100%;border-radius:3px;width:0;background:linear-gradient(90deg,var(--accent),var(--a2));transition:width 1.4s cubic-bezier(.22,1,.36,1)}
+.skill-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.stag{font-size:.63rem;padding:2px 8px;border-radius:5px;background:rgba(99,102,241,.09);border:1px solid rgba(99,102,241,.16);color:var(--accent)}
+
+/* ══ EXPERIENCE ══ */
+.timeline{padding-left:26px;position:relative}
+.timeline::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--accent),var(--a2),transparent);border-radius:2px}
+.tl-item{position:relative;margin-bottom:28px}
+.tl-dot{position:absolute;left:-26px;top:5px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:2px solid var(--accent);box-shadow:0 0 8px rgba(99,102,241,.4);z-index:1}
+.tl-dot.now{background:var(--accent)}
+.tl-card{background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:16px 20px;transition:border-color .2s,transform .2s}
+.tl-card:hover{border-color:rgba(99,102,241,.28);transform:translateX(3px)}
+.tl-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+.tl-role{font-size:.86rem;font-weight:700}
+.tl-period{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--accent);background:rgba(99,102,241,.09);padding:2px 8px;border-radius:5px;white-space:nowrap}
+.tl-company{font-size:.75rem;color:var(--a2);margin-bottom:7px}
+.tl-desc{font-size:.78rem;color:var(--muted);line-height:1.65}
+
+/* ══ PROJECTS ══ */
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.proj-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:15px;transition:border-color .2s,transform .2s;position:relative;overflow:hidden}
+.proj-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,.05),transparent);opacity:0;transition:opacity .2s}
+.proj-card:hover{border-color:rgba(99,102,241,.28);transform:translateY(-3px)}
+.proj-card:hover::before{opacity:1}
+.proj-year{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--a3);margin-bottom:5px}
+.proj-name{font-size:.82rem;font-weight:700;margin-bottom:5px}
+.proj-type{font-size:.62rem;color:var(--muted);background:rgba(255,255,255,.05);padding:2px 7px;border-radius:5px}
+
+
+/* ══ REVEAL ══ */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .58s ease,transform .58s ease}
+.reveal.on{opacity:1;transform:none}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:960px){
+  .abs-nav{display:none}
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .hero-photo-col{height:60vw;max-height:360px}
+  .hero-photo-col::after{display:none}
+  .hero-info-col{padding:32px 22px 44px}
+  section{padding:56px 22px}
+  .back-bar{padding:11px 16px}
+}
+@media(max-width:700px){
+  .about-grid{grid-template-columns:1fr}
+  .skills-grid{grid-template-columns:1fr}
+  .proj-grid{grid-template-columns:1fr 1fr}
+.hero-stats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:420px){
+  .proj-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- BACK BAR -->
+<header class="back-bar">
+  <a href="/" class="back-btn">
+    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>
+    Roadmap
+  </a>
+  <span style="font-size:.7rem;color:var(--bd)">→</span>
+  <span class="bar-name">CV Lengkap</span>
+  <div class="bar-spacer"></div>
+  <a href="/cv/assets/cv.pdf" target="_blank" class="bar-dl">
+    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    Download CV
+  </a>
+</header>
+
+<!-- ABSTRACT DOT NAV -->
+<nav class="abs-nav" id="absNav">
+  <div class="abs-track"></div>
+  <div class="abs-node active" data-s="hero"><span class="abs-label">Profil</span><div class="abs-dot"></div></div>
+  <div class="abs-node" data-s="about"><span class="abs-label">Tentang</span><div class="abs-dot"></div></div>
+  <div class="abs-node" data-s="skills"><span class="abs-label">Keahlian</span><div class="abs-dot"></div></div>
+  <div class="abs-node" data-s="experience"><span class="abs-label">Pengalaman</span><div class="abs-dot"></div></div>
+  <div class="abs-node" data-s="projects"><span class="abs-label">Proyek</span><div class="abs-dot"></div></div>
+</nav>
+
+<!-- HERO -->
+<section id="hero" style="padding:0;border:none">
+  <div class="hero">
+    <div class="hero-photo-col">
+      <div class="hero-photo-overlay"></div>
+      <img class="hero-photo" src="/foto-dion.png" alt="Dionisius Nanda Priyadi" onerror="this.src='/profile.jpg'"/>
+    </div>
+    <div class="hero-info-col">
+      <div class="hero-eyebrow"><span class="live"></span>Open to Projects &amp; Collaboration</div>
+      <h1 class="hero-name">
+        <span class="hero-name-grad">Dionisius</span><br/>Nanda Priyadi
+      </h1>
+      <p class="hero-title">
+        <strong>Software Engineer</strong> — Backend at heart,<br/>full-stack in practice, AI-curious by nature.
+      </p>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-n">8+</div><div class="hstat-l">Tahun Pengalaman</div></div>
+        <div class="hstat"><div class="hstat-n">11</div><div class="hstat-l">Proyek Selesai</div></div>
+        <div class="hstat"><div class="hstat-n">3</div><div class="hstat-l">Perusahaan</div></div>
+        <div class="hstat"><div class="hstat-n">2</div><div class="hstat-l">Role Aktif</div></div>
+      </div>
+      <div class="hero-btns">
+        <a href="#about" class="btn btn-primary">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          Tentang Saya
+        </a>
+        <a href="/cv/assets/cv.pdf" target="_blank" class="btn btn-ghost">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Download CV
+        </a>
+      </div>
+      <div class="hero-socials">
+        <a href="https://linkedin.com/in/dionisius-nanda-priyadi/" target="_blank" class="soc" title="LinkedIn">in</a>
+        <a href="https://github.com/dionisiusnp" target="_blank" class="soc" title="GitHub">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+        </a>
+        <a href="https://instagram.com/dionisnp/" target="_blank" class="soc" title="Instagram">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+        </a>
+        <a href="mailto:dionisiusn1@gmail.com" class="soc" title="Email">✉</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="sec-label">// tentang saya</div>
+  <div class="sec-title">Siapa <span>Saya?</span></div>
+  <div class="about-grid reveal">
+    <div>
+      <p class="about-bio">Saya <strong>Dionisius Nanda Priyadi</strong>, lahir 28 Maret 1995 di Malang, kini berdomisili di Sidoarjo, Jawa Timur. Software engineer passionate dengan pengalaman lebih dari 8 tahun sejak 2016.</p>
+      <p class="about-bio">Spesialis <strong>backend development</strong> dengan Java Spring Boot dan PHP Laravel, terbiasa bekerja full-stack dari arsitektur API hingga cloud deployment. Aktif di <strong>GDG (Google Developer Group)</strong> dan terus mengeksplorasi integrasi <strong>AI</strong> ke produk nyata.</p>
+      <div class="about-quote">
+        "A perfect application is not one that is expensive or error-free, but one that <em>can be used effectively</em>."
+        <cite>— Filosofi Kerja</cite>
+      </div>
+    </div>
+    <div class="meta-list">
+      <div class="meta-row"><div class="meta-ico">📍</div><div><div class="meta-lbl">Lokasi</div><div class="meta-val">Sidoarjo, Jawa Timur, Indonesia</div></div></div>
+      <div class="meta-row"><div class="meta-ico">🎂</div><div><div class="meta-lbl">Lahir</div><div class="meta-val">28 Maret 1995 · Malang</div></div></div>
+      <div class="meta-row"><div class="meta-ico">🎓</div><div><div class="meta-lbl">Pendidikan</div><div class="meta-val">Sistem Informasi · Universitas Airlangga (UNAIR)</div></div></div>
+      <div class="meta-row"><div class="meta-ico">📱</div><div><div class="meta-lbl">WhatsApp</div><div class="meta-val">+62 857 0825 1737</div></div></div>
+      <div class="meta-row"><div class="meta-ico">✉</div><div><div class="meta-lbl">Email</div><div class="meta-val">dionisiusn1@gmail.com</div></div></div>
+      <div class="meta-row"><div class="meta-ico">🌐</div><div><div class="meta-lbl">Bahasa</div><div class="meta-val">Bahasa Indonesia · English (Professional)</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="sec-label">// keahlian teknis</div>
+  <div class="sec-title">Skills &amp; <span>Teknologi</span></div>
+  <div class="skills-grid" id="skillsGrid">
+    <div class="skill-card">
+      <div class="skill-top"><span class="skill-name">Backend Development</span><span class="skill-pct">75%</span></div>
+      <div class="skill-bar"><div class="skill-fill" data-w="75"></div></div>
+      <div class="skill-tags"><span class="stag">Java Spring Boot</span><span class="stag">PHP Laravel</span><span class="stag">REST API</span></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-top"><span class="skill-name">Mobile Development</span><span class="skill-pct">65%</span></div>
+      <div class="skill-bar"><div class="skill-fill" data-w="65"></div></div>
+      <div class="skill-tags"><span class="stag">Flutter / Dart</span><span class="stag">iOS &amp; Android</span></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-top"><span class="skill-name">Infrastructure &amp; DevOps</span><span class="skill-pct">80%</span></div>
+      <div class="skill-bar"><div class="skill-fill" data-w="80"></div></div>
+      <div class="skill-tags"><span class="stag">AWS</span><span class="stag">GCP</span><span class="stag">VPS</span><span class="stag">Linux</span></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-top"><span class="skill-name">Database</span><span class="skill-pct">70%</span></div>
+      <div class="skill-bar"><div class="skill-fill" data-w="70"></div></div>
+      <div class="skill-tags"><span class="stag">MySQL</span><span class="stag">PostgreSQL</span><span class="stag">NoSQL</span></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-top"><span class="skill-name">Tools &amp; Workflow</span><span class="skill-pct">95%</span></div>
+      <div class="skill-bar"><div class="skill-fill" data-w="95"></div></div>
+      <div class="skill-tags"><span class="stag">Git</span><span class="stag">Postman</span><span class="stag">Docker</span><span class="stag">Ngrok</span></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-top"><span class="skill-name">AI / Machine Learning</span><span class="skill-pct">50%</span></div>
+      <div class="skill-bar"><div class="skill-fill" data-w="50" style="background:linear-gradient(90deg,var(--a2),var(--a3))"></div></div>
+      <div class="skill-tags"><span class="stag">LLM Integration</span><span class="stag">API AI</span><span class="stag">Eksplorasi</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="sec-label">// riwayat kerja</div>
+  <div class="sec-title">Pengalaman <span>Kerja</span></div>
+  <div class="timeline reveal">
+    <div class="tl-item">
+      <div class="tl-dot now"></div>
+      <div class="tl-card">
+        <div class="tl-head"><div class="tl-role">Software Engineer</div><div class="tl-period">Feb 2024 – Sekarang</div></div>
+        <div class="tl-company">Universitas Dinamika — Solusi Sistem Informasi · Surabaya</div>
+        <div class="tl-desc">Membangun sistem informasi kampus. Trainer Java Spring Boot Bootcamp 45 hari, membimbing mahasiswa dalam backend production-grade.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot now"></div>
+      <div class="tl-card">
+        <div class="tl-head"><div class="tl-role">Software Engineer</div><div class="tl-period">Jun 2022 – Sekarang</div></div>
+        <div class="tl-company">CV Mitra Super Teknologi · Depok, Jawa Barat</div>
+        <div class="tl-desc">Pengembangan solusi software custom untuk berbagai klien. Lintas tim DevOps, QA, frontend. Integrasi payment gateway dan cloud deployment.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-head"><div class="tl-role">Back End Engineer &amp; Project Leader</div><div class="tl-period">Sep 2021 – Feb 2024</div></div>
+        <div class="tl-company">PT Hokky Sumber Makmur · Surabaya</div>
+        <div class="tl-desc">Lead software development end-to-end. Desain REST API, supervisi junior dev, code review, koordinasi DevOps.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-head"><div class="tl-role">Freelance Web Developer</div><div class="tl-period">2016 – 2021</div></div>
+        <div class="tl-company">Freelance · Remote</div>
+        <div class="tl-desc">Company profile, eCommerce, web apps custom. Fondasi karier di backend engineering dan server management.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="sec-label">// portofolio</div>
+  <div class="sec-title">Proyek <span>Pilihan</span></div>
+  <div class="proj-grid reveal">
+    <div class="proj-card"><div class="proj-year">2025</div><div class="proj-name">Landing Page + CMS App</div><span class="proj-type">Web · CMS</span></div>
+    <div class="proj-card"><div class="proj-year">2024</div><div class="proj-name">Marketing Management App</div><span class="proj-type">Web · SaaS</span></div>
+    <div class="proj-card"><div class="proj-year">2024</div><div class="proj-name">Subscription Management App</div><span class="proj-type">Web · Billing</span></div>
+    <div class="proj-card"><div class="proj-year">2022</div><div class="proj-name">ERP for Contractor</div><span class="proj-type">Web · ERP</span></div>
+    <div class="proj-card"><div class="proj-year">2021</div><div class="proj-name">HRIS App</div><span class="proj-type">Web + Mobile · HR</span></div>
+    <div class="proj-card"><div class="proj-year">2021</div><div class="proj-name">Employee Tracking App</div><span class="proj-type">Web + Mobile · Ops</span></div>
+    <div class="proj-card"><div class="proj-year">2021</div><div class="proj-name">eCommerce for Retail</div><span class="proj-type">Web · Commerce</span></div>
+    <div class="proj-card"><div class="proj-year">2021</div><div class="proj-name">ERP for Retail</div><span class="proj-type">Web · ERP</span></div>
+    <div class="proj-card"><div class="proj-year">2020</div><div class="proj-name">COVID Room Booking App</div><span class="proj-type">Web · Civic</span></div>
+    <div class="proj-card"><div class="proj-year">2016</div><div class="proj-name">Robotic eCommerce</div><span class="proj-type">Web · Commerce</span></div>
+    <div class="proj-card"><div class="proj-year">2016</div><div class="proj-name">Company Profile Sites</div><span class="proj-type">Web · Branding</span></div>
+  </div>
+</section>
+
+
+<footer style="padding:28px 56px;border-top:1px solid var(--bd);display:flex;align-items:center;flex-wrap:wrap;gap:16px;font-size:.7rem;color:var(--muted)">
+  <span style="margin-right:auto">© 2026 Dionisius Nanda Priyadi · Sidoarjo, Indonesia</span>
+  <a href="/" style="color:var(--accent);font-weight:600">← Roadmap</a>
+  <a href="https://linkedin.com/in/dionisius-nanda-priyadi/" target="_blank" style="color:var(--muted);transition:color .2s">LinkedIn</a>
+  <a href="mailto:dionisiusn1@gmail.com" style="color:var(--muted);transition:color .2s">Email</a>
+</footer>
+
+<script>
+/* skill bars */
+const sObs = new IntersectionObserver(e => {
+  e.forEach(x => { if(x.isIntersecting){ x.target.querySelectorAll('.skill-fill').forEach(b=>{b.style.width=b.dataset.w+'%'}); sObs.unobserve(x.target); }});
+},{threshold:.2});
+sObs.observe(document.getElementById('skillsGrid'));
+
+/* reveal */
+const rObs = new IntersectionObserver(e => {
+  e.forEach(x => { if(x.isIntersecting){ x.target.classList.add('on'); rObs.unobserve(x.target); }});
+},{threshold:.07});
+document.querySelectorAll('.reveal').forEach(el=>rObs.observe(el));
+
+/* active dot nav on scroll */
+const secs = ['hero','about','skills','experience','projects'];
+const aObs = new IntersectionObserver(e => {
+  e.forEach(x => {
+    if(x.isIntersecting){
+      document.querySelectorAll('.abs-node').forEach(n=>n.classList.remove('active'));
+      const node = document.querySelector(`.abs-node[data-s="${x.target.id}"]`);
+      if(node) node.classList.add('active');
+    }
+  });
+},{threshold:.3});
+secs.forEach(id=>{ const el=document.getElementById(id); if(el) aObs.observe(el); });
+
+/* dot click → scroll */
+document.querySelectorAll('.abs-node[data-s]').forEach(item => {
+  item.addEventListener('click', ()=>{
+    const el = document.getElementById(item.dataset.s);
+    if(el) el.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>
