@@ -248,6 +248,45 @@ footer{border-top:1px solid var(--bd);padding:26px 40px;
   padding:5px 13px;border:1px solid var(--bd);border-radius:8px;transition:all .2s}
 .foot-link:hover{color:var(--accent);border-color:rgba(99,102,241,.3)}
 
+/* dropdown offering */
+.foot-drop{position:relative}
+.foot-drop-btn{
+  display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--muted);
+  padding:5px 13px;border:1px solid var(--bd);border-radius:8px;
+  cursor:pointer;transition:all .2s;background:none;font-family:inherit;
+}
+.foot-drop-btn:hover,.foot-drop.open .foot-drop-btn{
+  color:var(--accent);border-color:rgba(99,102,241,.3);
+}
+.foot-drop-ico{
+  width:12px;height:12px;transition:transform .2s;flex-shrink:0;
+}
+.foot-drop.open .foot-drop-ico{transform:rotate(180deg)}
+.foot-drop-menu{
+  position:absolute;bottom:calc(100% + 8px);right:0;
+  background:rgba(15,15,24,.97);border:1px solid var(--bd);
+  border-radius:11px;padding:6px;
+  min-width:200px;
+  box-shadow:0 -8px 32px rgba(0,0,0,.4);
+  backdrop-filter:blur(12px);
+  display:none;flex-direction:column;gap:1px;
+  z-index:200;
+}
+.foot-drop.open .foot-drop-menu{display:flex}
+.drop-section{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.54rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(99,102,241,.6);padding:8px 10px 4px;
+}
+.drop-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:.72rem;color:var(--muted);
+  padding:7px 10px;border-radius:7px;
+  text-decoration:none;transition:all .18s;
+}
+.drop-item:hover{background:rgba(99,102,241,.08);color:var(--text)}
+.drop-item-ico{font-size:13px;flex-shrink:0;width:18px;text-align:center}
+
 /* ══ MOBILE ══ */
 @media(max-width:800px){
   .rm-hero{grid-template-columns:1fr;height:auto}
@@ -325,8 +364,8 @@ footer{border-top:1px solid var(--bd);padding:26px 40px;
 
     <!-- TIM 1: Team for UK -->
     <a href="/team-for-uk/" class="rm-fc"
-       data-color="#4a8fd4"
-       style="--tc:rgba(74,143,212,.3);--tc-h:rgba(74,143,212,.55);--tc-bg:rgba(74,143,212,.07);--tc-glow:rgba(74,143,212,.12);--tc-text:#7ab8e8">
+       data-color="#6366f1"
+       style="--tc:rgba(99,102,241,.25);--tc-h:rgba(99,102,241,.45);--tc-bg:rgba(99,102,241,.06);--tc-glow:rgba(99,102,241,.1);--tc-text:#a5b4fc">
       <div class="rm-fc-header">
         <div class="rm-fc-ico">🇬🇧</div>
         <div class="rm-fc-meta">
@@ -352,8 +391,8 @@ footer{border-top:1px solid var(--bd);padding:26px 40px;
 
     <!-- TIM 2: Tim Gamifikasi Laravel -->
     <a href="/team-for-laravel-gamification/" class="rm-fc"
-       data-color="#e05a4a"
-       style="--tc:rgba(224,90,74,.3);--tc-h:rgba(224,90,74,.55);--tc-bg:rgba(224,90,74,.07);--tc-glow:rgba(224,90,74,.12);--tc-text:#e88a7e">
+       data-color="#6366f1"
+       style="--tc:rgba(99,102,241,.25);--tc-h:rgba(99,102,241,.45);--tc-bg:rgba(99,102,241,.06);--tc-glow:rgba(99,102,241,.1);--tc-text:#a5b4fc">
       <div class="rm-fc-header">
         <div class="rm-fc-ico">🎮</div>
         <div class="rm-fc-meta">
@@ -372,6 +411,33 @@ footer{border-top:1px solid var(--bd);padding:26px 40px;
         </span>
         <span class="rm-fc-cta">
           Lihat Tim
+          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <!-- TIM 3: SSI Academy -->
+    <a href="https://ssiacade.my.id" target="_blank" class="rm-fc"
+       data-color="#6366f1"
+       style="--tc:rgba(99,102,241,.25);--tc-h:rgba(99,102,241,.45);--tc-bg:rgba(99,102,241,.06);--tc-glow:rgba(99,102,241,.1);--tc-text:#a5b4fc">
+      <div class="rm-fc-header">
+        <div class="rm-fc-ico">🏫</div>
+        <div class="rm-fc-meta">
+          <div class="rm-fc-label">Komunitas IT</div>
+          <div class="rm-fc-name">SSI Academy</div>
+        </div>
+      </div>
+      <p class="rm-fc-desc">Wadah kolaborasi & edukasi IT — web, mobile, AI, game dev, keamanan siber. Berbasis Kampus Undika &amp; online, terbuka untuk semua level.</p>
+      <div class="rm-fc-chips">
+        <span>Web Dev</span><span>Mobile</span><span>AI / ML</span><span>Game Dev</span><span>Cyber Security</span>
+      </div>
+      <div class="rm-fc-foot">
+        <span class="rm-fc-members">
+          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Komunitas Aktif
+        </span>
+        <span class="rm-fc-cta">
+          ssiacade.my.id
           <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
         </span>
       </div>
@@ -416,7 +482,7 @@ footer{border-top:1px solid var(--bd);padding:26px 40px;
       <div class="cstat"><span class="cstat-n">8+</span><span class="cstat-l">Tahun</span></div>
       <div class="cstat"><span class="cstat-n">11</span><span class="cstat-l">Proyek</span></div>
       <div class="cstat"><span class="cstat-n">2</span><span class="cstat-l">Role Aktif</span></div>
-      <div class="cstat"><span class="cstat-n">2</span><span class="cstat-l">Tim</span></div>
+      <div class="cstat"><span class="cstat-n">3</span><span class="cstat-l">Tim</span></div>
     </div>
     <a href="/detail/" class="career-cta">
       Lihat CV Lengkap
@@ -432,6 +498,21 @@ footer{border-top:1px solid var(--bd);padding:26px 40px;
   <a href="https://github.com/dionisiusnp" target="_blank" class="foot-link">GitHub</a>
   <a href="https://wa.me/6285708251737" target="_blank" class="foot-link">WhatsApp</a>
   <a href="mailto:dionisiusn1@gmail.com" class="foot-link">Email</a>
+
+  <!-- Dropdown Offering -->
+  <div class="foot-drop" id="footDrop">
+    <button class="foot-drop-btn" onclick="toggleDrop()">
+      Offering
+      <svg class="foot-drop-ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+    <div class="foot-drop-menu">
+      <div class="drop-section">Offering</div>
+      <a href="/offering/marketplace/" class="drop-item">
+        <span class="drop-item-ico">🏪</span>Marketplace
+      </a>
+      <!-- tambah offering baru di sini -->
+    </div>
+  </div>
 </footer>
 
 <script>
@@ -515,6 +596,14 @@ function drawLines() {
 // Draw after full layout is ready
 window.addEventListener('load', drawLines);
 window.addEventListener('resize', drawLines);
+
+function toggleDrop() {
+  document.getElementById('footDrop').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const drop = document.getElementById('footDrop');
+  if (drop && !drop.contains(e.target)) drop.classList.remove('open');
+});
 
 // Reveal animation on career strip
 const rObs = new IntersectionObserver(e => {
