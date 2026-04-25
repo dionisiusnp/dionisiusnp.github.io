@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Laravel Cheat Sheet — Dionisius NP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090f;--surface:#0f0f18;--card:rgba(255,255,255,.04);
+  --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.13);
+  --text:#e2e2ee;--muted:#8888aa;
+  --accent:#6366f1;--a2:#a855f7;--a3:#22d3ee;
+  --green:#34d399;--gold:#fbbf24;--red:#f87171;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+/* ══ LAYOUT ══ */
+.page{display:flex;min-height:100vh}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:220px;flex-shrink:0;
+  position:sticky;top:44px;height:calc(100vh - 44px);
+  overflow-y:auto;
+  background:var(--surface);
+  border-right:1px solid var(--bd);
+  padding:20px 0;
+}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+.sb-section{margin-bottom:4px}
+.sb-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.22);padding:10px 18px 4px;
+}
+.sb-item{
+  display:block;font-size:.72rem;color:var(--muted);
+  padding:6px 18px;border-left:2px solid transparent;
+  transition:all .18s;cursor:pointer;
+}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.sb-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(99,102,241,.05)}
+
+/* ══ MAIN ══ */
+.main{flex:1;min-width:0;padding:48px 52px 80px}
+
+/* ══ HERO ══ */
+.page-hero{margin-bottom:48px}
+.page-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:10px;
+}
+.page-title{font-size:2rem;font-weight:900;letter-spacing:-.04em;margin-bottom:8px}
+.page-title span{
+  background:linear-gradient(135deg,var(--text) 20%,var(--accent) 65%,var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.page-sub{font-size:.84rem;color:var(--muted);max-width:520px;line-height:1.7}
+
+/* ══ SECTION ══ */
+.cs-section{margin-bottom:52px;scroll-margin-top:64px}
+.cs-section-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:1rem;font-weight:800;letter-spacing:-.02em;
+  margin-bottom:16px;padding-bottom:12px;
+  border-bottom:1px solid var(--bd);
+}
+.cs-section-title .ico{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+}
+
+/* ══ COMMAND BLOCK ══ */
+.cmd-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.cmd-item{
+  background:var(--surface);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.cmd-item:hover{border-color:var(--bd2)}
+.cmd-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 14px 6px;
+}
+.cmd-label{font-size:.7rem;color:var(--muted);font-weight:500}
+.cmd-copy{
+  font-size:.6rem;font-weight:600;color:var(--muted);
+  background:rgba(255,255,255,.05);border:1px solid var(--bd);
+  padding:2px 8px;border-radius:4px;cursor:pointer;transition:all .15s;
+  border:none;font-family:inherit;
+}
+.cmd-copy:hover{color:var(--accent);background:rgba(99,102,241,.08)}
+.cmd-copy.copied{color:var(--green)}
+pre{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.76rem;
+  background:rgba(0,0,0,.35);
+  padding:10px 14px;
+  overflow-x:auto;
+  line-height:1.6;
+  color:#c9d1d9;
+}
+pre::-webkit-scrollbar{height:3px}
+pre::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* syntax highlight helpers */
+.kw{color:#ff7b72}   /* keyword / flag */
+.str{color:#a5d6ff}  /* string / value */
+.cm{color:#6e7681;font-style:italic} /* comment */
+.fn{color:#d2a8ff}   /* function / class */
+.pkg{color:var(--gold)} /* package name */
+
+/* ══ NOTE BOX ══ */
+.note{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.18);
+  border-radius:9px;padding:12px 14px;margin-bottom:12px;
+  font-size:.76rem;color:rgba(255,255,255,.65);line-height:1.6;
+}
+.note.warn{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.18);color:rgba(251,191,36,.8)}
+.note.green{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.18);color:rgba(52,211,153,.85)}
+.note-ico{flex-shrink:0;font-size:14px}
+
+/* ══ BADGE ══ */
+.badge{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.56rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle;
+}
+.badge.blue{background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.22);color:var(--accent)}
+.badge.purple{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.22);color:var(--a2)}
+.badge.green{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:var(--green)}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{padding:32px 20px 60px}
+  .page-title{font-size:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- BACK NAV (dion-nav) -->
+<div id="dion-nav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);font-family:Inter,system-ui,sans-serif;font-size:.72rem"><a href="/" style="display:flex;align-items:center;gap:6px;font-weight:600;color:#8888aa;padding:4px 11px;border-radius:6px;border:1px solid rgba(255,255,255,.1);text-decoration:none" onmouseover="this.style.color='#6366f1';this.style.borderColor='rgba(99,102,241,.3)'" onmouseout="this.style.color='#8888aa';this.style.borderColor='rgba(255,255,255,.1)'"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>dionisiusnp.github.io</a></div>
+
+<div class="page">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">Dasar</div>
+    <a class="sb-item active" href="#new-project">New Project</a>
+    <a class="sb-item" href="#artisan">Artisan</a>
+    <a class="sb-item" href="#migrate">Migrate</a>
+    <a class="sb-item" href="#model">Model & Controller</a>
+    <a class="sb-item" href="#route">Route</a>
+    <a class="sb-item" href="#auth">Auth</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Spatie</div>
+    <a class="sb-item" href="#spatie-permission">Permission & Role</a>
+    <a class="sb-item" href="#spatie-media">Media Library</a>
+    <a class="sb-item" href="#spatie-activity">Activity Log</a>
+    <a class="sb-item" href="#spatie-backup">Backup</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Package Lain</div>
+    <a class="sb-item" href="#passport">Passport</a>
+    <a class="sb-item" href="#sanctum">Sanctum</a>
+    <a class="sb-item" href="#queue">Queue & Job</a>
+    <a class="sb-item" href="#schedule">Schedule</a>
+    <a class="sb-item" href="#cache">Cache</a>
+    <a class="sb-item" href="#storage">Storage</a>
+    <a class="sb-item" href="#test">Testing</a>
+    <a class="sb-item" href="#deploy">Deploy</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="page-eyebrow">// article · laravel</div>
+    <h1 class="page-title">Laravel <span>Cheat Sheet</span></h1>
+    <p class="page-sub">Kumpulan command yang sering dipakai — dari setup project hingga Spatie package dan deployment. Klik kode untuk copy.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       NEW PROJECT
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="new-project">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(99,102,241,.1)">🚀</div>
+      New Project
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat project baru via Composer</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer create-project laravel/laravel <span class="str">nama-project</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat project via Laravel Installer</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>laravel new <span class="str">nama-project</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Versi spesifik</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer create-project laravel/laravel <span class="str">nama-project</span> <span class="str">"11.*"</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Jalankan dev server</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan serve
+php artisan serve <span class="kw">--port=</span><span class="str">8080</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Generate app key</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan key:generate</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       ARTISAN
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="artisan">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(34,211,238,.1)">⚙️</div>
+      Artisan Command
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">List semua command</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan list
+php artisan help <span class="str">make:model</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Clear cache semua</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan optimize:clear
+<span class="cm"># atau satu per satu:</span>
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan event:clear</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Cache untuk production</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan optimize
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Tinker (REPL interaktif)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan tinker</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Storage link</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan storage:link</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       MIGRATE
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="migrate">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(52,211,153,.1)">🗄️</div>
+      Migration & Seeder
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat migration</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:migration <span class="str">create_users_table</span>
+php artisan make:migration <span class="str">add_phone_to_users_table</span> <span class="kw">--table=</span><span class="str">users</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Jalankan migration</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan migrate
+php artisan migrate <span class="kw">--seed</span>
+php artisan migrate <span class="kw">--force</span>          <span class="cm"># production</span>
+php artisan migrate:fresh <span class="kw">--seed</span>   <span class="cm"># drop all & re-migrate</span>
+php artisan migrate:rollback
+php artisan migrate:rollback <span class="kw">--step=</span><span class="str">3</span>
+php artisan migrate:status</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat & jalankan seeder</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:seeder <span class="str">UserSeeder</span>
+php artisan db:seed
+php artisan db:seed <span class="kw">--class=</span><span class="str">UserSeeder</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat factory</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:factory <span class="str">UserFactory</span> <span class="kw">--model=</span><span class="str">User</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       MODEL & CONTROLLER
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="model">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(251,191,36,.1)">📦</div>
+      Model, Controller & Resource
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat model</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:model <span class="str">Product</span>
+php artisan make:model <span class="str">Product</span> <span class="kw">-m</span>          <span class="cm"># + migration</span>
+php artisan make:model <span class="str">Product</span> <span class="kw">-mcr</span>        <span class="cm"># + migration + controller resource</span>
+php artisan make:model <span class="str">Product</span> <span class="kw">-mcrfs</span>      <span class="cm"># + factory + seeder</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat controller</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:controller <span class="str">ProductController</span>
+php artisan make:controller <span class="str">ProductController</span> <span class="kw">--resource</span>
+php artisan make:controller <span class="str">ProductController</span> <span class="kw">--api</span>
+php artisan make:controller <span class="str">Api/ProductController</span> <span class="kw">--api</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat request, resource, policy</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:request <span class="str">StoreProductRequest</span>
+php artisan make:resource <span class="str">ProductResource</span>
+php artisan make:resource <span class="str">ProductCollection</span> <span class="kw">--collection</span>
+php artisan make:policy <span class="str">ProductPolicy</span> <span class="kw">--model=</span><span class="str">Product</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat observer, event, listener</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:observer <span class="str">ProductObserver</span> <span class="kw">--model=</span><span class="str">Product</span>
+php artisan make:event <span class="str">OrderPlaced</span>
+php artisan make:listener <span class="str">SendOrderNotification</span> <span class="kw">--event=</span><span class="str">OrderPlaced</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat middleware</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:middleware <span class="str">CheckAge</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       ROUTE
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="route">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(168,85,247,.1)">🔀</div>
+      Route
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">List semua route</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan route:list
+php artisan route:list <span class="kw">--name=</span><span class="str">api</span>
+php artisan route:list <span class="kw">-v</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       AUTH
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="auth">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(248,113,113,.1)">🔐</div>
+      Breeze / Jetstream Auth
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install Breeze (Blade)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer require laravel/breeze <span class="kw">--dev</span>
+php artisan breeze:install
+npm install <span class="kw">&&</span> npm run dev
+php artisan migrate</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install Breeze (React/Vue/API)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan breeze:install <span class="str">react</span>
+php artisan breeze:install <span class="str">vue</span>
+php artisan breeze:install <span class="str">api</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install Jetstream (Livewire)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer require laravel/jetstream
+php artisan jetstream:install <span class="str">livewire</span>
+php artisan jetstream:install <span class="str">livewire</span> <span class="kw">--teams</span>
+npm install <span class="kw">&&</span> npm run dev
+php artisan migrate</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SPATIE PERMISSION
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="spatie-permission">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(99,102,241,.12)">🛡️</div>
+      Spatie — Permission & Role
+      <span class="badge blue">spatie/laravel-permission</span>
+    </div>
+
+    <div class="note">
+      <span class="note-ico">📦</span>
+      <span>Package untuk manajemen role dan permission berbasis database. Mendukung multiple guard.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer require spatie/laravel-permission
+php artisan vendor:publish <span class="kw">--provider=</span><span class="str">"Spatie\Permission\PermissionServiceProvider"</span>
+php artisan migrate</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Tambahkan trait ke model User</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="kw">use</span> <span class="fn">Spatie\Permission\Traits\HasRoles</span>;
+
+<span class="kw">class</span> <span class="fn">User</span> <span class="kw">extends</span> <span class="fn">Authenticatable</span>
+{
+    <span class="kw">use</span> HasRoles;
+}</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat role & permission via seeder / tinker</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm">// Buat permission</span>
+<span class="fn">Permission</span>::<span class="fn">create</span>([<span class="str">'name'</span> => <span class="str">'edit articles'</span>]);
+
+<span class="cm">// Buat role</span>
+<span class="fn">Role</span>::<span class="fn">create</span>([<span class="str">'name'</span> => <span class="str">'admin'</span>]);
+
+<span class="cm">// Assign permission ke role</span>
+$role-><span class="fn">givePermissionTo</span>(<span class="str">'edit articles'</span>);
+$role-><span class="fn">syncPermissions</span>([<span class="str">'edit articles'</span>, <span class="str">'delete articles'</span>]);
+
+<span class="cm">// Assign role ke user</span>
+$user-><span class="fn">assignRole</span>(<span class="str">'admin'</span>);
+$user-><span class="fn">assignRole</span>([<span class="str">'admin'</span>, <span class="str">'writer'</span>]);
+$user-><span class="fn">syncRoles</span>([<span class="str">'admin'</span>]);
+
+<span class="cm">// Cek permission</span>
+$user-><span class="fn">hasRole</span>(<span class="str">'admin'</span>);
+$user-><span class="fn">hasPermissionTo</span>(<span class="str">'edit articles'</span>);
+$user-><span class="fn">can</span>(<span class="str">'edit articles'</span>);
+
+<span class="cm">// Revoke</span>
+$user-><span class="fn">removeRole</span>(<span class="str">'admin'</span>);
+$user-><span class="fn">revokePermissionTo</span>(<span class="str">'edit articles'</span>);</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Middleware di route</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>Route::<span class="fn">middleware</span>([<span class="str">'role:admin'</span>])-><span class="fn">group</span>(<span class="kw">function</span>() { ... });
+Route::<span class="fn">middleware</span>([<span class="str">'permission:edit articles'</span>])-><span class="fn">group</span>(...);
+Route::<span class="fn">middleware</span>([<span class="str">'role_or_permission:admin|edit articles'</span>])-><span class="fn">group</span>(...);
+
+<span class="cm">// Di blade</span>
+@<span class="fn">role</span>(<span class="str">'admin'</span>) ... @<span class="fn">endrole</span>
+@<span class="fn">can</span>(<span class="str">'edit articles'</span>) ... @<span class="fn">endcan</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Reset cache permission</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan permission:cache-reset</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SPATIE MEDIA LIBRARY
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="spatie-media">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(34,211,238,.1)">🖼️</div>
+      Spatie — Media Library
+      <span class="badge blue">spatie/laravel-medialibrary</span>
+    </div>
+
+    <div class="note">
+      <span class="note-ico">📦</span>
+      <span>Upload dan kelola file/gambar yang terasosiasi dengan model. Support konversi gambar otomatis.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer require spatie/laravel-medialibrary
+php artisan vendor:publish <span class="kw">--provider=</span><span class="str">"Spatie\MediaLibrary\MediaLibraryServiceProvider"</span> <span class="kw">--tag=</span><span class="str">"medialibrary-migrations"</span>
+php artisan migrate
+php artisan storage:link</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Tambahkan interface ke model</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="kw">use</span> <span class="fn">Spatie\MediaLibrary\HasMedia</span>;
+<span class="kw">use</span> <span class="fn">Spatie\MediaLibrary\InteractsWithMedia</span>;
+
+<span class="kw">class</span> <span class="fn">Product</span> <span class="kw">implements</span> <span class="fn">HasMedia</span>
+{
+    <span class="kw">use</span> InteractsWithMedia;
+
+    <span class="kw">public function</span> <span class="fn">registerMediaCollections</span>(): void
+    {
+        $this-><span class="fn">addMediaCollection</span>(<span class="str">'images'</span>)
+             -><span class="fn">singleFile</span>();          <span class="cm">// opsional: hanya 1 file</span>
+
+        $this-><span class="fn">addMediaCollection</span>(<span class="str">'documents'</span>);
+    }
+
+    <span class="cm">// Konversi otomatis (butuh intervention/image)</span>
+    <span class="kw">public function</span> <span class="fn">registerMediaConversions</span>(<span class="fn">Media</span> $media = <span class="kw">null</span>): void
+    {
+        $this-><span class="fn">addMediaConversion</span>(<span class="str">'thumb'</span>)
+             -><span class="fn">width</span>(<span class="str">300</span>)-><span class="fn">height</span>(<span class="str">300</span>);
+    }
+}</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Upload file</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm">// Upload dari request</span>
+$product-><span class="fn">addMediaFromRequest</span>(<span class="str">'photo'</span>)
+         -><span class="fn">toMediaCollection</span>(<span class="str">'images'</span>);
+
+<span class="cm">// Upload dari URL</span>
+$product-><span class="fn">addMediaFromUrl</span>(<span class="str">'https://example.com/image.jpg'</span>)
+         -><span class="fn">toMediaCollection</span>(<span class="str">'images'</span>);
+
+<span class="cm">// Upload dari path lokal</span>
+$product-><span class="fn">addMedia</span>(<span class="str">storage_path</span>(<span class="str">'file.pdf'</span>))
+         -><span class="fn">toMediaCollection</span>(<span class="str">'documents'</span>);
+
+<span class="cm">// Simpan dengan nama custom</span>
+$product-><span class="fn">addMediaFromRequest</span>(<span class="str">'photo'</span>)
+         -><span class="fn">usingFileName</span>(<span class="str">'custom-name.jpg'</span>)
+         -><span class="fn">toMediaCollection</span>(<span class="str">'images'</span>);</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Ambil & hapus media</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm">// Ambil URL</span>
+$product-><span class="fn">getFirstMediaUrl</span>(<span class="str">'images'</span>);
+$product-><span class="fn">getFirstMediaUrl</span>(<span class="str">'images'</span>, <span class="str">'thumb'</span>); <span class="cm">// konversi</span>
+
+<span class="cm">// Ambil semua</span>
+$product-><span class="fn">getMedia</span>(<span class="str">'images'</span>);
+
+<span class="cm">// Hapus semua di collection</span>
+$product-><span class="fn">clearMediaCollection</span>(<span class="str">'images'</span>);</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SPATIE ACTIVITY LOG
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="spatie-activity">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(52,211,153,.1)">📋</div>
+      Spatie — Activity Log
+      <span class="badge green">spatie/laravel-activitylog</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer require spatie/laravel-activitylog
+php artisan vendor:publish <span class="kw">--provider=</span><span class="str">"Spatie\Activitylog\ActivitylogServiceProvider"</span> <span class="kw">--tag=</span><span class="str">"activitylog-migrations"</span>
+php artisan migrate</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Tambahkan trait ke model</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="kw">use</span> <span class="fn">Spatie\Activitylog\Traits\LogsActivity</span>;
+<span class="kw">use</span> <span class="fn">Spatie\Activitylog\LogOptions</span>;
+
+<span class="kw">class</span> <span class="fn">Product</span> <span class="kw">extends</span> <span class="fn">Model</span>
+{
+    <span class="kw">use</span> LogsActivity;
+
+    <span class="kw">public function</span> <span class="fn">getActivitylogOptions</span>(): <span class="fn">LogOptions</span>
+    {
+        <span class="kw">return</span> LogOptions::<span class="fn">defaults</span>()
+            -><span class="fn">logOnly</span>([<span class="str">'name'</span>, <span class="str">'price'</span>])
+            -><span class="fn">logOnlyDirty</span>()
+            -><span class="fn">dontSubmitEmptyLogs</span>();
+    }
+}</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Log manual</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="fn">activity</span>()-><span class="fn">log</span>(<span class="str">'User melakukan sesuatu'</span>);
+
+<span class="fn">activity</span>()
+    -><span class="fn">performedOn</span>($product)
+    -><span class="fn">causedBy</span>($user)
+    -><span class="fn">withProperties</span>([<span class="str">'key'</span> => <span class="str">'value'</span>])
+    -><span class="fn">log</span>(<span class="str">'Product diedit'</span>);
+
+<span class="cm">// Ambil log</span>
+<span class="fn">Activity</span>::<span class="fn">all</span>();
+$product-><span class="fn">activities</span>();</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SPATIE BACKUP
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="spatie-backup">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(251,191,36,.1)">💾</div>
+      Spatie — Backup
+      <span class="badge purple">spatie/laravel-backup</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer require spatie/laravel-backup
+php artisan vendor:publish <span class="kw">--provider=</span><span class="str">"Spatie\Backup\BackupServiceProvider"</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Jalankan backup</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan backup:run                <span class="cm"># backup files + DB</span>
+php artisan backup:run <span class="kw">--only-db</span>     <span class="cm"># hanya DB</span>
+php artisan backup:run <span class="kw">--only-files</span>  <span class="cm"># hanya files</span>
+php artisan backup:list               <span class="cm"># list semua backup</span>
+php artisan backup:clean              <span class="cm"># hapus backup lama</span>
+php artisan backup:monitor            <span class="cm"># cek health</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PASSPORT
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="passport">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(248,113,113,.1)">🔑</div>
+      Laravel Passport (OAuth2)
+      <span class="badge blue">laravel/passport</span>
+    </div>
+
+    <div class="note warn">
+      <span class="note-ico">⚠️</span>
+      <span>Gunakan Passport untuk OAuth2 penuh (client credentials, authorization code). Untuk API token sederhana, pertimbangkan Sanctum.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer require laravel/passport
+php artisan migrate
+php artisan passport:install           <span class="cm"># generate encryption keys + clients</span>
+php artisan passport:install <span class="kw">--uuids</span>  <span class="cm"># gunakan UUID</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Tambahkan trait ke model User</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="kw">use</span> <span class="fn">Laravel\Passport\HasApiTokens</span>;
+
+<span class="kw">class</span> <span class="fn">User</span> <span class="kw">extends</span> <span class="fn">Authenticatable</span>
+{
+    <span class="kw">use</span> HasApiTokens;
+}</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Config auth.php — guard api</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm">// config/auth.php</span>
+<span class="str">'guards'</span> => [
+    <span class="str">'api'</span> => [
+        <span class="str">'driver'</span>   => <span class="str">'passport'</span>,
+        <span class="str">'provider'</span> => <span class="str">'users'</span>,
+    ],
+],</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Manage keys & clients</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan passport:keys              <span class="cm"># regenerate keys</span>
+php artisan passport:client            <span class="cm"># buat client baru (interaktif)</span>
+php artisan passport:client <span class="kw">--personal</span> <span class="cm"># personal access client</span>
+php artisan passport:client <span class="kw">--password</span> <span class="cm"># password grant client</span>
+php artisan passport:client <span class="kw">--client</span>   <span class="cm"># client credentials</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Middleware & scope di route</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>Route::<span class="fn">middleware</span>(<span class="str">'auth:api'</span>)-><span class="fn">get</span>(<span class="str">'/user'</span>, ...);
+Route::<span class="fn">middleware</span>([<span class="str">'auth:api'</span>, <span class="str">'scopes:read-orders'</span>])-><span class="fn">get</span>(...);
+Route::<span class="fn">middleware</span>([<span class="str">'auth:api'</span>, <span class="str">'scope:read-orders,write-orders'</span>])-><span class="fn">get</span>(...);</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SANCTUM
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="sanctum">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(34,211,238,.1)">🪙</div>
+      Laravel Sanctum (API Token)
+      <span class="badge blue">laravel/sanctum</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer require laravel/sanctum
+php artisan vendor:publish <span class="kw">--provider=</span><span class="str">"Laravel\Sanctum\SanctumServiceProvider"</span>
+php artisan migrate</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Tambahkan trait ke model User</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="kw">use</span> <span class="fn">Laravel\Sanctum\HasApiTokens</span>;
+
+<span class="kw">class</span> <span class="fn">User</span> <span class="kw">extends</span> <span class="fn">Authenticatable</span>
+{
+    <span class="kw">use</span> HasApiTokens;
+}</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat & hapus token</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm">// Buat token</span>
+$token = $user-><span class="fn">createToken</span>(<span class="str">'token-name'</span>)->plainTextToken;
+$token = $user-><span class="fn">createToken</span>(<span class="str">'token-name'</span>, [<span class="str">'read'</span>, <span class="str">'write'</span>])->plainTextToken;
+
+<span class="cm">// Hapus token saat ini</span>
+$request->user()-><span class="fn">currentAccessToken</span>()-><span class="fn">delete</span>();
+
+<span class="cm">// Hapus semua token</span>
+$user-><span class="fn">tokens</span>()-><span class="fn">delete</span>();</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       QUEUE & JOB
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="queue">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(168,85,247,.1)">📬</div>
+      Queue & Job
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Setup queue database</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan queue:table
+php artisan migrate</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat job</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:job <span class="str">SendEmailJob</span>
+php artisan make:job <span class="str">SendEmailJob</span> <span class="kw">--sync</span>  <span class="cm"># synchronous</span>
+php artisan make:mail <span class="str">OrderShipped</span> <span class="kw">--markdown=</span><span class="str">emails.orders.shipped</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Jalankan worker</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan queue:work
+php artisan queue:work <span class="kw">--tries=</span><span class="str">3</span>
+php artisan queue:work <span class="kw">--queue=</span><span class="str">high,default</span>
+php artisan queue:work <span class="kw">--timeout=</span><span class="str">60</span>
+php artisan queue:listen
+php artisan queue:restart    <span class="cm"># restart worker setelah deploy</span>
+php artisan queue:failed     <span class="cm"># lihat failed jobs</span>
+php artisan queue:retry all  <span class="cm"># retry semua failed</span>
+php artisan queue:flush      <span class="cm"># hapus semua failed</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SCHEDULE
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="schedule">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(251,191,36,.1)">⏰</div>
+      Task Scheduling
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat command terjadwal</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:command <span class="str">SendDailyReport</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Jalankan scheduler (dev)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan schedule:work   <span class="cm"># foreground, tiap menit</span>
+php artisan schedule:run    <span class="cm"># jalankan sekali</span>
+php artisan schedule:list   <span class="cm"># list semua schedule</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Cron entry di server (production)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       CACHE
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="cache">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(52,211,153,.1)">⚡</div>
+      Cache
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Cache via code</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="fn">Cache</span>::<span class="fn">put</span>(<span class="str">'key'</span>, <span class="str">'value'</span>, <span class="fn">now</span>()-><span class="fn">addMinutes</span>(<span class="str">10</span>));
+<span class="fn">Cache</span>::<span class="fn">get</span>(<span class="str">'key'</span>, <span class="str">'default'</span>);
+<span class="fn">Cache</span>::<span class="fn">has</span>(<span class="str">'key'</span>);
+<span class="fn">Cache</span>::<span class="fn">forget</span>(<span class="str">'key'</span>);
+<span class="fn">Cache</span>::<span class="fn">flush</span>();
+
+<span class="cm">// Remember — auto cache atau ambil dari closure</span>
+$value = <span class="fn">Cache</span>::<span class="fn">remember</span>(<span class="str">'users'</span>, <span class="str">3600</span>, <span class="kw">fn</span>() => <span class="fn">User</span>::<span class="fn">all</span>());
+$value = <span class="fn">Cache</span>::<span class="fn">rememberForever</span>(<span class="str">'key'</span>, <span class="kw">fn</span>() => ...);
+
+<span class="cm">// Tags (butuh Redis/Memcached)</span>
+<span class="fn">Cache</span>::<span class="fn">tags</span>([<span class="str">'products'</span>])-><span class="fn">put</span>(<span class="str">'key'</span>, $val, <span class="str">600</span>);
+<span class="fn">Cache</span>::<span class="fn">tags</span>([<span class="str">'products'</span>])-><span class="fn">flush</span>();</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       STORAGE
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="storage">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(99,102,241,.1)">📁</div>
+      Storage & File
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Operasi file</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm">// Upload</span>
+$path = $request-><span class="fn">file</span>(<span class="str">'photo'</span>)-><span class="fn">store</span>(<span class="str">'photos'</span>);
+$path = $request-><span class="fn">file</span>(<span class="str">'photo'</span>)-><span class="fn">storeAs</span>(<span class="str">'photos'</span>, <span class="str">'filename.jpg'</span>);
+$path = $request-><span class="fn">file</span>(<span class="str">'photo'</span>)-><span class="fn">store</span>(<span class="str">'photos'</span>, <span class="str">'s3'</span>); <span class="cm"># ke S3</span>
+
+<span class="cm">// Storage facade</span>
+<span class="fn">Storage</span>::<span class="fn">put</span>(<span class="str">'file.txt'</span>, <span class="str">'contents'</span>);
+<span class="fn">Storage</span>::<span class="fn">get</span>(<span class="str">'file.txt'</span>);
+<span class="fn">Storage</span>::<span class="fn">exists</span>(<span class="str">'file.txt'</span>);
+<span class="fn">Storage</span>::<span class="fn">delete</span>(<span class="str">'file.txt'</span>);
+<span class="fn">Storage</span>::<span class="fn">url</span>(<span class="str">'photos/image.jpg'</span>);
+<span class="fn">Storage</span>::<span class="fn">disk</span>(<span class="str">'s3'</span>)-><span class="fn">url</span>(<span class="str">'file.jpg'</span>);</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       TESTING
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="test">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(52,211,153,.1)">🧪</div>
+      Testing
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat & jalankan test</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan make:test <span class="str">ProductTest</span>
+php artisan make:test <span class="str">ProductTest</span> <span class="kw">--unit</span>
+php artisan test
+php artisan test <span class="kw">--filter=</span><span class="str">ProductTest</span>
+php artisan test <span class="kw">--parallel</span>
+php artisan test <span class="kw">--coverage</span>
+
+<span class="cm"># atau via pest/phpunit langsung</span>
+./vendor/bin/pest
+./vendor/bin/phpunit</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       DEPLOY
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="deploy">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(248,113,113,.1)">🚢</div>
+      Deploy Checklist
+    </div>
+
+    <div class="note green">
+      <span class="note-ico">✅</span>
+      <span>Urutan command yang aman saat deploy ke production.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Deploy sequence</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>git pull origin main
+
+composer install <span class="kw">--optimize-autoloader --no-dev</span>
+
+php artisan down                   <span class="cm"># maintenance mode</span>
+
+php artisan migrate <span class="kw">--force</span>
+php artisan db:seed <span class="kw">--force</span>       <span class="cm"># jika ada seeder baru</span>
+
+php artisan optimize:clear
+php artisan optimize
+php artisan storage:link
+
+php artisan queue:restart          <span class="cm"># restart workers</span>
+php artisan permission:cache-reset <span class="cm"># jika pakai spatie/permission</span>
+
+php artisan up                     <span class="cm"># matikan maintenance mode</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Maintenance mode</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan down
+php artisan down <span class="kw">--secret=</span><span class="str">"my-secret"</span>  <span class="cm"># akses via /my-secret</span>
+php artisan down <span class="kw">--render=</span><span class="str">"errors.503"</span>
+php artisan up</pre>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script>
+function copyCmd(btn) {
+  const pre = btn.closest('.cmd-item').querySelector('pre');
+  const text = pre.innerText;
+
+  const done = () => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+  } else {
+    fallback(text, done);
+  }
+}
+
+function fallback(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+/* sidebar active on scroll */
+const sections = document.querySelectorAll('.cs-section[id]');
+const sbItems  = document.querySelectorAll('.sb-item');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      sbItems.forEach(i => i.classList.remove('active'));
+      const match = document.querySelector(`.sb-item[href="#${e.target.id}"]`);
+      if (match) match.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

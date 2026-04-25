@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Hands-On Labs — Java Spring Boot Bootcamp · Universitas Dinamika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--surface:#0d1117;--card:#111827;
+  --bd:#1e2d3d;--bd2:#2a3f57;
+  --text:#f0f6fc;--muted:#8b949e;--dim:#484f58;
+  --green:#22c55e;--green-s:rgba(34,197,94,.08);
+  --orange:#f97316;--orange-s:rgba(249,115,22,.08);
+  --blue:#38bdf8;--blue-s:rgba(56,189,248,.08);
+  --purple:#a78bfa;--purple-s:rgba(167,139,250,.08);
+  --red:#f87171;
+  --accent:#f97316;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* ══ LAYOUT ══ */
+.page{display:flex;min-height:100vh}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:230px;flex-shrink:0;
+  position:sticky;top:44px;height:calc(100vh - 44px);
+  overflow-y:auto;background:var(--surface);
+  border-right:1px solid var(--bd);padding:16px 0;
+}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bd2)}
+.sb-group{margin-bottom:2px}
+.sb-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.54rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);padding:10px 16px 4px;
+}
+.sb-link{
+  display:flex;align-items:center;gap:8px;
+  font-size:.72rem;color:var(--muted);
+  padding:6px 16px;border-left:2px solid transparent;
+  transition:all .15s;
+}
+.sb-link:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.sb-link.active{color:var(--orange);border-left-color:var(--orange);background:var(--orange-s)}
+.sb-link .week-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.52rem;font-weight:600;
+  padding:1px 5px;border-radius:3px;
+  background:rgba(255,255,255,.06);color:var(--dim);
+  flex-shrink:0;margin-left:auto;
+}
+
+/* ══ MAIN ══ */
+.main{flex:1;min-width:0;padding:48px 52px 80px}
+
+/* ══ HERO ══ */
+.hero{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--bd)}
+.hero-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--orange);margin-bottom:10px;
+}
+.hero-title{font-size:1.9rem;font-weight:900;letter-spacing:-.04em;line-height:1.1;margin-bottom:10px}
+.hero-title span{color:var(--orange)}
+.hero-sub{font-size:.86rem;color:var(--muted);max-width:560px;line-height:1.7;margin-bottom:20px}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px}
+.htag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;font-weight:600;
+  padding:4px 10px;border-radius:5px;
+  border:1px solid var(--bd2);color:var(--muted);
+  background:var(--card);
+}
+
+/* ══ LAB SECTION ══ */
+.lab{margin-bottom:60px;scroll-margin-top:60px}
+.lab-header{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:6px;
+}
+.lab-week{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 10px;border-radius:4px;
+  background:var(--orange-s);border:1px solid rgba(249,115,22,.2);
+  color:var(--orange);flex-shrink:0;
+}
+.lab-title{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
+.lab-desc{font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:20px;max-width:640px}
+
+/* ══ OBJECTIVES ══ */
+.objectives{
+  background:var(--card);border:1px solid var(--bd);
+  border-left:3px solid var(--green);
+  border-radius:10px;padding:14px 16px;margin-bottom:20px;
+}
+.obj-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--green);margin-bottom:8px;
+}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.obj-list li{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:.78rem;color:var(--muted);line-height:1.5;
+}
+.obj-list li::before{content:'→';color:var(--green);flex-shrink:0;font-size:.7rem;margin-top:2px}
+
+/* ══ CODE BLOCK ══ */
+.code-block{
+  background:var(--surface);border:1px solid var(--bd);
+  border-radius:10px;overflow:hidden;margin-bottom:12px;
+}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 14px;border-bottom:1px solid var(--bd);
+  background:rgba(255,255,255,.02);
+}
+.code-filename{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;color:var(--muted);font-weight:500;
+}
+.code-lang{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);
+}
+.copy-btn{
+  font-family:'Inter',sans-serif;
+  font-size:.62rem;font-weight:600;color:var(--muted);
+  background:rgba(255,255,255,.05);border:1px solid var(--bd);
+  padding:3px 9px;border-radius:4px;cursor:pointer;transition:all .15s;
+}
+.copy-btn:hover{color:var(--orange);background:var(--orange-s);border-color:rgba(249,115,22,.25)}
+.copy-btn.ok{color:var(--green)}
+pre{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.75rem;line-height:1.7;
+  padding:14px 16px;overflow-x:auto;
+  color:#c9d1d9;
+}
+pre::-webkit-scrollbar{height:3px}
+pre::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* syntax */
+.kw{color:#ff7b72}.str{color:#a5d6ff}.cm{color:#6e7681;font-style:italic}
+.fn{color:#d2a8ff}.an{color:#e3b341}.tp{color:#79c0ff}
+.num{color:#f2cc60}
+
+/* ══ NOTE / TIP / WARNING ══ */
+.note,.tip,.warn,.exercise{
+  border-radius:9px;padding:13px 15px;margin-bottom:14px;
+  font-size:.78rem;line-height:1.65;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.note{background:var(--blue-s);border:1px solid rgba(56,189,248,.18);color:rgba(56,189,248,.85)}
+.tip{background:var(--green-s);border:1px solid rgba(34,197,94,.18);color:rgba(34,197,94,.85)}
+.warn{background:var(--orange-s);border:1px solid rgba(249,115,22,.18);color:rgba(249,115,22,.85)}
+.exercise{
+  background:var(--purple-s);border:1px solid rgba(167,139,250,.2);
+  color:var(--text);flex-direction:column;gap:8px;
+}
+.exercise-header{
+  display:flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--purple);
+}
+.exercise p{font-size:.78rem;color:var(--muted);line-height:1.6}
+.exercise ol,.exercise ul{font-size:.78rem;color:var(--muted);line-height:1.7;padding-left:18px}
+.exercise li{margin-bottom:4px}
+.note-ico,.tip-ico,.warn-ico{flex-shrink:0;font-size:14px;margin-top:1px}
+
+/* ══ DIVIDER ══ */
+.lab-divider{height:1px;background:var(--bd);margin:40px 0}
+
+/* ══ STRUCTURE TREE ══ */
+.tree{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.74rem;line-height:1.9;
+  background:var(--surface);border:1px solid var(--bd);
+  border-radius:10px;padding:14px 16px;
+  color:#c9d1d9;margin-bottom:14px;
+  overflow-x:auto;
+}
+.tree .dir{color:var(--blue)}
+.tree .file{color:#c9d1d9}
+.tree .note-inline{color:var(--dim);font-style:italic}
+
+/* ══ CHECKLIST ══ */
+.checklist{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.checklist li{
+  display:flex;align-items:flex-start;gap:9px;
+  font-size:.78rem;color:var(--muted);
+}
+.ch-box{
+  width:16px;height:16px;border-radius:4px;
+  border:1.5px solid var(--bd2);flex-shrink:0;margin-top:2px;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;
+  font-size:9px;
+}
+.checklist li.done .ch-box{background:var(--green);border-color:var(--green);color:#000}
+.checklist li.done span{text-decoration:line-through;opacity:.5}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{padding:32px 18px 60px}
+  .hero-title{font-size:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- BACK NAV -->
+<div id="dion-nav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(10,10,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid #1e2d3d;font-family:Inter,system-ui,sans-serif;font-size:.72rem">
+  <a href="/universitas-dinamika/training/java-springboot/" style="display:flex;align-items:center;gap:6px;font-weight:600;color:#8b949e;padding:4px 11px;border-radius:6px;border:1px solid #1e2d3d;text-decoration:none" onmouseover="this.style.color='#f97316';this.style.borderColor='rgba(249,115,22,.3)'" onmouseout="this.style.color='#8b949e';this.style.borderColor='#1e2d3d'">
+    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>
+    Java Spring Boot Bootcamp
+  </a>
+  <span style="color:#484f58">·</span>
+  <span style="color:#484f58;font-size:.7rem">Hands-On Labs</span>
+</div>
+
+<div class="page">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-group">
+    <div class="sb-label">Persiapan</div>
+    <a class="sb-link active" href="#setup">Environment Setup</a>
+    <a class="sb-link" href="#structure">Struktur Project</a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">Lab Inti</div>
+    <a class="sb-link" href="#lab1">Java Modern<span class="week-tag">W1</span></a>
+    <a class="sb-link" href="#lab2">Spring Core & DI<span class="week-tag">W1-2</span></a>
+    <a class="sb-link" href="#lab3">REST API<span class="week-tag">W2-3</span></a>
+    <a class="sb-link" href="#lab4">JPA & Database<span class="week-tag">W3-4</span></a>
+    <a class="sb-link" href="#lab5">Security & JWT<span class="week-tag">W4-5</span></a>
+    <a class="sb-link" href="#lab6">Exception & Validation<span class="week-tag">W5</span></a>
+    <a class="sb-link" href="#lab7">Clean Architecture<span class="week-tag">W5-6</span></a>
+    <a class="sb-link" href="#lab8">Testing<span class="week-tag">W6</span></a>
+    <a class="sb-link" href="#lab9">Docker & Deploy<span class="week-tag">W6</span></a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">Final</div>
+    <a class="sb-link" href="#final-project">Final Project</a>
+    <a class="sb-link" href="#checklist">Checklist Kompetensi</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<div class="hero">
+  <div class="hero-label">// Universitas Dinamika · Java Spring Boot Bootcamp · 45 Hari</div>
+  <h1 class="hero-title">Hands-On <span>Labs & Guidelines</span></h1>
+  <p class="hero-sub">Panduan praktis untuk peserta bootcamp. Setiap lab berisi tujuan, contoh kode, dan latihan mandiri. Ikuti urutan dari atas — setiap lab membangun di atas lab sebelumnya.</p>
+  <div class="hero-tags">
+    <span class="htag">Java 17+</span>
+    <span class="htag">Spring Boot 3.x</span>
+    <span class="htag">Maven</span>
+    <span class="htag">PostgreSQL</span>
+    <span class="htag">JWT</span>
+    <span class="htag">Docker</span>
+    <span class="htag">IntelliJ IDEA</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     ENVIRONMENT SETUP
+═══════════════════════════════ -->
+<section class="lab" id="setup">
+  <div class="lab-header">
+    <span class="lab-week">Persiapan</span>
+    <h2 class="lab-title">Environment Setup</h2>
+  </div>
+  <p class="lab-desc">Pastikan semua tools terinstal sebelum memulai lab pertama. Versi yang tercantum adalah minimum yang direkomendasikan.</p>
+
+  <div class="objectives">
+    <div class="obj-label">// Yang harus siap</div>
+    <ul class="obj-list">
+      <li>Java Development Kit (JDK) 17 atau lebih baru</li>
+      <li>Maven 3.8+ atau Gradle 8+</li>
+      <li>IntelliJ IDEA (Community atau Ultimate)</li>
+      <li>PostgreSQL 14+ (atau Docker untuk database)</li>
+      <li>Postman atau Insomnia untuk test API</li>
+      <li>Git untuk version control</li>
+      <li>Docker Desktop (untuk Lab 9)</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">Verifikasi instalasi</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="code-lang">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+    </div>
+    <pre>java <span class="kw">-version</span>       <span class="cm"># harus 17+</span>
+mvn <span class="kw">-v</span>             <span class="cm"># Maven version</span>
+docker <span class="kw">--version</span>   <span class="cm"># Docker</span>
+git <span class="kw">--version</span>      <span class="cm"># Git</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">Buat project baru via Spring Initializr</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="code-lang">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+    </div>
+    <pre><span class="cm"># Via browser: https://start.spring.io</span>
+<span class="cm"># Pilihan yang direkomendasikan:</span>
+<span class="cm">#   Project     : Maven</span>
+<span class="cm">#   Language    : Java</span>
+<span class="cm">#   Spring Boot : 3.2.x</span>
+<span class="cm">#   Packaging   : Jar</span>
+<span class="cm">#   Java        : 17</span>
+<span class="cm">#</span>
+<span class="cm"># Dependencies:</span>
+<span class="cm">#   Spring Web, Spring Data JPA, Spring Security,</span>
+<span class="cm">#   PostgreSQL Driver, Lombok, Validation,</span>
+<span class="cm">#   Spring Boot DevTools</span></pre>
+  </div>
+
+  <div class="tip">
+    <span class="tip-ico">💡</span>
+    <span>Aktifkan <strong>Auto Import</strong> di IntelliJ: Settings → Editor → General → Auto Import → centang "Add unambiguous imports on the fly".</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     STRUKTUR PROJECT
+═══════════════════════════════ -->
+<section class="lab" id="structure">
+  <div class="lab-header">
+    <span class="lab-week">Persiapan</span>
+    <h2 class="lab-title">Struktur Project</h2>
+  </div>
+  <p class="lab-desc">Gunakan struktur package yang konsisten sejak awal. Ini akan memudahkan saat project berkembang.</p>
+
+  <div class="tree">
+<span class="dir">src/main/java/com/example/app/</span>
+├── <span class="dir">config/</span>          <span class="note-inline"># SecurityConfig, WebConfig, dll</span>
+├── <span class="dir">controller/</span>      <span class="note-inline"># REST Controllers (@RestController)</span>
+├── <span class="dir">dto/</span>             <span class="note-inline"># Request & Response DTO</span>
+│   ├── <span class="dir">request/</span>
+│   └── <span class="dir">response/</span>
+├── <span class="dir">entity/</span>          <span class="note-inline"># JPA Entities (@Entity)</span>
+├── <span class="dir">exception/</span>       <span class="note-inline"># Custom exceptions & handler</span>
+├── <span class="dir">repository/</span>      <span class="note-inline"># JPA Repositories</span>
+├── <span class="dir">service/</span>         <span class="note-inline"># Business logic</span>
+│   └── <span class="dir">impl/</span>          <span class="note-inline"># Service implementations</span>
+├── <span class="dir">security/</span>        <span class="note-inline"># JWT filter, UserDetails</span>
+└── <span class="file">Application.java</span>
+  </div>
+
+  <div class="note">
+    <span class="note-ico">📌</span>
+    <span>Jangan campur logic bisnis di Controller. Controller hanya menerima request, memanggil Service, dan mengembalikan response.</span>
+  </div>
+</section>
+
+<div class="lab-divider"></div>
+
+<!-- ═══════════════════════════════
+     LAB 1: JAVA MODERN
+═══════════════════════════════ -->
+<section class="lab" id="lab1">
+  <div class="lab-header">
+    <span class="lab-week">Week 1 · Hari 1–7</span>
+    <h2 class="lab-title">Lab 1 — Java Modern (OOP + Streams + Lambdas)</h2>
+  </div>
+  <p class="lab-desc">Sebelum Spring, pastikan konsep Java modern dikuasai. Spring Boot memanfaatkan Lambdas, Streams, dan Optional secara intensif.</p>
+
+  <div class="objectives">
+    <div class="obj-label">// Tujuan Lab</div>
+    <ul class="obj-list">
+      <li>Memahami OOP: Inheritance, Interface, Abstract Class, Generics</li>
+      <li>Menggunakan Lambda dan Functional Interface</li>
+      <li>Mengolah data dengan Stream API (filter, map, collect)</li>
+      <li>Menghindari NullPointerException dengan Optional</li>
+      <li>Menulis Record class untuk data sederhana (Java 16+)</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">LambdaAndStream.java</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="kw">import</span> java.util.*;
+<span class="kw">import</span> java.util.stream.*;
+
+<span class="kw">public class</span> <span class="tp">LambdaAndStream</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; names = <span class="tp">List</span>.<span class="fn">of</span>(<span class="str">"Andi"</span>, <span class="str">"Budi"</span>, <span class="str">"Citra"</span>, <span class="str">"Dian"</span>);
+
+        <span class="cm">// Filter + map + collect</span>
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = names.<span class="fn">stream</span>()
+            .<span class="fn">filter</span>(n -> n.<span class="fn">startsWith</span>(<span class="str">"C"</span>))
+            .<span class="fn">map</span>(<span class="tp">String</span>::toUpperCase)
+            .<span class="fn">collect</span>(<span class="tp">Collectors</span>.<span class="fn">toList</span>());
+        <span class="cm">// → ["CITRA"]</span>
+
+        <span class="cm">// Optional — hindari null check manual</span>
+        <span class="tp">Optional</span>&lt;<span class="tp">String</span>&gt; first = names.<span class="fn">stream</span>()
+            .<span class="fn">filter</span>(n -> n.<span class="fn">startsWith</span>(<span class="str">"Z"</span>))
+            .<span class="fn">findFirst</span>();
+
+        <span class="tp">String</span> val = first.<span class="fn">orElse</span>(<span class="str">"Tidak ditemukan"</span>);
+        first.<span class="fn">ifPresent</span>(n -> <span class="tp">System</span>.out.<span class="fn">println</span>(n));
+
+        <span class="cm">// Grouping</span>
+        <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; byLength = names.<span class="fn">stream</span>()
+            .<span class="fn">collect</span>(<span class="tp">Collectors</span>.<span class="fn">groupingBy</span>(<span class="tp">String</span>::length));
+    }
+}
+
+<span class="cm">// Record class (Java 16+) — immutable data carrier</span>
+<span class="kw">public record</span> <span class="tp">UserRecord</span>(<span class="tp">Long</span> id, <span class="tp">String</span> name, <span class="tp">String</span> email) {}</pre>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Buat List berisi 10 angka acak. Gunakan Stream untuk: filter angka genap, kalikan 2, urutkan, lalu cetak hasilnya.</li>
+      <li>Buat interface <code>Greeting</code> dengan satu method <code>greet(String name)</code>. Implementasikan menggunakan lambda.</li>
+      <li>Gunakan <code>Optional</code> untuk menangani pencarian user berdasarkan email dari sebuah List — kembalikan default jika tidak ada.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     LAB 2: SPRING CORE & DI
+═══════════════════════════════ -->
+<section class="lab" id="lab2">
+  <div class="lab-header">
+    <span class="lab-week">Week 1–2 · Hari 5–14</span>
+    <h2 class="lab-title">Lab 2 — Spring Core & Dependency Injection</h2>
+  </div>
+  <p class="lab-desc">Inti dari Spring adalah IoC Container. Memahami cara kerja Bean dan DI akan membuat kamu lebih mudah men-debug masalah di project nyata.</p>
+
+  <div class="objectives">
+    <div class="obj-label">// Tujuan Lab</div>
+    <ul class="obj-list">
+      <li>Memahami IoC Container dan siklus hidup Bean</li>
+      <li>Menggunakan @Component, @Service, @Repository, @Controller</li>
+      <li>Dependency Injection via constructor (best practice)</li>
+      <li>Menggunakan @Value dan @ConfigurationProperties</li>
+      <li>Memahami Scope: Singleton vs Prototype</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">UserService.java — Constructor Injection</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@Service</span>                        <span class="cm">// Spring mengelola bean ini</span>
+<span class="an">@RequiredArgsConstructor</span>        <span class="cm">// Lombok: auto constructor untuk final fields</span>
+<span class="kw">public class</span> <span class="tp">UserService</span> {
+
+    <span class="cm">// ✅ Constructor injection — lebih mudah di-test</span>
+    <span class="kw">private final</span> <span class="tp">UserRepository</span> userRepository;
+    <span class="kw">private final</span> <span class="tp">PasswordEncoder</span> passwordEncoder;
+
+    <span class="kw">public</span> <span class="tp">User</span> <span class="fn">findById</span>(<span class="tp">Long</span> id) {
+        <span class="kw">return</span> userRepository.<span class="fn">findById</span>(id)
+            .<span class="fn">orElseThrow</span>(() -> <span class="kw">new</span> <span class="tp">ResourceNotFoundException</span>(<span class="str">"User not found"</span>));
+    }
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">application.properties + @ConfigurationProperties</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="cm"># application.properties</span>
+app.jwt.secret=mySecretKey
+app.jwt.expiration=86400000
+app.name=MyApp
+
+<span class="cm">// AppProperties.java</span>
+<span class="an">@ConfigurationProperties</span>(prefix = <span class="str">"app"</span>)
+<span class="an">@Component</span>
+<span class="an">@Data</span>
+<span class="kw">public class</span> <span class="tp">AppProperties</span> {
+    <span class="kw">private</span> <span class="tp">String</span> name;
+    <span class="kw">private</span> <span class="tp">Jwt</span> jwt;
+
+    <span class="an">@Data</span>
+    <span class="kw">public static class</span> <span class="tp">Jwt</span> {
+        <span class="kw">private</span> <span class="tp">String</span> secret;
+        <span class="kw">private</span> <span class="tp">Long</span> expiration;
+    }
+}</pre>
+  </div>
+
+  <div class="warn">
+    <span class="warn-ico">⚠️</span>
+    <span>Hindari Field Injection (<code>@Autowired</code> langsung pada field). Gunakan Constructor Injection agar class bisa di-test tanpa Spring container.</span>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Buat <code>NotificationService</code> yang punya dependency ke <code>EmailService</code> dan <code>SmsService</code>. Inject via constructor.</li>
+      <li>Tambahkan konfigurasi <code>app.notification.email-enabled=true</code> di properties dan baca nilainya di service menggunakan <code>@ConfigurationProperties</code>.</li>
+      <li>Jalankan aplikasi, buka Actuator endpoint <code>/actuator/beans</code> — amati bean apa saja yang terdaftar.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     LAB 3: REST API
+═══════════════════════════════ -->
+<section class="lab" id="lab3">
+  <div class="lab-header">
+    <span class="lab-week">Week 2–3 · Hari 8–21</span>
+    <h2 class="lab-title">Lab 3 — REST API dengan Spring MVC</h2>
+  </div>
+  <p class="lab-desc">Membangun CRUD API yang clean — menggunakan DTO, ResponseEntity, dan konvensi REST yang benar.</p>
+
+  <div class="objectives">
+    <div class="obj-label">// Tujuan Lab</div>
+    <ul class="obj-list">
+      <li>Membuat REST Controller dengan @RestController dan @RequestMapping</li>
+      <li>Menggunakan DTO terpisah untuk request dan response</li>
+      <li>Mengembalikan ResponseEntity dengan HTTP status yang tepat</li>
+      <li>Validasi input dengan @Valid dan Bean Validation</li>
+      <li>Membuat API docs dengan Swagger/OpenAPI</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">ProductController.java</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="str">"/api/v1/products"</span>)
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">ProductController</span> {
+
+    <span class="kw">private final</span> <span class="tp">ProductService</span> productService;
+
+    <span class="an">@GetMapping</span>
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">List</span>&lt;<span class="tp">ProductResponse</span>&gt;&gt; <span class="fn">getAll</span>() {
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.<span class="fn">ok</span>(productService.<span class="fn">findAll</span>());
+    }
+
+    <span class="an">@GetMapping</span>(<span class="str">"/{id}"</span>)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">ProductResponse</span>&gt; <span class="fn">getById</span>(<span class="an">@PathVariable</span> <span class="tp">Long</span> id) {
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.<span class="fn">ok</span>(productService.<span class="fn">findById</span>(id));
+    }
+
+    <span class="an">@PostMapping</span>
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">ProductResponse</span>&gt; <span class="fn">create</span>(
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="tp">CreateProductRequest</span> request) {
+        <span class="tp">ProductResponse</span> created = productService.<span class="fn">create</span>(request);
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.<span class="fn">status</span>(<span class="tp">HttpStatus</span>.CREATED).<span class="fn">body</span>(created);
+    }
+
+    <span class="an">@PutMapping</span>(<span class="str">"/{id}"</span>)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">ProductResponse</span>&gt; <span class="fn">update</span>(
+            <span class="an">@PathVariable</span> <span class="tp">Long</span> id,
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="tp">UpdateProductRequest</span> request) {
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.<span class="fn">ok</span>(productService.<span class="fn">update</span>(id, request));
+    }
+
+    <span class="an">@DeleteMapping</span>(<span class="str">"/{id}"</span>)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">Void</span>&gt; <span class="fn">delete</span>(<span class="an">@PathVariable</span> <span class="tp">Long</span> id) {
+        productService.<span class="fn">delete</span>(id);
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.<span class="fn">noContent</span>().<span class="fn">build</span>();
+    }
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">CreateProductRequest.java — Bean Validation</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@Data</span>
+<span class="kw">public class</span> <span class="tp">CreateProductRequest</span> {
+
+    <span class="an">@NotBlank</span>(message = <span class="str">"Name tidak boleh kosong"</span>)
+    <span class="an">@Size</span>(min = <span class="num">3</span>, max = <span class="num">100</span>)
+    <span class="kw">private</span> <span class="tp">String</span> name;
+
+    <span class="an">@NotNull</span>(message = <span class="str">"Harga wajib diisi"</span>)
+    <span class="an">@Positive</span>(message = <span class="str">"Harga harus positif"</span>)
+    <span class="kw">private</span> <span class="tp">BigDecimal</span> price;
+
+    <span class="an">@Min</span>(<span class="num">0</span>)
+    <span class="kw">private</span> <span class="tp">Integer</span> stock;
+}</pre>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Buat CRUD API untuk entity <code>Category</code> (id, name, description). Ikuti pola ProductController di atas.</li>
+      <li>Tambahkan endpoint <code>GET /api/v1/products?category=elektronik&page=0&size=10</code> dengan pagination menggunakan <code>Pageable</code>.</li>
+      <li>Test semua endpoint menggunakan Postman. Pastikan status code sesuai: 200, 201, 204, 404.</li>
+      <li>Tambahkan Swagger: <code>springdoc-openapi-starter-webmvc-ui</code>, akses <code>/swagger-ui.html</code>.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     LAB 4: JPA & DATABASE
+═══════════════════════════════ -->
+<section class="lab" id="lab4">
+  <div class="lab-header">
+    <span class="lab-week">Week 3–4 · Hari 15–28</span>
+    <h2 class="lab-title">Lab 4 — JPA, Hibernate & Database</h2>
+  </div>
+  <p class="lab-desc">Mapping entity ke tabel database, relasi antar tabel, dan menulis query yang efisien.</p>
+
+  <div class="objectives">
+    <div class="obj-label">// Tujuan Lab</div>
+    <ul class="obj-list">
+      <li>Mendefinisikan Entity dengan anotasi JPA yang tepat</li>
+      <li>Mapping relasi: OneToMany, ManyToOne, ManyToMany</li>
+      <li>Menggunakan Spring Data Repository (findBy, custom @Query)</li>
+      <li>Pagination dan sorting dengan Pageable</li>
+      <li>Menghindari N+1 Problem dengan FETCH JOIN</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">Product.java — JPA Entity</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="str">"products"</span>)
+<span class="an">@Data</span>
+<span class="an">@NoArgsConstructor</span>
+<span class="an">@AllArgsConstructor</span>
+<span class="an">@Builder</span>
+<span class="kw">public class</span> <span class="tp">Product</span> {
+
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = <span class="tp">GenerationType</span>.IDENTITY)
+    <span class="kw">private</span> <span class="tp">Long</span> id;
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, length = <span class="num">100</span>)
+    <span class="kw">private</span> <span class="tp">String</span> name;
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, precision = <span class="num">10</span>, scale = <span class="num">2</span>)
+    <span class="kw">private</span> <span class="tp">BigDecimal</span> price;
+
+    <span class="cm">// ManyToOne: banyak produk milik satu kategori</span>
+    <span class="an">@ManyToOne</span>(fetch = <span class="tp">FetchType</span>.LAZY)
+    <span class="an">@JoinColumn</span>(name = <span class="str">"category_id"</span>)
+    <span class="kw">private</span> <span class="tp">Category</span> category;
+
+    <span class="cm">// Audit fields — auto set oleh Spring Data</span>
+    <span class="an">@CreatedDate</span>
+    <span class="kw">private</span> <span class="tp">LocalDateTime</span> createdAt;
+
+    <span class="an">@LastModifiedDate</span>
+    <span class="kw">private</span> <span class="tp">LocalDateTime</span> updatedAt;
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">ProductRepository.java — Custom Queries</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="kw">public interface</span> <span class="tp">ProductRepository</span> <span class="kw">extends</span> <span class="tp">JpaRepository</span>&lt;<span class="tp">Product</span>, <span class="tp">Long</span>&gt; {
+
+    <span class="cm">// Derived query — Spring otomatis buat SQL-nya</span>
+    <span class="tp">List</span>&lt;<span class="tp">Product</span>&gt; <span class="fn">findByCategoryId</span>(<span class="tp">Long</span> categoryId);
+    <span class="tp">Optional</span>&lt;<span class="tp">Product</span>&gt; <span class="fn">findByName</span>(<span class="tp">String</span> name);
+    <span class="tp">Page</span>&lt;<span class="tp">Product</span>&gt; <span class="fn">findByCategoryId</span>(<span class="tp">Long</span> categoryId, <span class="tp">Pageable</span> pageable);
+
+    <span class="cm">// JPQL — hindari N+1 dengan JOIN FETCH</span>
+    <span class="an">@Query</span>(<span class="str">"SELECT p FROM Product p JOIN FETCH p.category WHERE p.price BETWEEN :min AND :max"</span>)
+    <span class="tp">List</span>&lt;<span class="tp">Product</span>&gt; <span class="fn">findByPriceRange</span>(<span class="an">@Param</span>(<span class="str">"min"</span>) <span class="tp">BigDecimal</span> min,
+                                  <span class="an">@Param</span>(<span class="str">"max"</span>) <span class="tp">BigDecimal</span> max);
+
+    <span class="cm">// Native SQL query</span>
+    <span class="an">@Query</span>(value = <span class="str">"SELECT * FROM products WHERE stock > 0 LIMIT :limit"</span>,
+           nativeQuery = <span class="kw">true</span>)
+    <span class="tp">List</span>&lt;<span class="tp">Product</span>&gt; <span class="fn">findAvailableProducts</span>(<span class="an">@Param</span>(<span class="str">"limit"</span>) <span class="tp">int</span> limit);
+}</pre>
+  </div>
+
+  <div class="warn">
+    <span class="warn-ico">⚠️</span>
+    <span><strong>N+1 Problem:</strong> Jika relasi @OneToMany di-load dengan FetchType.LAZY, akses ke collection dalam loop akan trigger query baru per item. Gunakan <code>JOIN FETCH</code> atau <code>@EntityGraph</code> untuk menghindarinya.</span>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Buat relasi <code>Order</code> ↔ <code>OrderItem</code> ↔ <code>Product</code>. Satu Order punya banyak OrderItem, setiap OrderItem merujuk satu Product.</li>
+      <li>Buat query: "Tampilkan 5 produk terlaris (berdasarkan jumlah OrderItem) beserta nama kategorinya."</li>
+      <li>Aktifkan Audit (<code>@EnableJpaAuditing</code>) dan tambahkan field <code>createdAt</code>, <code>updatedAt</code> di semua entity.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     LAB 5: SECURITY & JWT
+═══════════════════════════════ -->
+<section class="lab" id="lab5">
+  <div class="lab-header">
+    <span class="lab-week">Week 4–5 · Hari 22–35</span>
+    <h2 class="lab-title">Lab 5 — Spring Security & JWT Authentication</h2>
+  </div>
+  <p class="lab-desc">Implementasi autentikasi stateless menggunakan JWT — yang paling umum digunakan untuk REST API modern.</p>
+
+  <div class="objectives">
+    <div class="obj-label">// Tujuan Lab</div>
+    <ul class="obj-list">
+      <li>Konfigurasi Spring Security untuk REST API (disable CSRF, stateless)</li>
+      <li>Implementasi UserDetailsService custom</li>
+      <li>Generate dan validasi JWT token</li>
+      <li>Membuat JwtAuthenticationFilter</li>
+      <li>Proteksi endpoint berdasarkan role</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">SecurityConfig.java</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@Configuration</span>
+<span class="an">@EnableWebSecurity</span>
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">SecurityConfig</span> {
+
+    <span class="kw">private final</span> <span class="tp">JwtAuthenticationFilter</span> jwtFilter;
+    <span class="kw">private final</span> <span class="tp">UserDetailsService</span> userDetailsService;
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">SecurityFilterChain</span> <span class="fn">filterChain</span>(<span class="tp">HttpSecurity</span> http) <span class="kw">throws</span> <span class="tp">Exception</span> {
+        http
+            .<span class="fn">csrf</span>(<span class="tp">AbstractHttpConfigurer</span>::disable)
+            .<span class="fn">sessionManagement</span>(s -> s.<span class="fn">sessionCreationPolicy</span>(<span class="tp">SessionCreationPolicy</span>.STATELESS))
+            .<span class="fn">authorizeHttpRequests</span>(auth -> auth
+                .<span class="fn">requestMatchers</span>(<span class="str">"/api/v1/auth/**"</span>).<span class="fn">permitAll</span>()
+                .<span class="fn">requestMatchers</span>(<span class="str">"/swagger-ui/**"</span>, <span class="str">"/v3/api-docs/**"</span>).<span class="fn">permitAll</span>()
+                .<span class="fn">requestMatchers</span>(<span class="tp">HttpMethod</span>.GET, <span class="str">"/api/v1/products/**"</span>).<span class="fn">permitAll</span>()
+                .<span class="fn">requestMatchers</span>(<span class="str">"/api/v1/admin/**"</span>).<span class="fn">hasRole</span>(<span class="str">"ADMIN"</span>)
+                .<span class="fn">anyRequest</span>().<span class="fn">authenticated</span>()
+            )
+            .<span class="fn">addFilterBefore</span>(jwtFilter, <span class="tp">UsernamePasswordAuthenticationFilter</span>.<span class="kw">class</span>);
+
+        <span class="kw">return</span> http.<span class="fn">build</span>();
+    }
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">PasswordEncoder</span> <span class="fn">passwordEncoder</span>() {
+        <span class="kw">return new</span> <span class="tp">BCryptPasswordEncoder</span>();
+    }
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">AuthenticationManager</span> <span class="fn">authManager</span>(<span class="tp">AuthenticationConfiguration</span> config) <span class="kw">throws</span> <span class="tp">Exception</span> {
+        <span class="kw">return</span> config.<span class="fn">getAuthenticationManager</span>();
+    }
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">JwtService.java — Generate & Validate Token</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="tp">JwtService</span> {
+
+    <span class="an">@Value</span>(<span class="str">"${app.jwt.secret}"</span>)
+    <span class="kw">private</span> <span class="tp">String</span> secret;
+
+    <span class="an">@Value</span>(<span class="str">"${app.jwt.expiration}"</span>)
+    <span class="kw">private</span> <span class="tp">Long</span> expiration;
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">generateToken</span>(<span class="tp">UserDetails</span> userDetails) {
+        <span class="kw">return</span> <span class="tp">Jwts</span>.<span class="fn">builder</span>()
+            .<span class="fn">subject</span>(userDetails.<span class="fn">getUsername</span>())
+            .<span class="fn">issuedAt</span>(<span class="kw">new</span> <span class="tp">Date</span>())
+            .<span class="fn">expiration</span>(<span class="kw">new</span> <span class="tp">Date</span>(<span class="tp">System</span>.<span class="fn">currentTimeMillis</span>() + expiration))
+            .<span class="fn">signWith</span>(<span class="fn">getSignKey</span>())
+            .<span class="fn">compact</span>();
+    }
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">extractUsername</span>(<span class="tp">String</span> token) {
+        <span class="kw">return</span> <span class="fn">extractClaim</span>(token, <span class="tp">Claims</span>::getSubject);
+    }
+
+    <span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">isTokenValid</span>(<span class="tp">String</span> token, <span class="tp">UserDetails</span> userDetails) {
+        <span class="kw">final</span> <span class="tp">String</span> username = <span class="fn">extractUsername</span>(token);
+        <span class="kw">return</span> username.<span class="fn">equals</span>(userDetails.<span class="fn">getUsername</span>()) &amp;&amp; !<span class="fn">isTokenExpired</span>(token);
+    }
+
+    <span class="kw">private</span> <span class="tp">SecretKey</span> <span class="fn">getSignKey</span>() {
+        <span class="kw">return</span> <span class="tp">Keys</span>.<span class="fn">hmacShaKeyFor</span>(<span class="tp">Decoders</span>.BASE64.<span class="fn">decode</span>(secret));
+    }
+}</pre>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Implementasikan endpoint <code>POST /api/v1/auth/register</code> dan <code>POST /api/v1/auth/login</code>. Login mengembalikan JWT token.</li>
+      <li>Test dengan Postman: register → login (dapat token) → akses protected endpoint dengan Bearer token.</li>
+      <li>Tambahkan endpoint <code>GET /api/v1/auth/me</code> yang mengembalikan data user yang sedang login dari JWT-nya.</li>
+      <li>Tambahkan role ADMIN: buat endpoint <code>DELETE /api/v1/admin/users/{id}</code> yang hanya bisa diakses ADMIN.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     LAB 6: EXCEPTION & VALIDATION
+═══════════════════════════════ -->
+<section class="lab" id="lab6">
+  <div class="lab-header">
+    <span class="lab-week">Week 5 · Hari 29–35</span>
+    <h2 class="lab-title">Lab 6 — Global Exception Handling & Validasi</h2>
+  </div>
+  <p class="lab-desc">Response error yang konsisten adalah tanda API yang profesional. Semua error harus punya format yang sama dan HTTP status yang tepat.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">GlobalExceptionHandler.java</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@RestControllerAdvice</span>
+<span class="kw">public class</span> <span class="tp">GlobalExceptionHandler</span> {
+
+    <span class="an">@ExceptionHandler</span>(<span class="tp">ResourceNotFoundException</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">ErrorResponse</span>&gt; <span class="fn">handleNotFound</span>(<span class="tp">ResourceNotFoundException</span> ex) {
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>
+            .<span class="fn">status</span>(<span class="tp">HttpStatus</span>.NOT_FOUND)
+            .<span class="fn">body</span>(<span class="kw">new</span> <span class="tp">ErrorResponse</span>(<span class="str">"NOT_FOUND"</span>, ex.<span class="fn">getMessage</span>()));
+    }
+
+    <span class="an">@ExceptionHandler</span>(<span class="tp">MethodArgumentNotValidException</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">ErrorResponse</span>&gt; <span class="fn">handleValidation</span>(<span class="tp">MethodArgumentNotValidException</span> ex) {
+        <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">String</span>&gt; errors = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+        ex.<span class="fn">getBindingResult</span>().<span class="fn">getFieldErrors</span>()
+            .<span class="fn">forEach</span>(e -> errors.<span class="fn">put</span>(e.<span class="fn">getField</span>(), e.<span class="fn">getDefaultMessage</span>()));
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>
+            .<span class="fn">status</span>(<span class="tp">HttpStatus</span>.BAD_REQUEST)
+            .<span class="fn">body</span>(<span class="kw">new</span> <span class="tp">ErrorResponse</span>(<span class="str">"VALIDATION_ERROR"</span>, <span class="str">"Input tidak valid"</span>, errors));
+    }
+
+    <span class="an">@ExceptionHandler</span>(<span class="tp">Exception</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">ErrorResponse</span>&gt; <span class="fn">handleGeneral</span>(<span class="tp">Exception</span> ex) {
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>
+            .<span class="fn">status</span>(<span class="tp">HttpStatus</span>.INTERNAL_SERVER_ERROR)
+            .<span class="fn">body</span>(<span class="kw">new</span> <span class="tp">ErrorResponse</span>(<span class="str">"INTERNAL_ERROR"</span>, <span class="str">"Terjadi kesalahan sistem"</span>));
+    }
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">ErrorResponse.java — Format error seragam</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@Data</span>
+<span class="an">@AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">ErrorResponse</span> {
+    <span class="kw">private</span> <span class="tp">String</span> code;
+    <span class="kw">private</span> <span class="tp">String</span> message;
+    <span class="kw">private</span> <span class="tp">Object</span> details;
+    <span class="kw">private</span> <span class="tp">LocalDateTime</span> timestamp = <span class="tp">LocalDateTime</span>.<span class="fn">now</span>();
+
+    <span class="kw">public</span> <span class="fn">ErrorResponse</span>(<span class="tp">String</span> code, <span class="tp">String</span> message) {
+        <span class="kw">this</span>.code = code; <span class="kw">this</span>.message = message;
+    }
+}</pre>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Buat custom exception <code>DuplicateResourceException</code> untuk kasus nama produk sudah ada (409 Conflict).</li>
+      <li>Tambahkan handler di <code>GlobalExceptionHandler</code> untuk <code>AccessDeniedException</code> (403).</li>
+      <li>Test semua skenario error dari Postman dan pastikan format response-nya konsisten.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     LAB 7: CLEAN ARCHITECTURE
+═══════════════════════════════ -->
+<section class="lab" id="lab7">
+  <div class="lab-header">
+    <span class="lab-week">Week 5–6 · Hari 33–42</span>
+    <h2 class="lab-title">Lab 7 — Clean Architecture & Best Practices</h2>
+  </div>
+  <p class="lab-desc">Code yang mudah dibaca, di-test, dan di-maintain adalah aset utama tim engineering.</p>
+
+  <div class="objectives">
+    <div class="obj-label">// Tujuan Lab</div>
+    <ul class="obj-list">
+      <li>Memisahkan concern: Controller → Service → Repository</li>
+      <li>Menggunakan MapStruct untuk mapping Entity ↔ DTO</li>
+      <li>Menerapkan @Transactional dengan benar</li>
+      <li>Menggunakan Builder Pattern (via Lombok @Builder)</li>
+      <li>Logging yang informatif dengan SLF4J / Logback</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">ProductService.java — Transactional + Logging</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@Service</span>
+<span class="an">@RequiredArgsConstructor</span>
+<span class="an">@Slf4j</span>                                   <span class="cm">// Lombok: inject log field</span>
+<span class="kw">public class</span> <span class="tp">ProductService</span> {
+
+    <span class="kw">private final</span> <span class="tp">ProductRepository</span> repo;
+    <span class="kw">private final</span> <span class="tp">ProductMapper</span> mapper;  <span class="cm">// MapStruct</span>
+
+    <span class="an">@Transactional</span>(readOnly = <span class="kw">true</span>)
+    <span class="kw">public</span> <span class="tp">Page</span>&lt;<span class="tp">ProductResponse</span>&gt; <span class="fn">findAll</span>(<span class="tp">Pageable</span> pageable) {
+        <span class="kw">return</span> repo.<span class="fn">findAll</span>(pageable).<span class="fn">map</span>(mapper::toResponse);
+    }
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public</span> <span class="tp">ProductResponse</span> <span class="fn">create</span>(<span class="tp">CreateProductRequest</span> req) {
+        log.<span class="fn">info</span>(<span class="str">"Creating product: {}"</span>, req.<span class="fn">getName</span>());
+
+        <span class="kw">if</span> (repo.<span class="fn">findByName</span>(req.<span class="fn">getName</span>()).<span class="fn">isPresent</span>()) {
+            <span class="kw">throw new</span> <span class="tp">DuplicateResourceException</span>(<span class="str">"Product sudah ada: "</span> + req.<span class="fn">getName</span>());
+        }
+
+        <span class="tp">Product</span> product = mapper.<span class="fn">toEntity</span>(req);
+        <span class="tp">Product</span> saved = repo.<span class="fn">save</span>(product);
+        log.<span class="fn">info</span>(<span class="str">"Product created with id: {}"</span>, saved.<span class="fn">getId</span>());
+
+        <span class="kw">return</span> mapper.<span class="fn">toResponse</span>(saved);
+    }
+}</pre>
+  </div>
+
+  <div class="tip">
+    <span class="tip-ico">💡</span>
+    <span>Gunakan <code>@Transactional(readOnly = true)</code> untuk operasi baca. Ini meningkatkan performa karena Hibernate skip dirty checking.</span>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Implementasikan MapStruct mapper untuk <code>Product</code> ↔ <code>ProductResponse</code> ↔ <code>CreateProductRequest</code>.</li>
+      <li>Review kode yang sudah dibuat di lab sebelumnya — pastikan tidak ada business logic di Controller.</li>
+      <li>Tambahkan logging yang informatif di setiap method Service dengan level yang tepat (INFO untuk operasi normal, WARN untuk kondisi tidak diharapkan, ERROR untuk exception).</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     LAB 8: TESTING
+═══════════════════════════════ -->
+<section class="lab" id="lab8">
+  <div class="lab-header">
+    <span class="lab-week">Week 6 · Hari 40–42</span>
+    <h2 class="lab-title">Lab 8 — Unit Testing & Integration Testing</h2>
+  </div>
+  <p class="lab-desc">Kode yang tidak di-test adalah kode yang tidak dipercaya. Minimal 1 test per service method dan 1 integration test per controller.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">ProductServiceTest.java — Unit Test dengan Mockito</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@ExtendWith</span>(<span class="tp">MockitoExtension</span>.<span class="kw">class</span>)
+<span class="kw">class</span> <span class="tp">ProductServiceTest</span> {
+
+    <span class="an">@Mock</span>
+    <span class="kw">private</span> <span class="tp">ProductRepository</span> repo;
+
+    <span class="an">@Mock</span>
+    <span class="kw">private</span> <span class="tp">ProductMapper</span> mapper;
+
+    <span class="an">@InjectMocks</span>
+    <span class="kw">private</span> <span class="tp">ProductService</span> service;
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">shouldReturnProductWhenFound</span>() {
+        <span class="cm">// Arrange</span>
+        <span class="tp">Product</span> product = <span class="tp">Product</span>.<span class="fn">builder</span>().<span class="fn">id</span>(<span class="num">1L</span>).<span class="fn">name</span>(<span class="str">"Laptop"</span>).<span class="fn">build</span>();
+        <span class="tp">Mockito</span>.<span class="fn">when</span>(repo.<span class="fn">findById</span>(<span class="num">1L</span>)).<span class="fn">thenReturn</span>(<span class="tp">Optional</span>.<span class="fn">of</span>(product));
+        <span class="tp">Mockito</span>.<span class="fn">when</span>(mapper.<span class="fn">toResponse</span>(product)).<span class="fn">thenReturn</span>(<span class="kw">new</span> <span class="tp">ProductResponse</span>(<span class="num">1L</span>, <span class="str">"Laptop"</span>));
+
+        <span class="cm">// Act</span>
+        <span class="tp">ProductResponse</span> result = service.<span class="fn">findById</span>(<span class="num">1L</span>);
+
+        <span class="cm">// Assert</span>
+        <span class="fn">assertThat</span>(result.<span class="fn">getName</span>()).<span class="fn">isEqualTo</span>(<span class="str">"Laptop"</span>);
+        <span class="tp">Mockito</span>.<span class="fn">verify</span>(repo).<span class="fn">findById</span>(<span class="num">1L</span>);
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">shouldThrowWhenProductNotFound</span>() {
+        <span class="tp">Mockito</span>.<span class="fn">when</span>(repo.<span class="fn">findById</span>(<span class="num">99L</span>)).<span class="fn">thenReturn</span>(<span class="tp">Optional</span>.<span class="fn">empty</span>());
+        <span class="fn">assertThatThrownBy</span>(() -> service.<span class="fn">findById</span>(<span class="num">99L</span>))
+            .<span class="fn">isInstanceOf</span>(<span class="tp">ResourceNotFoundException</span>.<span class="kw">class</span>);
+    }
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">ProductControllerTest.java — Integration Test dengan MockMvc</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">java</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="an">@SpringBootTest</span>
+<span class="an">@AutoConfigureMockMvc</span>
+<span class="an">@Transactional</span>
+<span class="kw">class</span> <span class="tp">ProductControllerTest</span> {
+
+    <span class="an">@Autowired</span>
+    <span class="kw">private</span> <span class="tp">MockMvc</span> mockMvc;
+
+    <span class="an">@Autowired</span>
+    <span class="kw">private</span> <span class="tp">ObjectMapper</span> objectMapper;
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">shouldReturnProductList</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        mockMvc.<span class="fn">perform</span>(<span class="fn">get</span>(<span class="str">"/api/v1/products"</span>)
+                .<span class="fn">contentType</span>(<span class="tp">MediaType</span>.APPLICATION_JSON))
+            .<span class="fn">andExpect</span>(<span class="fn">status</span>().<span class="fn">isOk</span>())
+            .<span class="fn">andExpect</span>(<span class="fn">jsonPath</span>(<span class="str">"$"</span>).<span class="fn">isArray</span>());
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">shouldReturn404WhenProductNotFound</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        mockMvc.<span class="fn">perform</span>(<span class="fn">get</span>(<span class="str">"/api/v1/products/9999"</span>))
+            .<span class="fn">andExpect</span>(<span class="fn">status</span>().<span class="fn">isNotFound</span>())
+            .<span class="fn">andExpect</span>(<span class="fn">jsonPath</span>(<span class="str">"$.code"</span>).<span class="fn">value</span>(<span class="str">"NOT_FOUND"</span>));
+    }
+}</pre>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Tulis unit test untuk <code>AuthService</code>: test register sukses, test register dengan email duplikat.</li>
+      <li>Tulis integration test untuk login — pastikan response mengandung token JWT.</li>
+      <li>Jalankan <code>./mvnw test</code> dan pastikan semua test hijau.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     LAB 9: DOCKER & DEPLOY
+═══════════════════════════════ -->
+<section class="lab" id="lab9">
+  <div class="lab-header">
+    <span class="lab-week">Week 6 · Hari 43–45</span>
+    <h2 class="lab-title">Lab 9 — Docker & Deployment</h2>
+  </div>
+  <p class="lab-desc">Kemas aplikasi menjadi container agar bisa jalan di mana saja — dari laptop ke server production.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">Dockerfile</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">docker</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="cm"># Multi-stage build — image lebih kecil</span>
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:17-jdk-alpine</span> <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> ./mvnw clean package -DskipTests
+
+<span class="kw">FROM</span> <span class="str">eclipse-temurin:17-jre-alpine</span>
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> <span class="kw">--from</span>=builder /app/target/*.jar app.jar
+<span class="kw">EXPOSE</span> 8080
+<span class="kw">ENTRYPOINT</span> [<span class="str">"java"</span>, <span class="str">"-jar"</span>, <span class="str">"app.jar"</span>]</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">docker-compose.yml</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">yaml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="kw">version:</span> <span class="str">'3.8'</span>
+<span class="kw">services:</span>
+  <span class="kw">db:</span>
+    <span class="kw">image:</span> <span class="str">postgres:15-alpine</span>
+    <span class="kw">environment:</span>
+      <span class="kw">POSTGRES_DB:</span> <span class="str">appdb</span>
+      <span class="kw">POSTGRES_USER:</span> <span class="str">appuser</span>
+      <span class="kw">POSTGRES_PASSWORD:</span> <span class="str">secret</span>
+    <span class="kw">ports:</span>
+      - <span class="str">"5432:5432"</span>
+    <span class="kw">volumes:</span>
+      - <span class="str">pgdata:/var/lib/postgresql/data</span>
+
+  <span class="kw">app:</span>
+    <span class="kw">build:</span> <span class="str">.</span>
+    <span class="kw">ports:</span>
+      - <span class="str">"8080:8080"</span>
+    <span class="kw">environment:</span>
+      <span class="kw">SPRING_DATASOURCE_URL:</span> <span class="str">jdbc:postgresql://db:5432/appdb</span>
+      <span class="kw">SPRING_DATASOURCE_USERNAME:</span> <span class="str">appuser</span>
+      <span class="kw">SPRING_DATASOURCE_PASSWORD:</span> <span class="str">secret</span>
+      <span class="kw">APP_JWT_SECRET:</span> <span class="str">your-256-bit-secret-key-here</span>
+    <span class="kw">depends_on:</span>
+      - <span class="str">db</span>
+
+<span class="kw">volumes:</span>
+  <span class="kw">pgdata:</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-filename">Deploy commands</span>
+      <div style="display:flex;align-items:center;gap:8px"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    </div>
+    <pre><span class="cm"># Build & jalankan semua service</span>
+docker compose up -d --build
+
+<span class="cm"># Lihat logs</span>
+docker compose logs -f app
+
+<span class="cm"># Stop semua</span>
+docker compose down
+
+<span class="cm"># Rebuild image app saja</span>
+docker compose up -d --build app</pre>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">🧪 Latihan Mandiri</div>
+    <ol>
+      <li>Buat Dockerfile untuk project kamu. Build dan jalankan — pastikan bisa diakses di <code>localhost:8080</code>.</li>
+      <li>Buat <code>docker-compose.yml</code> yang menyertakan PostgreSQL dan aplikasi kamu.</li>
+      <li>Gunakan environment variable untuk semua konfigurasi sensitif (tidak ada hardcoded password di code).</li>
+    </ol>
+  </div>
+</section>
+
+<div class="lab-divider"></div>
+
+<!-- ═══════════════════════════════
+     FINAL PROJECT
+═══════════════════════════════ -->
+<section class="lab" id="final-project">
+  <div class="lab-header">
+    <span class="lab-week">Week 6 · Hari 43–45</span>
+    <h2 class="lab-title">Final Project — REST API E-Commerce Backend</h2>
+  </div>
+  <p class="lab-desc">Gabungkan semua yang sudah dipelajari. Bangun backend e-commerce sederhana yang production-ready.</p>
+
+  <div class="objectives">
+    <div class="obj-label">// Fitur Minimum</div>
+    <ul class="obj-list">
+      <li>Auth: Register, Login (JWT), Profile endpoint</li>
+      <li>Produk: CRUD, pagination, search, filter by category</li>
+      <li>Kategori: CRUD dengan relasi ke produk</li>
+      <li>Keranjang: Tambah, update qty, hapus item, lihat keranjang</li>
+      <li>Order: Checkout dari keranjang, riwayat order, detail order</li>
+      <li>Role: USER dan ADMIN dengan akses berbeda</li>
+      <li>Semua error menggunakan format seragam</li>
+      <li>Minimal 10 unit test + 5 integration test</li>
+      <li>Bisa dijalankan via <code>docker compose up</code></li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <span class="note-ico">📐</span>
+    <span><strong>API Convention:</strong> Gunakan prefix <code>/api/v1/</code> untuk semua endpoint. Public endpoint (product list, register, login) tidak butuh auth. Protected endpoint butuh Bearer token.</span>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-header">📋 Kriteria Penilaian</div>
+    <ol>
+      <li><strong>Fungsionalitas</strong> — semua fitur minimum berjalan dengan benar</li>
+      <li><strong>Code Quality</strong> — tidak ada logic di Controller, DI via constructor, tidak ada magic number</li>
+      <li><strong>Error Handling</strong> — semua error ditangani, format response konsisten</li>
+      <li><strong>Security</strong> — endpoint terproteksi sesuai role, password di-hash</li>
+      <li><strong>Testing</strong> — minimal 15 test case (unit + integration)</li>
+      <li><strong>Docker</strong> — bisa jalan dengan <code>docker compose up</code></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     CHECKLIST KOMPETENSI
+═══════════════════════════════ -->
+<section class="lab" id="checklist">
+  <div class="lab-header">
+    <span class="lab-week">Self-Assessment</span>
+    <h2 class="lab-title">Checklist Kompetensi</h2>
+  </div>
+  <p class="lab-desc">Klik setiap item yang sudah dikuasai. Progress tersimpan di browser.</p>
+
+  <ul class="checklist" id="competencyList">
+    <li data-key="j1"><div class="ch-box">✓</div><span>Menggunakan Stream API untuk transformasi dan filtering data</span></li>
+    <li data-key="j2"><div class="ch-box">✓</div><span>Menulis code dengan Optional untuk menghindari NullPointerException</span></li>
+    <li data-key="j3"><div class="ch-box">✓</div><span>Membuat dan menggunakan Lambda + Functional Interface</span></li>
+    <li data-key="s1"><div class="ch-box">✓</div><span>Memahami cara kerja IoC Container Spring</span></li>
+    <li data-key="s2"><div class="ch-box">✓</div><span>Menggunakan Constructor Injection (bukan Field Injection)</span></li>
+    <li data-key="s3"><div class="ch-box">✓</div><span>Membaca konfigurasi dari properties dengan @ConfigurationProperties</span></li>
+    <li data-key="r1"><div class="ch-box">✓</div><span>Membuat CRUD REST API lengkap dengan status code yang tepat</span></li>
+    <li data-key="r2"><div class="ch-box">✓</div><span>Memisahkan Request DTO dan Response DTO dari Entity</span></li>
+    <li data-key="r3"><div class="ch-box">✓</div><span>Memvalidasi input dengan Bean Validation (@NotBlank, @Size, dll)</span></li>
+    <li data-key="d1"><div class="ch-box">✓</div><span>Mendefinisikan relasi JPA (OneToMany, ManyToOne) dengan benar</span></li>
+    <li data-key="d2"><div class="ch-box">✓</div><span>Menulis derived query dan @Query custom di Repository</span></li>
+    <li data-key="d3"><div class="ch-box">✓</div><span>Menggunakan Pageable untuk pagination</span></li>
+    <li data-key="d4"><div class="ch-box">✓</div><span>Memahami dan menghindari N+1 Problem</span></li>
+    <li data-key="sec1"><div class="ch-box">✓</div><span>Mengkonfigurasi Spring Security untuk REST API stateless</span></li>
+    <li data-key="sec2"><div class="ch-box">✓</div><span>Mengimplementasi JWT generate + validate + filter</span></li>
+    <li data-key="sec3"><div class="ch-box">✓</div><span>Memproteksi endpoint berdasarkan role</span></li>
+    <li data-key="e1"><div class="ch-box">✓</div><span>Membuat @RestControllerAdvice dengan handler per exception type</span></li>
+    <li data-key="t1"><div class="ch-box">✓</div><span>Menulis unit test dengan JUnit 5 + Mockito</span></li>
+    <li data-key="t2"><div class="ch-box">✓</div><span>Menulis integration test dengan MockMvc</span></li>
+    <li data-key="dep1"><div class="ch-box">✓</div><span>Membuat Dockerfile (multi-stage) untuk Spring Boot app</span></li>
+    <li data-key="dep2"><div class="ch-box">✓</div><span>Menjalankan app + database dengan docker-compose</span></li>
+  </ul>
+</section>
+
+</main>
+</div>
+
+<script>
+/* ── Copy code ── */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  const done = () => {
+    btn.textContent = 'copied!';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('ok'); }, 1800);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+  } else { fallback(text, done); }
+}
+function fallback(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+/* ── Sidebar active ── */
+const sections = document.querySelectorAll('.lab[id]');
+const sbLinks  = document.querySelectorAll('.sb-link');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      sbLinks.forEach(l => l.classList.remove('active'));
+      const match = document.querySelector(`.sb-link[href="#${e.target.id}"]`);
+      if (match) match.classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -75% 0px' });
+sections.forEach(s => obs.observe(s));
+
+/* ── Checklist persist ── */
+const list = document.getElementById('competencyList');
+list.querySelectorAll('li').forEach(li => {
+  const key = 'chk_' + li.dataset.key;
+  if (localStorage.getItem(key)) li.classList.add('done');
+  li.addEventListener('click', () => {
+    li.classList.toggle('done');
+    localStorage.setItem(key, li.classList.contains('done') ? '1' : '');
+  });
+});
+</script>
+</body>
+</html>

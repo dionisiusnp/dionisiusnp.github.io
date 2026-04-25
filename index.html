@@ -499,9 +499,33 @@ footer{border-top:1px solid var(--bd);padding:26px 40px;
   <a href="https://wa.me/6285708251737" target="_blank" class="foot-link">WhatsApp</a>
   <a href="mailto:dionisiusn1@gmail.com" class="foot-link">Email</a>
 
+  <!-- Dropdown Article -->
+  <div class="foot-drop" id="footDropArticle">
+    <button class="foot-drop-btn" onclick="toggleDrop('footDropArticle')">
+      Article
+      <svg class="foot-drop-ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+    <div class="foot-drop-menu">
+      <div class="drop-section">Article</div>
+      <a href="/article/laravel-cheat/" class="drop-item">
+        <span class="drop-item-ico">🔴</span>Laravel Cheat Sheet
+      </a>
+      <a href="/universitas-dinamika/training/java-springboot/guidelines/" class="drop-item">
+        <span class="drop-item-ico">☕</span>Spring Boot — Hands-On Labs
+      </a>
+      <a href="/article/mrp-simulation/" class="drop-item">
+        <span class="drop-item-ico">🏭</span>Simulasi MRP Odoo 19
+      </a>
+      <a href="/article/odoo-19/" class="drop-item">
+        <span class="drop-item-ico">📘</span>Panduan Odoo 19
+      </a>
+      <!-- tambah artikel baru di sini -->
+    </div>
+  </div>
+
   <!-- Dropdown Offering -->
-  <div class="foot-drop" id="footDrop">
-    <button class="foot-drop-btn" onclick="toggleDrop()">
+  <div class="foot-drop" id="footDropOffering">
+    <button class="foot-drop-btn" onclick="toggleDrop('footDropOffering')">
       Offering
       <svg class="foot-drop-ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
     </button>
@@ -597,12 +621,16 @@ function drawLines() {
 window.addEventListener('load', drawLines);
 window.addEventListener('resize', drawLines);
 
-function toggleDrop() {
-  document.getElementById('footDrop').classList.toggle('open');
+function toggleDrop(id) {
+  const el = document.getElementById(id);
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.foot-drop').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
 }
 document.addEventListener('click', e => {
-  const drop = document.getElementById('footDrop');
-  if (drop && !drop.contains(e.target)) drop.classList.remove('open');
+  if (!e.target.closest('.foot-drop')) {
+    document.querySelectorAll('.foot-drop').forEach(d => d.classList.remove('open'));
+  }
 });
 
 // Reveal animation on career strip
