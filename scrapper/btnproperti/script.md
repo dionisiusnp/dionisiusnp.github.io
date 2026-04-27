@@ -184,13 +184,17 @@ Fetch tiap halaman detail, parse nama / alamat / telepon / email dengan `DOMPars
       if (!img) return '';
       const parent = img.closest('div, p, span, li') || img.parentElement;
       if (!parent) return '';
-      // ambil text node saja (bukan teks dari img alt)
-      return [...parent.childNodes]
+      // Coba text node langsung dulu
+      const textNodes = [...parent.childNodes]
         .filter(n => n.nodeType === Node.TEXT_NODE)
         .map(n => n.textContent.trim())
-        .filter(Boolean)
-        .join(' ')
-        .trim();
+        .filter(Boolean);
+      if (textNodes.length) return textNodes.join(' ').trim();
+      // Fallback: clone parent, hapus img, ambil textContent
+      // (menangani kasus teks terbungkus <span> atau elemen lain)
+      const clone = parent.cloneNode(true);
+      clone.querySelectorAll('img').forEach(i => i.remove());
+      return clone.textContent.trim();
     }
 
     const address = getByIcon('room_contact');
