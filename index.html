@@ -71,7 +71,7 @@ a{text-decoration:none;color:inherit}
   transition:filter .4s;
   pointer-events:none;
 }
-.rmp-link:hover .rmp-img{filter:grayscale(18%) brightness(.52)}
+.rmp-link:hover .rmp-img{filter:grayscale(18%) brightness(.98)}
 
 /* fade gradients */
 .rmp-fade-r{
@@ -87,22 +87,6 @@ a{text-decoration:none;color:inherit}
   pointer-events:none;z-index:3;
 }
 
-/* hover label */
-.rmp-hover-label{
-  position:absolute;
-  left:50%;top:46%;
-  transform:translate(-50%,-50%);
-  font-size:.78rem;font-weight:800;letter-spacing:.05em;color:#fff;
-  background:rgba(99,102,241,.72);
-  border:1.5px solid rgba(99,102,241,.5);
-  padding:8px 20px;border-radius:30px;
-  backdrop-filter:blur(8px);
-  opacity:0;transition:opacity .25s,transform .25s;
-  z-index:4;pointer-events:none;
-  white-space:nowrap;
-  box-shadow:0 4px 24px rgba(99,102,241,.4);
-}
-.rmp-link:hover .rmp-hover-label{opacity:1}
 
 /* name info */
 .rmp-info{
@@ -324,7 +308,6 @@ footer{border-top:1px solid var(--bd);padding:26px 40px;
   <div class="rmp-col" id="rmpCol">
     <a href="/detail/" class="rmp-link" id="rmpLink">
       <img class="rmp-img" src="/foto-dion.png" alt="Dionisius Nanda Priyadi" onerror="this.src='/profile.jpg'"/>
-      <div class="rmp-hover-label">Lihat CV Lengkap →</div>
     </a>
     <div class="rmp-fade-r"></div>
     <div class="rmp-fade-b"></div>
