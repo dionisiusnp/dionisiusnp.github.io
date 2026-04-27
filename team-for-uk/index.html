@@ -3,10 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dedicated SaaS Engineering Team</title>
-
+<title>Dedicated SaaS Engineering Team — CPDme Proposal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -32,7 +30,6 @@ body {
     overflow-x: hidden;
 }
 
-/* dot-grid background */
 body::before {
     content: '';
     position: fixed;
@@ -81,7 +78,6 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     position: relative;
 }
 
-/* glow blob behind hero */
 .hero::before {
     content: '';
     position: absolute;
@@ -142,6 +138,307 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
 }
 
 .badge:hover { border-color: rgba(56,189,248,.4); color: var(--accent); }
+
+/* ── PROPOSAL OVERVIEW ── */
+.proposal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.proposal-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.proposal-item:hover {
+    border-color: rgba(56,189,248,.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+
+.proposal-item .pi-icon {
+    font-size: 26px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.proposal-item .pi-num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.proposal-item h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin: 0 0 6px;
+}
+
+.proposal-item p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+/* ── TIMELINE ── */
+.timeline-container {
+    margin-top: 40px;
+}
+
+.timeline-month {
+    margin-bottom: 48px;
+}
+
+.month-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.month-pill {
+    background: linear-gradient(90deg, rgba(56,189,248,.2), rgba(129,140,248,.1));
+    border: 1px solid rgba(56,189,248,.3);
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.month-focus {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+.month-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.sprints {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.sprint-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    transition: border-color .2s;
+}
+
+.sprint-card:hover { border-color: rgba(56,189,248,.25); }
+
+.sprint-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.sprint-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--violet);
+    text-transform: uppercase;
+}
+
+.sprint-week {
+    font-size: 11px;
+    color: var(--faint);
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 10px;
+}
+
+.sprint-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1.7;
+}
+
+.tag-bug      { background: rgba(248,113,113,.12); color: #f87171; border: 1px solid rgba(248,113,113,.25); }
+.tag-inv      { background: rgba(251,191,36,.10);  color: #fbbf24; border: 1px solid rgba(251,191,36,.2); }
+.tag-feature  { background: rgba(74,222,128,.10);  color: #4ade80; border: 1px solid rgba(74,222,128,.2); }
+.tag-security { background: rgba(248,113,113,.15); color: #fca5a5; border: 1px solid rgba(248,113,113,.3); }
+.tag-devops   { background: rgba(129,140,248,.12); color: var(--violet); border: 1px solid rgba(129,140,248,.25); }
+.tag-corp     { background: rgba(56,189,248,.10);  color: var(--accent); border: 1px solid rgba(56,189,248,.2); }
+.tag-body     { background: rgba(163,230,53,.10);  color: #a3e635; border: 1px solid rgba(163,230,53,.2); }
+.tag-improve  { background: rgba(148,163,184,.08); color: var(--muted); border: 1px solid var(--border); }
+
+/* ── COMMUNICATION ── */
+.comm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.comm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+}
+
+.comm-card .comm-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.comm-card h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin: 0 0 8px;
+}
+
+.comm-card p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.comm-detail {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.comm-chip {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    background: rgba(56,189,248,.08);
+    border: 1px solid rgba(56,189,248,.18);
+    border-radius: 999px;
+    padding: 3px 10px;
+}
+
+/* ── TOOLS ── */
+.tools-group {
+    margin-top: 36px;
+    margin-bottom: 28px;
+}
+
+.tools-group-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.tools-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tool-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color .2s, color .2s;
+}
+
+.tool-chip:hover { border-color: rgba(56,189,248,.35); color: var(--text); }
+
+.tool-chip .tc-icon { font-size: 16px; }
+
+/* ── REQUIREMENTS ── */
+.req-list {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.req-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.req-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.req-content h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin: 0 0 5px;
+}
+
+.req-content p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+}
 
 /* ── PROJECTS ── */
 .project-card {
@@ -205,7 +502,6 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
 }
 
 .ai-box h2 { margin-bottom: 14px; }
-
 .ai-box p { max-width: 560px; margin: 0 auto; font-size: 16px; }
 
 /* ── HOW WE WORK ── */
@@ -228,7 +524,6 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     position: relative;
 }
 
-/* arrow between steps */
 .work-step:not(:last-child)::after {
     content: '›';
     position: absolute;
@@ -266,13 +561,9 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     margin-bottom: 6px;
 }
 
-.work-step p {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-}
+.work-step p { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
-/* ── TEAM — speaker-poster style ── */
+/* ── TEAM ── */
 .team { text-align: center; }
 
 .team-grid {
@@ -283,7 +574,6 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     margin-top: 40px;
 }
 
-/* wrapper: photo on top, card below */
 .member {
     width: 190px;
     display: flex;
@@ -292,20 +582,17 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     cursor: default;
 }
 
-/* floating photo — negative margin overlaps into card */
 .member-float {
     width: 160px;
     height: 220px;
-    margin-bottom: -44px; /* overlap 44px into card */
+    margin-bottom: -44px;
     position: relative;
     z-index: 1;
     flex-shrink: 0;
     transition: transform .3s;
 }
 
-.member:hover .member-float {
-    transform: translateY(-6px);
-}
+.member:hover .member-float { transform: translateY(-6px); }
 
 .member-float img {
     width: 100%;
@@ -317,13 +604,12 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     filter: drop-shadow(0 -4px 20px rgba(56,189,248,.25));
 }
 
-/* card base */
 .member-card {
     width: 100%;
     background: linear-gradient(180deg, #111827 0%, #0c1424 100%);
     border: 1px solid var(--border);
     border-radius: 18px;
-    padding: 52px 18px 20px; /* top padding = overlap height + breathing room */
+    padding: 52px 18px 20px;
     text-align: center;
     position: relative;
     z-index: 0;
@@ -335,7 +621,6 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     box-shadow: 0 12px 32px rgba(0,0,0,.4), 0 0 0 1px rgba(56,189,248,.06);
 }
 
-/* glow line at card top */
 .member-card::before {
     content: '';
     position: absolute;
@@ -344,7 +629,6 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     background: linear-gradient(90deg, transparent, rgba(56,189,248,.45), transparent);
 }
 
-/* ── member info ── */
 .member .name {
     font-weight: 700;
     font-size: 14.5px;
@@ -361,7 +645,6 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
     margin-bottom: 14px;
 }
 
-/* info icon button */
 .info-btn {
     display: inline-flex;
     align-items: center;
@@ -527,6 +810,13 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
 
 .close:hover { color: var(--text); }
 
+/* ── DIVIDER ── */
+.section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin-top: 110px;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 700px) {
     .project-card,
@@ -534,19 +824,22 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
         grid-template-columns: 1fr;
         direction: ltr;
     }
-
     .work-step:not(:last-child)::after { display: none; }
     .work-step { width: 140px; }
-
     .ai-box { padding: 36px 24px; }
+    .proposal-grid { grid-template-columns: 1fr; }
+    .sprints { grid-template-columns: 1fr; }
+    .comm-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 
-<body><div id="dion-nav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);font-family:Inter,system-ui,sans-serif;font-size:.72rem"><a href="/" style="display:flex;align-items:center;gap:6px;font-weight:600;color:#8888aa;padding:4px 11px;border-radius:6px;border:1px solid rgba(255,255,255,.1);text-decoration:none" onmouseover="this.style.color='#6366f1';this.style.borderColor='rgba(99,102,241,.3)'" onmouseout="this.style.color='#8888aa';this.style.borderColor='rgba(255,255,255,.1)'"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>dionisiusnp.github.io</a></div>
+<body>
+<div id="dion-nav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);font-family:Inter,system-ui,sans-serif;font-size:.72rem"><a href="/" style="display:flex;align-items:center;gap:6px;font-weight:600;color:#8888aa;padding:4px 11px;border-radius:6px;border:1px solid rgba(255,255,255,.1);text-decoration:none" onmouseover="this.style.color='#6366f1';this.style.borderColor='rgba(99,102,241,.3)'" onmouseout="this.style.color='#8888aa';this.style.borderColor='rgba(255,255,255,.1)'"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>dionisiusnp.github.io</a></div>
+
 <div class="container">
 
-    <!-- HERO -->
+    <!-- ══ HERO ══ -->
     <div class="hero">
         <h1>A Dedicated Engineering Team Built for CPDme</h1>
         <p>
@@ -555,7 +848,6 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
             Remote, full-time, and fully aligned with UK working hours.
         </p>
         <p class="hero-meta">Remote &nbsp;·&nbsp; 09:00–17:00 UK Time &nbsp;·&nbsp; Full-Time &nbsp;·&nbsp; Long-Term</p>
-
         <div class="badge-strip">
             <span class="badge">Java · Spring Boot</span>
             <span class="badge">Flutter iOS &amp; Android</span>
@@ -566,39 +858,804 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
         </div>
     </div>
 
-    <!-- PROJECTS -->
+    <!-- ══ PROPOSAL OVERVIEW ══ -->
     <section>
-        <span class="label">Relevant Work</span>
-        <h2>Projects Aligned with CPDme's Stack</h2>
+        <span class="label">Proposal Contents</span>
+        <h2>What's Included in This Proposal</h2>
+        <p style="max-width:620px; margin-bottom:0">
+            This document covers every aspect of our engagement model — from who we are,
+            how we deliver, and exactly how we plan to address CPDme's current backlog.
+        </p>
 
-        <div class="project-card">
-            <img src="https://via.placeholder.com/600x350/0f172a/38bdf8?text=LMS+Platform" alt="Learning Management System">
-            <div class="text">
-                <h3>Learning Management System</h3>
-                <p>
-                    A multi-user web platform for course management and learner progress tracking,
-                    built with Laravel and Vue.js. Features RBAC, KPI dashboard, enrolment analytics,
-                    and a dark-mode UI — directly relevant to CPDme's CPD logging and portfolio structure.
-                </p>
-                <a href="#">View Demo →</a>
+        <div class="proposal-grid">
+            <div class="proposal-item">
+                <span class="pi-icon">👥</span>
+                <div class="pi-num">01</div>
+                <h4>Team Overview &amp; Structure</h4>
+                <p>Six full-time specialists with defined roles, seniority levels, and direct accountability for CPDme deliverables.</p>
             </div>
-        </div>
-
-        <div class="project-card reverse">
-            <img src="https://via.placeholder.com/600x350/0f172a/818cf8?text=Flutter+Mobile+App" alt="Cross-Platform Mobile App">
-            <div class="text">
-                <h3>Cross-Platform Mobile App (Flutter)</h3>
-                <p>
-                    iOS and Android application with real-time data sync, offline mode,
-                    and RESTful API integration — developed using Flutter with GetX state management,
-                    Firebase, and App Store / Google Play deployment experience.
-                </p>
-                <a href="#">View Demo →</a>
+            <div class="proposal-item">
+                <span class="pi-icon">⚙️</span>
+                <div class="pi-num">02</div>
+                <h4>Development Approach</h4>
+                <p>Agile / Scrum methodology — 2-week sprints, pull request reviews, staging environment, and QA sign-off before every release.</p>
+            </div>
+            <div class="proposal-item">
+                <span class="pi-icon">📅</span>
+                <div class="pi-num">03</div>
+                <h4>Timeline &amp; Delivery Plan</h4>
+                <p>4-month sprint roadmap built directly from CPDme's next-month task list and backlog, with per-sprint deliverables and priorities.</p>
+            </div>
+            <div class="proposal-item">
+                <span class="pi-icon">💬</span>
+                <div class="pi-num">04</div>
+                <h4>Communication &amp; Reporting</h4>
+                <p>Daily standups, weekly progress reports, sprint demos, and async availability on Slack or Microsoft Teams — all within UK hours.</p>
+            </div>
+            <div class="proposal-item">
+                <span class="pi-icon">🛠️</span>
+                <div class="pi-num">05</div>
+                <h4>Tools &amp; Technology Used</h4>
+                <p>Full-stack tooling aligned with CPDme's existing infrastructure — from Java/Spring Boot to Flutter, Kubernetes, Sentry, and Intercom integrations.</p>
+            </div>
+            <div class="proposal-item">
+                <span class="pi-icon">🔗</span>
+                <div class="pi-num">06</div>
+                <h4>Special Requirements &amp; Dependencies</h4>
+                <p>Android 15 compliance, Microsoft SSO, UK GDPR account deletion, Sentry error monitoring, Intercom integration, and governing body standards.</p>
             </div>
         </div>
     </section>
 
-    <!-- AI -->
+    <!-- ══ TEAM ══ -->
+    <section class="team">
+        <span class="label">01 — Team Overview</span>
+        <h2>Six Specialists, One Cohesive Team</h2>
+        <p style="max-width:560px; margin: 0 auto 0">
+            Each member owns a clear domain. Leni (Team Lead) manages all stakeholder communication in English;
+            the engineers execute in their technical lanes with zero hand-off friction.
+        </p>
+
+        <div class="team-grid">
+            <div class="member">
+                <div class="member-float"><img src="/team-for-uk/foto-leni.png" alt="Leni Widiastuti"></div>
+                <div class="member-card">
+                    <div class="name">Leni Widiastuti</div>
+                    <div class="role">Team Lead · Project Manager</div>
+                    <button class="info-btn" onclick="openModal('m1')">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
+                        View Profile
+                    </button>
+                </div>
+            </div>
+            <div class="member">
+                <div class="member-float"><img src="/team-for-uk/foto-heru.png" alt="Heru Afandi"></div>
+                <div class="member-card">
+                    <div class="name">Heru Afandi</div>
+                    <div class="role">Frontend Engineer</div>
+                    <button class="info-btn" onclick="openModal('m5')">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
+                        View Profile
+                    </button>
+                </div>
+            </div>
+            <div class="member">
+                <div class="member-float"><img src="/team-for-uk/foto-bima.png" alt="Bima Andriansyah"></div>
+                <div class="member-card">
+                    <div class="name">Bima Andriansyah</div>
+                    <div class="role">Flutter Mobile</div>
+                    <button class="info-btn" onclick="openModal('m4')">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
+                        View Profile
+                    </button>
+                </div>
+            </div>
+            <div class="member">
+                <div class="member-float"><img src="/team-for-uk/foto-dion.png" alt="Dionisius NP"></div>
+                <div class="member-card">
+                    <div class="name">Dionisius NP</div>
+                    <div class="role">Backend Engineer</div>
+                    <button class="info-btn" onclick="openModal('m2')">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
+                        View Profile
+                    </button>
+                </div>
+            </div>
+            <div class="member">
+                <div class="member-float"><img src="/team-for-uk/foto-anwar.png" alt="Khaerul Anwar"></div>
+                <div class="member-card">
+                    <div class="name">Khaerul Anwar</div>
+                    <div class="role">DevOps &amp; Cloud</div>
+                    <button class="info-btn" onclick="openModal('m3')">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
+                        View Profile
+                    </button>
+                </div>
+            </div>
+            <div class="member">
+                <div class="member-float"><img src="/team-for-uk/foto-onas.png" alt="Onastatia S"></div>
+                <div class="member-card">
+                    <div class="name">Onastatia Sahartian</div>
+                    <div class="role">IT Support · System Analyst</div>
+                    <button class="info-btn" onclick="openModal('m6')">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
+                        View Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ DEVELOPMENT APPROACH ══ -->
+    <section>
+        <span class="label">02 — Development Approach</span>
+        <h2 style="text-align:center">How We Deliver</h2>
+        <div class="work-steps">
+            <div class="work-step">
+                <div class="step-bubble">📋</div>
+                <div class="step-num">SPRINT KICK-OFF</div>
+                <p>Backlog grooming with CPDme team — every task scoped, estimated, and prioritised before a sprint starts</p>
+            </div>
+            <div class="work-step">
+                <div class="step-bubble">⚡</div>
+                <div class="step-num">2-WEEK SPRINTS</div>
+                <p>Scrum-based cycles with clear acceptance criteria. No task ships without a linked ticket and passing QA</p>
+            </div>
+            <div class="work-step">
+                <div class="step-bubble">💬</div>
+                <div class="step-num">DAILY STANDUP</div>
+                <p>Async or live update on Slack/Teams — progress, blockers, and dependency flags every working day</p>
+            </div>
+            <div class="work-step">
+                <div class="step-bubble">✅</div>
+                <div class="step-num">QA SIGN-OFF</div>
+                <p>Unit, integration, and regression tests on every feature. Onas reviews and signs off before merge to main</p>
+            </div>
+            <div class="work-step">
+                <div class="step-bubble">🚀</div>
+                <div class="step-num">SPRINT DEMO</div>
+                <p>Live demo of delivered features to CPDme stakeholders at end of each sprint — full transparency on what ships</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ TIMELINE ══ -->
+    <section>
+        <span class="label">03 — Timeline &amp; Delivery Plan</span>
+        <h2>Sprint Roadmap — 8-Month Full Backlog Plan</h2>
+        <p style="max-width:640px; margin-bottom:12px">
+            15 sprints over 8 months — covers every task from the Next Month list, New Tasks, and full Backlog
+            in guide.md. Frontend, backend, mobile, and DevOps tracks run in parallel within each sprint.
+        </p>
+        <p style="max-width:640px; margin-bottom:16px; font-size:13.5px; color:var(--faint)">
+            Heavy single-track items (SSO, Android 15, Jenkins migration) are given their own sprint space
+            and not stacked with other large deliverables. Week 1–2 is onboarding only — no sprint commitments.
+        </p>
+        <p style="max-width:640px; margin-bottom:40px; font-size:13px; color:var(--faint); border-left:2px solid rgba(56,189,248,.25); padding-left:14px; font-style:italic">
+            Disclaimer: this timeline is an estimate. Actual delivery may be faster or slower once the team has
+            real-world knowledge of the existing codebase, live business processes, and application behaviour.
+            Sprint scope will be reviewed and adjusted at the start of each cycle.
+        </p>
+
+        <div class="timeline-container">
+
+            <!-- ONBOARDING -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill" style="background:linear-gradient(90deg,rgba(129,140,248,.2),rgba(56,189,248,.1));border-color:rgba(129,140,248,.3);color:var(--violet)">Pre-Sprint</div>
+                    <div class="month-focus">Onboarding &amp; Environment Setup</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprint-card" style="border-color:rgba(129,140,248,.25)">
+                    <div class="sprint-meta">
+                        <span class="sprint-label" style="color:var(--muted)">Pre-Sprint</span>
+                        <span class="sprint-week">Week 1–2</span>
+                    </div>
+                    <div class="sprint-title">Team Ramp-Up — No Deliverables Committed</div>
+                    <div class="task-list">
+                        <div class="task-item"><span class="tag tag-devops">Setup</span>Git repository access, branch strategy alignment, and local environment configuration</div>
+                        <div class="task-item"><span class="tag tag-devops">Setup</span>Staging &amp; production environment walkthrough with CPDme tech team</div>
+                        <div class="task-item"><span class="tag tag-devops">Setup</span>Sentry, Intercom, and monitoring tool access provisioned</div>
+                        <div class="task-item"><span class="tag tag-devops">Setup</span>Codebase familiarisation — architecture review, database schema, API structure</div>
+                        <div class="task-item"><span class="tag tag-improve">Process</span>Slack/Teams channel setup, standup cadence agreed, sprint board configured</div>
+                        <div class="task-item"><span class="tag tag-improve">Process</span>Sprint 1 backlog grooming session with CPDme stakeholders</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH 1 -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill">Month 1</div>
+                    <div class="month-focus">Production Bugs &amp; Critical Fixes</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprints">
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 1</span>
+                            <span class="sprint-week">Week 3–4</span>
+                        </div>
+                        <div class="sprint-title">Critical Security &amp; Auth Bugs</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-security">Security</span>Portfolio leaking summary — server-side scope fix</div>
+                            <div class="task-item"><span class="tag tag-security">Security</span>Can login without confirming password — auth flow patch</div>
+                            <div class="task-item"><span class="tag tag-security">Security</span>CPDHub video accessible via free account — paywall enforcement</div>
+                            <div class="task-item"><span class="tag tag-security">Security</span>2FA issue with DMS CPDme</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>HCPC standards appearing on generated portfolio</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>Delete account + Intercom GDPR deletion request</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>App Tags not able to scroll · iOS password input hard to use · UI tags bug</div>
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>APP ENV-based build params — environment config isolation</div>
+                        </div>
+                    </div>
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 2</span>
+                            <span class="sprint-week">Week 5–6</span>
+                        </div>
+                        <div class="sprint-title">Remaining Bugs &amp; Notification Fixes</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>[Sentry] Service Exception — Failed to download file</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>IPRS Issues — Standards not producing a portfolio</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>Problem with PA diary entry — new Physician's Assistant</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>Confirm your email — email delivery issue</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>Profile not showing 'renew' date</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>Profile image lost after change</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Notification (email) after user creates</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Help text change</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Entries cleanup for entries not assigned</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH 2 -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill">Month 2</div>
+                    <div class="month-focus">Investigations &amp; Android 15</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprints">
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 3</span>
+                            <span class="sprint-week">Week 7–8</span>
+                        </div>
+                        <div class="sprint-title">Investigations Batch 1 + Android 15 Start</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>User unable to download portfolio</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>App users not being added to Katra — root cause &amp; fix</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>Duplication of email for document · duplicate avatar returns</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>Send tag to Intercom — basic user info</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>FEN — Last login only picks up from dashboard</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Check usages of profile and user profile</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>Corporate Events — investigation</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Android 15 (API 35) — SDK audit &amp; dependency update (start)</div>
+                        </div>
+                    </div>
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 4</span>
+                            <span class="sprint-week">Week 9–10</span>
+                        </div>
+                        <div class="sprint-title">Investigations Batch 2 + Android 15 Complete</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Android 15 — finalise build, full test suite, Play Store resubmission</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>Supervision tool in the app — UX audit</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>Recycle bin capability — feasibility &amp; scope</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>Redoing evidence capture — flow review</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>Marketing dashboard — investigation</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>RCOT — SSO Investigation · user not assigned to org during SSO</div>
+                            <div class="task-item"><span class="tag tag-inv">Investigate</span>IPGNEA — glueUp SSO logic change</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH 3 -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill">Month 3</div>
+                    <div class="month-focus">SSO, Standards &amp; Supervision</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprints">
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 5</span>
+                            <span class="sprint-week">Week 11–12</span>
+                        </div>
+                        <div class="sprint-title">Microsoft SSO &amp; Standards — Dedicated Sprint</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Microsoft SSO — Global rollout (Azure AD, OAuth2, org-claim mapping)</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>GMC text standards changed — content &amp; mapping update</div>
+                            <div class="task-item"><span class="tag tag-body">Gov. Body</span>Governing body — Airways skills log configuration</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Standardise Membership Table Across Payment Gateway</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Development — Send Emails to Disabled &amp; Closed Accounts</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Admin — Disabled Users Improvements</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Add a Date to the Supervision</div>
+                        </div>
+                    </div>
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 6</span>
+                            <span class="sprint-week">Week 13–14</span>
+                        </div>
+                        <div class="sprint-title">Supervision Overhaul &amp; Portfolio</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Relook at supervisions — UX &amp; flow overhaul</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Supervision tool — auto-add name &amp; role · completion % calculation fix</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Move Supervisor and Role together on support page</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Portfolio builder — ability to send portfolio · Summary document for entries</div>
+                            <div class="task-item"><span class="tag tag-bug">Bug</span>Portfolio Builder — text not centred</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Reminders for admin and corporate</div>
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>Pipeline backend setup · Documentation setup for dev environment</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH 4 -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill">Month 4</div>
+                    <div class="month-focus">Dashboard, User Features &amp; Governing Bodies</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprints">
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 7</span>
+                            <span class="sprint-week">Week 15–16</span>
+                        </div>
+                        <div class="sprint-title">Dashboard, App Features &amp; UK/Ireland Governing Bodies</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Graph on Dashboard — CPD entry completion status</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Advanced Practice Four Pillars on dashboard</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>CPD Management — hours countdown notification</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Add role of user to CPDresilience Expo</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Myfile notification — turn on attachments · Interests Box in Profile updated</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Ability for App to send referral invites for membership</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Generate QR or Link to add users to corporate system</div>
+                            <div class="task-item"><span class="tag tag-body">Gov. Body</span>IRCM · Sports for Confidence · Chartered Society of Physiotherapists (CSP)</div>
+                            <div class="task-item"><span class="tag tag-body">Gov. Body</span>PHECC · PSI · PHEM — standards mapping &amp; configuration</div>
+                        </div>
+                    </div>
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 8</span>
+                            <span class="sprint-week">Week 17–18</span>
+                        </div>
+                        <div class="sprint-title">International Governing Bodies + Related Features</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-body">Gov. Body</span>UMHAN · AHPRA · Podiatry Board of Australia · CMI · BACP</div>
+                            <div class="task-item"><span class="tag tag-body">Gov. Body</span>Bradford District Care Foundation Trust</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Fix Governing Bodies names — display &amp; data cleanup</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Add text to HCPC Audit Portal · Intercom — add missed certificates to platform</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>CMSUK New Certificate — generation &amp; template</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Users that are members of multiple organisations — scope fix</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Unlinking accounts from corporates · Add trash can for deleted users</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH 5 -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill">Month 5</div>
+                    <div class="month-focus">Corporate Features</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprints">
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 9</span>
+                            <span class="sprint-week">Week 19–20</span>
+                        </div>
+                        <div class="sprint-title">Corporate Features Batch 1</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Bulk upload for organisations after launch</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Organisation control over accordions</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Diary Entry Generator</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Faculty of Emergency Nursing (FEN)</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate Manager / Superuser Permissions Change</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>SQL Export — raw data export for corporate admins</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Development — Switch user errors not handled</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Development — Countdown when user cancels payment</div>
+                        </div>
+                    </div>
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 10</span>
+                            <span class="sprint-week">Week 21–22</span>
+                        </div>
+                        <div class="sprint-title">Corporate Features Batch 2</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Events visibility for organisations</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Shared CPD visibility</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Allow SSO for whole organisations</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Toggle option for new Bulletin Tracker</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Organisation ability to manage users</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Users able to create diary entries</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Organisation managers view read status</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Managers able to send content</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH 6 -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill">Month 6</div>
+                    <div class="month-focus">Corporate Batch 3, Admin &amp; SSO Backlog</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprints">
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 11</span>
+                            <span class="sprint-week">Week 23–24</span>
+                        </div>
+                        <div class="sprint-title">Corporate Batch 3 &amp; Remaining Corporate</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Request move of user to group</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Countdown warning</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — View list of users to send certificate</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — Limit certificates</div>
+                            <div class="task-item"><span class="tag tag-corp">Corporate</span>Corporate — development user notification suppression (non-prod)</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Development — Share CPD from share</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Admin — Activity log improvements</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Admin — Add event</div>
+                        </div>
+                    </div>
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 12</span>
+                            <span class="sprint-week">Week 25–26</span>
+                        </div>
+                        <div class="sprint-title">Admin, Google SSO &amp; Webinar</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Google Sign On</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Logout of all platforms — session revocation</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Admin — User Reports Page</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Admin — Improve 'Manage Organisations' page</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Activity log for organisations (CSV export)</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Webinar page improvements</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Database update when webinar changes</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Development — Webinar alerts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH 7 -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill">Month 7</div>
+                    <div class="month-focus">Misc Backlog &amp; Jenkins Migration</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprints">
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 13</span>
+                            <span class="sprint-week">Week 27–28</span>
+                        </div>
+                        <div class="sprint-title">Miscellaneous Backlog Features</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Change CPDHub search</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Allow attach censored files</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Allow users choose CPD hours</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Allow users to like videos</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Separate reflections and entries</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>CRM LMS Integration (The Ortus Group)</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Cleanup CPDme storage repository</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Annotation of documents in Files / App</div>
+                        </div>
+                    </div>
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 14</span>
+                            <span class="sprint-week">Week 29–30</span>
+                        </div>
+                        <div class="sprint-title">Jenkins → GitHub Actions Migration — Dedicated Sprint</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>Migrate Jenkins to GitHub Actions — pipeline rewrite &amp; prod verification</div>
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>Technical — Backend setup for pipeline</div>
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>Technical — Unit tests for authentication</div>
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>Technical — Backend unit tests for entry completion</div>
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>Technical — Payment documentation</div>
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>Technical — High-level overview documentation</div>
+                            <div class="task-item"><span class="tag tag-devops">DevOps</span>Technical — Documentation setup dev</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTH 8 -->
+            <div class="timeline-month">
+                <div class="month-banner">
+                    <div class="month-pill">Month 8</div>
+                    <div class="month-focus">Final Backlog &amp; Polish</div>
+                    <div class="month-line"></div>
+                </div>
+                <div class="sprints">
+                    <div class="sprint-card">
+                        <div class="sprint-meta">
+                            <span class="sprint-label">Sprint 15</span>
+                            <span class="sprint-week">Week 31–32</span>
+                        </div>
+                        <div class="sprint-title">Remaining Backlog, Polish &amp; Final QA</div>
+                        <div class="task-list">
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>CPD hours countdown — gamification layer</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Show tags on Portfolio Entries</div>
+                            <div class="task-item"><span class="tag tag-feature">Feature</span>Portfolio generation — add option to include first page</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Spell check in diary entries · Text editor improvements</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Add FEN Standards field to diary form</div>
+                            <div class="task-item"><span class="tag tag-improve">Improve</span>Sprint buffer — carryover, full regression suite, final QA sign-off</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ══ RISK MITIGATION ══ -->
+    <section>
+        <span class="label">Risk &amp; Mitigation</span>
+        <h2>What Happens If the Timeline Slips</h2>
+        <p style="max-width:640px; margin-bottom:36px; font-size:15px">
+            Delays happen. Below is how we handle scope creep, blockers, and sprint overruns —
+            so CPDme always knows the plan before a problem becomes a surprise.
+        </p>
+
+        <div class="req-list">
+            <div class="req-item">
+                <div class="req-icon">🔁</div>
+                <div class="req-content">
+                    <h4>Sprint Overrun — Task Carries Over, Not Dropped</h4>
+                    <p>If a task isn't completed within its sprint, it rolls into the next sprint as a priority item — it doesn't quietly disappear. Leni reports the carryover in the weekly progress report with a revised estimate and root cause (e.g. unexpected complexity, dependency block, or scope change).</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">🔀</div>
+                <div class="req-content">
+                    <h4>Scope Change — Backlog Reprioritisation, Not Silent Additions</h4>
+                    <p>If CPDme adds new tasks mid-sprint, we'll flag the trade-off: something of equal weight moves to the next sprint, or we extend the sprint with CPDme's agreement. We never silently absorb new scope without adjusting the timeline.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">🚧</div>
+                <div class="req-content">
+                    <h4>External Dependency Blocker — Escalated Within 24 Hours</h4>
+                    <p>If progress is blocked by something outside our control — a third-party API outage, missing credentials, or a decision needed from CPDme — we flag it in standup the same day and escalate via Slack/Teams if unresolved within 24 hours. We don't sit on blockers.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">📊</div>
+                <div class="req-content">
+                    <h4>Month-End Review — Timeline Reset If Needed</h4>
+                    <p>At the end of each month, we run a brief retrospective with CPDme. If we're consistently running behind, we adjust sprint capacity estimates or re-scope the roadmap together — rather than pretending we'll catch up and then missing again.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">⚡</div>
+                <div class="req-content">
+                    <h4>Critical Bug in Production — Dropped Into Current Sprint Immediately</h4>
+                    <p>Any Sentry-flagged production error or user-reported critical bug gets pulled into the active sprint immediately, displacing a lower-priority backlog item. Production stability takes precedence over scheduled features — CPDme's users are never left broken while we work on new things.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ COMMUNICATION ══ -->
+    <section>
+        <span class="label">04 — Communication &amp; Reporting</span>
+        <h2>How We Keep You Informed</h2>
+
+        <div class="comm-grid">
+            <div class="comm-card">
+                <span class="comm-icon">⏰</span>
+                <h4>Daily Standup</h4>
+                <p>Every working day at a time that fits CPDme's schedule — async message or live call. Covers what was done, what's next, and any blockers.</p>
+                <div class="comm-detail">
+                    <span class="comm-chip">Slack or Teams</span>
+                    <span class="comm-chip">09:00–10:00 UK</span>
+                    <span class="comm-chip">Daily</span>
+                </div>
+            </div>
+            <div class="comm-card">
+                <span class="comm-icon">📊</span>
+                <h4>Weekly Progress Report</h4>
+                <p>End-of-week written summary: tasks completed, hours logged, blockers encountered, and what's planned for the next week. Sent every Friday.</p>
+                <div class="comm-detail">
+                    <span class="comm-chip">Email / Notion</span>
+                    <span class="comm-chip">Friday EOD</span>
+                    <span class="comm-chip">Weekly</span>
+                </div>
+            </div>
+            <div class="comm-card">
+                <span class="comm-icon">🎯</span>
+                <h4>Sprint Demo &amp; Review</h4>
+                <p>End of every 2-week sprint: live demo of delivered features with Leni presenting to CPDme stakeholders. Feedback captured and fed into next sprint.</p>
+                <div class="comm-detail">
+                    <span class="comm-chip">Google Meet / Teams</span>
+                    <span class="comm-chip">Bi-weekly</span>
+                    <span class="comm-chip">Recorded</span>
+                </div>
+            </div>
+            <div class="comm-card">
+                <span class="comm-icon">🔖</span>
+                <h4>Task Board Transparency</h4>
+                <p>Full access to our project management board — every ticket, status, assignee, and estimate visible to CPDme at all times. No black boxes.</p>
+                <div class="comm-detail">
+                    <span class="comm-chip">Asana / Jira</span>
+                    <span class="comm-chip">Real-time access</span>
+                    <span class="comm-chip">Shared workspace</span>
+                </div>
+            </div>
+            <div class="comm-card">
+                <span class="comm-icon">🚨</span>
+                <h4>Incident &amp; Bug Escalation</h4>
+                <p>Critical bugs or Sentry alerts acknowledged within 2 hours during UK business hours. Production incidents get a dedicated war-room channel and live updates until resolved.</p>
+                <div class="comm-detail">
+                    <span class="comm-chip">Sentry Alerts</span>
+                    <span class="comm-chip">&lt;2h response</span>
+                    <span class="comm-chip">Dedicated channel</span>
+                </div>
+            </div>
+            <div class="comm-card">
+                <span class="comm-icon">📋</span>
+                <h4>Documentation Handover</h4>
+                <p>Every sprint closes with updated Confluence / Notion docs — architecture decisions, API changes, deployment notes, and QA sign-off records. Nothing leaves undocumented.</p>
+                <div class="comm-detail">
+                    <span class="comm-chip">Confluence / Notion</span>
+                    <span class="comm-chip">Per sprint</span>
+                    <span class="comm-chip">Git versioned</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ TOOLS & TECHNOLOGY ══ -->
+    <section>
+        <span class="label">05 — Tools &amp; Technology</span>
+        <h2>Our Full-Stack Toolkit</h2>
+
+        <div class="tools-group">
+            <div class="tools-group-label">Backend &amp; API</div>
+            <div class="tools-row">
+                <div class="tool-chip"><span class="tc-icon">☕</span> Java · Spring Boot</div>
+                <div class="tool-chip"><span class="tc-icon">🐘</span> Laravel · PHP</div>
+                <div class="tool-chip"><span class="tc-icon">🗄️</span> PostgreSQL · MySQL</div>
+                <div class="tool-chip"><span class="tc-icon">🔌</span> REST API · GraphQL</div>
+                <div class="tool-chip"><span class="tc-icon">🔐</span> OAuth2 · JWT · SSO</div>
+                <div class="tool-chip"><span class="tc-icon">📨</span> Intercom API</div>
+                <div class="tool-chip"><span class="tc-icon">⚠️</span> Sentry Error Monitoring</div>
+            </div>
+        </div>
+
+        <div class="tools-group">
+            <div class="tools-group-label">Frontend &amp; Mobile</div>
+            <div class="tools-row">
+                <div class="tool-chip"><span class="tc-icon">💚</span> Vue.js 3</div>
+                <div class="tool-chip"><span class="tc-icon">⚛️</span> React</div>
+                <div class="tool-chip"><span class="tc-icon">🎨</span> Tailwind CSS</div>
+                <div class="tool-chip"><span class="tc-icon">📱</span> Flutter · Dart</div>
+                <div class="tool-chip"><span class="tc-icon">🍎</span> iOS App Store Deploy</div>
+                <div class="tool-chip"><span class="tc-icon">🤖</span> Google Play Deploy</div>
+                <div class="tool-chip"><span class="tc-icon">🎯</span> GetX · BLoC</div>
+                <div class="tool-chip"><span class="tc-icon">🔥</span> Firebase · Supabase</div>
+            </div>
+        </div>
+
+        <div class="tools-group">
+            <div class="tools-group-label">DevOps &amp; Infrastructure</div>
+            <div class="tools-row">
+                <div class="tool-chip"><span class="tc-icon">☁️</span> AWS · GCP</div>
+                <div class="tool-chip"><span class="tc-icon">⎈</span> Kubernetes</div>
+                <div class="tool-chip"><span class="tc-icon">🐳</span> Docker</div>
+                <div class="tool-chip"><span class="tc-icon">🔄</span> GitHub Actions (CI/CD)</div>
+                <div class="tool-chip"><span class="tc-icon">🏗️</span> Jenkins (migration)</div>
+                <div class="tool-chip"><span class="tc-icon">🔒</span> Vault · Secrets Mgmt</div>
+                <div class="tool-chip"><span class="tc-icon">📈</span> Monitoring &amp; Alerting</div>
+            </div>
+        </div>
+
+        <div class="tools-group">
+            <div class="tools-group-label">Project Management &amp; Communication</div>
+            <div class="tools-row">
+                <div class="tool-chip"><span class="tc-icon">📌</span> Asana · Jira</div>
+                <div class="tool-chip"><span class="tc-icon">📝</span> Confluence · Notion</div>
+                <div class="tool-chip"><span class="tc-icon">💬</span> Slack · Microsoft Teams</div>
+                <div class="tool-chip"><span class="tc-icon">🎨</span> Figma</div>
+                <div class="tool-chip"><span class="tc-icon">🌿</span> Git · GitHub</div>
+                <div class="tool-chip"><span class="tc-icon">🔍</span> Postman · Swagger</div>
+            </div>
+        </div>
+
+        <div class="tools-group">
+            <div class="tools-group-label">Testing &amp; Quality Assurance</div>
+            <div class="tools-row">
+                <div class="tool-chip"><span class="tc-icon">🧪</span> JUnit · PHPUnit</div>
+                <div class="tool-chip"><span class="tc-icon">🔁</span> Regression Test Suites</div>
+                <div class="tool-chip"><span class="tc-icon">🐛</span> Bug Tracking · Sentry</div>
+                <div class="tool-chip"><span class="tc-icon">📋</span> Test Documentation</div>
+                <div class="tool-chip"><span class="tc-icon">🔌</span> Integration Testing</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ SPECIAL REQUIREMENTS ══ -->
+    <section>
+        <span class="label">06 — Special Requirements &amp; Dependencies</span>
+        <h2>Known Dependencies &amp; Constraints</h2>
+
+        <div class="req-list">
+            <div class="req-item">
+                <div class="req-icon">🤖</div>
+                <div class="req-content">
+                    <h4>Android 15 (API Level 35) Compliance</h4>
+                    <p>Google Play Store now requires all new app submissions to target Android 15 (API 35). This impacts the Flutter mobile codebase — SDK version upgrade, dependency audit, and Play Store re-submission are required. Addressed across Sprint 2–3 by the mobile engineer.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">🪟</div>
+                <div class="req-content">
+                    <h4>Microsoft SSO — Global Integration</h4>
+                    <p>CPDme's corporate customers expect Microsoft/Azure AD SSO as a login option. This requires OAuth2 app registration in Azure, callback URL configuration, org-claim mapping, and fallback authentication logic. Must include audit logging for all SSO events. Scheduled in Sprint 3.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">🇬🇧</div>
+                <div class="req-content">
+                    <h4>UK GDPR — Account Deletion &amp; Data Erasure</h4>
+                    <p>Article 17 (Right to Erasure) requires that user deletion requests from both in-app and Intercom channels are fully processed — not just soft-deleted but data anonymised across all systems (database, Intercom, email, Katra). Currently broken for both vectors. Sprint 1 priority.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">🔗</div>
+                <div class="req-content">
+                    <h4>Intercom Integration Dependency</h4>
+                    <p>Several features depend on Intercom as the customer support and communication layer — account deletion requests, tag syncing, certificate notifications, and user activity events. Any Intercom API changes require coordinated updates across backend and webhook handlers.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">🏛️</div>
+                <div class="req-content">
+                    <h4>Governing Body Standards Versioning</h4>
+                    <p>GMC, HCPC, PHECC, PSI, AHPRA, CMI, BACP, and others maintain their own CPD standards formats which change periodically. CPDme must track standards versions and map them correctly to user portfolios. Standards changes (e.g. GMC text update) require a coordinated content and data migration — not just a front-end text swap.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">⚠️</div>
+                <div class="req-content">
+                    <h4>Sentry Error Monitoring — Production Visibility</h4>
+                    <p>Sentry is already capturing production exceptions (e.g. the file download failure in Sprint 1). We require read/write access to the CPDme Sentry project to triage, assign, and resolve production errors as part of normal sprint work. Alerts should be routed to our shared Slack channel.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">🌍</div>
+                <div class="req-content">
+                    <h4>Multi-Timezone &amp; Multi-Org User Logic</h4>
+                    <p>Users can be members of multiple organisations across different governing bodies (e.g. a physiotherapist who is also a CSP and AHPRA member). Supervision, portfolio generation, and CPD hour counting must correctly scope data per-organisation without cross-contamination. This is a dependency for several Sprint 4 features.</p>
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-icon">🔑</div>
+                <div class="req-content">
+                    <h4>Access to Existing Codebase &amp; Infrastructure</h4>
+                    <p>To work at full velocity from day one, we require: read/write access to the CPDme Git repositories, staging environment credentials, Sentry project access, Intercom workspace access, and an onboarding call with the current technical team to understand deployment pipelines and known system quirks.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ AI ══ -->
     <section>
         <div class="ai-box">
             <span class="label">CPDassist Alignment</span>
@@ -612,124 +1669,7 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
         </div>
     </section>
 
-    <!-- HOW WE WORK -->
-    <section>
-        <span class="label">Process</span>
-        <h2 style="text-align:center">How We Work</h2>
-
-        <div class="work-steps">
-            <div class="work-step">
-                <div class="step-bubble">⚡</div>
-                <div class="step-num">STEP 01</div>
-                <p>Scrum-based sprints (2 weeks) with clear backlog and milestone tracking via Asana</p>
-            </div>
-            <div class="work-step">
-                <div class="step-bubble">💬</div>
-                <div class="step-num">STEP 02</div>
-                <p>Daily standups on Slack or Teams, transparent progress and blocker reporting</p>
-            </div>
-            <div class="work-step">
-                <div class="step-bubble">✅</div>
-                <div class="step-num">STEP 03</div>
-                <p>QA sign-off — unit, integration &amp; regression tests before every release</p>
-            </div>
-            <div class="work-step">
-                <div class="step-bubble">📄</div>
-                <div class="step-num">STEP 04</div>
-                <p>Confluence / Notion documentation, Git version control, and clean handover practice</p>
-            </div>
-            <div class="work-step">
-                <div class="step-bubble">🕐</div>
-                <div class="step-num">STEP 05</div>
-                <p>09:00–17:00 UK time (15:00–23:00 WIB) — always reachable during your business hours</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- TEAM -->
-    <section class="team">
-        <span class="label">The Team</span>
-        <h2>Six Specialists, One Cohesive Team</h2>
-
-        <div class="team-grid">
-
-            <div class="member">
-                <div class="member-float"><img src="/team-for-uk/foto-leni.png" alt="Leni Widiastuti"></div>
-                <div class="member-card">
-                    <div class="name">Leni Widiastuti</div>
-                    <div class="role">Head Developer</div>
-                    <button class="info-btn" onclick="openModal('m1')">
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
-                        View Portfolio
-                    </button>
-                </div>
-            </div>
-
-            <div class="member">
-                <div class="member-float"><img src="/team-for-uk/foto-heru.png" alt="Heru Afandi"></div>
-                <div class="member-card">
-                    <div class="name">Heru Afandi</div>
-                    <div class="role">Frontend Engineer</div>
-                    <button class="info-btn" onclick="openModal('m5')">
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
-                        View Portfolio
-                    </button>
-                </div>
-            </div>
-
-            <div class="member">
-                <div class="member-float"><img src="/team-for-uk/foto-bima.png" alt="Bima Andriansyah"></div>
-                <div class="member-card">
-                    <div class="name">Bima Andriansyah</div>
-                    <div class="role">Flutter Mobile</div>
-                    <button class="info-btn" onclick="openModal('m4')">
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
-                        View Portfolio
-                    </button>
-                </div>
-            </div>
-
-            <div class="member">
-                <div class="member-float"><img src="/team-for-uk/foto-dion.png" alt="Dionisius NP"></div>
-                <div class="member-card">
-                    <div class="name">Dionisius NP</div>
-                    <div class="role">Backend Engineer</div>
-                    <button class="info-btn" onclick="openModal('m2')">
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
-                        View Portfolio
-                    </button>
-                </div>
-            </div>
-
-
-            <div class="member">
-                <div class="member-float"><img src="/team-for-uk/foto-anwar.png" alt="Khaerul Anwar"></div>
-                <div class="member-card">
-                    <div class="name">Khaerul Anwar</div>
-                    <div class="role">DevOps &amp; Cloud</div>
-                    <button class="info-btn" onclick="openModal('m3')">
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
-                        View Portfolio
-                    </button>
-                </div>
-            </div>
-
-            <div class="member">
-                <div class="member-float"><img src="/team-for-uk/foto-onas.png" alt="Onastatia S"></div>
-                <div class="member-card">
-                    <div class="name">Onastatia S</div>
-                    <div class="role">QA / QC Engineer</div>
-                    <button class="info-btn" onclick="openModal('m6')">
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v4M8 5v.01" stroke-linecap="round"/></svg>
-                        View Portfolio
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- CTA -->
+    <!-- ══ CTA ══ -->
     <div class="cta">
         <span class="label">Next Step</span>
         <h2>Let's Build CPDme's Future Together</h2>
@@ -747,23 +1687,26 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
             <div class="modal-avatar">👩‍💼</div>
             <div>
                 <h3>Leni Widiastuti</h3>
-                <span class="modal-role">Head Developer · Team Lead</span>
+                <span class="modal-role">Team Lead · Project Manager</span>
             </div>
         </div>
         <p class="modal-bio">
-            7+ years in project management and business analysis across Asia-Pacific.
-            Fluent in English — leads stakeholder communication, requirement gathering, and delivery
-            reporting. Bridges CPDme's business goals with the engineering team's execution.
+            7+ years in business development and project management across Asia-Pacific.
+            Currently Project Manager at Triumph Eminent Hub Group (Hong Kong, remote) — leading multi-country events,
+            C-suite stakeholder outreach, and cross-border vendor coordination.
+            Previously Merchant Engagement Manager at Grab and Merchant Acquisition Lead at Lazada.
+            Fluent in English — the primary communication link between CPDme and the engineering team.
         </p>
         <div class="modal-skills">
-            <span>Business Analysis</span>
-            <span>Stakeholder Management</span>
-            <span>Agile · Scrum</span>
-            <span>Asana · Notion · Jira</span>
             <span>English (Professional)</span>
-            <span>KPI &amp; Reporting</span>
+            <span>Project Management</span>
+            <span>Stakeholder Management</span>
+            <span>KPI Tracking &amp; Reporting</span>
+            <span>Agile · Scrum</span>
+            <span>CRM &amp; Pipeline</span>
+            <span>B2B · C-Level Engagement</span>
+            <span>Google Workspace · Power BI</span>
         </div>
-        <a href="#" class="modal-link">View full portfolio →</a>
     </div>
 </div>
 
@@ -778,19 +1721,21 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
             </div>
         </div>
         <p class="modal-bio">
-            5+ years building production SaaS, ERP, and e-Commerce systems.
-            Experienced with Java Spring Boot, Laravel, Flutter, and cloud infrastructure.
-            Delivered scalable backends for retail, HR, and subscription platforms.
+            Software engineer with 5+ years across SaaS, ERP, and e-Commerce.
+            Currently at Solusi Sistem Informasi (subscription management, geolocation marketing, arena gamification)
+            and CV Mitra Super Teknologi (e-Commerce, POS). Former Project Leader at PT Hokky Sumber Makmur
+            building ERP Retail, ERP Contractor, e-Commerce, HRIS, and tracking systems.
         </p>
         <div class="modal-skills">
+            <span>PHP · Laravel</span>
             <span>Java · Spring Boot</span>
-            <span>Laravel · PHP</span>
-            <span>Flutter · Dart</span>
-            <span>PostgreSQL · MySQL</span>
-            <span>AWS · GCP</span>
-            <span>REST API</span>
+            <span>Dart · Flutter</span>
+            <span>SQL &amp; NoSQL</span>
+            <span>AWS · Google Cloud</span>
+            <span>Payment Gateway</span>
+            <span>VPS &amp; Shared Hosting</span>
+            <span>AI Integration</span>
         </div>
-        <a href="#" class="modal-link">View full portfolio →</a>
     </div>
 </div>
 
@@ -805,19 +1750,22 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
             </div>
         </div>
         <p class="modal-bio">
-            3+ years managing production infrastructure across multi-cloud environments.
-            Currently at PT ALTO Network handling GCP, AWS, and Huawei Cloud.
-            Experienced with Kubernetes orchestration, Docker Swarm, and CI/CD pipelines.
+            Cloud infrastructure engineer with 3+ years in multi-cloud production environments.
+            Currently at PT ALTO Network managing GCP, AWS, Huawei Cloud, Kubernetes clusters,
+            Docker Swarm, and Hashicorp Vault — including Thought Machine Vault Core Banking.
+            Previously at PT Tata Sarana Mandiri deploying AWS CI/CD pipelines, VMware vSphere,
+            IPSec VPN, and on-premise datacenter setups with MPLS.
         </p>
         <div class="modal-skills">
-            <span>AWS · GCP · Azure</span>
+            <span>GCP · AWS · Huawei Cloud</span>
             <span>Kubernetes</span>
-            <span>Docker</span>
+            <span>Docker Swarm</span>
+            <span>Hashicorp Vault</span>
+            <span>VMware vSphere</span>
             <span>CI/CD Pipelines</span>
-            <span>Vault / Secrets</span>
+            <span>IPSec VPN</span>
             <span>Monitoring &amp; Alerting</span>
         </div>
-        <a href="#" class="modal-link">View full portfolio →</a>
     </div>
 </div>
 
@@ -832,19 +1780,22 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
             </div>
         </div>
         <p class="modal-bio">
-            3+ years building iOS and Android apps with Flutter.
-            Worked on consumer-facing products at VocaGame and AyoSatu — apps with high user volumes
-            and real-time data requirements. Skilled in GetX, BLoC, Firebase, and App Store / Play Store deployment.
+            Mobile developer with 3+ years specialising in Flutter, currently at AyoSatu
+            (PT Rahadhyan Integrasi Nusantara). Previously built high-volume consumer apps at VocaGame.
+            Experienced across the full mobile lifecycle — UI design, state management (GetX, BLoC, Provider),
+            REST API + Firebase integration, and App Store / Google Play deployment.
+            Also has exploratory experience in TensorFlow Lite and UI/UX prototyping with Figma.
         </p>
         <div class="modal-skills">
             <span>Flutter · Dart</span>
             <span>GetX · BLoC · Provider</span>
-            <span>Firebase · Supabase</span>
-            <span>RESTful API</span>
+            <span>REST API · Firebase · Supabase</span>
+            <span>SQLite · Hive · WebSocket</span>
             <span>iOS &amp; Android Deploy</span>
-            <span>UI/UX · Figma</span>
+            <span>Figma · UI/UX</span>
+            <span>TensorFlow Lite (exploratory)</span>
+            <span>Git · GitHub · GitLab</span>
         </div>
-        <a href="#" class="modal-link">View full portfolio →</a>
     </div>
 </div>
 
@@ -859,19 +1810,19 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
             </div>
         </div>
         <p class="modal-bio">
-            5+ years building web applications with Vue.js, React, and Laravel.
-            Built a Learning Management System with RBAC, KPI dashboards, and progress tracking —
-            architecture directly relevant to CPDme's portfolio and logging features.
+            Software engineer with 6+ years at Solusi Sistem Informasi, specialising in
+            Laravel, Vue.js, React, and Flutter. Builds high-performance web and mobile applications.
+            Web developer internship at Balai Riset dan Standardisasi Industri Surabaya (2017).
+            Education: Sistem Informasi, Institut Bisnis dan Informatika Stikom Surabaya (2015–2019).
         </p>
         <div class="modal-skills">
-            <span>Vue.js · React</span>
             <span>Laravel</span>
-            <span>Tailwind CSS</span>
-            <span>RBAC · Auth Systems</span>
-            <span>Dashboard &amp; Analytics UI</span>
-            <span>Responsive Design</span>
+            <span>Vue.js</span>
+            <span>React</span>
+            <span>Flutter</span>
+            <span>Responsive UI</span>
+            <span>REST API Integration</span>
         </div>
-        <a href="#" class="modal-link">View full portfolio →</a>
     </div>
 </div>
 
@@ -881,23 +1832,28 @@ p { margin: 0; color: var(--muted); font-size: 15.5px; }
         <div class="modal-header">
             <div class="modal-avatar">🔍</div>
             <div>
-                <h3>Onastatia S</h3>
-                <span class="modal-role">QA / QC Engineer</span>
+                <h3>Onastatia Sahartian</h3>
+                <span class="modal-role">IT Support · System Analyst</span>
             </div>
         </div>
         <p class="modal-bio">
-            Responsible for quality assurance across all releases — unit, integration, system,
-            and regression testing. Ensures no feature ships without thorough validation,
-            bug documentation, and sign-off aligned with CPDme's high-reliability standards.
+            Results-oriented professional with 5 years in digital marketing and 3 years in IT support.
+            Currently Supervisor of Digital Marketing &amp; IT Support at CV GRC Sukses Sejahtera,
+            and System Analyst / Software Engineer at Prima Jaya Diesel (both ongoing).
+            Has handled technical and digital strategy for 15+ companies. Manages technical team supervision,
+            software development oversight, project coordination, code review, and QA processes.
+            Education: Bachelor of Information Systems, Dinamika University (GPA 3.95/4.00).
         </p>
         <div class="modal-skills">
-            <span>Unit &amp; Integration Testing</span>
-            <span>Regression Testing</span>
-            <span>Bug Tracking</span>
-            <span>Test Documentation</span>
-            <span>QA Process Design</span>
+            <span>IT Support &amp; Supervision</span>
+            <span>Software Development Oversight</span>
+            <span>Code Review &amp; QA</span>
+            <span>Project Coordination</span>
+            <span>Agile · Scrum</span>
+            <span>System Analysis</span>
+            <span>Digital Marketing</span>
+            <span>Documentation &amp; Reporting</span>
         </div>
-        <a href="#" class="modal-link">View full portfolio →</a>
     </div>
 </div>
 
