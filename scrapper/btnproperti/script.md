@@ -10,10 +10,12 @@
 
 ## Cara Pakai
 
-1. Buka `https://www.btnproperti.co.id/developer?pg=1`
+1. Buka `https://www.btnproperti.co.id/developer?pg=START_PAGE` — sesuaikan dengan nilai `START_PAGE` yang akan kamu set (misal batch 2 → buka `?pg=101`)
 2. Tunggu halaman selesai load
 3. Buka Console (`F12`)
 4. Paste **Step 1** untuk kumpulkan semua URL → lalu **Step 2** untuk fetch detail
+
+> **Penting:** Script navigasi antar halaman dengan klik tombol "Next", bukan lompat langsung. Jadi **browser harus sudah ada di halaman `START_PAGE` saat script dijalankan**.
 
 ---
 
@@ -66,17 +68,26 @@ Script ini navigasi halaman per halaman, kumpulkan link detail developer, lalu s
     return [];
   }
 
-  async function scrapePage(pg) {
-    // Ubah URL
-    const url = new URL(window.location.href);
-    url.searchParams.set('pg', pg);
-    window.history.pushState({}, '', url.toString());
-    window.dispatchEvent(new PopStateEvent('popstate', { state: { pg } }));
+  // Klik tombol Next → lebih reliable daripada pushState di SPA
+  async function clickNext() {
+    const nextBtn = [...document.querySelectorAll('.page-link, a[aria-label], button[aria-label]')]
+      .find(el => {
+        const label = (el.getAttribute('aria-label') || el.innerText || '').toLowerCase();
+        return /next|›|»|selanjutnya/i.test(label);
+      });
+    if (nextBtn && !nextBtn.closest('.disabled, [disabled]')) {
+      nextBtn.click();
+      return true;
+    }
+    return false;
+  }
 
-    // Coba klik tombol pagination (lebih reliable di SPA)
-    const pgLink = [...document.querySelectorAll('.page-link')]
-      .find(a => a.innerText.trim() === String(pg));
-    if (pgLink && pg > 1) pgLink.click();
+  async function scrapePage(pg, isFirst) {
+    if (!isFirst) {
+      // Navigasi ke halaman berikutnya lewat klik Next
+      const ok = await clickNext();
+      if (!ok) console.warn(`⚠️  Tombol Next tidak ditemukan di hal ${pg}`);
+    }
 
     await sleep(RENDER_WAIT);
 
@@ -98,9 +109,10 @@ Script ini navigasi halaman per halaman, kumpulkan link detail developer, lalu s
 
   console.log('🚀 Mulai kumpulkan URL...');
   console.log(`   Halaman ${START_PAGE}–${END_PAGE} (perkiraan ${(END_PAGE - START_PAGE + 1) * 14} developer)`);
+  console.log(`   ⚠️  Pastikan browser sudah membuka hal ${START_PAGE} sebelum script ini dijalankan!`);
 
-  // Halaman pertama — sudah terbuka
-  const first = await scrapePage(START_PAGE);
+  // Halaman pertama — sudah terbuka di browser (user wajib buka manual)
+  const first = await scrapePage(START_PAGE, true);
   window._devUrls.push(...first);
 
   for (let pg = START_PAGE + 1; pg <= END_PAGE; pg++) {
@@ -111,7 +123,7 @@ Script ini navigasi halaman per halaman, kumpulkan link detail developer, lalu s
     console.log(`⏳ Hal ${pg}/${END_PAGE} — jeda ${(delay/1000).toFixed(1)}s...`);
     await sleep(delay);
 
-    const data = await scrapePage(pg);
+    const data = await scrapePage(pg, false);
     window._devUrls.push(...data);
 
     // Simpan progress setiap 50 halaman
