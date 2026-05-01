@@ -13,36 +13,70 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg-base:       #0a0a0a;
-      --bg-surface:    #0d1117;
-      --bg-card:       #111827;
-      --bg-card-hover: #1a2236;
-      --border:        #1e2d3d;
-      --border-bright: #2a3f57;
-      --green:         #22c55e;
-      --green-dim:     #16a34a;
-      --green-glow:    rgba(34,197,94,0.35);
-      --green-subtle:  rgba(34,197,94,0.08);
-      --orange:        #f97316;
-      --orange-dim:    #ea6c0a;
-      --orange-glow:   rgba(249,115,22,0.35);
-      --red-badge:     #ef4444;
-      --text-primary:  #f0f6fc;
-      --text-secondary:#8b949e;
-      --text-muted:    #484f58;
-      --mono:         'JetBrains Mono', monospace;
-      --sans:         'Inter', sans-serif;
-      --radius:        12px;
-      --radius-sm:     8px;
-      --radius-lg:     20px;
+      /* ── Surfaces ── */
+      --bg:#0a0a0a;
+      --surface:#0d1117;
+      --card:#111827;
+
+      /* ── Borders ── */
+      --bd:#1e2d3d;
+      --bd2:#2a3f57;
+
+      /* ── Text ── */
+      --text:#e2e2ee;
+      --muted:#8888aa;
+      --dim:rgba(255,255,255,.22);
+
+      /* ── Accent palette ── */
+      --accent:#6366f1;
+      --a2:#a855f7;
+      --a3:#22d3ee;
+
+      /* ── Semantic colors ── */
+      --green:#22c55e;
+      --gold:#fbbf24;
+      --red:#f87171;
+
+      /* ── Per-page accent (Spring Boot — green) ── */
+      --page-accent:#22c55e;
+
+      /* ── Typography ── */
+      --font-sans:'Inter',system-ui,sans-serif;
+      --font-mono:'JetBrains Mono',monospace;
+
+      /* ── Radius scale ── */
+      --r-xs:4px;
+      --r-sm:7px;
+      --r-md:10px;
+      --r-lg:14px;
+      --r-xl:20px;
+      --r-pill:999px;
+
+      /* ── Shadows ── */
+      --shadow-card:0 4px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+      --shadow-hover:0 8px 38px rgba(0,0,0,.4);
+      --shadow-btn:0 4px 18px rgba(99,102,241,.35);
+
+      /* ── Local compat aliases ── */
+      --border:var(--bd);
+      --border-bright:var(--bd2);
+      --bg-card-hover:#1a2236;
+      --green-dim:#16a34a;
+      --green-glow:rgba(34,197,94,0.35);
+      --green-subtle:rgba(34,197,94,0.08);
+      --orange:#f97316;
+      --orange-dim:#ea6c0a;
+      --orange-glow:rgba(249,115,22,0.35);
+      --red-badge:#ef4444;
+      --text-muted:var(--dim);
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: var(--sans);
-      background-color: var(--bg-base);
-      color: var(--text-primary);
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
@@ -52,7 +86,7 @@
 
     /* ===== SCROLLBAR ===== */
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
 
     /* ===== ANIMATIONS ===== */
@@ -100,7 +134,7 @@
       gap: 16px;
     }
     .nav-logo {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-weight: 700;
       font-size: 15px;
       color: var(--green);
@@ -109,7 +143,7 @@
       align-items: center;
       gap: 8px;
     }
-    .nav-logo span { color: var(--text-secondary); font-weight: 400; }
+    .nav-logo span { color: var(--muted); font-weight: 400; }
     .nav-links {
       display: flex;
       align-items: center;
@@ -119,19 +153,19 @@
     .nav-links a {
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-secondary);
+      color: var(--muted);
       padding: 6px 14px;
-      border-radius: var(--radius-sm);
+      border-radius: var(--r-sm);
       transition: color 0.2s, background 0.2s;
     }
-    .nav-links a:hover { color: var(--text-primary); background: var(--bg-card); }
+    .nav-links a:hover { color: var(--text); background: var(--card); }
     .nav-cta {
       font-size: 13px;
       font-weight: 600;
       color: #000 !important;
       background: var(--green) !important;
       padding: 8px 16px !important;
-      border-radius: var(--radius-sm) !important;
+      border-radius: var(--r-sm) !important;
       transition: background 0.2s, transform 0.15s !important;
     }
     .nav-cta:hover { background: #16a34a !important; transform: translateY(-1px); }
@@ -141,7 +175,7 @@
     .container { max-width: 1200px; margin: 0 auto; }
 
     .section-label {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.12em;
@@ -153,12 +187,12 @@
       font-size: clamp(28px, 4vw, 42px);
       font-weight: 800;
       line-height: 1.2;
-      color: var(--text-primary);
+      color: var(--text);
       margin-bottom: 16px;
     }
     .section-sub {
       font-size: 16px;
-      color: var(--text-secondary);
+      color: var(--muted);
       max-width: 560px;
       line-height: 1.7;
     }
@@ -168,7 +202,7 @@
       padding-top: 80px;
       padding-bottom: 96px;
       background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(34,197,94,0.07) 0%, transparent 70%),
-                  linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+                  linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
     }
     .hero-grid {
       display: grid;
@@ -186,13 +220,13 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       padding: 4px 10px;
-      border-radius: 999px;
+      border-radius: var(--r-pill);
       border: 1px solid;
     }
     .badge-green {
@@ -219,10 +253,10 @@
       margin-bottom: 8px;
     }
     .hero-title .accent-green { color: var(--green); }
-    .hero-title .accent-dim   { color: var(--text-secondary); font-weight: 400; font-size: 0.65em; letter-spacing: 0; }
+    .hero-title .accent-dim   { color: var(--muted); font-weight: 400; font-size: 0.65em; letter-spacing: 0; }
     .hero-tagline {
       font-size: 17px;
-      color: var(--text-secondary);
+      color: var(--muted);
       line-height: 1.7;
       max-width: 520px;
       margin-bottom: 36px;
@@ -238,16 +272,16 @@
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      background: var(--bg-card);
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--r-md);
       padding: 14px 20px;
       min-width: 90px;
       transition: border-color 0.2s, background 0.2s;
     }
     .stat-chip:hover { border-color: var(--green); background: var(--bg-card-hover); }
     .stat-chip-value {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 22px;
       font-weight: 700;
       color: var(--green);
@@ -274,7 +308,7 @@
       color: #000;
       background: var(--green);
       padding: 14px 28px;
-      border-radius: var(--radius);
+      border-radius: var(--r-md);
       animation: glow-cta 3s ease-in-out infinite;
       transition: background 0.2s, transform 0.15s;
     }
@@ -285,11 +319,11 @@
       gap: 8px;
       font-weight: 600;
       font-size: 14px;
-      color: var(--text-secondary);
+      color: var(--muted);
       background: transparent;
       border: 1px solid var(--border-bright);
       padding: 13px 24px;
-      border-radius: var(--radius);
+      border-radius: var(--r-md);
       transition: border-color 0.2s, color 0.2s, background 0.2s;
     }
     .btn-secondary:hover { border-color: var(--green); color: var(--green); background: var(--green-subtle); }
@@ -307,7 +341,7 @@
       position: absolute;
       inset: -2px;
       background: linear-gradient(135deg, var(--green), transparent 60%, var(--orange));
-      border-radius: calc(var(--radius-lg) + 2px);
+      border-radius: calc(var(--r-xl) + 2px);
       z-index: -1;
       opacity: 0.6;
     }
@@ -315,14 +349,14 @@
       content: '';
       position: absolute;
       inset: 0;
-      border-radius: var(--radius-lg);
+      border-radius: var(--r-xl);
       box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(34,197,94,0.15);
       z-index: -1;
     }
     .hero-poster {
       width: 100%;
       max-width: 400px;
-      border-radius: var(--radius-lg);
+      border-radius: var(--r-xl);
       border: 1px solid var(--border);
       object-fit: cover;
     }
@@ -330,9 +364,9 @@
       width: 100%;
       max-width: 400px;
       aspect-ratio: 1;
-      border-radius: var(--radius-lg);
+      border-radius: var(--r-xl);
       border: 1px solid var(--border);
-      background: var(--bg-card);
+      background: var(--card);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -343,7 +377,7 @@
     }
     .poster-placeholder .poster-icon { font-size: 56px; }
     .poster-placeholder .poster-title {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 18px;
       font-weight: 700;
       color: var(--green);
@@ -370,7 +404,7 @@
 
     /* ===== ROADMAP / CURRICULUM ===== */
     #curriculum {
-      background: var(--bg-surface);
+      background: var(--surface);
     }
     .curriculum-header { margin-bottom: 64px; }
     .roadmap-timeline {
@@ -422,14 +456,14 @@
       box-shadow: 0 0 20px rgba(34,197,94,0.3);
     }
     .stage-dot.dim {
-      background: var(--bg-card);
+      background: var(--card);
       border-color: var(--border);
     }
     .roadmap-stage:hover .stage-dot { transform: scale(1.08); }
     .stage-content {
-      background: var(--bg-card);
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--r-md);
       padding: 24px 28px;
       transition: border-color 0.2s, background 0.2s;
     }
@@ -438,7 +472,7 @@
       background: var(--bg-card-hover);
     }
     .stage-week {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.1em;
@@ -449,7 +483,7 @@
     .stage-title {
       font-size: 18px;
       font-weight: 700;
-      color: var(--text-primary);
+      color: var(--text);
       margin-bottom: 12px;
     }
     .stage-topics {
@@ -458,13 +492,13 @@
       gap: 8px;
     }
     .topic-tag {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 12px;
       font-weight: 500;
-      color: var(--text-secondary);
+      color: var(--muted);
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: var(--r-sm);
       padding: 4px 10px;
       transition: color 0.2s, border-color 0.2s, background 0.2s;
     }
@@ -481,7 +515,7 @@
     }
 
     /* ===== REQUIREMENTS ===== */
-    #requirements { background: var(--bg-base); }
+    #requirements { background: var(--bg); }
     .req-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -489,9 +523,9 @@
       margin-top: 48px;
     }
     .req-card {
-      background: var(--bg-card);
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--r-md);
       padding: 32px 28px;
       display: flex;
       flex-direction: column;
@@ -502,7 +536,7 @@
     .req-icon {
       width: 48px;
       height: 48px;
-      border-radius: var(--radius-sm);
+      border-radius: var(--r-sm);
       background: var(--green-subtle);
       border: 1px solid rgba(34,197,94,0.2);
       display: flex;
@@ -513,27 +547,27 @@
     .req-title {
       font-size: 16px;
       font-weight: 700;
-      color: var(--text-primary);
+      color: var(--text);
     }
     .req-desc {
       font-size: 14px;
-      color: var(--text-secondary);
+      color: var(--muted);
       line-height: 1.65;
     }
 
     /* ===== PRICING ===== */
     #pricing {
       background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(34,197,94,0.05) 0%, transparent 70%),
-                  var(--bg-surface);
+                  var(--surface);
     }
     .pricing-center { text-align: center; }
     .pricing-center .section-sub { margin: 0 auto 48px; }
     .price-card {
       max-width: 520px;
       margin: 0 auto;
-      background: var(--bg-card);
+      background: var(--card);
       border: 1px solid var(--border-bright);
-      border-radius: var(--radius-lg);
+      border-radius: var(--r-xl);
       padding: 40px;
       position: relative;
       overflow: hidden;
@@ -547,7 +581,7 @@
     }
     .price-card-header { margin-bottom: 32px; }
     .price-label {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.12em;
@@ -558,10 +592,10 @@
     .price-name {
       font-size: 22px;
       font-weight: 800;
-      color: var(--text-primary);
+      color: var(--text);
       margin-bottom: 4px;
     }
-    .price-desc { font-size: 14px; color: var(--text-secondary); }
+    .price-desc { font-size: 14px; color: var(--muted); }
     .price-amount-row {
       display: flex;
       align-items: flex-end;
@@ -577,13 +611,13 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 13px;
       font-weight: 700;
       color: var(--orange);
       background: rgba(249,115,22,0.1);
       border: 1px solid rgba(249,115,22,0.3);
-      border-radius: 8px;
+      border-radius: var(--r-sm);
       padding: 8px 14px;
       margin-bottom: 28px;
     }
@@ -600,7 +634,7 @@
       align-items: flex-start;
       gap: 10px;
       font-size: 14px;
-      color: var(--text-secondary);
+      color: var(--muted);
     }
     .price-features li .check {
       color: var(--green);
@@ -619,7 +653,7 @@
       color: #000;
       background: var(--green);
       padding: 16px 28px;
-      border-radius: var(--radius);
+      border-radius: var(--r-md);
       animation: glow-cta 3s ease-in-out infinite;
       transition: background 0.2s, transform 0.15s;
       margin-bottom: 14px;
@@ -630,7 +664,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 12px;
       color: var(--text-muted);
     }
@@ -644,7 +678,7 @@
 
     /* ===== FOOTER ===== */
     footer {
-      background: var(--bg-surface);
+      background: var(--surface);
       border-top: 1px solid var(--border);
       padding: 48px 24px;
     }
@@ -657,7 +691,7 @@
       align-items: start;
     }
     .footer-brand-logo {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 16px;
       font-weight: 700;
       color: var(--green);
@@ -679,10 +713,10 @@
     .footer-org-chip {
       font-size: 12px;
       font-weight: 500;
-      color: var(--text-secondary);
-      background: var(--bg-card);
+      color: var(--muted);
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: var(--r-sm);
       padding: 4px 12px;
     }
     .footer-contact {
@@ -695,7 +729,7 @@
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      color: var(--text-secondary);
+      color: var(--muted);
       transition: color 0.2s;
     }
     .footer-contact-item:hover { color: var(--green); }
@@ -709,7 +743,7 @@
     }
     .footer-links a {
       font-size: 13px;
-      color: var(--text-secondary);
+      color: var(--muted);
       transition: color 0.2s;
     }
     .footer-links a:hover { color: var(--green); }
@@ -737,9 +771,17 @@
       .hero-stats { gap: 8px; }
       .stat-chip { padding: 10px 14px; min-width: 76px; }
     }
+  
+/* ══ DION NAV ══ */
+#dion-nav{position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:9px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);font-family:var(--font-sans);font-size:.72rem}
+#dion-nav a.back{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--muted);padding:4px 11px;border-radius:var(--r-sm);border:1px solid var(--bd);text-decoration:none;transition:color .18s,border-color .18s}
+#dion-nav a.back:hover{color:var(--accent);border-color:rgba(99,102,241,.3)}
+#dion-nav .crumb-sep{color:var(--dim)}
+#dion-nav a.crumb{color:rgba(255,255,255,.3);text-decoration:none;transition:color .18s}
+#dion-nav a.crumb:hover{color:var(--accent)}
   </style>
 </head>
-<body><div id="dion-nav" style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);font-family:Inter,system-ui,sans-serif;font-size:.72rem"><a href="/universitas-dinamika/" style="display:flex;align-items:center;gap:6px;font-weight:600;color:#8888aa;padding:4px 11px;border-radius:6px;border:1px solid rgba(255,255,255,.1);text-decoration:none" onmouseover="this.style.color='#6366f1';this.style.borderColor='rgba(99,102,241,.3)'" onmouseout="this.style.color='#8888aa';this.style.borderColor='rgba(255,255,255,.1)'"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>Universitas Dinamika</a><span style="color:rgba(255,255,255,.2)">·</span><a href="/" style="color:rgba(255,255,255,.3);text-decoration:none" onmouseover="this.style.color='#6366f1'" onmouseout="this.style.color='rgba(255,255,255,.3)'">Portfolio</a></div>
+<body><div id="dion-nav"><a href="/universitas-dinamika/" class="back"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>Universitas Dinamika</a><span class="crumb-sep">·</span><a href="/" class="crumb">Portfolio</a></div>
 
 <!-- ===== NAV ===== -->
 <nav>
@@ -828,7 +870,7 @@
           <div class="poster-placeholder" style="display:none;">
             <div class="poster-icon">☕</div>
             <div class="poster-title">Spring Boot<br>Bootcamp</div>
-            <div class="poster-sub" style="color:var(--green);font-family:var(--mono);font-size:15px;font-weight:700;">45 Hari · 10 Peserta</div>
+            <div class="poster-sub" style="color:var(--green);font-family:var(--font-mono);font-size:15px;font-weight:700;">45 Hari · 10 Peserta</div>
             <div class="poster-sub">Universitas Dinamika<br>× Solusi Sistem Informasi</div>
           </div>
         </div>
@@ -1078,15 +1120,15 @@
 
       <div class="seats-warning">
         <div class="seats-dot"></div>
-        Terbatas hanya <strong style="color:var(--text-primary);margin:0 4px;">10 peserta</strong> — segera amankan tempat Anda
+        Terbatas hanya <strong style="color:var(--text);margin:0 4px;">10 peserta</strong> — segera amankan tempat Anda
       </div>
 
       <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;justify-content:center;gap:16px;">
-        <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);transition:color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='var(--text-secondary)'">
+        <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);transition:color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='var(--muted)'">
           📱 085183009828
         </a>
         <span style="color:var(--border-bright)">|</span>
-        <a href="https://training.dinamika.ac.id" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);transition:color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='var(--text-secondary)'">
+        <a href="https://training.dinamika.ac.id" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);transition:color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='var(--muted)'">
           🌐 training.dinamika.ac.id
         </a>
       </div>
@@ -1128,7 +1170,7 @@
       </div>
       <p class="footer-copy">
         © 2025 Universitas Dinamika<br>
-        <span style="font-family:var(--mono);font-size:11px;">Java Spring Boot Bootcamp · 45 Days</span>
+        <span style="font-family:var(--font-mono);font-size:11px;">Java Spring Boot Bootcamp · 45 Days</span>
       </p>
     </div>
   </div>
