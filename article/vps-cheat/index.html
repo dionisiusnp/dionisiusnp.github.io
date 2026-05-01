@@ -187,6 +187,24 @@ pre::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
 .badge.purple{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.22);color:var(--a2)}
 .badge.green{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:var(--green)}
 
+/* ══ STACK TABS ══ */
+.stack-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.stack-tab{
+  font-family:var(--font-mono);font-size:.65rem;font-weight:700;
+  padding:5px 14px;border-radius:var(--r-sm);
+  border:1px solid var(--bd);background:transparent;
+  color:var(--muted);cursor:pointer;transition:all .18s;
+  letter-spacing:.04em;
+}
+.stack-tab:hover{color:var(--text);border-color:var(--bd2);background:rgba(255,255,255,.03)}
+.stack-tab.active{
+  color:var(--page-accent);
+  border-color:color-mix(in srgb,var(--page-accent) 35%,transparent);
+  background:color-mix(in srgb,var(--page-accent) 8%,transparent);
+}
+.stack-panel{display:none}
+.stack-panel.active{display:block}
+
 /* ══ RESPONSIVE ══ */
 @media(max-width:900px){
   .sidebar{display:none}
@@ -225,7 +243,7 @@ pre::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
     <div class="sb-label">Deploy</div>
     <a class="sb-item" href="#composer">Composer</a>
     <a class="sb-item" href="#node">Node.js / NVM</a>
-    <a class="sb-item" href="#laravel-deploy">Laravel Deploy</a>
+    <a class="sb-item" href="#app-deploy">Deploy by Stack</a>
     <a class="sb-item" href="#ssl">SSL — Certbot</a>
     <a class="sb-item" href="#supervisor">Supervisor</a>
     <a class="sb-item" href="#cron">Cron / Scheduler</a>
@@ -623,45 +641,54 @@ apt install <span class="kw">-y</span> nodejs</pre>
   </section>
 
   <!-- ══════════════════════════════════════
-       LARAVEL DEPLOY
+       DEPLOY BY STACK
   ══════════════════════════════════════ -->
-  <section class="cs-section" id="laravel-deploy">
+  <section class="cs-section" id="app-deploy">
     <div class="cs-section-title">
       <div class="ico" style="background:rgba(168,85,247,.1)">🚀</div>
-      Laravel Deploy
+      Deploy by Stack
     </div>
 
-    <div class="note green">
-      <span class="note-ico">✅</span>
-      <span>Urutan lengkap dari clone hingga aplikasi siap jalan di VPS.</span>
+    <!-- TAB BAR -->
+    <div class="stack-tabs">
+      <button class="stack-tab active" onclick="switchStack(this,'stack-laravel')">🔴 Laravel</button>
+      <button class="stack-tab" onclick="switchStack(this,'stack-node')">🟢 Node.js + PM2</button>
+      <button class="stack-tab" onclick="switchStack(this,'stack-spa')">⚡ React / Vue SPA</button>
+      <button class="stack-tab" onclick="switchStack(this,'stack-next')">▲ Next.js</button>
     </div>
 
-    <div class="cmd-group">
-      <div class="cmd-item">
-        <div class="cmd-header"><span class="cmd-label">Clone repo & setup direktori</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
-        <pre>cd <span class="path">/var/www</span>
+    <!-- ── PANEL: Laravel ── -->
+    <div class="stack-panel active" id="stack-laravel">
+      <div class="note green">
+        <span class="note-ico">✅</span>
+        <span>PHP + Nginx + PHP-FPM. Pastikan PHP, Composer, dan Nginx sudah terinstall.</span>
+      </div>
+      <div class="cmd-group">
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Clone repo & setup direktori</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www</span>
 git clone <span class="str">git@github.com:username/nama-repo.git</span> <span class="str">namaapp</span>
 cd <span class="str">namaapp</span></pre>
-      </div>
-      <div class="cmd-item">
-        <div class="cmd-header"><span class="cmd-label">Install dependencies & setup .env</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
-        <pre>composer install <span class="kw">--optimize-autoloader --no-dev</span>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Install dependencies & setup .env</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>composer install <span class="kw">--optimize-autoloader --no-dev</span>
 
 cp .env.example .env
-nano .env                      <span class="cm"># isi DB, APP_URL, dll</span>
+nano .env                      <span class="cm"># isi DB_*, APP_URL, dll</span>
 
 php artisan key:generate</pre>
-      </div>
-      <div class="cmd-item">
-        <div class="cmd-header"><span class="cmd-label">Permission storage & bootstrap</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
-        <pre>chown <span class="kw">-R</span> www-data:www-data <span class="path">/var/www/</span><span class="str">namaapp</span>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Permission storage & bootstrap</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>chown <span class="kw">-R</span> www-data:www-data <span class="path">/var/www/</span><span class="str">namaapp</span>
 chmod <span class="kw">-R</span> 755 <span class="path">/var/www/</span><span class="str">namaapp</span>
 chmod <span class="kw">-R</span> 775 <span class="path">/var/www/</span><span class="str">namaapp</span>/storage
 chmod <span class="kw">-R</span> 775 <span class="path">/var/www/</span><span class="str">namaapp</span>/bootstrap/cache</pre>
-      </div>
-      <div class="cmd-item">
-        <div class="cmd-header"><span class="cmd-label">Migrate, seed & optimize</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
-        <pre>php artisan migrate <span class="kw">--force</span>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Migrate, seed & optimize</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>php artisan migrate <span class="kw">--force</span>
 php artisan db:seed <span class="kw">--force</span>   <span class="cm"># jika ada initial seed</span>
 
 php artisan storage:link
@@ -669,15 +696,32 @@ php artisan optimize
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache</pre>
-      </div>
-      <div class="cmd-item">
-        <div class="cmd-header"><span class="cmd-label">Build frontend assets</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
-        <pre>npm ci
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Build frontend assets (jika pakai Vite)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>npm ci
 npm run build</pre>
-      </div>
-      <div class="cmd-item">
-        <div class="cmd-header"><span class="cmd-label">Deploy ulang (setelah git pull)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
-        <pre>cd <span class="path">/var/www/</span><span class="str">namaapp</span>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Nginx server block</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>server {
+    listen 80;
+    server_name <span class="str">domain.com</span>;
+    root <span class="path">/var/www/</span><span class="str">namaapp</span>/public;
+    index index.php;
+
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php<span class="str">8.3</span>-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Deploy ulang (setelah git pull)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www/</span><span class="str">namaapp</span>
 git pull origin main
 
 composer install <span class="kw">--optimize-autoloader --no-dev</span>
@@ -689,10 +733,245 @@ php artisan optimize:clear
 php artisan optimize
 php artisan queue:restart
 php artisan up</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Cek log Laravel</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>tail <span class="kw">-f</span> <span class="path">/var/www/</span><span class="str">namaapp</span>/storage/logs/laravel.log</pre>
+        </div>
       </div>
-      <div class="cmd-item">
-        <div class="cmd-header"><span class="cmd-label">Cek log Laravel</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
-        <pre>tail <span class="kw">-f</span> <span class="path">/var/www/</span><span class="str">namaapp</span>/storage/logs/laravel.log</pre>
+    </div>
+
+    <!-- ── PANEL: Node.js + PM2 ── -->
+    <div class="stack-panel" id="stack-node">
+      <div class="note green">
+        <span class="note-ico">✅</span>
+        <span>Node.js (Express / Fastify / dll) dijalankan via PM2, Nginx sebagai reverse proxy ke port lokal.</span>
+      </div>
+      <div class="cmd-group">
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Install PM2 secara global</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>npm install <span class="kw">-g</span> pm2</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Clone repo & install dependencies</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www</span>
+git clone <span class="str">git@github.com:username/nama-repo.git</span> <span class="str">namaapp</span>
+cd <span class="str">namaapp</span>
+
+npm ci <span class="kw">--omit=dev</span>
+
+cp .env.example .env
+nano .env                      <span class="cm"># PORT, DB_*, dll</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Jalankan app via PM2</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre><span class="cm"># Start dengan nama proses</span>
+pm2 start <span class="str">index.js</span> <span class="kw">--name</span> <span class="str">namaapp</span>
+
+<span class="cm"># Atau pakai ecosystem file (direkomendasikan)</span>
+pm2 start ecosystem.config.js
+
+pm2 save                       <span class="cm"># simpan daftar proses</span>
+pm2 startup                    <span class="cm"># auto-start saat server reboot</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Contoh ecosystem.config.js</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre><span class="cm">// ecosystem.config.js</span>
+module.exports = {
+  apps: [{
+    name: <span class="str">'namaapp'</span>,
+    script: <span class="str">'./src/index.js'</span>,
+    instances: <span class="str">'max'</span>,        <span class="cm">// cluster mode</span>
+    exec_mode: <span class="str">'cluster'</span>,
+    env_production: {
+      NODE_ENV: <span class="str">'production'</span>,
+      PORT: <span class="str">3000</span>
+    }
+  }]
+};</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Nginx reverse proxy config</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>server {
+    listen 80;
+    server_name <span class="str">domain.com</span>;
+
+    location / {
+        proxy_pass http://127.0.0.1:<span class="str">3000</span>;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection <span class="str">'upgrade'</span>;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_cache_bypass $http_upgrade;
+    }
+}</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Manage proses PM2</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>pm2 list                       <span class="cm"># lihat semua proses</span>
+pm2 status
+pm2 logs <span class="str">namaapp</span>             <span class="cm"># lihat log real-time</span>
+pm2 restart <span class="str">namaapp</span>
+pm2 reload <span class="str">namaapp</span>           <span class="cm"># zero-downtime reload</span>
+pm2 stop <span class="str">namaapp</span>
+pm2 delete <span class="str">namaapp</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Deploy ulang (setelah git pull)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www/</span><span class="str">namaapp</span>
+git pull origin main
+npm ci <span class="kw">--omit=dev</span>
+pm2 reload <span class="str">namaapp</span>           <span class="cm"># zero-downtime</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: React / Vue SPA ── -->
+    <div class="stack-panel" id="stack-spa">
+      <div class="note green">
+        <span class="note-ico">✅</span>
+        <span>Build Vite/webpack menghasilkan file statis di <code>dist/</code>. Nginx langsung serve folder tersebut — tidak butuh runtime Node.js di server.</span>
+      </div>
+      <div class="cmd-group">
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Clone, install & build</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www</span>
+git clone <span class="str">git@github.com:username/nama-repo.git</span> <span class="str">namaapp</span>
+cd <span class="str">namaapp</span>
+
+cp .env.example .env
+nano .env                      <span class="cm"># VITE_API_URL, dll</span>
+
+npm ci
+npm run build                  <span class="cm"># output di dist/</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Permission folder dist</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>chown <span class="kw">-R</span> www-data:www-data <span class="path">/var/www/</span><span class="str">namaapp</span>/dist
+chmod <span class="kw">-R</span> 755 <span class="path">/var/www/</span><span class="str">namaapp</span>/dist</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Nginx config — serve static + SPA fallback</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>server {
+    listen 80;
+    server_name <span class="str">domain.com</span>;
+    root <span class="path">/var/www/</span><span class="str">namaapp</span>/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;  <span class="cm"># fallback ke index.html untuk SPA routing</span>
+    }
+
+    <span class="cm"># Cache asset statis</span>
+    location ~* \.(js|css|png|jpg|svg|ico|woff2)$ {
+        expires 1y;
+        add_header Cache-Control <span class="str">"public, immutable"</span>;
+    }
+}</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Deploy ulang (rebuild & reload Nginx)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www/</span><span class="str">namaapp</span>
+git pull origin main
+npm ci
+npm run build
+systemctl reload nginx</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Deploy ke folder terpisah (atomic swap, zero-downtime)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre><span class="cm"># Build ke folder sementara</span>
+npm run build <span class="kw">--</span> <span class="kw">--outDir</span> dist_new
+
+<span class="cm"># Swap atomik</span>
+mv dist dist_old && mv dist_new dist
+
+<span class="cm"># Reload & hapus backup lama</span>
+systemctl reload nginx
+rm <span class="kw">-rf</span> dist_old</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: Next.js ── -->
+    <div class="stack-panel" id="stack-next">
+      <div class="note green">
+        <span class="note-ico">✅</span>
+        <span>Next.js SSR/SSG dijalankan via PM2 (Node.js runtime), Nginx sebagai reverse proxy. Butuh <code>npm run build</code> setiap deploy.</span>
+      </div>
+      <div class="cmd-group">
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Clone, install & build</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www</span>
+git clone <span class="str">git@github.com:username/nama-repo.git</span> <span class="str">namaapp</span>
+cd <span class="str">namaapp</span>
+
+cp .env.local.example .env.local
+nano .env.local                <span class="cm"># NEXT_PUBLIC_*, DATABASE_URL, dll</span>
+
+npm ci
+npm run build                  <span class="cm"># output di .next/</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Jalankan via PM2</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>pm2 start npm <span class="kw">--name</span> <span class="str">namaapp</span> <span class="kw">-- start</span>
+
+<span class="cm"># Atau via ecosystem file</span>
+pm2 start ecosystem.config.js
+
+pm2 save
+pm2 startup</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Contoh ecosystem.config.js</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>module.exports = {
+  apps: [{
+    name: <span class="str">'namaapp'</span>,
+    script: <span class="str">'node_modules/.bin/next'</span>,
+    args: <span class="str">'start'</span>,
+    env_production: {
+      NODE_ENV: <span class="str">'production'</span>,
+      PORT: <span class="str">3000</span>
+    }
+  }]
+};</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Nginx reverse proxy config</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>server {
+    listen 80;
+    server_name <span class="str">domain.com</span>;
+
+    location /_next/static/ {
+        alias <span class="path">/var/www/</span><span class="str">namaapp</span>/.next/static/;
+        expires 1y;
+        add_header Cache-Control <span class="str">"public, immutable"</span>;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:<span class="str">3000</span>;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection <span class="str">'upgrade'</span>;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_cache_bypass $http_upgrade;
+    }
+}</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Deploy ulang (setelah git pull)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www/</span><span class="str">namaapp</span>
+git pull origin main
+npm ci
+npm run build
+pm2 reload <span class="str">namaapp</span>           <span class="cm"># zero-downtime reload</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Cek log Next.js</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>pm2 logs <span class="str">namaapp</span>
+pm2 logs <span class="str">namaapp</span> <span class="kw">--lines</span> <span class="str">100</span></pre>
+        </div>
       </div>
     </div>
   </section>
@@ -864,6 +1143,14 @@ function fallback(text, done) {
   ta.select();
   try { document.execCommand('copy'); done(); } catch(e) {}
   document.body.removeChild(ta);
+}
+
+function switchStack(btn, panelId) {
+  const section = btn.closest('.cs-section');
+  section.querySelectorAll('.stack-tab').forEach(t => t.classList.remove('active'));
+  section.querySelectorAll('.stack-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
 }
 
 /* sidebar active on scroll */
