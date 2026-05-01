@@ -655,6 +655,7 @@ apt install <span class="kw">-y</span> nodejs</pre>
       <button class="stack-tab" onclick="switchStack(this,'stack-node')">🟢 Node.js + PM2</button>
       <button class="stack-tab" onclick="switchStack(this,'stack-spa')">⚡ React / Vue SPA</button>
       <button class="stack-tab" onclick="switchStack(this,'stack-next')">▲ Next.js</button>
+      <button class="stack-tab" onclick="switchStack(this,'stack-python')">🐍 Python</button>
     </div>
 
     <!-- ── PANEL: Laravel ── -->
@@ -971,6 +972,130 @@ pm2 reload <span class="str">namaapp</span>           <span class="cm"># zero-do
           <div class="cmd-header"><span class="cmd-label">Cek log Next.js</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
           <pre>pm2 logs <span class="str">namaapp</span>
 pm2 logs <span class="str">namaapp</span> <span class="kw">--lines</span> <span class="str">100</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: Python ── -->
+    <div class="stack-panel" id="stack-python">
+      <div class="note green">
+        <span class="note-ico">✅</span>
+        <span>Django / Flask / FastAPI dijalankan via Gunicorn (WSGI/ASGI), Nginx sebagai reverse proxy. Virtualenv per project untuk isolasi dependensi.</span>
+      </div>
+      <div class="cmd-group">
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Install Python & pip</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>apt install <span class="kw">-y</span> python3 python3-pip python3-venv
+python3 <span class="kw">--version</span>
+pip3 <span class="kw">--version</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Clone repo & setup virtualenv</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www</span>
+git clone <span class="str">git@github.com:username/nama-repo.git</span> <span class="str">namaapp</span>
+cd <span class="str">namaapp</span>
+
+python3 <span class="kw">-m</span> venv venv
+source venv/bin/activate
+
+pip install <span class="kw">-r</span> requirements.txt</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Setup .env & variabel environment</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cp .env.example .env
+nano .env                      <span class="cm"># SECRET_KEY, DATABASE_URL, DEBUG=False, dll</span>
+
+<span class="cm"># Django: migrasi database</span>
+python manage.py migrate
+python manage.py collectstatic <span class="kw">--noinput</span>
+
+<span class="cm"># Flask/FastAPI: jalankan init DB jika ada</span>
+flask db upgrade               <span class="cm"># jika pakai Flask-Migrate</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Install Gunicorn & test manual</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>pip install gunicorn
+
+<span class="cm"># Django</span>
+gunicorn <span class="str">namaapp.wsgi:application</span> <span class="kw">--bind</span> 127.0.0.1:8000
+
+<span class="cm"># Flask (app = Flask(__name__))</span>
+gunicorn <span class="str">wsgi:app</span> <span class="kw">--bind</span> 127.0.0.1:8000
+
+<span class="cm"># FastAPI / ASGI (butuh uvicorn)</span>
+pip install uvicorn gunicorn
+gunicorn <span class="str">main:app</span> <span class="kw">-k</span> uvicorn.workers.UvicornWorker <span class="kw">--bind</span> 127.0.0.1:8000</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Systemd service untuk Gunicorn</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>nano <span class="path">/etc/systemd/system/</span><span class="str">namaapp</span>.service
+
+<span class="cm">----- isi file -----</span>
+[Unit]
+Description=Gunicorn — <span class="str">namaapp</span>
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=<span class="path">/var/www/</span><span class="str">namaapp</span>
+EnvironmentFile=<span class="path">/var/www/</span><span class="str">namaapp</span>/.env
+ExecStart=<span class="path">/var/www/</span><span class="str">namaapp</span>/venv/bin/gunicorn \
+          --workers 3 \
+          --bind unix:<span class="path">/run/</span><span class="str">namaapp</span>.sock \
+          <span class="str">namaapp.wsgi:application</span>       <span class="cm"># ganti sesuai entry point</span>
+Restart=always
+
+[Install]
+WantedBy=multi-user.target</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Enable & manage Gunicorn service</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>systemctl daemon-reload
+systemctl enable <span class="str">namaapp</span>
+systemctl start <span class="str">namaapp</span>
+systemctl status <span class="str">namaapp</span>
+systemctl restart <span class="str">namaapp</span>
+
+<span class="cm"># Cek log</span>
+journalctl <span class="kw">-u</span> <span class="str">namaapp</span> <span class="kw">-f</span></pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Nginx config — reverse proxy via Unix socket</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>server {
+    listen 80;
+    server_name <span class="str">domain.com</span>;
+
+    <span class="cm"># Static files Django (collectstatic)</span>
+    location /static/ {
+        alias <span class="path">/var/www/</span><span class="str">namaapp</span>/staticfiles/;
+    }
+    location /media/ {
+        alias <span class="path">/var/www/</span><span class="str">namaapp</span>/media/;
+    }
+
+    location / {
+        proxy_pass http://unix:<span class="path">/run/</span><span class="str">namaapp</span>.sock;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</pre>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-header"><span class="cmd-label">Deploy ulang (setelah git pull)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+          <pre>cd <span class="path">/var/www/</span><span class="str">namaapp</span>
+git pull origin main
+
+source venv/bin/activate
+pip install <span class="kw">-r</span> requirements.txt
+
+python manage.py migrate        <span class="cm"># Django</span>
+python manage.py collectstatic <span class="kw">--noinput</span>
+
+systemctl restart <span class="str">namaapp</span>
+systemctl reload nginx</pre>
         </div>
       </div>
     </div>
