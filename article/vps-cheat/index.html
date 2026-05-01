@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VPS Deploy Cheat Sheet — Dionisius NP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* ── Surfaces ── */
+  --bg:#09090f;
+  --surface:#0f0f18;
+  --card:rgba(255,255,255,.04);
+
+  /* ── Borders ── */
+  --bd:rgba(255,255,255,.08);
+  --bd2:rgba(255,255,255,.13);
+
+  /* ── Text ── */
+  --text:#e2e2ee;
+  --muted:#8888aa;
+  --dim:rgba(255,255,255,.22);
+
+  /* ── Accent palette ── */
+  --accent:#6366f1;
+  --a2:#a855f7;
+  --a3:#22d3ee;
+
+  /* ── Semantic colors ── */
+  --green:#34d399;
+  --gold:#fbbf24;
+  --red:#f87171;
+
+  /* ── Per-page override slot ── */
+  --page-accent:#0ea5e9;
+
+  /* ── Typography ── */
+  --font-sans:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  /* ── Radius scale ── */
+  --r-xs:4px;
+  --r-sm:7px;
+  --r-md:10px;
+  --r-lg:14px;
+  --r-xl:20px;
+  --r-pill:999px;
+
+  /* ── Shadows ── */
+  --shadow-card:0 4px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+  --shadow-hover:0 8px 38px rgba(0,0,0,.4);
+  --shadow-btn:0 4px 18px rgba(14,165,233,.35);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--page-accent);border-radius:3px}
+
+/* ══ LAYOUT ══ */
+.page{display:flex;min-height:100vh}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:220px;flex-shrink:0;
+  position:sticky;top:44px;height:calc(100vh - 44px);
+  overflow-y:auto;
+  background:var(--surface);
+  border-right:1px solid var(--bd);
+  padding:20px 0;
+}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+.sb-section{margin-bottom:4px}
+.sb-label{
+  font-family:var(--font-mono);
+  font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.22);padding:10px 18px 4px;
+}
+.sb-item{
+  display:block;font-size:.72rem;color:var(--muted);
+  padding:6px 18px;border-left:2px solid transparent;
+  transition:all .18s;cursor:pointer;
+}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.sb-item.active{color:var(--page-accent);border-left-color:var(--page-accent);background:color-mix(in srgb,var(--page-accent) 6%,transparent)}
+
+/* ══ MAIN ══ */
+.main{flex:1;min-width:0;padding:48px 52px 80px}
+
+/* ══ HERO ══ */
+.page-hero{margin-bottom:48px}
+.page-eyebrow{
+  font-family:var(--font-mono);
+  font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--page-accent);margin-bottom:10px;
+}
+.page-title{font-size:2rem;font-weight:900;letter-spacing:-.04em;margin-bottom:8px}
+.page-title span{
+  background:linear-gradient(135deg,var(--text) 20%,var(--page-accent) 65%,var(--a3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.page-sub{font-size:.84rem;color:var(--muted);max-width:520px;line-height:1.7}
+
+/* ══ SECTION ══ */
+.cs-section{margin-bottom:52px;scroll-margin-top:64px}
+.cs-section-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:1rem;font-weight:800;letter-spacing:-.02em;
+  margin-bottom:16px;padding-bottom:12px;
+  border-bottom:1px solid var(--bd);
+}
+.cs-section-title .ico{
+  width:30px;height:30px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+}
+
+/* ══ COMMAND BLOCK ══ */
+.cmd-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.cmd-item{
+  background:var(--surface);
+  border:1px solid var(--bd);
+  border-radius:var(--r-md);
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.cmd-item:hover{border-color:var(--bd2)}
+.cmd-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 14px 6px;
+}
+.cmd-label{font-size:.7rem;color:var(--muted);font-weight:500}
+.cmd-copy{
+  font-size:.6rem;font-weight:600;color:var(--muted);
+  background:rgba(255,255,255,.05);border:1px solid var(--bd);
+  padding:2px 8px;border-radius:var(--r-xs);cursor:pointer;transition:all .15s;
+  border:none;font-family:inherit;
+}
+.cmd-copy:hover{color:var(--page-accent);background:color-mix(in srgb,var(--page-accent) 10%,transparent)}
+.cmd-copy.copied{color:var(--green)}
+pre{
+  font-family:var(--font-mono);
+  font-size:.76rem;
+  background:rgba(0,0,0,.35);
+  padding:10px 14px;
+  overflow-x:auto;
+  line-height:1.6;
+  color:#c9d1d9;
+}
+pre::-webkit-scrollbar{height:3px}
+pre::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* syntax highlight helpers */
+.kw{color:#ff7b72}   /* keyword / flag */
+.str{color:#a5d6ff}  /* string / value */
+.cm{color:#6e7681;font-style:italic} /* comment */
+.fn{color:#d2a8ff}   /* function / class */
+.pkg{color:var(--gold)} /* package name */
+.path{color:#79c0ff} /* file path */
+
+/* ══ NOTE BOX ══ */
+.note{
+  display:flex;align-items:flex-start;gap:10px;
+  background:color-mix(in srgb,var(--page-accent) 6%,transparent);
+  border:1px solid color-mix(in srgb,var(--page-accent) 20%,transparent);
+  border-radius:var(--r-md);padding:12px 14px;margin-bottom:12px;
+  font-size:.76rem;color:rgba(255,255,255,.65);line-height:1.6;
+}
+.note.warn{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.18);color:rgba(251,191,36,.8)}
+.note.green{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.18);color:rgba(52,211,153,.85)}
+.note.red{background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.18);color:rgba(248,113,113,.8)}
+.note-ico{flex-shrink:0;font-size:14px}
+
+/* ══ BADGE ══ */
+.badge{
+  display:inline-block;
+  font-family:var(--font-mono);
+  font-size:.56rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 8px;border-radius:var(--r-xs);margin-left:8px;vertical-align:middle;
+}
+.badge.sky{background:color-mix(in srgb,var(--page-accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--page-accent) 25%,transparent);color:var(--page-accent)}
+.badge.blue{background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.22);color:var(--accent)}
+.badge.purple{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.22);color:var(--a2)}
+.badge.green{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:var(--green)}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{padding:32px 20px 60px}
+  .page-title{font-size:1.5rem}
+}
+
+/* ══ DION NAV ══ */
+#dion-nav{position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:9px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);font-family:var(--font-sans);font-size:.72rem}
+#dion-nav a.back{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--muted);padding:4px 11px;border-radius:var(--r-sm);border:1px solid var(--bd);text-decoration:none;transition:color .18s,border-color .18s}
+#dion-nav a.back:hover{color:var(--page-accent);border-color:color-mix(in srgb,var(--page-accent) 30%,transparent)}
+</style>
+</head>
+<body>
+
+<!-- BACK NAV (dion-nav) -->
+<div id="dion-nav"><a href="/" class="back"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>dionisiusnp.github.io</a></div>
+
+<div class="page">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">Server</div>
+    <a class="sb-item active" href="#initial-setup">Initial Setup</a>
+    <a class="sb-item" href="#ufw">Firewall UFW</a>
+    <a class="sb-item" href="#nginx">Nginx</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Runtime</div>
+    <a class="sb-item" href="#php">PHP & FPM</a>
+    <a class="sb-item" href="#mysql">MySQL / MariaDB</a>
+    <a class="sb-item" href="#redis">Redis</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Deploy</div>
+    <a class="sb-item" href="#composer">Composer</a>
+    <a class="sb-item" href="#node">Node.js / NVM</a>
+    <a class="sb-item" href="#laravel-deploy">Laravel Deploy</a>
+    <a class="sb-item" href="#ssl">SSL — Certbot</a>
+    <a class="sb-item" href="#supervisor">Supervisor</a>
+    <a class="sb-item" href="#cron">Cron / Scheduler</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="page-eyebrow">// article · devops</div>
+    <h1 class="page-title">VPS Deploy <span>Cheat Sheet</span></h1>
+    <p class="page-sub">Command yang sering dipakai saat setup VPS baru dan deploy aplikasi — dari initial setup Ubuntu hingga Nginx, PHP, MySQL, SSL, dan supervisor queue. Klik kode untuk copy.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       INITIAL SETUP
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="initial-setup">
+    <div class="cs-section-title">
+      <div class="ico" style="background:color-mix(in srgb,var(--page-accent) 12%,transparent)">🖥️</div>
+      Initial Setup
+    </div>
+
+    <div class="note">
+      <span class="note-ico">💡</span>
+      <span>Langkah pertama setelah dapat akses root ke VPS baru. Buat user deploy terpisah supaya tidak pakai root sehari-hari.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Koneksi SSH ke VPS</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>ssh root@<span class="str">IP_VPS</span>
+ssh -i <span class="path">~/.ssh/id_rsa</span> root@<span class="str">IP_VPS</span>   <span class="cm"># pakai key file</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Update & upgrade sistem</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>apt update <span class="kw">&&</span> apt upgrade <span class="kw">-y</span>
+apt install <span class="kw">-y</span> curl wget git unzip zip nano htop</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat user deploy (non-root)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>adduser <span class="str">deploy</span>
+usermod <span class="kw">-aG</span> sudo <span class="str">deploy</span>
+
+<span class="cm"># Copy authorized_keys dari root ke user baru</span>
+rsync <span class="kw">--archive --chown=</span><span class="str">deploy:deploy</span> ~/.ssh /home/<span class="str">deploy</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Setup SSH key di local machine</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm"># Generate key (di local, bukan di VPS)</span>
+ssh-keygen <span class="kw">-t</span> ed25519 <span class="kw">-C</span> <span class="str">"email@example.com"</span>
+
+<span class="cm"># Copy public key ke VPS</span>
+ssh-copy-id <span class="str">deploy</span>@<span class="str">IP_VPS</span>
+
+<span class="cm"># Atau manual</span>
+cat ~/.ssh/id_ed25519.pub | ssh root@<span class="str">IP_VPS</span> <span class="str">"cat >> ~/.ssh/authorized_keys"</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Disable root login & password auth (opsional, direkomendasikan)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm"># Edit /etc/ssh/sshd_config</span>
+nano <span class="path">/etc/ssh/sshd_config</span>
+
+  PermitRootLogin <span class="str">no</span>
+  PasswordAuthentication <span class="str">no</span>
+
+systemctl restart sshd</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Set timezone</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>timedatectl set-timezone <span class="str">Asia/Jakarta</span>
+timedatectl status</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       FIREWALL UFW
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="ufw">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(248,113,113,.1)">🛡️</div>
+      Firewall — UFW
+    </div>
+
+    <div class="note warn">
+      <span class="note-ico">⚠️</span>
+      <span>Pastikan allow SSH sebelum enable UFW, supaya tidak terkunci dari server.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Setup dasar</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>ufw allow OpenSSH              <span class="cm"># atau: ufw allow 22</span>
+ufw allow 80                   <span class="cm"># HTTP</span>
+ufw allow 443                  <span class="cm"># HTTPS</span>
+ufw enable
+ufw status verbose</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Rule tambahan</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>ufw allow <span class="str">'Nginx Full'</span>          <span class="cm"># allow port 80 & 443 via Nginx profile</span>
+ufw allow from <span class="str">IP_TERTENTU</span>      <span class="cm"># whitelist IP spesifik</span>
+ufw deny <span class="str">3306</span>                  <span class="cm"># blokir akses MySQL dari luar</span>
+ufw delete allow <span class="str">80</span>            <span class="cm"># hapus rule</span>
+ufw disable                    <span class="cm"># matikan sementara</span>
+ufw reset                      <span class="cm"># reset semua rule</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       NGINX
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="nginx">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(52,211,153,.1)">🌐</div>
+      Nginx
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install & manage service</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>apt install <span class="kw">-y</span> nginx
+
+systemctl start nginx
+systemctl enable nginx         <span class="cm"># auto-start on boot</span>
+systemctl status nginx
+systemctl reload nginx         <span class="cm"># reload config tanpa downtime</span>
+systemctl restart nginx</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Config server block untuk Laravel</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>nano <span class="path">/etc/nginx/sites-available/</span><span class="str">namaapp</span>
+
+<span class="cm">----- isi file -----</span>
+server {
+    listen 80;
+    server_name <span class="str">domain.com</span> www.<span class="str">domain.com</span>;
+    root <span class="path">/var/www/</span><span class="str">namaapp</span>/public;
+    index index.php index.html;
+
+    add_header X-Frame-Options <span class="str">"SAMEORIGIN"</span>;
+    add_header X-Content-Type-Options <span class="str">"nosniff"</span>;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php<span class="str">8.3</span>-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    client_max_body_size 50M;
+}</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Aktifkan site & test config</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>ln <span class="kw">-s</span> <span class="path">/etc/nginx/sites-available/</span><span class="str">namaapp</span> <span class="path">/etc/nginx/sites-enabled/</span>
+
+nginx <span class="kw">-t</span>                        <span class="cm"># test konfigurasi</span>
+systemctl reload nginx</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Hapus site / default</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>rm <span class="path">/etc/nginx/sites-enabled/default</span>
+rm <span class="path">/etc/nginx/sites-enabled/</span><span class="str">namaapp</span>
+systemctl reload nginx</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Cek log Nginx</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>tail <span class="kw">-f</span> <span class="path">/var/log/nginx/error.log</span>
+tail <span class="kw">-f</span> <span class="path">/var/log/nginx/access.log</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PHP
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="php">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(168,85,247,.1)">🐘</div>
+      PHP & PHP-FPM
+      <span class="badge sky">ondrej/php PPA</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Tambah PPA & install PHP 8.3</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>add-apt-repository ppa:ondrej/php <span class="kw">-y</span>
+apt update
+
+apt install <span class="kw">-y</span> php8.3 php8.3-fpm php8.3-cli \
+  php8.3-mysql php8.3-pgsql php8.3-sqlite3 \
+  php8.3-curl php8.3-gd php8.3-imagick \
+  php8.3-mbstring php8.3-xml php8.3-zip \
+  php8.3-bcmath php8.3-intl php8.3-redis</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Manage PHP-FPM</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>systemctl start php8.3-fpm
+systemctl enable php8.3-fpm
+systemctl status php8.3-fpm
+systemctl restart php8.3-fpm</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Cek versi & ekstensi aktif</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php <span class="kw">-v</span>
+php <span class="kw">-m</span>                           <span class="cm"># list ekstensi aktif</span>
+php <span class="kw">-r</span> <span class="str">"echo phpinfo();"</span> | grep <span class="str">redis</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Atur php.ini (upload, memory)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>nano <span class="path">/etc/php/8.3/fpm/php.ini</span>
+
+  upload_max_filesize = <span class="str">50M</span>
+  post_max_size       = <span class="str">50M</span>
+  memory_limit        = <span class="str">256M</span>
+  max_execution_time  = <span class="str">120</span>
+
+systemctl restart php8.3-fpm</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Switch versi PHP (jika multi-versi)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>update-alternatives <span class="kw">--config</span> php
+update-alternatives <span class="kw">--set</span> php /usr/bin/php8.3</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       MYSQL
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="mysql">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(251,191,36,.1)">🗄️</div>
+      MySQL / MariaDB
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install MySQL</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>apt install <span class="kw">-y</span> mysql-server
+systemctl enable mysql
+mysql_secure_installation    <span class="cm"># wizard: set root pw, hapus test DB</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install MariaDB (alternatif)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>apt install <span class="kw">-y</span> mariadb-server mariadb-client
+systemctl enable mariadb
+mysql_secure_installation</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat database & user</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>mysql <span class="kw">-u</span> root <span class="kw">-p</span>
+
+<span class="cm">-- Di dalam MySQL prompt:</span>
+CREATE DATABASE <span class="str">nama_db</span> CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER <span class="str">'db_user'</span>@<span class="str">'localhost'</span> IDENTIFIED BY <span class="str">'password_kuat'</span>;
+GRANT ALL PRIVILEGES ON <span class="str">nama_db</span>.* TO <span class="str">'db_user'</span>@<span class="str">'localhost'</span>;
+FLUSH PRIVILEGES;
+EXIT;</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Backup & restore database</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm"># Backup</span>
+mysqldump <span class="kw">-u</span> root <span class="kw">-p</span> <span class="str">nama_db</span> > <span class="path">backup.sql</span>
+mysqldump <span class="kw">-u</span> root <span class="kw">-p --all-databases</span> > <span class="path">all-db.sql</span>
+
+<span class="cm"># Restore</span>
+mysql <span class="kw">-u</span> root <span class="kw">-p</span> <span class="str">nama_db</span> < <span class="path">backup.sql</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Cek status & log</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>systemctl status mysql
+tail <span class="kw">-f</span> <span class="path">/var/log/mysql/error.log</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       REDIS
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="redis">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(248,113,113,.1)">⚡</div>
+      Redis
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install & manage</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>apt install <span class="kw">-y</span> redis-server
+systemctl enable redis-server
+systemctl status redis-server
+
+<span class="cm"># Test koneksi</span>
+redis-cli ping              <span class="cm"># harus reply: PONG</span>
+redis-cli info server</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Atur password Redis (opsional)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>nano <span class="path">/etc/redis/redis.conf</span>
+
+  requirepass <span class="str">password_redis_kuat</span>
+  bind 127.0.0.1            <span class="cm"># hanya listen lokal</span>
+
+systemctl restart redis-server</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Konfigurasi .env Laravel</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=<span class="str">password_redis_kuat</span>
+REDIS_PORT=6379
+
+CACHE_STORE=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       COMPOSER
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="composer">
+    <div class="cs-section-title">
+      <div class="ico" style="background:color-mix(in srgb,var(--page-accent) 12%,transparent)">📦</div>
+      Composer
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install Composer secara global</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>curl <span class="kw">-sS</span> https://getcomposer.org/installer <span class="kw">-o</span> composer-setup.php
+php composer-setup.php
+mv composer.phar <span class="path">/usr/local/bin/composer</span>
+rm composer-setup.php
+
+composer <span class="kw">--version</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Update Composer</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer self-update
+composer self-update <span class="kw">--2</span>      <span class="cm"># paksa ke v2</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       NODE.JS / NVM
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="node">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(52,211,153,.1)">🟢</div>
+      Node.js / NVM
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install NVM (Node Version Manager)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>curl <span class="kw">-o-</span> https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+<span class="cm"># Reload shell</span>
+source ~/.bashrc
+
+nvm <span class="kw">--version</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install & manage Node.js via NVM</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>nvm install <span class="kw">--lts</span>             <span class="cm"># versi LTS terbaru</span>
+nvm install <span class="str">20</span>
+nvm use <span class="str">20</span>
+nvm alias default <span class="str">20</span>          <span class="cm"># set default</span>
+nvm ls                         <span class="cm"># list versi terinstall</span>
+
+node <span class="kw">-v</span>
+npm <span class="kw">-v</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install Node.js via NodeSource (alternatif, system-wide)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>curl <span class="kw">-fsSL</span> https://deb.nodesource.com/setup_20.x | bash <span class="kw">-</span>
+apt install <span class="kw">-y</span> nodejs</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       LARAVEL DEPLOY
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="laravel-deploy">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(168,85,247,.1)">🚀</div>
+      Laravel Deploy
+    </div>
+
+    <div class="note green">
+      <span class="note-ico">✅</span>
+      <span>Urutan lengkap dari clone hingga aplikasi siap jalan di VPS.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Clone repo & setup direktori</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>cd <span class="path">/var/www</span>
+git clone <span class="str">git@github.com:username/nama-repo.git</span> <span class="str">namaapp</span>
+cd <span class="str">namaapp</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install dependencies & setup .env</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>composer install <span class="kw">--optimize-autoloader --no-dev</span>
+
+cp .env.example .env
+nano .env                      <span class="cm"># isi DB, APP_URL, dll</span>
+
+php artisan key:generate</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Permission storage & bootstrap</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>chown <span class="kw">-R</span> www-data:www-data <span class="path">/var/www/</span><span class="str">namaapp</span>
+chmod <span class="kw">-R</span> 755 <span class="path">/var/www/</span><span class="str">namaapp</span>
+chmod <span class="kw">-R</span> 775 <span class="path">/var/www/</span><span class="str">namaapp</span>/storage
+chmod <span class="kw">-R</span> 775 <span class="path">/var/www/</span><span class="str">namaapp</span>/bootstrap/cache</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Migrate, seed & optimize</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>php artisan migrate <span class="kw">--force</span>
+php artisan db:seed <span class="kw">--force</span>   <span class="cm"># jika ada initial seed</span>
+
+php artisan storage:link
+php artisan optimize
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Build frontend assets</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>npm ci
+npm run build</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Deploy ulang (setelah git pull)</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>cd <span class="path">/var/www/</span><span class="str">namaapp</span>
+git pull origin main
+
+composer install <span class="kw">--optimize-autoloader --no-dev</span>
+npm ci <span class="kw">&&</span> npm run build
+
+php artisan down
+php artisan migrate <span class="kw">--force</span>
+php artisan optimize:clear
+php artisan optimize
+php artisan queue:restart
+php artisan up</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Cek log Laravel</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>tail <span class="kw">-f</span> <span class="path">/var/www/</span><span class="str">namaapp</span>/storage/logs/laravel.log</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SSL CERTBOT
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="ssl">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(52,211,153,.1)">🔒</div>
+      SSL — Let's Encrypt / Certbot
+    </div>
+
+    <div class="note">
+      <span class="note-ico">💡</span>
+      <span>Certbot otomatis modifikasi Nginx config dan tambahkan redirect HTTP → HTTPS.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install Certbot</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>apt install <span class="kw">-y</span> certbot python3-certbot-nginx</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Issue & install sertifikat</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm"># Otomatis konfigurasi Nginx</span>
+certbot <span class="kw">--nginx -d</span> <span class="str">domain.com</span> <span class="kw">-d</span> www.<span class="str">domain.com</span>
+
+<span class="cm"># Hanya generate cert, config manual</span>
+certbot certonly <span class="kw">--nginx -d</span> <span class="str">domain.com</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Renew & test auto-renew</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>certbot renew <span class="kw">--dry-run</span>        <span class="cm"># simulasi renew</span>
+certbot renew                   <span class="cm"># renew manual</span>
+certbot certificates            <span class="cm"># list sertifikat aktif</span>
+
+<span class="cm"># Auto-renew sudah diatur via systemd timer — cek dengan:</span>
+systemctl status certbot.timer</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Hapus sertifikat</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>certbot delete <span class="kw">--cert-name</span> <span class="str">domain.com</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SUPERVISOR
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="supervisor">
+    <div class="cs-section-title">
+      <div class="ico" style="background:rgba(251,191,36,.1)">👷</div>
+      Supervisor — Queue Worker
+    </div>
+
+    <div class="note">
+      <span class="note-ico">💡</span>
+      <span>Supervisor menjaga proses <code>queue:work</code> tetap berjalan di background dan otomatis restart jika crash.</span>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Install Supervisor</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>apt install <span class="kw">-y</span> supervisor
+systemctl enable supervisor
+systemctl start supervisor</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Buat config worker Laravel</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>nano <span class="path">/etc/supervisor/conf.d/</span><span class="str">namaapp</span>-worker.conf
+
+<span class="cm">----- isi file -----</span>
+[program:<span class="str">namaapp</span>-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php <span class="path">/var/www/</span><span class="str">namaapp</span>/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=2
+redirect_stderr=true
+stdout_logfile=<span class="path">/var/www/</span><span class="str">namaapp</span>/storage/logs/worker.log
+stopwaitsecs=3600</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Reload & manage Supervisor</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>supervisorctl reread
+supervisorctl update
+supervisorctl start <span class="str">namaapp</span>-worker:*
+
+supervisorctl status
+supervisorctl restart <span class="str">namaapp</span>-worker:*
+supervisorctl stop <span class="str">namaapp</span>-worker:*</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Restart worker setelah deploy</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm"># Via artisan (trigger graceful restart)</span>
+php artisan queue:restart
+
+<span class="cm"># Via supervisorctl (force restart)</span>
+supervisorctl restart <span class="str">namaapp</span>-worker:*</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       CRON / SCHEDULER
+  ══════════════════════════════════════ -->
+  <section class="cs-section" id="cron">
+    <div class="cs-section-title">
+      <div class="ico" style="background:color-mix(in srgb,var(--page-accent) 12%,transparent)">⏰</div>
+      Cron — Laravel Scheduler
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Tambah cron entry untuk Laravel</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre><span class="cm"># Edit crontab user www-data</span>
+crontab <span class="kw">-u</span> www-data <span class="kw">-e</span>
+
+<span class="cm">----- tambahkan baris ini -----</span>
+* * * * * cd <span class="path">/var/www/</span><span class="str">namaapp</span> && php artisan schedule:run >> /dev/null 2>&1</pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Cek & manage cron</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>crontab <span class="kw">-u</span> www-data <span class="kw">-l</span>       <span class="cm"># lihat cron aktif</span>
+crontab <span class="kw">-u</span> www-data <span class="kw">-r</span>       <span class="cm"># hapus semua cron user ini</span>
+
+<span class="cm"># Test scheduler berjalan</span>
+php artisan schedule:list
+php artisan schedule:run       <span class="cm"># jalankan sekali manual</span></pre>
+      </div>
+      <div class="cmd-item">
+        <div class="cmd-header"><span class="cmd-label">Log output cron ke file</span><button class="cmd-copy" onclick="copyCmd(this)">copy</button></div>
+        <pre>* * * * * cd <span class="path">/var/www/</span><span class="str">namaapp</span> && php artisan schedule:run >> <span class="path">/var/www/</span><span class="str">namaapp</span>/storage/logs/scheduler.log 2>&1</pre>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script>
+function copyCmd(btn) {
+  const pre = btn.closest('.cmd-item').querySelector('pre');
+  const text = pre.innerText;
+
+  const done = () => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+  } else {
+    fallback(text, done);
+  }
+}
+
+function fallback(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+/* sidebar active on scroll */
+const sections = document.querySelectorAll('.cs-section[id]');
+const sbItems  = document.querySelectorAll('.sb-item');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      sbItems.forEach(i => i.classList.remove('active'));
+      const match = document.querySelector(`.sb-item[href="#${e.target.id}"]`);
+      if (match) match.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
