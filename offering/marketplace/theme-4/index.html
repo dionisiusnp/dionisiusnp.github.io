@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BersihMart — Toko Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0d;
+  --s1:#141414;
+  --s2:#1c1c1c;
+  --s3:#242424;
+  --bd:rgba(255,255,255,.07);
+  --bd2:rgba(255,255,255,.12);
+  --text:#f0f0f0;
+  --muted:#888;
+  --dim:#555;
+  --lime:#a3e635;
+  --lime-s:rgba(163,230,53,.08);
+  --lime-b:rgba(163,230,53,.2);
+  --red:#f87171;
+  --gold:#fbbf24;
+  --font:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --r:8px;
+  --r-sm:5px;
+  --r-lg:12px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+a{text-decoration:none;color:inherit}
+img{display:block;max-width:100%}
+button{font-family:var(--font);cursor:pointer}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+
+/* ══ DION NAV ══ */
+#dion-nav{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 20px;
+  background:rgba(13,13,13,.96);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bd);
+  font-size:.7rem;font-family:var(--font);
+  position:sticky;top:0;z-index:9999;
+}
+#dion-nav a.back{
+  display:flex;align-items:center;gap:5px;
+  font-weight:600;color:var(--muted);
+  padding:3px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--bd);transition:color .18s,border-color .18s;
+}
+#dion-nav a.back:hover{color:var(--lime);border-color:var(--lime-b)}
+#dion-nav .dn-sep{color:var(--dim)}
+#dion-nav .dn-label{color:var(--dim);font-size:.68rem}
+
+/* ══ HEADER ══ */
+.header{
+  position:sticky;top:33px;z-index:100;
+  background:rgba(13,13,13,.97);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--bd);
+}
+.header-inner{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;gap:16px;
+  padding:14px 24px;
+}
+.logo{
+  font-size:1.05rem;font-weight:900;letter-spacing:-.03em;
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.logo-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--lime);flex-shrink:0;
+}
+.search-bar{
+  flex:1;max-width:460px;
+  display:flex;align-items:center;gap:0;
+  background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);
+  overflow:hidden;transition:border-color .18s;
+}
+.search-bar:focus-within{border-color:var(--bd2)}
+.search-bar input{
+  flex:1;background:transparent;border:none;outline:none;
+  padding:9px 14px;font-size:.82rem;color:var(--text);
+}
+.search-bar input::placeholder{color:var(--dim)}
+.search-btn{
+  padding:9px 14px;background:transparent;border:none;
+  color:var(--muted);transition:color .18s;
+}
+.search-btn:hover{color:var(--lime)}
+.h-spacer{flex:1}
+.h-nav{display:flex;align-items:center;gap:4px}
+.h-nav a{
+  font-size:.75rem;font-weight:600;color:var(--muted);
+  padding:6px 12px;border-radius:var(--r-sm);transition:all .15s;
+}
+.h-nav a:hover{color:var(--text);background:var(--s2)}
+.h-cart{
+  display:flex;align-items:center;gap:6px;
+  font-size:.75rem;font-weight:700;
+  padding:7px 14px;border-radius:var(--r);
+  background:var(--lime);color:#0d0d0d;
+  transition:opacity .18s;
+}
+.h-cart:hover{opacity:.88}
+.cart-count{
+  background:#0d0d0d;color:var(--lime);
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.58rem;font-weight:800;
+}
+
+/* ══ HERO ══ */
+.hero{
+  max-width:1200px;margin:0 auto;padding:52px 24px 44px;
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
+}
+.hero-label{
+  font-family:var(--mono);font-size:.58rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--lime);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.hero-label::before{content:'';width:20px;height:1.5px;background:var(--lime)}
+.hero-title{
+  font-size:clamp(1.8rem,3vw,2.8rem);font-weight:900;
+  letter-spacing:-.04em;line-height:1.06;margin-bottom:16px;
+}
+.hero-title em{font-style:normal;color:var(--lime)}
+.hero-desc{font-size:.88rem;color:var(--muted);line-height:1.75;margin-bottom:28px;max-width:380px}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn-prime{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--lime);color:#0d0d0d;
+  padding:11px 22px;border-radius:var(--r);
+  font-size:.82rem;font-weight:800;border:none;
+  transition:opacity .18s,transform .18s;
+}
+.btn-prime:hover{opacity:.88;transform:translateY(-1px)}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:7px;
+  background:transparent;color:var(--muted);
+  padding:10px 20px;border-radius:var(--r);
+  font-size:.82rem;font-weight:600;
+  border:1px solid var(--bd2);transition:all .18s;
+}
+.btn-ghost:hover{color:var(--text);border-color:var(--bd2);background:var(--s2)}
+.hero-stats{display:flex;gap:24px;margin-top:32px;padding-top:28px;border-top:1px solid var(--bd)}
+.stat-num{font-size:1.3rem;font-weight:900;letter-spacing:-.03em}
+.stat-label{font-size:.68rem;color:var(--muted);margin-top:2px}
+
+.hero-visual{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-lg);
+  overflow:hidden;
+}
+.hv-top{
+  background:var(--s2);padding:14px 18px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--bd);
+}
+.hv-dot{width:8px;height:8px;border-radius:50%;background:var(--bd2)}
+.hv-dot.lime{background:var(--lime)}
+.hv-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--bd);
+}
+.hv-product{
+  background:var(--s1);padding:18px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.hv-img{
+  height:80px;border-radius:var(--r-sm);
+  background:var(--s3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;
+}
+.hv-name{font-size:.72rem;font-weight:700;line-height:1.3}
+.hv-price{font-size:.78rem;font-weight:800;color:var(--lime)}
+.hv-shopee{
+  font-size:.6rem;font-weight:700;
+  color:var(--muted);letter-spacing:.06em;text-transform:uppercase;
+  display:flex;align-items:center;gap:4px;
+}
+.hv-shopee span{color:var(--lime)}
+
+/* ══ TRUST BAR ══ */
+.trust-bar{
+  border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);
+  background:var(--s1);
+}
+.trust-inner{
+  max-width:1200px;margin:0 auto;padding:0 24px;
+  display:flex;justify-content:space-around;flex-wrap:wrap;gap:0;
+}
+.trust-item{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 24px;
+  border-right:1px solid var(--bd);flex:1;min-width:160px;
+}
+.trust-item:last-child{border-right:none}
+.trust-ico{font-size:1.2rem;flex-shrink:0}
+.trust-text{font-size:.72rem;font-weight:700;line-height:1.3}
+.trust-text span{display:block;font-weight:400;color:var(--muted);font-size:.66rem}
+
+/* ══ SECTION HEADER ══ */
+.section-hd{
+  max-width:1200px;margin:0 auto;padding:48px 24px 20px;
+  display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+}
+.section-label{
+  font-family:var(--mono);font-size:.58rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--lime);
+}
+.section-title{
+  font-size:1.15rem;font-weight:900;letter-spacing:-.03em;margin-top:5px;
+}
+.section-divider{
+  flex:1;height:1px;background:var(--bd);margin:0 16px;align-self:center;
+}
+.section-link{
+  font-size:.72rem;font-weight:700;color:var(--muted);
+  display:flex;align-items:center;gap:5px;transition:color .15s;
+}
+.section-link:hover{color:var(--lime)}
+
+/* ══ CATEGORY PILLS ══ */
+.cats{
+  max-width:1200px;margin:0 auto;padding:0 24px 32px;
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+.cat-pill{
+  font-size:.72rem;font-weight:700;
+  padding:6px 16px;border-radius:100px;
+  border:1px solid var(--bd);background:transparent;
+  color:var(--muted);transition:all .15s;
+}
+.cat-pill:hover{border-color:var(--bd2);color:var(--text)}
+.cat-pill.active{
+  background:var(--lime-s);border-color:var(--lime-b);color:var(--lime);
+}
+
+/* ══ PRODUCT GRID ══ */
+.products{
+  max-width:1200px;margin:0 auto;padding:0 24px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  margin-bottom:52px;
+}
+.pcard{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-lg);
+  overflow:hidden;transition:border-color .2s,transform .2s;
+  display:flex;flex-direction:column;
+}
+.pcard:hover{border-color:var(--bd2);transform:translateY(-3px)}
+.pcard-img{
+  height:160px;background:var(--s2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:3rem;position:relative;overflow:hidden;
+}
+.pcard-badge{
+  position:absolute;top:10px;left:10px;
+  font-family:var(--mono);font-size:.52rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:var(--r-sm);
+}
+.badge-sale{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+.badge-new{background:var(--lime-s);color:var(--lime);border:1px solid var(--lime-b)}
+.badge-hit{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.2)}
+
+.pcard-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:6px}
+.pcard-cat{
+  font-family:var(--mono);font-size:.54rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+}
+.pcard-name{font-size:.82rem;font-weight:700;line-height:1.35;flex:1}
+.pcard-rating{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--muted)}
+.pcard-stars{color:var(--gold);letter-spacing:-.5px}
+
+.pcard-footer{
+  padding:12px 16px;border-top:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.pcard-price{font-size:.92rem;font-weight:900;letter-spacing:-.02em}
+.pcard-price-old{font-size:.68rem;color:var(--dim);text-decoration:line-through;margin-top:1px}
+.pcard-btn{
+  display:flex;align-items:center;gap:5px;
+  background:var(--lime);color:#0d0d0d;
+  padding:7px 12px;border-radius:var(--r-sm);
+  font-size:.68rem;font-weight:800;border:none;
+  transition:opacity .18s;white-space:nowrap;
+}
+.pcard-btn:hover{opacity:.85}
+.pcard-btn svg{flex-shrink:0}
+
+/* ══ FEATURED BANNER ══ */
+.featured{
+  max-width:1200px;margin:0 auto 52px;padding:0 24px;
+}
+.feat-banner{
+  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r-lg);
+  padding:36px 40px;
+  display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;
+  position:relative;overflow:hidden;
+}
+.feat-banner::before{
+  content:'';position:absolute;right:-40px;top:-40px;
+  width:240px;height:240px;border-radius:50%;
+  background:radial-gradient(circle,var(--lime-s),transparent 70%);
+  pointer-events:none;
+}
+.feat-eyebrow{
+  font-family:var(--mono);font-size:.56rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--lime);margin-bottom:10px;
+}
+.feat-title{font-size:1.4rem;font-weight:900;letter-spacing:-.04em;margin-bottom:8px;line-height:1.2}
+.feat-desc{font-size:.8rem;color:var(--muted);line-height:1.65;max-width:380px}
+.feat-visual{font-size:3.5rem;text-align:center;flex-shrink:0;padding:8px}
+
+/* ══ TESTIMONI ══ */
+.testi-wrap{
+  border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);
+  background:var(--s1);margin-bottom:0;
+  padding:40px 0;
+}
+.testi-inner{max-width:1200px;margin:0 auto;padding:0 24px}
+.testi-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px;
+}
+.testi-card{
+  background:var(--bg);border:1px solid var(--bd);border-radius:var(--r-lg);
+  padding:20px;
+}
+.testi-stars{color:var(--lime);font-size:.9rem;margin-bottom:8px;letter-spacing:-.5px}
+.testi-text{font-size:.78rem;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--s2);border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;
+}
+.testi-name{font-size:.72rem;font-weight:700}
+.testi-loc{font-size:.62rem;color:var(--dim)}
+
+/* ══ FOOTER ══ */
+.footer{
+  border-top:1px solid var(--bd);
+  background:var(--s1);
+}
+.footer-inner{
+  max-width:1200px;margin:0 auto;padding:40px 24px 32px;
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;
+}
+.footer-logo{
+  font-size:.95rem;font-weight:900;letter-spacing:-.03em;
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
+.footer-desc{font-size:.75rem;color:var(--muted);line-height:1.7;max-width:220px;margin-bottom:18px}
+.footer-shopee{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.72rem;font-weight:700;
+  color:var(--lime);padding:6px 14px;
+  border:1px solid var(--lime-b);border-radius:var(--r-sm);
+  background:var(--lime-s);transition:all .18s;
+}
+.footer-shopee:hover{background:rgba(163,230,53,.14)}
+.footer-col-title{
+  font-family:var(--mono);font-size:.56rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:14px;
+}
+.footer-links{display:flex;flex-direction:column;gap:9px}
+.footer-links a{font-size:.75rem;color:var(--muted);transition:color .15s}
+.footer-links a:hover{color:var(--lime)}
+.footer-bottom{
+  border-top:1px solid var(--bd);padding:14px 24px;
+  max-width:1200px;margin:0 auto;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  flex-wrap:wrap;
+}
+.footer-copy{font-size:.68rem;color:var(--dim)}
+.footer-badges{display:flex;gap:8px}
+.f-badge{
+  font-family:var(--mono);font-size:.52rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:var(--r-sm);
+  background:var(--s2);border:1px solid var(--bd);color:var(--muted);
+}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1024px){
+  .products{grid-template-columns:repeat(3,1fr)}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:28px}
+}
+@media(max-width:768px){
+  .hero{grid-template-columns:1fr;gap:28px}
+  .hero-visual{display:none}
+  .products{grid-template-columns:repeat(2,1fr);gap:12px}
+  .testi-grid{grid-template-columns:1fr}
+  .trust-inner{flex-direction:column;gap:0}
+  .trust-item{border-right:none;border-bottom:1px solid var(--bd)}
+  .trust-item:last-child{border-bottom:none}
+  .h-nav{display:none}
+  .footer-inner{grid-template-columns:1fr 1fr}
+  .feat-banner{grid-template-columns:1fr;text-align:center}
+  .feat-visual{display:none}
+}
+@media(max-width:480px){
+  .header-inner{padding:10px 16px;gap:10px}
+  .hero{padding:32px 16px 28px}
+  .products{grid-template-columns:1fr 1fr;padding:0 16px}
+  .section-hd{padding:36px 16px 16px}
+  .cats{padding:0 16px 24px}
+  .featured{padding:0 16px}
+  .testi-inner{padding:0 16px}
+  .feat-banner{padding:24px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- DION NAV -->
+<div id="dion-nav">
+  <a href="../" class="back"><svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>Penawaran</a>
+  <span class="dn-sep">·</span>
+  <span class="dn-label">Demo — BersihMart (Clean Theme)</span>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      BersihMart
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Cari produk..."/>
+      <button class="search-btn" aria-label="Cari">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-width="2.5" d="m21 21-4.35-4.35"/></svg>
+      </button>
+    </div>
+
+    <div class="h-spacer"></div>
+
+    <nav class="h-nav">
+      <a href="#">Produk</a>
+      <a href="#">Promo</a>
+      <a href="#">Tentang</a>
+    </nav>
+
+    <a href="#" class="h-cart">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      Keranjang
+      <div class="cart-count">3</div>
+    </a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-label">Toko Resmi</div>
+    <h1 class="hero-title">Produk Pilihan,<br/>Harga <em>Bersih</em></h1>
+    <p class="hero-desc">Semua produk dikurasi langsung dari supplier terpercaya. Checkout mudah via Shopee — tanpa perlu daftar akun baru.</p>
+    <div class="hero-actions">
+      <button class="btn-prime">
+        Belanja Sekarang
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </button>
+      <button class="btn-ghost">Lihat Semua Produk</button>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">200+</div>
+        <div class="stat-label">Produk tersedia</div>
+      </div>
+      <div>
+        <div class="stat-num">4.9★</div>
+        <div class="stat-label">Rating toko</div>
+      </div>
+      <div>
+        <div class="stat-num">2rb+</div>
+        <div class="stat-label">Pesanan selesai</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual mockup -->
+  <div class="hero-visual">
+    <div class="hv-top">
+      <div class="hv-dot"></div>
+      <div class="hv-dot"></div>
+      <div class="hv-dot lime"></div>
+    </div>
+    <div class="hv-grid">
+      <div class="hv-product">
+        <div class="hv-img">🌿</div>
+        <div class="hv-name">Sabun Herbal Aloe</div>
+        <div class="hv-price">Rp 32.000</div>
+        <div class="hv-shopee">Beli di <span>Shopee ›</span></div>
+      </div>
+      <div class="hv-product">
+        <div class="hv-img">🧴</div>
+        <div class="hv-name">Lotion Vitamin C</div>
+        <div class="hv-price">Rp 58.000</div>
+        <div class="hv-shopee">Beli di <span>Shopee ›</span></div>
+      </div>
+      <div class="hv-product">
+        <div class="hv-img">🪴</div>
+        <div class="hv-name">Serum Niacinamide</div>
+        <div class="hv-price">Rp 75.000</div>
+        <div class="hv-shopee">Beli di <span>Shopee ›</span></div>
+      </div>
+      <div class="hv-product">
+        <div class="hv-img">🌾</div>
+        <div class="hv-name">Masker Clay 100g</div>
+        <div class="hv-price">Rp 45.000</div>
+        <div class="hv-shopee">Beli di <span>Shopee ›</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item">
+      <div class="trust-ico">✅</div>
+      <div class="trust-text">Produk Asli
+        <span>100% original, bergaransi</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico">🚚</div>
+      <div class="trust-text">Pengiriman Cepat
+        <span>Same-day untuk area Surabaya</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico">🔒</div>
+      <div class="trust-text">Transaksi Aman
+        <span>Via Shopee, terlindungi ShopeePay</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico">💬</div>
+      <div class="trust-text">CS Aktif
+        <span>Senin–Sabtu 08.00–21.00</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KATEGORI -->
+<div class="section-hd">
+  <div>
+    <div class="section-label">Telusuri</div>
+    <div class="section-title">Kategori</div>
+  </div>
+  <div class="section-divider"></div>
+</div>
+<div class="cats">
+  <button class="cat-pill active">Semua</button>
+  <button class="cat-pill">Perawatan Kulit</button>
+  <button class="cat-pill">Rambut</button>
+  <button class="cat-pill">Sabun & Mandi</button>
+  <button class="cat-pill">Suplemen</button>
+  <button class="cat-pill">Bayi & Anak</button>
+  <button class="cat-pill">Peralatan Rumah</button>
+</div>
+
+<!-- PRODUK UNGGULAN -->
+<div class="section-hd">
+  <div>
+    <div class="section-label">Terlaris</div>
+    <div class="section-title">Produk Pilihan</div>
+  </div>
+  <div class="section-divider"></div>
+  <a href="#" class="section-link">Lihat semua <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+</div>
+
+<div class="products">
+
+  <div class="pcard">
+    <div class="pcard-img">🌿
+      <span class="pcard-badge badge-hit">Terlaris</span>
+    </div>
+    <div class="pcard-body">
+      <div class="pcard-cat">Perawatan Kulit</div>
+      <div class="pcard-name">Sabun Herbal Aloe Vera 100g</div>
+      <div class="pcard-rating"><span class="pcard-stars">★★★★★</span> 4.9 (312)</div>
+    </div>
+    <div class="pcard-footer">
+      <div>
+        <div class="pcard-price">Rp 32.000</div>
+        <div class="pcard-price-old">Rp 40.000</div>
+      </div>
+      <button class="pcard-btn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Shopee
+      </button>
+    </div>
+  </div>
+
+  <div class="pcard">
+    <div class="pcard-img">🧴
+      <span class="pcard-badge badge-new">Baru</span>
+    </div>
+    <div class="pcard-body">
+      <div class="pcard-cat">Perawatan Kulit</div>
+      <div class="pcard-name">Lotion Body Vitamin C & E</div>
+      <div class="pcard-rating"><span class="pcard-stars">★★★★★</span> 4.8 (187)</div>
+    </div>
+    <div class="pcard-footer">
+      <div>
+        <div class="pcard-price">Rp 58.000</div>
+      </div>
+      <button class="pcard-btn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Shopee
+      </button>
+    </div>
+  </div>
+
+  <div class="pcard">
+    <div class="pcard-img">🪴</div>
+    <div class="pcard-body">
+      <div class="pcard-cat">Perawatan Kulit</div>
+      <div class="pcard-name">Serum Niacinamide 10% 30ml</div>
+      <div class="pcard-rating"><span class="pcard-stars">★★★★★</span> 4.9 (540)</div>
+    </div>
+    <div class="pcard-footer">
+      <div>
+        <div class="pcard-price">Rp 75.000</div>
+        <div class="pcard-price-old">Rp 89.000</div>
+      </div>
+      <button class="pcard-btn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Shopee
+      </button>
+    </div>
+  </div>
+
+  <div class="pcard">
+    <div class="pcard-img">🌾
+      <span class="pcard-badge badge-sale">−20%</span>
+    </div>
+    <div class="pcard-body">
+      <div class="pcard-cat">Sabun & Mandi</div>
+      <div class="pcard-name">Masker Clay Charcoal 100g</div>
+      <div class="pcard-rating"><span class="pcard-stars">★★★★☆</span> 4.6 (92)</div>
+    </div>
+    <div class="pcard-footer">
+      <div>
+        <div class="pcard-price">Rp 45.000</div>
+        <div class="pcard-price-old">Rp 56.000</div>
+      </div>
+      <button class="pcard-btn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Shopee
+      </button>
+    </div>
+  </div>
+
+  <div class="pcard">
+    <div class="pcard-img">🫐</div>
+    <div class="pcard-body">
+      <div class="pcard-cat">Suplemen</div>
+      <div class="pcard-name">Vitamin C 1000mg Effervescent (30s)</div>
+      <div class="pcard-rating"><span class="pcard-stars">★★★★★</span> 5.0 (213)</div>
+    </div>
+    <div class="pcard-footer">
+      <div>
+        <div class="pcard-price">Rp 62.000</div>
+      </div>
+      <button class="pcard-btn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Shopee
+      </button>
+    </div>
+  </div>
+
+  <div class="pcard">
+    <div class="pcard-img">🌸
+      <span class="pcard-badge badge-hit">Popular</span>
+    </div>
+    <div class="pcard-body">
+      <div class="pcard-cat">Rambut</div>
+      <div class="pcard-name">Hair Serum Argan Oil 50ml</div>
+      <div class="pcard-rating"><span class="pcard-stars">★★★★★</span> 4.8 (408)</div>
+    </div>
+    <div class="pcard-footer">
+      <div>
+        <div class="pcard-price">Rp 89.000</div>
+        <div class="pcard-price-old">Rp 110.000</div>
+      </div>
+      <button class="pcard-btn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Shopee
+      </button>
+    </div>
+  </div>
+
+  <div class="pcard">
+    <div class="pcard-img">🧼</div>
+    <div class="pcard-body">
+      <div class="pcard-cat">Sabun & Mandi</div>
+      <div class="pcard-name">Sabun Cair Tea Tree 500ml</div>
+      <div class="pcard-rating"><span class="pcard-stars">★★★★☆</span> 4.7 (156)</div>
+    </div>
+    <div class="pcard-footer">
+      <div>
+        <div class="pcard-price">Rp 38.000</div>
+      </div>
+      <button class="pcard-btn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Shopee
+      </button>
+    </div>
+  </div>
+
+  <div class="pcard">
+    <div class="pcard-img">🫧
+      <span class="pcard-badge badge-new">Baru</span>
+    </div>
+    <div class="pcard-body">
+      <div class="pcard-cat">Perawatan Kulit</div>
+      <div class="pcard-name">Sunscreen SPF50 PA+++ 40ml</div>
+      <div class="pcard-rating"><span class="pcard-stars">★★★★★</span> 4.9 (621)</div>
+    </div>
+    <div class="pcard-footer">
+      <div>
+        <div class="pcard-price">Rp 95.000</div>
+        <div class="pcard-price-old">Rp 115.000</div>
+      </div>
+      <button class="pcard-btn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Shopee
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FEATURED BANNER -->
+<div class="featured">
+  <div class="feat-banner">
+    <div>
+      <div class="feat-eyebrow">Promo Bulan Ini</div>
+      <div class="feat-title">Paket Skincare<br/>Starter Kit</div>
+      <p class="feat-desc">Dapatkan 5 produk essential skincare dengan harga bundling. Hemat hingga 30% dibanding beli satuan.</p>
+      <div style="margin-top:20px">
+        <button class="btn-prime">Lihat Paket<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-left:6px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></button>
+      </div>
+    </div>
+    <div class="feat-visual">🎁</div>
+  </div>
+</div>
+
+<!-- TESTIMONI -->
+<div class="testi-wrap">
+  <div class="testi-inner">
+    <div class="section-hd" style="padding:0 0 0 0;margin:0 0 4px 0">
+      <div>
+        <div class="section-label">Ulasan</div>
+        <div class="section-title">Yang Mereka Bilang</div>
+      </div>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Produknya asli, packagingnya rapi, pengiriman super cepat. Sudah order 5× ke sini dan tidak pernah kecewa."</div>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Rizka A.</div>
+            <div class="testi-loc">Surabaya · via Shopee</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Serum niacinamide-nya bagus banget, kulit jadi lebih cerah setelah 2 minggu pakai. Harganya juga wajar."</div>
+        <div class="testi-author">
+          <div class="testi-avatar">👧</div>
+          <div>
+            <div class="testi-name">Sita W.</div>
+            <div class="testi-loc">Jakarta · via Shopee</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"CS-nya responsif, langsung dibalas dalam hitungan menit. Produk juga sesuai deskripsi, no tipu-tipu."</div>
+        <div class="testi-author">
+          <div class="testi-avatar">🧑</div>
+          <div>
+            <div class="testi-name">Budi H.</div>
+            <div class="testi-loc">Malang · via Shopee</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">
+        <div class="logo-dot"></div>
+        BersihMart
+      </div>
+      <div class="footer-desc">Marketplace produk perawatan diri pilihan. Semua transaksi dilakukan aman via Shopee.</div>
+      <a href="#" class="footer-shopee">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03L21 4H5.21L4 1H1v2h2l3.6 7.59L5.25 13c-.16.28-.25.61-.25.95C5 15.1 5.9 16 7 16h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+        Kunjungi Toko Shopee
+      </a>
+    </div>
+    <div>
+      <div class="footer-col-title">Produk</div>
+      <div class="footer-links">
+        <a href="#">Perawatan Kulit</a>
+        <a href="#">Rambut</a>
+        <a href="#">Sabun & Mandi</a>
+        <a href="#">Suplemen</a>
+        <a href="#">Bayi & Anak</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Informasi</div>
+      <div class="footer-links">
+        <a href="#">Tentang Kami</a>
+        <a href="#">Kebijakan Retur</a>
+        <a href="#">FAQ</a>
+        <a href="#">Cara Pemesanan</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Kontak</div>
+      <div class="footer-links">
+        <a href="#">WhatsApp</a>
+        <a href="#">Instagram</a>
+        <a href="#">Email</a>
+        <a href="#">Shopee Chat</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 BersihMart. Semua hak dilindungi.</div>
+    <div class="footer-badges">
+      <span class="f-badge">Demo</span>
+      <span class="f-badge">Clean Theme</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Category pill switch */
+document.querySelectorAll('.cat-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+/* Shopee button click */
+document.querySelectorAll('.pcard-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    alert('Demo: Tombol ini akan mengarahkan ke halaman produk di Shopee.');
+  });
+});
+</script>
+</body>
+</html>
