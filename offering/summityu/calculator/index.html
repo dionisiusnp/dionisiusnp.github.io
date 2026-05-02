@@ -181,6 +181,85 @@ input[type=range]::-webkit-slider-thumb{
 }
 .tag:hover,.tag.active{background:rgba(22,163,74,.08);border-color:rgba(22,163,74,.3);color:var(--a2)}
 
+/* TIM ITEMS */
+.tim-item{
+  display:grid;grid-template-columns:1fr 90px auto;gap:8px;align-items:center;
+  margin-bottom:8px;
+}
+.tim-item input[type=text]{font-size:.76rem}
+.tim-item input[type=number]{font-size:.76rem}
+.tim-pct-wrap{position:relative;display:flex;align-items:center}
+.tim-pct-wrap input{padding-right:28px}
+.tim-pct-wrap .input-suffix{right:8px;font-size:.7rem}
+.pct-warning{
+  font-size:.65rem;color:var(--red);margin-top:6px;
+  display:none;
+}
+.pct-ok{font-size:.65rem;color:var(--a2);margin-top:6px;display:none}
+
+/* TIM RESULT */
+.tim-result-wrap{
+  background:rgba(99,102,241,.04);border:1px solid rgba(99,102,241,.15);
+  border-radius:var(--r-lg);padding:14px 16px;margin-top:14px;
+}
+.tim-result-title{
+  font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(165,180,252,.6);margin-bottom:10px;
+}
+.tim-result-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:.75rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);
+}
+.tim-result-row:last-child{border-bottom:none}
+.tim-result-row .tr-name{color:var(--muted)}
+.tim-result-row .tr-pct{font-size:.62rem;color:rgba(255,255,255,.2);margin-left:4px}
+.tim-result-row .tr-ticket{font-family:var(--font-mono);font-weight:600;font-size:.7rem;color:var(--text)}
+.tim-result-row .tr-trip{font-family:var(--font-mono);font-size:.65rem;color:rgba(74,222,128,.7)}
+.tim-result-header{
+  display:flex;justify-content:space-between;
+  font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);padding-bottom:6px;border-bottom:1px solid var(--bd);margin-bottom:4px;
+}
+.sisa-warning{
+  font-size:.65rem;color:var(--red);margin-top:8px;padding-top:8px;border-top:1px solid rgba(248,113,113,.15);
+}
+
+/* PPN TOGGLE */
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:var(--r-md);
+  border:1px solid var(--bd);background:var(--s2);margin-bottom:12px;
+  cursor:pointer;transition:border-color .18s;
+}
+.toggle-row:hover{border-color:rgba(22,163,74,.3)}
+.toggle-row.active{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.04)}
+.toggle-label{font-size:.76rem;font-weight:600;color:var(--muted)}
+.toggle-row.active .toggle-label{color:var(--text)}
+.toggle-sub{font-size:.62rem;color:rgba(255,255,255,.2);margin-top:1px}
+.toggle-switch{
+  width:36px;height:20px;border-radius:10px;background:rgba(255,255,255,.1);
+  position:relative;transition:background .2s;flex-shrink:0;
+}
+.toggle-switch::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:14px;height:14px;border-radius:50%;background:var(--muted);
+  transition:transform .2s,background .2s;
+}
+.toggle-row.active .toggle-switch{background:rgba(22,163,74,.4)}
+.toggle-row.active .toggle-switch::after{transform:translateX(16px);background:var(--a2)}
+.ppn-rate-row{
+  display:flex;align-items:center;gap:10px;
+  padding:0 0 12px 0;
+}
+.ppn-rate-row label{font-size:.72rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.ppn-rate-row input{max-width:80px}
+.ppn-presets{display:flex;gap:6px;flex-wrap:wrap}
+.ppn-preset{
+  font-size:.62rem;font-weight:600;padding:3px 10px;border-radius:var(--r-pill);
+  border:1px solid var(--bd);color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.ppn-preset:hover,.ppn-preset.active{background:rgba(22,163,74,.08);border-color:rgba(22,163,74,.3);color:var(--a2)}
+
 /* RESET */
 .reset-btn{
   display:flex;align-items:center;justify-content:center;gap:6px;
@@ -279,6 +358,18 @@ input[type=range]::-webkit-slider-thumb{
         </div>
       </div>
 
+      <!-- PEMBAGIAN MARGIN TIM -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-title">Pembagian Margin ke Tim</div>
+        <p style="font-size:.72rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Tentukan berapa persen dari total margin yang diterima masing-masing anggota tim per tiket terjual.</p>
+
+        <div id="timItems"></div>
+        <button class="add-btn" onclick="addTim()">+ Tambah Anggota Tim</button>
+
+        <div id="pctWarning" class="pct-warning">⚠️ Total persentase melebihi 100%</div>
+        <div id="pctOk" class="pct-ok">✓ Total persentase: <span id="pctTotal">0</span>%</div>
+      </div>
+
       <!-- MARGIN & FEE -->
       <div class="panel">
         <div class="panel-title">Margin & Platform</div>
@@ -307,7 +398,34 @@ input[type=range]::-webkit-slider-thumb{
           </div>
         </div>
 
-        <div class="field" style="margin-top:16px">
+        <div class="section-gap"></div>
+
+        <div class="field">
+          <div class="field-label" style="margin-bottom:10px">PPN (Pajak Pertambahan Nilai)</div>
+          <div class="toggle-row" id="ppnToggle" onclick="togglePpn()">
+            <div>
+              <div class="toggle-label">Tambahkan PPN ke harga tiket</div>
+              <div class="toggle-sub">Harga final akan mencakup pajak</div>
+            </div>
+            <div class="toggle-switch"></div>
+          </div>
+          <div id="ppnOptions" style="display:none">
+            <div class="ppn-rate-row">
+              <label>Tarif PPN</label>
+              <div class="input-wrap has-suffix" style="max-width:80px">
+                <input type="number" id="ppnRate" value="11" min="0" max="100" step="0.5" oninput="syncPpnPreset();recalc()"/>
+                <span class="input-suffix">%</span>
+              </div>
+              <div class="ppn-presets">
+                <span class="ppn-preset" onclick="setPpnRate(0,this)">0%</span>
+                <span class="ppn-preset active" onclick="setPpnRate(11,this)">11%</span>
+                <span class="ppn-preset" onclick="setPpnRate(12,this)">12%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:4px">
           <div class="field-label">Pembulatan Harga <span class="field-hint">ke kelipatan</span></div>
           <div class="tag-wrap" id="roundTags">
             <span class="tag" onclick="setRound(0,this)">Tidak</span>
@@ -373,6 +491,10 @@ input[type=range]::-webkit-slider-thumb{
           <span class="r-label">+ Platform Fee (<span id="r-platform-pct">0%</span>)</span>
           <span class="r-val" id="r-platform-val">Rp 0</span>
         </div>
+        <div class="result-row" id="r-ppn-row" style="display:none">
+          <span class="r-label">+ PPN (<span id="r-ppn-pct">11%</span>)</span>
+          <span class="r-val" id="r-ppn-val">Rp 0</span>
+        </div>
         <div class="result-row" id="r-round-row" style="display:none">
           <span class="r-label">Pembulatan</span>
           <span class="r-val" id="r-round-val">–</span>
@@ -382,6 +504,23 @@ input[type=range]::-webkit-slider-thumb{
           <div class="final-label">Harga Tiket Final</div>
           <div class="final-num" id="r-final">Rp 0</div>
           <div class="final-note" id="r-final-note">per orang / per tiket</div>
+        </div>
+
+        <!-- TIM RESULT -->
+        <div class="tim-result-wrap" id="timResultWrap" style="display:none">
+          <div class="tim-result-title">Pembagian Margin per Tiket</div>
+          <div class="tim-result-header">
+            <span>Anggota</span>
+            <span style="display:flex;gap:24px"><span>/ tiket</span><span>/ trip</span></span>
+          </div>
+          <div id="timResultRows"></div>
+          <div id="sisaRow" style="display:none" class="tim-result-row">
+            <span class="tr-name" style="color:rgba(255,255,255,.3)">Sisa (tidak dibagi)</span>
+            <span style="display:flex;gap:24px">
+              <span class="tr-ticket" id="sisa-ticket" style="color:rgba(255,255,255,.3)">–</span>
+              <span class="tr-trip" id="sisa-trip" style="color:rgba(255,255,255,.3)">–</span>
+            </span>
+          </div>
         </div>
 
         <button class="reset-btn" onclick="resetAll()">
@@ -397,10 +536,13 @@ input[type=range]::-webkit-slider-thumb{
 <script>
 /* ── State ── */
 let roundTo = 5000;
+let ppnOn = false;
 let tetapItems = [];
 let perorangItems = [];
+let timItems = [];
 let tetapIdCounter = 0;
 let perorangIdCounter = 0;
+let timIdCounter = 0;
 
 /* ── Format currency ── */
 function fmt(n) {
@@ -459,6 +601,79 @@ function delCost(type, id) {
   recalc();
 }
 
+/* ── PPN toggle ── */
+function togglePpn() {
+  ppnOn = !ppnOn;
+  const toggle = document.getElementById('ppnToggle');
+  const opts = document.getElementById('ppnOptions');
+  toggle.classList.toggle('active', ppnOn);
+  opts.style.display = ppnOn ? 'block' : 'none';
+  recalc();
+}
+function setPpnRate(val, el) {
+  document.getElementById('ppnRate').value = val;
+  document.querySelectorAll('.ppn-preset').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  recalc();
+}
+function syncPpnPreset() {
+  const val = parseFloat(document.getElementById('ppnRate').value) || 0;
+  document.querySelectorAll('.ppn-preset').forEach(p => {
+    const pVal = parseFloat(p.textContent) || 0;
+    p.classList.toggle('active', pVal === val);
+  });
+}
+
+/* ── Tim items ── */
+function renderTimItems() {
+  const el = document.getElementById('timItems');
+  el.innerHTML = '';
+  timItems.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'tim-item';
+    row.innerHTML = `
+      <input type="text" placeholder="Nama anggota" value="${item.label}"
+        oninput="updateTimLabel(${item.id},this.value)"/>
+      <div class="tim-pct-wrap input-wrap has-suffix">
+        <input type="number" placeholder="0" value="${item.pct || ''}" min="0" max="100" step="0.5"
+          oninput="updateTimPct(${item.id},this.value)"/>
+        <span class="input-suffix">%</span>
+      </div>
+      <button class="cost-del" onclick="delTim(${item.id})" title="Hapus">×</button>
+    `;
+    el.appendChild(row);
+  });
+  updatePctIndicator();
+}
+function addTim() {
+  timItems.push({ id: ++timIdCounter, label: '', pct: 0 });
+  renderTimItems();
+  recalc();
+}
+function delTim(id) {
+  timItems = timItems.filter(i => i.id !== id);
+  renderTimItems();
+  recalc();
+}
+function updateTimLabel(id, val) {
+  const item = timItems.find(i => i.id === id);
+  if (item) { item.label = val; recalc(); }
+}
+function updateTimPct(id, val) {
+  const item = timItems.find(i => i.id === id);
+  if (item) { item.pct = parseFloat(val) || 0; updatePctIndicator(); recalc(); }
+}
+function updatePctIndicator() {
+  const total = timItems.reduce((s, i) => s + (i.pct || 0), 0);
+  const warn = document.getElementById('pctWarning');
+  const ok = document.getElementById('pctOk');
+  const pctTotalEl = document.getElementById('pctTotal');
+  if (timItems.length === 0) { warn.style.display = 'none'; ok.style.display = 'none'; return; }
+  pctTotalEl.textContent = Math.round(total * 10) / 10;
+  if (total > 100.01) { warn.style.display = 'block'; ok.style.display = 'none'; }
+  else { warn.style.display = 'none'; ok.style.display = 'block'; }
+}
+
 /* ── Recalculate ── */
 function recalc() {
   const peserta = Math.max(1, parseInt(document.getElementById('peserta').value) || 1);
@@ -481,7 +696,12 @@ function recalc() {
   const marginVal = hpp * (margin / 100);
   const baseAfterMargin = hpp + marginVal;
   const platformVal = baseAfterMargin * (platformFee / 100);
-  const beforeRound = baseAfterMargin + platformVal;
+  const afterPlatform = baseAfterMargin + platformVal;
+
+  // PPN
+  const ppnRate = ppnOn ? (parseFloat(document.getElementById('ppnRate').value) || 0) : 0;
+  const ppnVal = afterPlatform * (ppnRate / 100);
+  const beforeRound = afterPlatform + ppnVal;
 
   // Rounding
   let final = beforeRound;
@@ -507,6 +727,21 @@ function recalc() {
   const pfRow = document.getElementById('r-platform-row');
   pfRow.style.display = platformFee > 0 ? 'flex' : 'none';
 
+  // PPN row
+  const ppnRow = document.getElementById('r-ppn-row');
+  if (ppnOn && ppnRate > 0) {
+    ppnRow.style.display = 'flex';
+    document.getElementById('r-ppn-pct').textContent = ppnRate + '%';
+    document.getElementById('r-ppn-val').textContent = fmt(ppnVal);
+  } else {
+    ppnRow.style.display = 'none';
+  }
+
+  // Final note
+  document.getElementById('r-final-note').textContent = ppnOn && ppnRate > 0
+    ? `per orang / per tiket (sudah termasuk PPN ${ppnRate}%)`
+    : 'per orang / per tiket';
+
   // Round row
   const rRow = document.getElementById('r-round-row');
   if (roundTo > 0 && roundDiff > 0) {
@@ -523,6 +758,48 @@ function recalc() {
   // Slider fill
   updateSliderFill('margin', margin, 0, 100);
   updateSliderFill('platformFee', platformFee, 0, 50);
+
+  // Tim margin split
+  renderTimResult(marginVal, peserta);
+}
+
+function renderTimResult(marginPerTicket, peserta) {
+  const wrap = document.getElementById('timResultWrap');
+  const rowsEl = document.getElementById('timResultRows');
+  const sisaRow = document.getElementById('sisaRow');
+
+  if (timItems.length === 0 || marginPerTicket <= 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+
+  const totalPct = timItems.reduce((s, i) => s + (i.pct || 0), 0);
+  rowsEl.innerHTML = timItems.map(item => {
+    const perTicket = marginPerTicket * ((item.pct || 0) / 100);
+    const perTrip = perTicket * peserta;
+    return `
+      <div class="tim-result-row">
+        <span class="tr-name">${item.label || '(tanpa nama)'}<span class="tr-pct">${item.pct || 0}%</span></span>
+        <span style="display:flex;gap:24px">
+          <span class="tr-ticket">${fmt(perTicket)}</span>
+          <span class="tr-trip">${fmt(perTrip)}</span>
+        </span>
+      </div>
+    `;
+  }).join('');
+
+  // Sisa margin yang tidak dibagi
+  const sisaPct = 100 - totalPct;
+  if (sisaPct > 0.01 && totalPct > 0) {
+    const sisaTicket = marginPerTicket * (sisaPct / 100);
+    const sisaTrip = sisaTicket * peserta;
+    sisaRow.style.display = 'flex';
+    document.getElementById('sisa-ticket').textContent = fmt(sisaTicket);
+    document.getElementById('sisa-trip').textContent = fmt(sisaTrip);
+  } else {
+    sisaRow.style.display = 'none';
+  }
 }
 
 function renderBreakdown(elId, items, divisor, divide) {
@@ -648,14 +925,22 @@ function resetAll() {
   document.getElementById('durasi').value = 3;
   document.getElementById('margin').value = 30;
   document.getElementById('platformFee').value = 0;
+  ppnOn = false;
+  document.getElementById('ppnToggle').classList.remove('active');
+  document.getElementById('ppnOptions').style.display = 'none';
+  document.getElementById('ppnRate').value = 11;
+  document.querySelectorAll('.ppn-preset').forEach(p => p.classList.toggle('active', p.textContent === '11%'));
   updateMarginLabel();
   updatePlatformLabel();
   tetapIdCounter = 0;
   perorangIdCounter = 0;
+  timIdCounter = 0;
   tetapItems = [];
   perorangItems = [];
+  timItems = [];
   renderItems('biayaTetap', tetapItems, 'tetap');
   renderItems('biayaPerOrang', perorangItems, 'perorang');
+  renderTimItems();
   recalc();
 }
 
