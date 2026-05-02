@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Penawaran — Summit Yu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090f;
+  --surface:#0f0f18;
+  --card:rgba(255,255,255,.04);
+  --bd:rgba(255,255,255,.08);
+  --bd2:rgba(255,255,255,.13);
+  --text:#e2e2ee;
+  --muted:#8888aa;
+  --dim:rgba(255,255,255,.22);
+  --accent:#16a34a;
+  --a2:#4ade80;
+  --a3:#86efac;
+  --green:#34d399;
+  --gold:#fbbf24;
+  --red:#f87171;
+  --page-accent:var(--accent);
+  --font-sans:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --r-xs:4px;
+  --r-sm:7px;
+  --r-md:10px;
+  --r-lg:14px;
+  --r-xl:20px;
+  --r-pill:999px;
+  --shadow-card:0 4px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+/* ══ DION NAV ══ */
+#dion-nav{position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:9px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);font-family:var(--font-sans);font-size:.72rem}
+#dion-nav a.back{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--muted);padding:4px 11px;border-radius:var(--r-sm);border:1px solid var(--bd);text-decoration:none;transition:color .18s,border-color .18s}
+#dion-nav a.back:hover{color:var(--accent);border-color:rgba(22,163,74,.3)}
+
+/* ══ HEADER ══ */
+.header{
+  display:flex;align-items:center;gap:14px;
+  padding:15px 48px;
+  border-bottom:1px solid var(--bd);
+  background:rgba(9,9,15,.95);backdrop-filter:blur(16px);
+  position:sticky;top:37px;z-index:100;
+}
+.h-title{font-size:.88rem;font-weight:800;letter-spacing:-.02em}
+.h-spacer{flex:1}
+.h-wa{
+  display:flex;align-items:center;gap:7px;
+  font-size:.72rem;font-weight:700;color:#fff;
+  background:#25d366;padding:7px 16px;border-radius:var(--r-sm);transition:all .2s;
+}
+.h-wa:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(37,211,102,.3)}
+
+/* ══ HERO ══ */
+.hero{
+  text-align:center;padding:72px 24px 60px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:700px;height:350px;
+  background:radial-gradient(ellipse,rgba(22,163,74,.12),transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);
+  font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--a2);background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.22);
+  padding:5px 14px;border-radius:var(--r-xl);margin-bottom:20px;
+}
+.hero-title{
+  font-size:clamp(1.9rem,3.8vw,2.8rem);font-weight:900;letter-spacing:-.04em;
+  line-height:1.08;margin-bottom:14px;
+}
+.hero-title span{
+  background:linear-gradient(135deg,var(--text) 20%,var(--a2) 65%,var(--a3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:.88rem;color:var(--muted);max-width:480px;margin:0 auto;line-height:1.75}
+.hero-tags{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:20px}
+.hero-tag{
+  font-size:.65rem;font-weight:600;color:var(--muted);
+  padding:4px 12px;border-radius:var(--r-pill);border:1px solid var(--bd);
+}
+
+/* ══ CARDS ══ */
+.cards-wrap{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:20px;max-width:860px;margin:56px auto 0;padding:0 24px;
+}
+
+.offer-card{
+  background:var(--surface);
+  border:1.5px solid var(--bd);
+  border-radius:var(--r-xl);padding:36px 32px;
+  display:flex;flex-direction:column;
+  transition:border-color .25s,box-shadow .25s;
+  position:relative;
+}
+.offer-card:hover{border-color:rgba(22,163,74,.3);box-shadow:0 12px 48px rgba(22,163,74,.06)}
+
+.offer-card.featured{
+  border-color:rgba(22,163,74,.35);
+  background:linear-gradient(160deg,rgba(22,163,74,.06),rgba(74,222,128,.02),var(--surface));
+  box-shadow:0 0 48px rgba(22,163,74,.07);
+}
+.offer-card.featured:hover{border-color:rgba(22,163,74,.55);box-shadow:0 14px 56px rgba(22,163,74,.13)}
+
+.rec-badge{
+  position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  background:linear-gradient(135deg,var(--accent),var(--a2));
+  color:#fff;padding:4px 16px;border-radius:var(--r-xl);white-space:nowrap;
+}
+
+.card-type{
+  font-family:var(--font-mono);
+  font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.card-name{font-size:1.4rem;font-weight:900;letter-spacing:-.03em;margin-bottom:6px}
+.card-tagline{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:28px}
+
+.card-price{margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--bd)}
+.price-num{
+  font-size:2.2rem;font-weight:900;letter-spacing:-.04em;
+  background:linear-gradient(135deg,var(--text),rgba(255,255,255,.75));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.featured .price-num{
+  background:linear-gradient(135deg,var(--a2),var(--a3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.price-unit{font-size:.78rem;color:var(--muted);font-weight:500;margin-left:4px}
+.price-note{font-size:.7rem;color:var(--muted);margin-top:6px;line-height:1.5}
+.price-badge{
+  display:inline-flex;align-items:center;gap:5px;margin-top:8px;
+  font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  background:rgba(22,163,74,.1);color:var(--a2);border:1px solid rgba(22,163,74,.2);
+  padding:3px 10px;border-radius:var(--r-pill);
+}
+
+.features{list-style:none;display:flex;flex-direction:column;gap:11px;flex:1;margin-bottom:28px}
+.features li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:.8rem;line-height:1.5;
+}
+.feat-check{
+  width:18px;height:18px;border-radius:50%;flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;
+}
+.feat-check.yes{background:rgba(52,211,153,.12);color:var(--green)}
+.feat-check.no{background:rgba(255,255,255,.04);color:rgba(255,255,255,.2);font-size:12px}
+.feat-text{color:var(--text)}
+.feat-text.dim{color:var(--muted)}
+
+.info-box{
+  border-radius:var(--r-md);padding:12px 14px;margin-bottom:24px;
+  font-size:.72rem;line-height:1.65;
+  display:flex;align-items:flex-start;gap:8px;
+}
+.info-box.green{background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.16);color:rgba(52,211,153,.85)}
+.info-box.gold{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.18);color:rgba(251,191,36,.85)}
+.info-ico{flex-shrink:0;font-size:14px;margin-top:1px}
+
+.card-btn{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:12px 20px;border-radius:var(--r-md);
+  font-size:.84rem;font-weight:700;
+  cursor:pointer;border:none;width:100%;transition:all .22s;
+}
+.btn-outline{background:transparent;border:1.5px solid var(--bd2);color:var(--muted)}
+.btn-outline:hover{border-color:var(--accent);color:var(--a2);background:rgba(22,163,74,.06)}
+.btn-fill{
+  background:linear-gradient(135deg,var(--accent),var(--a2));
+  color:#fff;box-shadow:0 3px 18px rgba(22,163,74,.25);
+}
+.btn-fill:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(22,163,74,.45)}
+
+/* ══ HOW IT WORKS ══ */
+.how-wrap{max-width:860px;margin:64px auto 0;padding:0 24px}
+.section-title{
+  font-size:.88rem;font-weight:800;letter-spacing:-.02em;
+  margin-bottom:28px;display:flex;align-items:center;gap:12px;color:var(--muted);
+}
+.section-title::before,.section-title::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.step{
+  background:var(--surface);border:1px solid var(--bd);
+  border-radius:var(--r-lg);padding:20px 18px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.step-num{
+  font-family:var(--font-mono);font-size:.6rem;font-weight:700;letter-spacing:.1em;
+  color:var(--a2);background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.15);
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.step-title{font-size:.82rem;font-weight:700}
+.step-desc{font-size:.72rem;color:var(--muted);line-height:1.6}
+
+/* ══ COMPARE ══ */
+.compare-wrap{max-width:860px;margin:64px auto 0;padding:0 24px 72px}
+
+.ct{width:100%;border-collapse:collapse;font-size:.78rem}
+.ct th{
+  padding:11px 18px;
+  font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);border-bottom:1px solid var(--bd);text-align:left;
+}
+.ct th:not(:first-child){text-align:center;width:22%}
+.ct td{padding:11px 18px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted)}
+.ct td:not(:first-child){text-align:center}
+.ct tr:hover td{background:rgba(255,255,255,.018)}
+.ct .fn{color:var(--text);font-weight:500}
+.ct .ck{color:var(--green);font-size:1rem;font-weight:700}
+.ct .cx{color:rgba(255,255,255,.18)}
+.ct .note{font-size:.68rem;color:var(--muted)}
+.ct .cat td{
+  background:rgba(22,163,74,.04);
+  font-family:var(--font-mono);
+  font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(74,222,128,.6);padding-top:16px;padding-bottom:8px;
+}
+
+/* ══ FAQ ══ */
+.faq-wrap{max-width:620px;margin:0 auto;padding:0 24px 72px}
+.faq-item{border-bottom:1px solid var(--bd);padding:15px 0}
+.faq-q{
+  font-size:.82rem;font-weight:700;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;user-select:none;
+}
+.faq-q:hover{color:var(--a2)}
+.faq-ico{color:var(--muted);font-size:1.1rem;font-weight:300;transition:transform .2s;flex-shrink:0}
+.faq-item.open .faq-ico{transform:rotate(45deg);color:var(--a2)}
+.faq-a{font-size:.77rem;color:var(--muted);line-height:1.75;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.faq-item.open .faq-a{max-height:260px;padding-top:10px}
+
+/* ══ BOTTOM CTA ══ */
+.bottom{
+  text-align:center;padding:56px 24px;
+  border-top:1px solid var(--bd);
+}
+.bottom h2{font-size:1.3rem;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
+.bottom p{font-size:.82rem;color:var(--muted);margin-bottom:24px}
+.btn-group{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.bwa{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#25d366;color:#fff;
+  padding:11px 22px;border-radius:var(--r-md);font-size:.82rem;font-weight:700;transition:all .22s;
+}
+.bwa:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(37,211,102,.3)}
+.bemail{
+  display:inline-flex;align-items:center;gap:7px;
+  background:transparent;border:1.5px solid var(--bd2);color:var(--muted);
+  padding:11px 22px;border-radius:var(--r-md);font-size:.82rem;font-weight:700;transition:all .22s;
+}
+.bemail:hover{border-color:var(--a2);color:var(--a2)}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:680px){
+  .cards-wrap{grid-template-columns:1fr;max-width:440px}
+  .steps{grid-template-columns:1fr 1fr}
+  .header{padding:12px 16px}
+  .hero{padding:52px 16px 44px}
+  .compare-wrap,.faq-wrap{padding:0 16px 56px}
+  .how-wrap{padding:0 16px}
+  .bottom{padding:44px 16px}
+}
+</style>
+</head>
+<body>
+
+<div id="dion-nav">
+  <a href="/" class="back">
+    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>
+    dionisiusnp.github.io
+  </a>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <span class="h-title">Penawaran — Summit Yu</span>
+  <div class="h-spacer"></div>
+  <a href="https://wa.me/6285708251737" target="_blank" class="h-wa">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Tanya via WhatsApp
+  </a>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">⛰️ Summit Yu</div>
+  <h1 class="hero-title">Dua Model,<br/><span>Satu Platform</span></h1>
+  <p class="hero-sub">Platform lengkap untuk wisata pendakian — website, aplikasi Android, dan iOS — kelola pendaftaran, jadwal trip, porter & guide dalam satu ekosistem.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">🌐 Website</span>
+    <span class="hero-tag">🤖 Android</span>
+    <span class="hero-tag">🍎 iOS</span>
+    <span class="hero-tag">Booking & Jadwal Trip</span>
+    <span class="hero-tag">Manajemen Porter & Guide</span>
+    <span class="hero-tag">Payment Gateway</span>
+    <span class="hero-tag">Dashboard Admin</span>
+  </div>
+</section>
+
+<!-- CARDS -->
+<div class="cards-wrap">
+
+  <!-- SHARING PROFIT -->
+  <div class="offer-card featured">
+    <div class="rec-badge">Sharing Modal + Profit</div>
+    <div class="card-type">Model 1</div>
+    <div class="card-name">Sharing Profit</div>
+    <div class="card-tagline">Development ditanggung tim kami. Anda menanggung modal infrastruktur server & akun distribusi — profit kita bagi bersama setiap bulan.</div>
+
+    <div class="card-price">
+      <div><span class="price-num">20%</span><span class="price-unit">dari setiap transaksi</span></div>
+      <div class="price-note">Persentase bersifat diskusi. Modal infrastruktur awal ditanggung klien (estimasi Rp 3–5 Jt) — lihat rincian di bawah.</div>
+      <div class="price-badge">🏗️ Modal Infrastruktur Klien</div>
+    </div>
+
+    <ul class="features">
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Website + Android + iOS dibangun tim kami</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text"><strong>Modal server</strong> ditanggung klien — VPS & database running cost</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text"><strong>Akun Play Store</strong> (Android) ditanggung klien — $25 sekali</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text"><strong>Akun App Store</strong> (iOS) ditanggung klien — $99/tahun</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Development cost (SDM & waktu) ditanggung tim kami</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Maintenance & perbaikan bug tanpa batas</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Pembaruan fitur sesuai kebutuhan operasional</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">1 PIC teknis yang bisa dihubungi</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Laporan transaksi & revenue transparan bulanan</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Integrasi payment gateway (Midtrans/Xendit)</span></li>
+      <li><div class="feat-check no">–</div><span class="feat-text dim">Source code tidak diserahkan</span></li>
+      <li><div class="feat-check no">–</div><span class="feat-text dim">Hak kepemilikan platform di pihak pengembang</span></li>
+    </ul>
+
+    <div class="info-box green">
+      <span class="info-ico">🤝</span>
+      <span>Klien menanggung <strong>modal infrastruktur</strong> (server + akun distribusi app) agar platform bisa running. Kami tanggung seluruh biaya development. Profit dibagi proporsional — kepentingan kita selaras.</span>
+    </div>
+
+    <button class="card-btn btn-fill" onclick="wa('Sharing Profit')">
+      Diskusi Model Ini
+      <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+    </button>
+  </div>
+
+  <!-- JUAL LEPAS -->
+  <div class="offer-card">
+    <div class="card-type">Model 2</div>
+    <div class="card-name">Jual Lepas</div>
+    <div class="card-tagline">Bayar sekali, semua aset diserahkan. Tidak ada bagi hasil — platform sepenuhnya milik Anda untuk dikelola sendiri.</div>
+
+    <div class="card-price">
+      <div><span class="price-num">Rp 75 Jt</span><span class="price-unit">sekali bayar</span></div>
+      <div class="price-note">Mencakup website + Android + iOS (3 platform). Sudah termasuk domain + hosting 1 tahun. Harga final menyesuaikan fitur & spesifikasi yang disepakati.</div>
+    </div>
+
+    <ul class="features">
+      <li><div class="feat-check yes">✓</div><span class="feat-text"><strong>Website</strong> — platform web lengkap</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text"><strong>Aplikasi Android</strong> — publish ke Google Play Store</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text"><strong>Aplikasi iOS</strong> — publish ke Apple App Store</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Source code lengkap ketiga platform diserahkan</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Hak kepemilikan penuh atas seluruh platform</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Domain + hosting 1 tahun (sudah include)</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Deployment & publish ke store oleh tim kami</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">Dokumentasi teknis & handover session</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text"><strong>Perbaikan bug 1 tahun</strong> — selama masa garansi</span></li>
+      <li><div class="feat-check yes">✓</div><span class="feat-text">1 PIC aktif <strong>selama masa garansi 1 tahun</strong></span></li>
+      <li><div class="feat-check no">–</div><span class="feat-text dim">Tidak ada pembaruan fitur</span></li>
+      <li><div class="feat-check no">–</div><span class="feat-text dim">PIC tidak aktif setelah garansi berakhir</span></li>
+    </ul>
+
+    <div class="info-box gold">
+      <span class="info-ico">⚠️</span>
+      <span>PIC dan perbaikan bug aktif selama <strong>1 tahun</strong>. Pembaruan fitur tidak termasuk. Perpanjangan domain & hosting tahun berikutnya ditanggung klien.</span>
+    </div>
+
+    <button class="card-btn btn-outline" onclick="wa('Jual Lepas')">
+      Tanya &amp; Diskusi
+      <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+    </button>
+  </div>
+
+</div>
+
+<!-- HOW IT WORKS (Sharing Profit) -->
+<div class="how-wrap">
+  <div class="section-title">Cara Kerja Sharing Profit</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Diskusi & Sepakati</div>
+      <div class="step-desc">Kita bahas fitur yang dibutuhkan, persentase bagi hasil, dan target volume transaksi per bulan.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Siapkan Infrastruktur</div>
+      <div class="step-desc">Klien menyediakan modal server, akun Play Store & App Store. Tim kami mulai development website + Android + iOS.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Platform Live</div>
+      <div class="step-desc">Platform go-live, pendaki mulai booking. Anda kelola operasional, kami kelola teknisnya.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-title">Bagi Hasil Bulanan</div>
+      <div class="step-desc">Setiap bulan ada laporan transaksi transparan dan pembagian profit sesuai kesepakatan awal.</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE TABLE -->
+<div class="compare-wrap">
+  <div class="section-title">Perbandingan Singkat</div>
+  <table class="ct">
+    <thead>
+      <tr>
+        <th>Aspek</th>
+        <th>Sharing Profit</th>
+        <th>Jual Lepas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="cat"><td colspan="3">Kepemilikan</td></tr>
+      <tr><td class="fn">Source code</td><td class="cx">–</td><td class="ck">✓</td></tr>
+      <tr><td class="fn">Hak kepemilikan platform</td><td class="note">Di pengembang</td><td class="ck">Milik klien</td></tr>
+      <tr><td class="fn">Kontrol penuh sistem</td><td class="note">Bersama tim</td><td class="ck">✓</td></tr>
+      <tr class="cat"><td colspan="3">Biaya & Investasi</td></tr>
+      <tr><td class="fn">Modal infrastruktur</td><td class="note">Klien (est. Rp 3–5 Jt)</td><td class="note">Include di harga</td></tr>
+      <tr><td class="fn">Biaya development</td><td class="note">Ditanggung tim kami</td><td class="note">Rp 75 Jt (sekali)</td></tr>
+      <tr><td class="fn">Biaya ongoing</td><td class="note">20% per transaksi + server</td><td class="note">Perpanjangan hosting/domain</td></tr>
+      <tr><td class="fn">Play Store + App Store</td><td class="note">Klien (~Rp 2 Jt/thn)</td><td class="note">Klien (akun milik sendiri)</td></tr>
+      <tr><td class="fn">Domain + hosting</td><td class="note">Server klien (selama aktif)</td><td class="note">1 tahun (include)</td></tr>
+      <tr class="cat"><td colspan="3">Dukungan Teknis</td></tr>
+      <tr><td class="fn">Maintenance & bug fix</td><td class="ck">✓ Tanpa batas</td><td class="note">1 tahun (garansi)</td></tr>
+      <tr><td class="fn">Pembaruan fitur</td><td class="ck">✓</td><td class="cx">–</td></tr>
+      <tr><td class="fn">PIC teknis</td><td class="ck">✓ Selama aktif</td><td class="note">Selama garansi (1 thn)</td></tr>
+      <tr class="cat"><td colspan="3">Lain-lain</td></tr>
+      <tr><td class="fn">Cocok untuk</td><td class="note">Modal terbatas, ingin cepat live</td><td class="note">Ada modal, ingin kontrol penuh</td></tr>
+      <tr><td class="fn">Risiko bisnis</td><td class="note">Rendah (bagi bersama)</td><td class="note">Ditanggung klien sendiri</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- FAQ -->
+<div class="faq-wrap">
+  <div class="section-title">Pertanyaan Umum</div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Berapa modal infrastruktur yang perlu disiapkan klien? <span class="faq-ico">+</span></div>
+    <div class="faq-a">Estimasi awal Rp 3–5 Jt, mencakup: VPS/server bulanan (Rp 200–500rb/bln tergantung traffic), akun Google Play Store ($25 sekali bayar ≈ Rp 400rb), dan akun Apple Developer ($99/tahun ≈ Rp 1,6 Jt). Angka pastinya disesuaikan setelah diskusi spesifikasi teknis.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Bagaimana transparansi perhitungan sharing profit? <span class="faq-ico">+</span></div>
+    <div class="faq-a">Setiap transaksi tercatat otomatis di dashboard admin yang bisa diakses kedua pihak. Laporan bulanan dikirim via WhatsApp atau email sebelum tanggal pembagian. Tidak ada angka yang disembunyikan — semua real-time.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Berapa persen sharing profit yang berlaku? <span class="faq-ico">+</span></div>
+    <div class="faq-a">Angka 20% adalah titik awal diskusi. Persentase bisa lebih rendah untuk volume transaksi yang tinggi, atau disesuaikan dengan kompleksitas fitur yang dibutuhkan. Kita sepakati bersama sebelum development dimulai.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Apakah model sharing profit bisa beralih ke jual lepas? <span class="faq-ico">+</span></div>
+    <div class="faq-a">Bisa, dengan biaya konversi yang disepakati. Source code tidak otomatis diserahkan saat sharing profit — harus ada perjanjian alih kepemilikan terpisah jika suatu saat ingin beralih ke model jual lepas.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Apa yang terjadi jika kerjasama sharing profit dihentikan? <span class="faq-ico">+</span></div>
+    <div class="faq-a">Platform dihentikan operasinya dan tidak lagi bisa diakses publik. Data transaksi historis akan diserahkan dalam format spreadsheet. Jika ingin melanjutkan dengan platform sendiri, tersedia opsi pembelian source code dengan harga yang disepakati saat itu.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Platform mencakup apa saja — website, Android, dan iOS semuanya? <span class="faq-ico">+</span></div>
+    <div class="faq-a">Ya, ketiganya dibangun dalam satu ekosistem terintegrasi. Website untuk akses desktop/browser, aplikasi Android di Google Play Store, dan aplikasi iOS di Apple App Store. Fitur standar: booking trip, manajemen porter & guide, jadwal & kuota pendaki, payment gateway, notifikasi push, dan dashboard admin.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Berapa lama proses development awal? <span class="faq-ico">+</span></div>
+    <div class="faq-a">Estimasi 3–6 minggu untuk development awal tergantung kompleksitas fitur yang disepakati. Kedua model memiliki timeline yang sama — setelah selesai, sharing profit langsung masuk masa aktif, jual lepas langsung serah terima.</div>
+  </div>
+</div>
+
+<!-- BOTTOM CTA -->
+<div class="bottom">
+  <h2>Tertarik bergabung bersama Summit Yu?</h2>
+  <p>Ceritakan kondisi & kebutuhan Anda — kami bantu tentukan model yang paling masuk akal.</p>
+  <div class="btn-group">
+    <a href="https://wa.me/6285708251737?text=Halo%2C%20saya%20tertarik%20dengan%20penawaran%20aplikasi%20wisata%20pendakian.%20Bisa%20konsultasi%3F" target="_blank" class="bwa">
+      <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Chat WhatsApp
+    </a>
+    <a href="mailto:dionisiusn1@gmail.com?subject=Konsultasi%20Aplikasi%20Wisata%20Pendakian" class="bemail">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      Kirim Email
+    </a>
+  </div>
+</div>
+
+<script>
+function toggleFaq(el) {
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+function wa(model) {
+  const msg = encodeURIComponent(`Halo, saya tertarik dengan model *${model}* untuk Summit Yu. Bisa konsultasi lebih lanjut?`);
+  window.open(`https://wa.me/6285708251737?text=${msg}`, '_blank');
+}
+</script>
+</body>
+</html>
