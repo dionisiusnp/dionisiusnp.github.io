@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Kalkulator HPP Tiket — Summit Yu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090f;
+  --surface:#0f0f18;
+  --s2:#13131e;
+  --bd:rgba(255,255,255,.08);
+  --bd2:rgba(255,255,255,.13);
+  --text:#e2e2ee;
+  --muted:#8888aa;
+  --dim:rgba(255,255,255,.22);
+  --accent:#16a34a;
+  --a2:#4ade80;
+  --a3:#86efac;
+  --gold:#fbbf24;
+  --red:#f87171;
+  --font-sans:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --r-sm:7px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:999px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+/* NAV */
+#dion-nav{position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:9px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);font-size:.72rem}
+#dion-nav a.back{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--muted);padding:4px 11px;border-radius:var(--r-sm);border:1px solid var(--bd);transition:color .18s,border-color .18s}
+#dion-nav a.back:hover{color:var(--a2);border-color:rgba(22,163,74,.3)}
+#dion-nav .nav-title{font-size:.72rem;color:var(--muted);margin-left:4px}
+
+/* LAYOUT */
+.page{max-width:980px;margin:0 auto;padding:36px 24px 80px}
+.page-header{margin-bottom:32px}
+.page-eyebrow{
+  font-family:var(--font-mono);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--a2);margin-bottom:8px;
+}
+.page-title{font-size:1.6rem;font-weight:900;letter-spacing:-.04em;margin-bottom:6px}
+.page-sub{font-size:.82rem;color:var(--muted);line-height:1.7}
+
+.grid{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r-xl);padding:24px}
+.panel-title{
+  font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:8px;
+}
+.panel-title::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+/* FORM ELEMENTS */
+.field{margin-bottom:16px}
+.field-label{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:6px;
+}
+.field-hint{font-size:.62rem;color:rgba(255,255,255,.22);font-weight:400}
+.input-wrap{position:relative;display:flex;align-items:center}
+.input-prefix,.input-suffix{
+  position:absolute;font-size:.75rem;font-weight:600;color:var(--muted);
+  pointer-events:none;
+}
+.input-prefix{left:12px}
+.input-suffix{right:12px}
+input[type=number],input[type=text]{
+  width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-md);
+  color:var(--text);font-family:var(--font-sans);font-size:.82rem;
+  padding:9px 12px;transition:border-color .18s;outline:none;
+  -moz-appearance:textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+input[type=number]:focus,input[type=text]:focus{border-color:rgba(22,163,74,.4);box-shadow:0 0 0 3px rgba(22,163,74,.06)}
+.has-prefix input{padding-left:36px}
+.has-suffix input{padding-right:36px}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* COST ITEMS */
+.cost-section{margin-bottom:20px}
+.cost-section-label{
+  font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(74,222,128,.55);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bd);
+}
+.cost-item{
+  display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;
+  margin-bottom:8px;
+}
+.cost-item input[type=text]{font-size:.76rem}
+.cost-item input[type=number]{font-size:.76rem}
+.cost-item-price{min-width:130px}
+.cost-del{
+  width:28px;height:28px;border-radius:var(--r-sm);border:1px solid var(--bd);
+  background:transparent;color:rgba(248,113,113,.6);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;
+  transition:all .15s;flex-shrink:0;
+}
+.cost-del:hover{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red)}
+.add-btn{
+  display:flex;align-items:center;gap:6px;
+  font-size:.72rem;font-weight:600;color:var(--a2);
+  background:rgba(22,163,74,.06);border:1px dashed rgba(22,163,74,.25);
+  border-radius:var(--r-md);padding:7px 14px;cursor:pointer;
+  width:100%;justify-content:center;transition:all .18s;margin-top:4px;
+}
+.add-btn:hover{background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.4)}
+
+/* RESULT PANEL */
+.result-panel{
+  background:var(--surface);border:1px solid rgba(22,163,74,.25);
+  border-radius:var(--r-xl);padding:24px;
+  position:sticky;top:56px;
+}
+.result-panel .panel-title{color:var(--a2)}
+.result-panel .panel-title::after{background:rgba(22,163,74,.15)}
+
+.result-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:.78rem;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);
+}
+.result-row:last-child{border-bottom:none}
+.result-row .r-label{color:var(--muted)}
+.result-row .r-val{font-family:var(--font-mono);font-weight:600;color:var(--text)}
+.result-row.indent{padding-left:12px}
+.result-row.indent .r-label{color:rgba(255,255,255,.3);font-size:.72rem}
+.result-row.indent .r-val{color:rgba(255,255,255,.5);font-size:.72rem}
+.result-row.sub-total .r-label{font-weight:700;color:var(--muted)}
+.result-row.sub-total .r-val{color:var(--text)}
+.result-divider{height:1px;background:var(--bd);margin:10px 0}
+
+.final-price{
+  background:linear-gradient(135deg,rgba(22,163,74,.1),rgba(74,222,128,.05));
+  border:1px solid rgba(22,163,74,.3);
+  border-radius:var(--r-lg);padding:16px 18px;margin-top:14px;
+  text-align:center;
+}
+.final-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a2);margin-bottom:6px}
+.final-num{
+  font-size:2rem;font-weight:900;letter-spacing:-.04em;
+  background:linear-gradient(135deg,var(--a2),var(--a3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.final-note{font-size:.65rem;color:var(--muted);margin-top:4px}
+
+.hpp-row{
+  background:rgba(251,191,36,.04);border:1px solid rgba(251,191,36,.12);
+  border-radius:var(--r-md);padding:10px 14px;margin:10px 0;
+}
+.hpp-row .r-label{color:rgba(251,191,36,.7)}
+.hpp-row .r-val{color:var(--gold)}
+
+/* MARGIN SLIDER */
+.slider-wrap{margin-top:6px}
+input[type=range]{
+  width:100%;height:4px;border-radius:2px;outline:none;border:none;
+  background:linear-gradient(to right, var(--accent) 0%, var(--accent) var(--fill,30%), rgba(255,255,255,.1) var(--fill,30%));
+  cursor:pointer;-webkit-appearance:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--a2);box-shadow:0 0 0 3px rgba(22,163,74,.2);cursor:pointer;
+}
+.slider-labels{display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:4px}
+
+/* TAGS */
+.tag-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tag{
+  font-size:.62rem;font-weight:600;padding:3px 10px;border-radius:var(--r-pill);
+  border:1px solid var(--bd);color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.tag:hover,.tag.active{background:rgba(22,163,74,.08);border-color:rgba(22,163,74,.3);color:var(--a2)}
+
+/* RESET */
+.reset-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:9px;margin-top:14px;
+  font-size:.72rem;font-weight:600;color:var(--muted);
+  background:transparent;border:1px solid var(--bd);border-radius:var(--r-md);
+  cursor:pointer;transition:all .18s;
+}
+.reset-btn:hover{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.04)}
+
+/* SECTION DIVIDER */
+.section-gap{height:20px}
+
+@media(max-width:768px){
+  .grid{grid-template-columns:1fr}
+  .result-panel{position:static}
+  .field-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="dion-nav">
+  <a href="../" class="back">
+    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>
+    Summit Yu
+  </a>
+  <span class="nav-title">/ Kalkulator HPP Tiket</span>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-eyebrow">⛰️ Summit Yu — Tool Internal</div>
+    <h1 class="page-title">Kalkulator HPP Tiket</h1>
+    <p class="page-sub">Hitung harga pokok per tiket pendakian berdasarkan biaya operasional, lalu tentukan harga jual final yang akan ditampilkan di aplikasi.</p>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: INPUT -->
+    <div>
+
+      <!-- TRIP INFO -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-title">Info Trip</div>
+
+        <div class="field">
+          <div class="field-label">Nama Trip / Gunung <span class="field-hint">opsional</span></div>
+          <input type="text" id="tripName" placeholder="cth. Pendakian Semeru 3 Hari 2 Malam" oninput="recalc()"/>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Jumlah Peserta</div>
+            <div class="input-wrap">
+              <input type="number" id="peserta" value="10" min="1" oninput="recalc()"/>
+              <span class="input-suffix">orang</span>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">Durasi Trip</div>
+            <div class="input-wrap">
+              <input type="number" id="durasi" value="3" min="1" oninput="recalc()"/>
+              <span class="input-suffix">hari</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Template Cepat</div>
+          <div class="tag-wrap">
+            <span class="tag" onclick="loadTemplate('day')">Day Hike</span>
+            <span class="tag" onclick="loadTemplate('weekend')">2H1M Weekend</span>
+            <span class="tag" onclick="loadTemplate('semeru')">3H2M Semeru</span>
+            <span class="tag" onclick="loadTemplate('rinjani')">4H3M Rinjani</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BIAYA TETAP PER TRIP -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-title">Biaya Tetap per Trip <span style="font-size:.6rem;font-weight:400;text-transform:none;letter-spacing:0">(dibagi jumlah peserta)</span></div>
+
+        <div class="cost-section">
+          <div id="biayaTetap"></div>
+          <button class="add-btn" onclick="addCost('tetap')">+ Tambah Item Biaya Tetap</button>
+        </div>
+      </div>
+
+      <!-- BIAYA PER ORANG -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-title">Biaya per Orang</div>
+
+        <div class="cost-section">
+          <div id="biayaPerOrang"></div>
+          <button class="add-btn" onclick="addCost('perorang')">+ Tambah Item Biaya per Orang</button>
+        </div>
+      </div>
+
+      <!-- MARGIN & FEE -->
+      <div class="panel">
+        <div class="panel-title">Margin & Platform</div>
+
+        <div class="field">
+          <div class="field-label">
+            Margin Keuntungan
+            <span class="field-hint" id="marginPct">30%</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="margin" min="0" max="100" value="30" oninput="updateMarginLabel();recalc()"/>
+            <div class="slider-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+          </div>
+        </div>
+
+        <div class="section-gap"></div>
+
+        <div class="field">
+          <div class="field-label">
+            Platform Fee / Sharing Profit Cut <span class="field-hint">opsional</span>
+            <span class="field-hint" id="platformPct">0%</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="platformFee" min="0" max="50" value="0" oninput="updatePlatformLabel();recalc()"/>
+            <div class="slider-labels"><span>0%</span><span>10%</span><span>20%</span><span>30%</span><span>50%</span></div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:16px">
+          <div class="field-label">Pembulatan Harga <span class="field-hint">ke kelipatan</span></div>
+          <div class="tag-wrap" id="roundTags">
+            <span class="tag" onclick="setRound(0,this)">Tidak</span>
+            <span class="tag active" onclick="setRound(5000,this)">Rp 5.000</span>
+            <span class="tag" onclick="setRound(10000,this)">Rp 10.000</span>
+            <span class="tag" onclick="setRound(25000,this)">Rp 25.000</span>
+            <span class="tag" onclick="setRound(50000,this)">Rp 50.000</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: RESULT -->
+    <div>
+      <div class="result-panel">
+        <div class="panel-title">Hasil Perhitungan</div>
+
+        <div id="resultTripName" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;display:none"></div>
+
+        <div class="result-row">
+          <span class="r-label">Peserta</span>
+          <span class="r-val" id="r-peserta">10 orang</span>
+        </div>
+
+        <div class="result-divider"></div>
+
+        <div class="result-row sub-total">
+          <span class="r-label">Total Biaya Tetap</span>
+          <span class="r-val" id="r-tetap-total">Rp 0</span>
+        </div>
+        <div id="r-tetap-breakdown"></div>
+
+        <div class="result-divider"></div>
+
+        <div class="result-row sub-total">
+          <span class="r-label">Biaya Tetap / Orang</span>
+          <span class="r-val" id="r-tetap-per">Rp 0</span>
+        </div>
+
+        <div class="result-divider"></div>
+
+        <div class="result-row sub-total">
+          <span class="r-label">Total Biaya per Orang</span>
+          <span class="r-val" id="r-perorang-total">Rp 0</span>
+        </div>
+        <div id="r-perorang-breakdown"></div>
+
+        <div class="result-divider"></div>
+
+        <div class="hpp-row result-row">
+          <span class="r-label">⚡ HPP per Tiket</span>
+          <span class="r-val" id="r-hpp">Rp 0</span>
+        </div>
+
+        <div class="result-divider"></div>
+
+        <div class="result-row">
+          <span class="r-label">+ Margin (<span id="r-margin-pct">30%</span>)</span>
+          <span class="r-val" id="r-margin-val">Rp 0</span>
+        </div>
+        <div class="result-row" id="r-platform-row" style="display:none">
+          <span class="r-label">+ Platform Fee (<span id="r-platform-pct">0%</span>)</span>
+          <span class="r-val" id="r-platform-val">Rp 0</span>
+        </div>
+        <div class="result-row" id="r-round-row" style="display:none">
+          <span class="r-label">Pembulatan</span>
+          <span class="r-val" id="r-round-val">–</span>
+        </div>
+
+        <div class="final-price">
+          <div class="final-label">Harga Tiket Final</div>
+          <div class="final-num" id="r-final">Rp 0</div>
+          <div class="final-note" id="r-final-note">per orang / per tiket</div>
+        </div>
+
+        <button class="reset-btn" onclick="resetAll()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Reset Semua
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── State ── */
+let roundTo = 5000;
+let tetapItems = [];
+let perorangItems = [];
+let tetapIdCounter = 0;
+let perorangIdCounter = 0;
+
+/* ── Format currency ── */
+function fmt(n) {
+  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+}
+
+/* ── Render cost items ── */
+function renderItems(containerId, items, type) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'cost-item';
+    row.innerHTML = `
+      <input type="text" placeholder="Nama biaya" value="${item.label}"
+        oninput="updateLabel('${type}',${item.id},this.value)"/>
+      <div class="input-wrap cost-item-price has-prefix">
+        <span class="input-prefix">Rp</span>
+        <input type="number" placeholder="0" value="${item.value || ''}" min="0"
+          oninput="updateValue('${type}',${item.id},this.value)"/>
+      </div>
+      <button class="cost-del" onclick="delCost('${type}',${item.id})" title="Hapus">×</button>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function updateLabel(type, id, val) {
+  const arr = type === 'tetap' ? tetapItems : perorangItems;
+  const item = arr.find(i => i.id === id);
+  if (item) { item.label = val; recalc(); }
+}
+function updateValue(type, id, val) {
+  const arr = type === 'tetap' ? tetapItems : perorangItems;
+  const item = arr.find(i => i.id === id);
+  if (item) { item.value = parseFloat(val) || 0; recalc(); }
+}
+function addCost(type) {
+  if (type === 'tetap') {
+    tetapItems.push({ id: ++tetapIdCounter, label: '', value: 0 });
+    renderItems('biayaTetap', tetapItems, 'tetap');
+  } else {
+    perorangItems.push({ id: ++perorangIdCounter, label: '', value: 0 });
+    renderItems('biayaPerOrang', perorangItems, 'perorang');
+  }
+  recalc();
+}
+function delCost(type, id) {
+  if (type === 'tetap') {
+    tetapItems = tetapItems.filter(i => i.id !== id);
+    renderItems('biayaTetap', tetapItems, 'tetap');
+  } else {
+    perorangItems = perorangItems.filter(i => i.id !== id);
+    renderItems('biayaPerOrang', perorangItems, 'perorang');
+  }
+  recalc();
+}
+
+/* ── Recalculate ── */
+function recalc() {
+  const peserta = Math.max(1, parseInt(document.getElementById('peserta').value) || 1);
+  const margin = parseInt(document.getElementById('margin').value) || 0;
+  const platformFee = parseInt(document.getElementById('platformFee').value) || 0;
+  const tripName = document.getElementById('tripName').value.trim();
+
+  // Trip name display
+  const nameEl = document.getElementById('resultTripName');
+  if (tripName) { nameEl.textContent = '📍 ' + tripName; nameEl.style.display = 'block'; }
+  else { nameEl.style.display = 'none'; }
+
+  // Totals
+  const totalTetap = tetapItems.reduce((s, i) => s + (i.value || 0), 0);
+  const tetapPerOrang = totalTetap / peserta;
+  const totalPerOrang = perorangItems.reduce((s, i) => s + (i.value || 0), 0);
+  const hpp = tetapPerOrang + totalPerOrang;
+
+  // Margin & fee applied to HPP
+  const marginVal = hpp * (margin / 100);
+  const baseAfterMargin = hpp + marginVal;
+  const platformVal = baseAfterMargin * (platformFee / 100);
+  const beforeRound = baseAfterMargin + platformVal;
+
+  // Rounding
+  let final = beforeRound;
+  let roundDiff = 0;
+  if (roundTo > 0) {
+    final = Math.ceil(beforeRound / roundTo) * roundTo;
+    roundDiff = final - beforeRound;
+  }
+
+  /* Update DOM */
+  document.getElementById('r-peserta').textContent = peserta + ' orang';
+  document.getElementById('r-tetap-total').textContent = fmt(totalTetap);
+  document.getElementById('r-tetap-per').textContent = fmt(tetapPerOrang);
+  document.getElementById('r-perorang-total').textContent = fmt(totalPerOrang);
+  document.getElementById('r-hpp').textContent = fmt(hpp);
+  document.getElementById('r-margin-pct').textContent = margin + '%';
+  document.getElementById('r-margin-val').textContent = fmt(marginVal);
+  document.getElementById('r-final').textContent = fmt(final);
+  document.getElementById('r-platform-pct').textContent = platformFee + '%';
+  document.getElementById('r-platform-val').textContent = fmt(platformVal);
+
+  // Platform fee row visibility
+  const pfRow = document.getElementById('r-platform-row');
+  pfRow.style.display = platformFee > 0 ? 'flex' : 'none';
+
+  // Round row
+  const rRow = document.getElementById('r-round-row');
+  if (roundTo > 0 && roundDiff > 0) {
+    rRow.style.display = 'flex';
+    document.getElementById('r-round-val').textContent = '+' + fmt(roundDiff).replace('Rp ','Rp ');
+  } else {
+    rRow.style.display = 'none';
+  }
+
+  // Breakdowns
+  renderBreakdown('r-tetap-breakdown', tetapItems, peserta, true);
+  renderBreakdown('r-perorang-breakdown', perorangItems, 1, false);
+
+  // Slider fill
+  updateSliderFill('margin', margin, 0, 100);
+  updateSliderFill('platformFee', platformFee, 0, 50);
+}
+
+function renderBreakdown(elId, items, divisor, divide) {
+  const el = document.getElementById(elId);
+  const visible = items.filter(i => i.label || i.value > 0);
+  if (visible.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = visible.map(i => `
+    <div class="result-row indent">
+      <span class="r-label">${i.label || '(tanpa nama)'}</span>
+      <span class="r-val">${fmt(divide ? i.value / divisor : i.value)}</span>
+    </div>
+  `).join('');
+}
+
+/* ── Sliders ── */
+function updateMarginLabel() {
+  const v = document.getElementById('margin').value;
+  document.getElementById('marginPct').textContent = v + '%';
+}
+function updatePlatformLabel() {
+  const v = document.getElementById('platformFee').value;
+  document.getElementById('platformPct').textContent = v + '%';
+}
+function updateSliderFill(id, val, min, max) {
+  const pct = ((val - min) / (max - min)) * 100;
+  document.getElementById(id).style.setProperty('--fill', pct + '%');
+}
+
+/* ── Round setting ── */
+function setRound(val, el) {
+  roundTo = val;
+  document.querySelectorAll('#roundTags .tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  recalc();
+}
+
+/* ── Templates ── */
+function loadTemplate(type) {
+  const templates = {
+    day: {
+      name: 'Day Hike',
+      peserta: 15, durasi: 1,
+      tetap: [
+        { label: 'Tiket masuk / simaksi', value: 450000 },
+        { label: 'Transportasi PP', value: 1500000 },
+        { label: 'Guide', value: 500000 },
+      ],
+      perorang: [
+        { label: 'Konsumsi (snack + air)', value: 35000 },
+        { label: 'Asuransi perjalanan', value: 15000 },
+      ]
+    },
+    weekend: {
+      name: 'Trip 2H1M Weekend',
+      peserta: 12, durasi: 2,
+      tetap: [
+        { label: 'Tiket masuk / simaksi', value: 600000 },
+        { label: 'Transportasi PP', value: 2400000 },
+        { label: 'Guide (2 hari)', value: 1000000 },
+        { label: 'Porter', value: 700000 },
+      ],
+      perorang: [
+        { label: 'Konsumsi (2 hari)', value: 80000 },
+        { label: 'Asuransi perjalanan', value: 20000 },
+      ]
+    },
+    semeru: {
+      name: 'Pendakian Semeru 3H2M',
+      peserta: 10, durasi: 3,
+      tetap: [
+        { label: 'Simaksi TNBTS', value: 1200000 },
+        { label: 'Transportasi PP (Malang–Ranu Pane)', value: 3000000 },
+        { label: 'Guide berpengalaman', value: 1500000 },
+        { label: 'Porter (2 orang × 3 hari)', value: 1800000 },
+        { label: 'Izin & administrasi', value: 300000 },
+      ],
+      perorang: [
+        { label: 'Konsumsi (3 hari)', value: 150000 },
+        { label: 'Asuransi perjalanan', value: 35000 },
+        { label: 'Sewa carrier (jika ada)', value: 50000 },
+      ]
+    },
+    rinjani: {
+      name: 'Pendakian Rinjani 4H3M',
+      peserta: 8, durasi: 4,
+      tetap: [
+        { label: 'Simaksi TNGR', value: 1500000 },
+        { label: 'Transportasi PP (Lombok)', value: 2400000 },
+        { label: 'Guide senior', value: 2000000 },
+        { label: 'Porter (3 orang × 4 hari)', value: 3600000 },
+        { label: 'Izin & administrasi', value: 400000 },
+        { label: 'Tenda & logistik camp', value: 800000 },
+      ],
+      perorang: [
+        { label: 'Konsumsi (4 hari)', value: 200000 },
+        { label: 'Asuransi perjalanan', value: 50000 },
+        { label: 'Sewa sleeping bag', value: 60000 },
+      ]
+    }
+  };
+
+  const t = templates[type];
+  if (!t) return;
+
+  document.getElementById('tripName').value = t.name;
+  document.getElementById('peserta').value = t.peserta;
+  document.getElementById('durasi').value = t.durasi;
+
+  tetapIdCounter = 0;
+  perorangIdCounter = 0;
+  tetapItems = t.tetap.map(i => ({ id: ++tetapIdCounter, label: i.label, value: i.value }));
+  perorangItems = t.perorang.map(i => ({ id: ++perorangIdCounter, label: i.label, value: i.value }));
+
+  renderItems('biayaTetap', tetapItems, 'tetap');
+  renderItems('biayaPerOrang', perorangItems, 'perorang');
+  recalc();
+}
+
+/* ── Reset ── */
+function resetAll() {
+  document.getElementById('tripName').value = '';
+  document.getElementById('peserta').value = 10;
+  document.getElementById('durasi').value = 3;
+  document.getElementById('margin').value = 30;
+  document.getElementById('platformFee').value = 0;
+  updateMarginLabel();
+  updatePlatformLabel();
+  tetapIdCounter = 0;
+  perorangIdCounter = 0;
+  tetapItems = [];
+  perorangItems = [];
+  renderItems('biayaTetap', tetapItems, 'tetap');
+  renderItems('biayaPerOrang', perorangItems, 'perorang');
+  recalc();
+}
+
+/* ── Init ── */
+(function init() {
+  loadTemplate('semeru');
+  document.querySelectorAll('#roundTags .tag').forEach(t => {
+    if (t.textContent.trim() === 'Rp 5.000') t.classList.add('active');
+  });
+})();
+</script>
+</body>
+</html>
