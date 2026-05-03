@@ -260,6 +260,17 @@ input[type=range]::-webkit-slider-thumb{
 }
 .ppn-preset:hover,.ppn-preset.active{background:rgba(22,163,74,.08);border-color:rgba(22,163,74,.3);color:var(--a2)}
 
+/* PDF BUTTON */
+.pdf-btn{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;padding:10px;margin-top:10px;
+  font-size:.76rem;font-weight:700;
+  background:linear-gradient(135deg,var(--accent),var(--a2));
+  color:#fff;border:none;border-radius:var(--r-md);cursor:pointer;
+  box-shadow:0 3px 16px rgba(22,163,74,.25);transition:all .2s;
+}
+.pdf-btn:hover{transform:translateY(-1px);box-shadow:0 5px 22px rgba(22,163,74,.4)}
+
 /* RESET */
 .reset-btn{
   display:flex;align-items:center;justify-content:center;gap:6px;
@@ -277,6 +288,40 @@ input[type=range]::-webkit-slider-thumb{
   .grid{grid-template-columns:1fr}
   .result-panel{position:static}
   .field-row{grid-template-columns:1fr}
+}
+
+/* ══ PRINT / PDF ══ */
+#printDoc{display:none}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #dion-nav,header,.page>.page-header,.grid{display:none!important}
+  #printDoc{display:block;font-family:'Inter',system-ui,sans-serif;color:#1a1a2e;background:#fff;padding:0;margin:0}
+  .pd-header{display:flex;justify-content:space-between;align-items:flex-start;padding:28px 32px 18px;border-bottom:2px solid #16a34a;margin-bottom:24px}
+  .pd-brand{font-size:1rem;font-weight:900;color:#16a34a;letter-spacing:-.02em}
+  .pd-brand span{color:#1a1a2e}
+  .pd-meta{text-align:right;font-size:.7rem;color:#6b7280}
+  .pd-meta strong{display:block;font-size:.82rem;color:#1a1a2e;font-weight:700;margin-bottom:2px}
+  .pd-body{padding:0 32px 32px}
+  .pd-section{margin-bottom:20px}
+  .pd-section-title{font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#16a34a;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e5e7eb}
+  .pd-table{width:100%;border-collapse:collapse;font-size:.76rem}
+  .pd-table td{padding:6px 8px;border-bottom:1px solid #f3f4f6;color:#374151}
+  .pd-table td:last-child{text-align:right;font-weight:600;font-family:'JetBrains Mono',monospace;color:#1a1a2e}
+  .pd-table tr.sub td{font-weight:700;color:#1a1a2e;background:#f9fafb}
+  .pd-table tr.hpp td{background:#fffbeb;color:#92400e}
+  .pd-table tr.hpp td:last-child{color:#d97706}
+  .pd-table tr.final-row td{background:#f0fdf4;font-weight:900;font-size:.88rem;color:#14532d}
+  .pd-table tr.final-row td:last-child{color:#16a34a;font-size:1rem}
+  .pd-table tr.ppn td{color:#6b7280}
+  .pd-table tr.ppn td:last-child{color:#6b7280}
+  .pd-two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .pd-tim-table{width:100%;border-collapse:collapse;font-size:.74rem}
+  .pd-tim-table th{padding:5px 8px;text-align:left;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;border-bottom:1px solid #e5e7eb}
+  .pd-tim-table th:not(:first-child){text-align:right}
+  .pd-tim-table td{padding:6px 8px;border-bottom:1px solid #f3f4f6;color:#374151}
+  .pd-tim-table td:not(:first-child){text-align:right;font-weight:600;font-family:'JetBrains Mono',monospace}
+  .pd-tim-table tr.sisa td{color:#d1d5db}
+  .pd-footer{padding:14px 32px;border-top:1px solid #e5e7eb;font-size:.62rem;color:#9ca3af;display:flex;justify-content:space-between}
 }
 </style>
 </head>
@@ -523,6 +568,11 @@ input[type=range]::-webkit-slider-thumb{
           </div>
         </div>
 
+        <button class="pdf-btn" onclick="generatePdf()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          Cetak / Download PDF
+        </button>
+
         <button class="reset-btn" onclick="resetAll()">
           <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           Reset Semua
@@ -532,6 +582,9 @@ input[type=range]::-webkit-slider-thumb{
 
   </div>
 </div>
+
+<!-- PRINT DOCUMENT (hidden, shown only on print) -->
+<div id="printDoc"></div>
 
 <script>
 /* ── State ── */
@@ -916,6 +969,142 @@ function loadTemplate(type) {
   renderItems('biayaTetap', tetapItems, 'tetap');
   renderItems('biayaPerOrang', perorangItems, 'perorang');
   recalc();
+}
+
+/* ── Generate PDF ── */
+function generatePdf() {
+  const peserta = Math.max(1, parseInt(document.getElementById('peserta').value) || 1);
+  const durasi = parseInt(document.getElementById('durasi').value) || 1;
+  const tripName = document.getElementById('tripName').value.trim() || 'Tanpa Nama Trip';
+  const margin = parseInt(document.getElementById('margin').value) || 0;
+  const platformFee = parseInt(document.getElementById('platformFee').value) || 0;
+  const ppnRate = ppnOn ? (parseFloat(document.getElementById('ppnRate').value) || 0) : 0;
+
+  // Recalculate all values
+  const totalTetap = tetapItems.reduce((s, i) => s + (i.value || 0), 0);
+  const tetapPerOrang = totalTetap / peserta;
+  const totalPerOrang = perorangItems.reduce((s, i) => s + (i.value || 0), 0);
+  const hpp = tetapPerOrang + totalPerOrang;
+  const marginVal = hpp * (margin / 100);
+  const baseAfterMargin = hpp + marginVal;
+  const platformVal = baseAfterMargin * (platformFee / 100);
+  const afterPlatform = baseAfterMargin + platformVal;
+  const ppnVal = afterPlatform * (ppnRate / 100);
+  const beforeRound = afterPlatform + ppnVal;
+  let final = beforeRound;
+  if (roundTo > 0) final = Math.ceil(beforeRound / roundTo) * roundTo;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+
+  // Build biaya tetap rows
+  const tetapRows = tetapItems.filter(i => i.label || i.value > 0).map(i => `
+    <tr><td style="padding-left:20px;color:#6b7280">${i.label || '(tanpa nama)'}</td><td>${fmt(i.value)}</td></tr>
+  `).join('');
+  const perOrangRows = perorangItems.filter(i => i.label || i.value > 0).map(i => `
+    <tr><td style="padding-left:20px;color:#6b7280">${i.label || '(tanpa nama)'}</td><td>${fmt(i.value)}</td></tr>
+  `).join('');
+
+  // Platform fee row
+  const platformRow = platformFee > 0 ? `
+    <tr><td>+ Platform Fee (${platformFee}%)</td><td>${fmt(platformVal)}</td></tr>` : '';
+
+  // PPN row
+  const ppnRow = ppnOn && ppnRate > 0 ? `
+    <tr class="ppn"><td>+ PPN (${ppnRate}%)</td><td>${fmt(ppnVal)}</td></tr>` : '';
+
+  // Round row
+  const roundDiff = final - beforeRound;
+  const roundRow = roundTo > 0 && roundDiff > 0 ? `
+    <tr><td style="color:#9ca3af">Pembulatan</td><td style="color:#9ca3af">+${fmt(roundDiff)}</td></tr>` : '';
+
+  // Tim rows
+  const timSection = timItems.length > 0 && marginVal > 0 ? (() => {
+    const totalPct = timItems.reduce((s, i) => s + (i.pct || 0), 0);
+    const timRows = timItems.map(i => {
+      const perTicket = marginVal * ((i.pct || 0) / 100);
+      return `<tr>
+        <td>${i.label || '(tanpa nama)'} <span style="color:#9ca3af;font-size:.65rem">${i.pct || 0}%</span></td>
+        <td>${fmt(perTicket)}</td>
+        <td>${fmt(perTicket * peserta)}</td>
+      </tr>`;
+    }).join('');
+    const sisaPct = 100 - totalPct;
+    const sisaRow = sisaPct > 0.01 && totalPct > 0 ? `
+      <tr class="sisa">
+        <td>Sisa tidak dibagi <span style="font-size:.62rem">${Math.round(sisaPct * 10) / 10}%</span></td>
+        <td>${fmt(marginVal * sisaPct / 100)}</td>
+        <td>${fmt(marginVal * sisaPct / 100 * peserta)}</td>
+      </tr>` : '';
+    return `
+      <div class="pd-section">
+        <div class="pd-section-title">Pembagian Margin ke Tim (total margin/tiket: ${fmt(marginVal)})</div>
+        <table class="pd-tim-table">
+          <thead><tr><th>Anggota</th><th>Per Tiket</th><th>Per Trip (${peserta} org)</th></tr></thead>
+          <tbody>${timRows}${sisaRow}</tbody>
+        </table>
+      </div>`;
+  })() : '';
+
+  document.getElementById('printDoc').innerHTML = `
+    <div class="pd-header">
+      <div>
+        <div class="pd-brand">Summit <span>Yu</span></div>
+        <div style="font-size:.7rem;color:#6b7280;margin-top:3px">Kalkulator HPP Tiket Pendakian</div>
+      </div>
+      <div class="pd-meta">
+        <strong>${tripName}</strong>
+        ${peserta} peserta &middot; ${durasi} hari &middot; ${dateStr}
+      </div>
+    </div>
+
+    <div class="pd-body">
+      <div class="pd-two">
+        <div class="pd-section">
+          <div class="pd-section-title">Biaya Tetap per Trip</div>
+          <table class="pd-table">
+            <tbody>
+              ${tetapRows || '<tr><td colspan="2" style="color:#d1d5db">Tidak ada</td></tr>'}
+              <tr class="sub"><td>Total Biaya Tetap</td><td>${fmt(totalTetap)}</td></tr>
+              <tr><td>÷ ${peserta} peserta</td><td>${fmt(tetapPerOrang)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pd-section">
+          <div class="pd-section-title">Biaya per Orang</div>
+          <table class="pd-table">
+            <tbody>
+              ${perOrangRows || '<tr><td colspan="2" style="color:#d1d5db">Tidak ada</td></tr>'}
+              <tr class="sub"><td>Total per Orang</td><td>${fmt(totalPerOrang)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pd-section">
+        <div class="pd-section-title">Kalkulasi Harga</div>
+        <table class="pd-table">
+          <tbody>
+            <tr class="hpp"><td>⚡ HPP per Tiket (biaya pokok)</td><td>${fmt(hpp)}</td></tr>
+            <tr><td>+ Margin Keuntungan (${margin}%)</td><td>${fmt(marginVal)}</td></tr>
+            ${platformRow}
+            ${ppnRow}
+            ${roundRow}
+            <tr class="final-row"><td>🏷️ Harga Tiket Final${ppnOn && ppnRate > 0 ? ` (sudah termasuk PPN ${ppnRate}%)` : ''}</td><td>${fmt(final)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      ${timSection}
+
+      <div class="pd-footer">
+        <span>Summit Yu — Dokumen Internal</span>
+        <span>Digenerate: ${dateStr}</span>
+      </div>
+    </div>
+  `;
+
+  window.print();
 }
 
 /* ── Reset ── */
