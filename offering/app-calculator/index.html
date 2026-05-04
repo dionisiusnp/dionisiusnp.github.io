@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Kalkulator Harga Penawaran Aplikasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090f;--surface:#0f0f18;--s2:#13131e;
+  --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.13);
+  --text:#e2e2ee;--muted:#8888aa;--dim:rgba(255,255,255,.22);
+  --accent:#6366f1;--a2:#a5b4fc;--a3:#c7d2fe;
+  --green:#34d399;--gold:#fbbf24;--red:#f87171;
+  --font-sans:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --r-sm:7px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:999px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+/* NAV */
+#dion-nav{position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:9px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);font-size:.72rem}
+#dion-nav a.back{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--muted);padding:4px 11px;border-radius:var(--r-sm);border:1px solid var(--bd);transition:color .18s,border-color .18s}
+#dion-nav a.back:hover{color:var(--a2);border-color:rgba(99,102,241,.3)}
+#dion-nav .nav-title{font-size:.72rem;color:var(--muted);margin-left:4px}
+
+/* LAYOUT */
+.page{max-width:1060px;margin:0 auto;padding:36px 24px 80px}
+.page-header{margin-bottom:28px}
+.page-eyebrow{font-family:var(--font-mono);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--a2);margin-bottom:8px}
+.page-title{font-size:1.6rem;font-weight:900;letter-spacing:-.04em;margin-bottom:6px}
+.page-sub{font-size:.82rem;color:var(--muted);line-height:1.7}
+.grid{display:grid;grid-template-columns:1fr 390px;gap:20px;align-items:start}
+
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r-xl);padding:22px;margin-bottom:14px}
+.panel:last-child{margin-bottom:0}
+.panel-title{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel-title::after{content:'';flex:1;height:1px;background:var(--bd)}
+.panel-collapse{cursor:pointer;user-select:none}
+.panel-collapse .panel-title{margin-bottom:0}
+.panel-collapse.open .panel-title{margin-bottom:16px}
+.panel-collapse .collapse-arrow{font-size:.7rem;color:var(--muted);transition:transform .2s;margin-left:auto}
+.panel-collapse.open .collapse-arrow{transform:rotate(180deg)}
+.panel-body{overflow:hidden}
+
+/* FORM */
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field-label{display:flex;align-items:center;justify-content:space-between;font-size:.7rem;font-weight:600;color:var(--muted);margin-bottom:5px}
+.field-hint{font-size:.6rem;color:rgba(255,255,255,.2);font-weight:400}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.input-wrap{position:relative;display:flex;align-items:center}
+.input-prefix,.input-suffix{position:absolute;font-size:.72rem;font-weight:600;color:var(--muted);pointer-events:none}
+.input-prefix{left:12px}
+.input-suffix{right:12px}
+input[type=number],input[type=text],input[type=date],select,textarea{
+  width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-md);
+  color:var(--text);font-family:var(--font-sans);font-size:.8rem;
+  padding:8px 11px;transition:border-color .18s;outline:none;-moz-appearance:textfield;
+}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:rgba(99,102,241,.4);box-shadow:0 0 0 3px rgba(99,102,241,.06)}
+textarea{resize:vertical;line-height:1.6}
+input[type=date]{color-scheme:dark}
+.has-prefix input{padding-left:34px}
+.has-suffix input{padding-right:34px}
+select{cursor:pointer}
+select option{background:var(--s2)}
+
+/* PLATFORM CHIPS */
+.platform-chips{display:flex;gap:7px;flex-wrap:wrap}
+.pchip{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;padding:5px 13px;border-radius:var(--r-pill);border:1px solid var(--bd);color:var(--muted);cursor:pointer;transition:all .15s;user-select:none}
+.pchip input[type=checkbox]{display:none}
+.pchip:hover{border-color:rgba(99,102,241,.3);color:var(--a2)}
+.pchip.checked{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.4);color:var(--a2)}
+
+/* ROLE / EXTRA ITEMS */
+.role-item{display:grid;grid-template-columns:1fr 88px 115px auto;gap:7px;align-items:center;margin-bottom:7px}
+.role-item input{font-size:.74rem}
+.role-item-rate{position:relative}
+.role-item-rate input{padding-left:28px;font-size:.74rem}
+.role-item-rate::before{content:'Rp';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.65rem;font-weight:600;color:var(--muted);pointer-events:none;z-index:1}
+.cost-item{display:grid;grid-template-columns:1fr 125px auto;gap:7px;align-items:center;margin-bottom:7px}
+.cost-item input{font-size:.74rem}
+.cost-item-val{position:relative}
+.cost-item-val input{padding-left:28px;font-size:.74rem}
+.cost-item-val::before{content:'Rp';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.65rem;font-weight:600;color:var(--muted);pointer-events:none;z-index:1}
+.item-del{width:27px;height:27px;border-radius:var(--r-sm);border:1px solid var(--bd);background:transparent;color:rgba(248,113,113,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .15s;flex-shrink:0}
+.item-del:hover{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red)}
+.add-btn{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:600;color:var(--a2);background:rgba(99,102,241,.05);border:1px dashed rgba(99,102,241,.22);border-radius:var(--r-md);padding:6px 14px;cursor:pointer;width:100%;justify-content:center;transition:all .18s;margin-top:3px}
+.add-btn:hover{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.4)}
+.col-header{display:grid;grid-template-columns:1fr 88px 115px 27px;gap:7px;margin-bottom:5px}
+.col-header span{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.18);padding:0 2px}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-radius:var(--r-md);border:1px solid var(--bd);background:var(--s2);margin-bottom:10px;cursor:pointer;transition:border-color .18s}
+.toggle-row:hover{border-color:rgba(99,102,241,.3)}
+.toggle-row.active{border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.04)}
+.toggle-label{font-size:.74rem;font-weight:600;color:var(--muted)}
+.toggle-row.active .toggle-label{color:var(--text)}
+.toggle-sub{font-size:.6rem;color:rgba(255,255,255,.18);margin-top:1px}
+.toggle-switch{width:34px;height:18px;border-radius:9px;background:rgba(255,255,255,.1);position:relative;transition:background .2s;flex-shrink:0}
+.toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.toggle-row.active .toggle-switch{background:rgba(99,102,241,.4)}
+.toggle-row.active .toggle-switch::after{transform:translateX(16px);background:var(--a2)}
+
+/* SLIDER */
+.slider-wrap{margin-top:5px}
+input[type=range]{width:100%;height:4px;border-radius:2px;outline:none;border:none;background:linear-gradient(to right,var(--accent) 0%,var(--accent) var(--fill,30%),rgba(255,255,255,.1) var(--fill,30%));cursor:pointer;-webkit-appearance:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--a2);box-shadow:0 0 0 3px rgba(99,102,241,.2);cursor:pointer}
+.slider-labels{display:flex;justify-content:space-between;font-size:.58rem;color:var(--muted);margin-top:4px}
+
+/* TAGS */
+.tag-wrap{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:3px}
+.tag{font-size:.6rem;font-weight:600;padding:3px 9px;border-radius:var(--r-pill);border:1px solid var(--bd);color:var(--muted);cursor:pointer;transition:all .15s}
+.tag:hover,.tag.active{background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.3);color:var(--a2)}
+
+/* SPK OUTPUT ROW */
+.spk-out-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
+
+/* DOC SECTION HEADER */
+.doc-section-hd{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.18);margin:10px 0 7px}
+.doc-section-hd:first-child{margin-top:0}
+
+/* RESULT PANEL */
+.result-panel{background:var(--surface);border:1px solid rgba(99,102,241,.22);border-radius:var(--r-xl);padding:22px;position:sticky;top:56px;max-height:calc(100vh - 80px);overflow-y:auto}
+.result-panel::-webkit-scrollbar{width:3px}
+.result-panel::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:2px}
+.result-panel .panel-title{color:var(--a2)}
+.result-panel .panel-title::after{background:rgba(99,102,241,.15)}
+.result-row{display:flex;justify-content:space-between;align-items:baseline;font-size:.76rem;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.result-row:last-child{border-bottom:none}
+.result-row .r-label{color:var(--muted)}
+.result-row .r-val{font-family:var(--font-mono);font-weight:600;color:var(--text)}
+.result-row.indent{padding-left:11px}
+.result-row.indent .r-label{color:rgba(255,255,255,.28);font-size:.68rem}
+.result-row.indent .r-val{color:rgba(255,255,255,.45);font-size:.68rem}
+.result-row.sub-total .r-label{font-weight:700;color:var(--muted)}
+.result-divider{height:1px;background:var(--bd);margin:6px 0}
+.hpp-row{background:rgba(251,191,36,.04);border:1px solid rgba(251,191,36,.1);border-radius:var(--r-md);padding:9px 13px;margin:8px 0}
+.hpp-row .r-label{color:rgba(251,191,36,.65)}
+.hpp-row .r-val{color:var(--gold)}
+.final-price{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(165,180,252,.04));border:1px solid rgba(99,102,241,.28);border-radius:var(--r-lg);padding:14px 16px;margin-top:12px;text-align:center}
+.final-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a2);margin-bottom:5px}
+.final-num{font-size:1.7rem;font-weight:900;letter-spacing:-.04em;background:linear-gradient(135deg,var(--a2),var(--a3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.final-note{font-size:.6rem;color:var(--muted);margin-top:3px}
+
+/* PDF MODE BUTTONS */
+.pdf-mode-flow{display:flex;flex-direction:column;gap:0}
+.pdf-mode-btn{padding:8px 12px;border-radius:var(--r-md);border:1px solid var(--bd);background:var(--s2);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .18s}
+.pdf-mode-btn:hover{border-color:rgba(99,102,241,.3);color:var(--a2)}
+.pdf-mode-btn.active{border-color:rgba(99,102,241,.45);background:rgba(99,102,241,.09);color:var(--a2)}
+.mode-icon{font-size:.9rem;flex-shrink:0;width:20px;text-align:center}
+.mode-name{font-size:.74rem;font-weight:700;line-height:1.2}
+.mode-desc{font-size:.6rem;color:rgba(255,255,255,.18);font-weight:400;margin-top:1px}
+.pdf-mode-btn.active .mode-desc{color:rgba(165,180,252,.45)}
+.mode-arrow{text-align:center;font-size:.65rem;color:rgba(255,255,255,.12);padding:2px 0;line-height:1}
+
+.pdf-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px;margin-top:10px;font-size:.74rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;border:none;border-radius:var(--r-md);cursor:pointer;box-shadow:0 3px 16px rgba(99,102,241,.22);transition:all .2s}
+.pdf-btn:hover{transform:translateY(-1px);box-shadow:0 5px 22px rgba(99,102,241,.38)}
+.reset-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:8px;margin-top:7px;font-size:.7rem;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--bd);border-radius:var(--r-md);cursor:pointer;transition:all .18s}
+.reset-btn:hover{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.04)}
+
+@media(max-width:860px){
+  .grid{grid-template-columns:1fr}
+  .result-panel{position:static;max-height:none}
+  .field-row,.field-row3{grid-template-columns:1fr}
+  .role-item{grid-template-columns:1fr 80px auto}
+  .role-item .role-item-rate{display:none}
+}
+@media(max-width:520px){
+  .page{padding:20px 14px 60px}
+  .cost-item{grid-template-columns:1fr auto auto}
+}
+
+/* ── PRINT ── */
+@page{size:A4 portrait;margin:13mm 17mm}
+#printDoc{display:none}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body>*:not(#printDoc){display:none!important}
+  #printDoc{display:block;font-family:'Inter',system-ui,sans-serif;color:#1a1a2e;background:#fff}
+  /* KOP */
+  .pd-kop{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:10px;border-bottom:2.5px solid #6366f1;margin-bottom:18px}
+  .pd-kop-brand{font-size:.88rem;font-weight:900;color:#6366f1}
+  .pd-kop-tagline{font-size:.66rem;color:#6b7280;margin-top:2px}
+  .pd-kop-alamat{font-size:.6rem;color:#9ca3af;margin-top:5px;line-height:1.5;white-space:pre-line}
+  .pd-kop-kontak{font-size:.6rem;color:#9ca3af;margin-top:3px}
+  .pd-kop-right{text-align:right}
+  .pd-doc-type{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6366f1;margin-bottom:2px}
+  .pd-doc-sub{font-size:.7rem;font-weight:700;color:#1a1a2e}
+  .pd-doc-date{font-size:.6rem;color:#9ca3af;margin-top:2px}
+  .pd-confidential{display:inline-flex;align-items:center;gap:5px;background:#fff7ed;border:1px solid #fed7aa;border-radius:5px;padding:4px 11px;font-size:.6rem;font-weight:700;color:#c2410c;letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px}
+  /* BODY */
+  .pd-section{margin-bottom:15px}
+  .pd-section-title{font-size:.57rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6366f1;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid #e5e7eb}
+  .pd-table{width:100%;border-collapse:collapse;font-size:.73rem}
+  .pd-table td,.pd-table th{padding:5px 7px;border-bottom:1px solid #f3f4f6;color:#374151}
+  .pd-table th{font-size:.57rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;background:#f9fafb}
+  .pd-table td:last-child{text-align:right;font-weight:600;font-family:monospace}
+  .pd-table tr.sub td{font-weight:700;color:#1a1a2e;background:#f8f9ff}
+  .pd-table tr.hpp td{background:#fffbeb;color:#92400e}
+  .pd-table tr.hpp td:last-child{color:#d97706}
+  .pd-table tr.final-row td{background:#eef2ff;font-weight:900;color:#3730a3}
+  .pd-table tr.final-row td:last-child{color:#4f46e5;font-size:.88rem}
+  .pd-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+  .pd-chip{font-size:.58rem;font-weight:700;padding:2px 9px;border-radius:999px;background:#eef2ff;color:#4f46e5;border:1px solid #c7d2fe}
+  .pd-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  /* FOOTER */
+  .pd-foot{display:flex;justify-content:space-between;align-items:flex-start;padding-top:8px;border-top:1px solid #e5e7eb;font-size:.58rem;color:#9ca3af;margin-top:18px}
+  .pd-foot-note{font-style:italic;max-width:60%}
+  /* Penugasan */
+  .pd-spk-parties{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:13px}
+  .pd-party-box{border:1px solid #e5e7eb;border-radius:7px;padding:10px 12px}
+  .pd-party-label{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:4px}
+  .pd-party-name{font-size:.78rem;font-weight:700;color:#1a1a2e}
+  .pd-party-sub{font-size:.64rem;color:#6b7280;margin-top:2px}
+  .pd-checklist{list-style:none;padding:0}
+  .pd-checklist li{display:flex;align-items:flex-start;gap:9px;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:.72rem;color:#374151}
+  .pd-checklist li:last-child{border-bottom:none}
+  .pd-check-box{width:14px;height:14px;border:1.5px solid #c7d2fe;border-radius:3px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#4f46e5}
+  .pd-ttd-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:28px}
+  .pd-ttd-box{text-align:center}
+  .pd-ttd-label{font-size:.65rem;font-weight:600;color:#6b7280;margin-bottom:52px}
+  .pd-ttd-line{border-top:1px solid #1a1a2e;padding-top:5px}
+  .pd-ttd-name{font-size:.7rem;font-weight:700;color:#1a1a2e}
+  .pd-ttd-role{font-size:.6rem;color:#9ca3af}
+  /* Invoice */
+  .pd-inv-meta{display:grid;grid-template-columns:auto 1fr;gap:20px;margin-bottom:14px;align-items:start}
+  .pd-inv-no{font-family:monospace;font-size:.68rem;color:#6366f1;font-weight:700;margin-bottom:2px}
+  .pd-inv-title{font-size:1.25rem;font-weight:900;color:#1a1a2e;letter-spacing:-.03em}
+  .pd-inv-date{font-size:.62rem;color:#9ca3af;margin-top:3px}
+  .pd-bill-box{text-align:right}
+  .pd-bill-label{font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:3px}
+  .pd-bill-name{font-size:.78rem;font-weight:700;color:#1a1a2e}
+  .pd-bill-addr{font-size:.62rem;color:#6b7280;margin-top:2px}
+  .pd-bank-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:10px 14px;margin-top:12px}
+  .pd-bank-label{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#16a34a;margin-bottom:5px}
+  .pd-bank-name{font-size:.76rem;font-weight:700;color:#14532d}
+  .pd-bank-acc{font-family:monospace;font-size:.9rem;font-weight:900;color:#15803d;letter-spacing:.05em}
+  .pd-bank-holder{font-size:.64rem;color:#166534}
+  /* Bukti Bayar */
+  .pd-receipt-wrap{text-align:center;margin-bottom:14px}
+  .pd-receipt-stamp{border:2.5px solid #16a34a;border-radius:50%;width:76px;height:76px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;font-size:.56rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#16a34a;text-align:center;line-height:1.3}
+  .pd-terbilang{font-style:italic;font-size:.68rem;color:#6b7280;padding:6px 10px;background:#f9fafb;border-left:3px solid #6366f1;margin:7px 0}
+  /* Penawaran */
+  .pd-price-hero{text-align:center;padding:16px 0 18px;border-bottom:1px solid #e5e7eb;margin-bottom:16px}
+  .pd-price-for{font-size:.68rem;color:#6b7280;margin-bottom:3px}
+  .pd-price-project{font-size:1.3rem;font-weight:900;color:#1a1a2e;letter-spacing:-.03em;margin-bottom:12px}
+  .pd-price-wrap{display:inline-block;background:#eef2ff;border:2px solid #c7d2fe;border-radius:13px;padding:14px 34px}
+  .pd-price-label{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6366f1;margin-bottom:3px}
+  .pd-price-num{font-size:1.9rem;font-weight:900;color:#4f46e5;letter-spacing:-.04em}
+  .pd-price-note{font-size:.63rem;color:#9ca3af;margin-top:3px}
+  .pd-scope-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:11px}
+  .pd-scope-item{background:#f8f9ff;border:1px solid #e0e7ff;border-radius:8px;padding:10px 11px;text-align:center}
+  .pd-scope-ico{font-size:1rem;margin-bottom:4px}
+  .pd-scope-label{font-size:.66rem;font-weight:700;color:#3730a3}
+  .pd-terms-box{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:11px 15px;margin-top:12px}
+  .pd-terms-title{font-size:.56rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:6px}
+  .pd-terms-list{list-style:none;padding:0}
+  .pd-terms-list li{font-size:.68rem;color:#6b7280;margin-bottom:4px;padding-left:11px;position:relative}
+  .pd-terms-list li::before{content:'·';position:absolute;left:0;color:#9ca3af}
+}
+</style>
+</head>
+<body>
+
+<div id="dion-nav">
+  <a href="/" class="back">
+    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>
+    dionisiusnp.github.io
+  </a>
+  <span class="nav-title">/ Kalkulator Harga Penawaran Aplikasi</span>
+</div>
+
+<div id="printDoc"></div>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-eyebrow">// Tool Internal</div>
+    <h1 class="page-title">Kalkulator Harga Penawaran Aplikasi</h1>
+    <p class="page-sub">Hitung HPP, margin, dan harga jual — lalu cetak dokumen dari Internal sampai Bukti Bayar dalam satu halaman.</p>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT -->
+    <div>
+
+      <!-- INFO PROYEK -->
+      <div class="panel">
+        <div class="panel-title">Informasi Proyek</div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Nama Klien</div>
+            <input type="text" id="clientName" placeholder="cth. PT. Maju Bersama" oninput="recalc()"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Nama Proyek</div>
+            <input type="text" id="projectName" placeholder="cth. Aplikasi Marketplace" oninput="recalc()"/>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Platform yang Dibangun</div>
+          <div class="platform-chips" id="platformChips">
+            <label class="pchip"><input type="checkbox" value="web" onchange="chipChange(this)"/> 🌐 Website</label>
+            <label class="pchip"><input type="checkbox" value="android" onchange="chipChange(this)"/> 🤖 Android</label>
+            <label class="pchip"><input type="checkbox" value="ios" onchange="chipChange(this)"/> 🍎 iOS</label>
+            <label class="pchip"><input type="checkbox" value="api" onchange="chipChange(this)"/> ⚙️ Backend/API</label>
+            <label class="pchip"><input type="checkbox" value="admin" onchange="chipChange(this)"/> 🖥️ Admin Panel</label>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Estimasi Durasi</div>
+            <div class="input-wrap has-suffix">
+              <input type="number" id="duration" value="3" min="1" oninput="recalc()"/>
+              <span class="input-suffix">bln</span>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">Jenis Proyek</div>
+            <select id="projectType" onchange="recalc()">
+              <option value="new">Proyek Baru</option>
+              <option value="warranty">Garansi</option>
+              <option value="maintenance">Maintenance</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- IDENTITAS & KOP -->
+      <div class="panel panel-collapse open" id="kopPanel">
+        <div class="panel-title" onclick="togglePanel('kopPanel')">
+          Identitas &amp; Kop Dokumen
+          <span class="collapse-arrow">▾</span>
+        </div>
+        <div class="panel-body" id="kopBody">
+          <div class="field-row">
+            <div class="field">
+              <div class="field-label">Nama / Brand</div>
+              <input type="text" id="kopBrand" value="dionisiusnp · Software Development"/>
+            </div>
+            <div class="field">
+              <div class="field-label">Tagline / Jabatan</div>
+              <input type="text" id="kopTagline" value="Software Engineer"/>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">Alamat <span class="field-hint">opsional — tampil di kop</span></div>
+            <input type="text" id="kopAlamat" placeholder="cth. Jl. Gatot Subroto No. 1, Jakarta"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Kontak <span class="field-hint">WA / Email / Website</span></div>
+            <input type="text" id="kopKontak" placeholder="cth. 0812-3456-7890 · hello@dion.dev"/>
+          </div>
+          <div class="field">
+            <div class="field-label">Catatan Footer <span class="field-hint">opsional — muncul di semua dokumen</span></div>
+            <input type="text" id="kopFooterNote" placeholder="cth. Terima kasih atas kepercayaan Anda"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIM & JAM KERJA -->
+      <div class="panel">
+        <div class="panel-title">Tim &amp; Jam Kerja</div>
+        <p style="font-size:.7rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Setiap peran, estimasi total jam kerja, dan rate per jam.</p>
+        <div class="col-header">
+          <span>Peran / Role</span><span>Jam</span><span>Rate / Jam</span><span></span>
+        </div>
+        <div id="roleItems"></div>
+        <button class="add-btn" onclick="addRole()">+ Tambah Peran</button>
+      </div>
+
+      <!-- BIAYA TAMBAHAN -->
+      <div class="panel">
+        <div class="panel-title">Biaya Tambahan</div>
+        <p style="font-size:.7rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Hosting, domain, lisensi, biaya distribusi app, dll.</p>
+        <div id="extraItems"></div>
+        <button class="add-btn" onclick="addExtra()">+ Tambah Biaya</button>
+      </div>
+
+      <!-- MARGIN & PAJAK -->
+      <div class="panel">
+        <div class="panel-title">Margin &amp; Pajak</div>
+        <div class="field">
+          <div class="field-label">Margin Keuntungan <span class="field-hint" id="marginPct">30%</span></div>
+          <div class="slider-wrap">
+            <input type="range" id="margin" min="0" max="100" value="30" oninput="updateMarginLabel();recalc()"/>
+            <div class="slider-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="toggle-row" id="ppnToggle" onclick="togglePpn()">
+          <div><div class="toggle-label">Tambahkan PPN</div><div class="toggle-sub">Harga final mencakup pajak</div></div>
+          <div class="toggle-switch"></div>
+        </div>
+        <div id="ppnOptions" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;padding-bottom:10px">
+            <span style="font-size:.7rem;font-weight:600;color:var(--muted);white-space:nowrap">Tarif PPN</span>
+            <div class="input-wrap has-suffix" style="max-width:78px">
+              <input type="number" id="ppnRate" value="11" min="0" max="100" step="0.5" oninput="syncPpnPreset();recalc()"/>
+              <span class="input-suffix">%</span>
+            </div>
+            <div class="tag-wrap" style="margin:0">
+              <span class="ppn-preset tag" onclick="setPpnRate(0,this)">0%</span>
+              <span class="ppn-preset tag active" onclick="setPpnRate(11,this)">11%</span>
+              <span class="ppn-preset tag" onclick="setPpnRate(12,this)">12%</span>
+            </div>
+          </div>
+        </div>
+        <div style="height:2px"></div>
+        <div class="field">
+          <div class="field-label">Pembulatan <span class="field-hint">ke kelipatan</span></div>
+          <div class="tag-wrap" id="roundTags">
+            <span class="tag" onclick="setRound(0,this)">Tidak</span>
+            <span class="tag" onclick="setRound(100000,this)">100rb</span>
+            <span class="tag active" onclick="setRound(500000,this)">500rb</span>
+            <span class="tag" onclick="setRound(1000000,this)">1 Jt</span>
+            <span class="tag" onclick="setRound(5000000,this)">5 Jt</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /LEFT -->
+
+    <!-- RIGHT: RESULT -->
+    <div>
+      <div class="result-panel">
+        <div class="panel-title">Estimasi Biaya</div>
+
+        <div id="r-project-info" style="font-size:.68rem;color:var(--muted);margin-bottom:10px;display:none;line-height:1.6"></div>
+
+        <div class="result-row sub-total">
+          <span class="r-label">Biaya Tim (SDM)</span>
+          <span class="r-val" id="r-team-total">Rp 0</span>
+        </div>
+        <div id="r-team-breakdown"></div>
+        <div class="result-divider"></div>
+        <div class="result-row sub-total">
+          <span class="r-label">Biaya Tambahan</span>
+          <span class="r-val" id="r-extra-total">Rp 0</span>
+        </div>
+        <div id="r-extra-breakdown"></div>
+        <div class="result-divider"></div>
+        <div class="hpp-row result-row">
+          <span class="r-label">⚡ Total HPP (Modal)</span>
+          <span class="r-val" id="r-hpp">Rp 0</span>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-row">
+          <span class="r-label">+ Margin (<span id="r-margin-pct">30%</span>)</span>
+          <span class="r-val" id="r-margin-val">Rp 0</span>
+        </div>
+        <div class="result-row" id="r-ppn-row" style="display:none">
+          <span class="r-label">+ PPN (<span id="r-ppn-pct">11%</span>)</span>
+          <span class="r-val" id="r-ppn-val">Rp 0</span>
+        </div>
+        <div class="result-row" id="r-round-row" style="display:none">
+          <span class="r-label">Pembulatan</span>
+          <span class="r-val" id="r-round-val">–</span>
+        </div>
+        <div class="final-price">
+          <div class="final-label">Harga ke Klien</div>
+          <div class="final-num" id="r-final">Rp 0</div>
+          <div class="final-note" id="r-final-note">estimasi harga jual</div>
+        </div>
+        <div style="height:8px"></div>
+        <div class="result-row">
+          <span class="r-label" style="font-size:.68rem">Total Jam Kerja</span>
+          <span class="r-val" id="r-total-hours" style="font-size:.68rem">0 jam</span>
+        </div>
+        <div class="result-row">
+          <span class="r-label" style="font-size:.68rem">Eff. Rate / Jam</span>
+          <span class="r-val" id="r-eff-rate" style="font-size:.68rem">–</span>
+        </div>
+        <div class="result-row">
+          <span class="r-label" style="font-size:.68rem">Durasi</span>
+          <span class="r-val" id="r-duration" style="font-size:.68rem">–</span>
+        </div>
+
+        <!-- MODE DOKUMEN -->
+        <div style="margin-top:14px">
+          <div style="font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:8px">Alur Dokumen</div>
+          <div class="pdf-mode-flow">
+            <div class="pdf-mode-btn active" id="modeInternal" onclick="setPdfMode('internal')">
+              <span class="mode-icon">🔒</span>
+              <div><div class="mode-name">Internal</div><div class="mode-desc">HPP + margin + rate — rahasia</div></div>
+            </div>
+            <div class="mode-arrow">↓</div>
+            <div class="pdf-mode-btn" id="modePenawaran" onclick="setPdfMode('penawaran')">
+              <span class="mode-icon">📄</span>
+              <div><div class="mode-name">Penawaran</div><div class="mode-desc">Proposal harga ke klien</div></div>
+            </div>
+            <div class="mode-arrow">↓</div>
+            <div class="pdf-mode-btn" id="modePenugasan" onclick="setPdfMode('penugasan')">
+              <span class="mode-icon">📋</span>
+              <div><div class="mode-name">Penugasan</div><div class="mode-desc">SPK + checklist output + TTD</div></div>
+            </div>
+            <div class="mode-arrow">↓</div>
+            <div class="pdf-mode-btn" id="modePenagihan" onclick="setPdfMode('penagihan')">
+              <span class="mode-icon">🧾</span>
+              <div><div class="mode-name">Penagihan</div><div class="mode-desc">Invoice + rekening + terbilang</div></div>
+            </div>
+            <div class="mode-arrow">↓</div>
+            <div class="pdf-mode-btn" id="modeBuktiBayar" onclick="setPdfMode('buktibayar')">
+              <span class="mode-icon">✅</span>
+              <div><div class="mode-name">Bukti Bayar</div><div class="mode-desc">Kwitansi + stamp + sisa tagihan</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXTRA FIELDS per mode -->
+        <div id="docExtraFields" style="display:none;margin-top:12px;border-top:1px solid var(--bd);padding-top:12px"></div>
+
+        <button class="pdf-btn" onclick="generatePdf()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          <span id="pdfBtnLabel">Cetak / Download PDF</span>
+        </button>
+        <button class="reset-btn" onclick="resetAll()">
+          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Reset Semua
+        </button>
+      </div>
+    </div>
+  </div><!-- /grid -->
+</div><!-- /page -->
+
+<script>
+/* ── State ── */
+let roundTo=500000, ppnOn=false, pdfMode='internal';
+let roleItems=[], extraItems=[];
+let roleCounter=0, extraCounter=0;
+
+const DEFAULT_SPK_OUTPUTS=[
+  'Dokumentasi teknis & panduan penggunaan',
+  'Source code lengkap (jika jual lepas)',
+  'Deployment ke server / store',
+  'Handover & demo session',
+  'Garansi bug fix pasca-launch',
+];
+let spkOutputItems=DEFAULT_SPK_OUTPUTS.map((label,i)=>({id:i+1,label}));
+let spkOutputCounter=DEFAULT_SPK_OUTPUTS.length;
+
+/* ── Format ── */
+const fmt=n=>'Rp '+Math.round(n).toLocaleString('id-ID');
+function fmtShort(n){
+  if(n>=1e9) return 'Rp '+(n/1e9).toFixed(1).replace('.0','')+'M';
+  if(n>=1e6) return 'Rp '+(n/1e6).toFixed(1).replace('.0','')+'Jt';
+  if(n>=1e3) return 'Rp '+(n/1e3).toFixed(0)+'rb';
+  return fmt(n);
+}
+
+/* ── Collapse ── */
+function togglePanel(id){
+  const el=document.getElementById(id);
+  const body=document.getElementById(id.replace('Panel','Body'));
+  if(!el||!body) return;
+  const open=el.classList.toggle('open');
+  body.style.display=open?'block':'none';
+}
+
+/* ── Platform chips ── */
+function chipChange(cb){
+  cb.closest('.pchip').classList.toggle('checked',cb.checked);
+  recalc();
+}
+function getSelectedPlatforms(){
+  return [...document.querySelectorAll('.pchip input:checked')].map(c=>c.closest('.pchip').textContent.trim());
+}
+
+/* ── Roles ── */
+function renderRoles(){
+  const el=document.getElementById('roleItems'); el.innerHTML='';
+  roleItems.forEach(item=>{
+    const row=document.createElement('div');
+    row.className='role-item';
+    row.innerHTML=`
+      <input type="text" placeholder="cth. Frontend Dev" value="${esc(item.label)}" oninput="updateRoleLabel(${item.id},this.value)"/>
+      <div class="input-wrap has-suffix">
+        <input type="number" placeholder="0" value="${item.hours||''}" min="0" oninput="updateRoleHours(${item.id},this.value)" style="padding-right:32px;font-size:.74rem"/>
+        <span class="input-suffix">jam</span>
+      </div>
+      <div class="role-item-rate">
+        <input type="number" placeholder="0" value="${item.rate||''}" min="0" oninput="updateRoleRate(${item.id},this.value)"/>
+      </div>
+      <button class="item-del" onclick="delRole(${item.id})">×</button>`;
+    el.appendChild(row);
+  });
+  recalc();
+}
+function addRole(){ roleItems.push({id:++roleCounter,label:'',hours:0,rate:0}); renderRoles(); }
+function delRole(id){ roleItems=roleItems.filter(i=>i.id!==id); renderRoles(); }
+function updateRoleLabel(id,v){ const i=roleItems.find(i=>i.id===id); if(i){i.label=v;recalc();} }
+function updateRoleHours(id,v){ const i=roleItems.find(i=>i.id===id); if(i){i.hours=parseFloat(v)||0;recalc();} }
+function updateRoleRate(id,v){ const i=roleItems.find(i=>i.id===id); if(i){i.rate=parseFloat(v)||0;recalc();} }
+
+/* ── Extras ── */
+function renderExtras(){
+  const el=document.getElementById('extraItems'); el.innerHTML='';
+  extraItems.forEach(item=>{
+    const row=document.createElement('div');
+    row.className='cost-item';
+    row.innerHTML=`
+      <input type="text" placeholder="cth. Google Play Store" value="${esc(item.label)}" oninput="updateExtraLabel(${item.id},this.value)"/>
+      <div class="cost-item-val">
+        <input type="number" placeholder="0" value="${item.value||''}" min="0" oninput="updateExtraVal(${item.id},this.value)"/>
+      </div>
+      <button class="item-del" onclick="delExtra(${item.id})">×</button>`;
+    el.appendChild(row);
+  });
+  recalc();
+}
+function addExtra(){ extraItems.push({id:++extraCounter,label:'',value:0}); renderExtras(); }
+function delExtra(id){ extraItems=extraItems.filter(i=>i.id!==id); renderExtras(); }
+function updateExtraLabel(id,v){ const i=extraItems.find(i=>i.id===id); if(i){i.label=v;recalc();} }
+function updateExtraVal(id,v){ const i=extraItems.find(i=>i.id===id); if(i){i.value=parseFloat(v)||0;recalc();} }
+
+/* ── Recalc ── */
+function recalc(){
+  const margin=parseInt(document.getElementById('margin').value)||0;
+  const ppnRate=ppnOn?(parseFloat(document.getElementById('ppnRate').value)||0):0;
+  const duration=parseInt(document.getElementById('duration').value)||1;
+  const clientName=document.getElementById('clientName').value.trim();
+  const projectName=document.getElementById('projectName').value.trim();
+  const totalTeam=roleItems.reduce((s,i)=>s+(i.hours||0)*(i.rate||0),0);
+  const totalExtra=extraItems.reduce((s,i)=>s+(i.value||0),0);
+  const totalHours=roleItems.reduce((s,i)=>s+(i.hours||0),0);
+  const hpp=totalTeam+totalExtra;
+  const marginVal=hpp*(margin/100);
+  const afterMargin=hpp+marginVal;
+  const ppnVal=afterMargin*(ppnRate/100);
+  const beforeRound=afterMargin+ppnVal;
+  let final=beforeRound, roundDiff=0;
+  if(roundTo>0){final=Math.ceil(beforeRound/roundTo)*roundTo;roundDiff=final-beforeRound;}
+
+  const infoEl=document.getElementById('r-project-info');
+  if(clientName||projectName){
+    infoEl.style.display='block';
+    infoEl.innerHTML=(projectName?`<strong style="color:var(--text)">${projectName}</strong><br/>`:'')+(clientName?`Klien: ${clientName}`:'');
+  } else infoEl.style.display='none';
+
+  document.getElementById('r-team-total').textContent=fmt(totalTeam);
+  document.getElementById('r-extra-total').textContent=fmt(totalExtra);
+  document.getElementById('r-hpp').textContent=fmt(hpp);
+  document.getElementById('r-margin-pct').textContent=margin+'%';
+  document.getElementById('r-margin-val').textContent=fmt(marginVal);
+  document.getElementById('r-final').textContent=fmt(final);
+  document.getElementById('r-total-hours').textContent=totalHours+' jam';
+  document.getElementById('r-duration').textContent=duration+' bulan';
+  document.getElementById('r-eff-rate').textContent=totalHours>0?fmt(final/totalHours)+'/jam':'–';
+  document.getElementById('r-final-note').textContent=ppnOn&&ppnRate>0?`sudah termasuk PPN ${ppnRate}%`:'estimasi harga jual';
+
+  const ppnRow=document.getElementById('r-ppn-row');
+  if(ppnOn&&ppnRate>0){ppnRow.style.display='flex';document.getElementById('r-ppn-pct').textContent=ppnRate+'%';document.getElementById('r-ppn-val').textContent=fmt(ppnVal);}
+  else ppnRow.style.display='none';
+
+  const rRow=document.getElementById('r-round-row');
+  if(roundTo>0&&roundDiff>0){rRow.style.display='flex';document.getElementById('r-round-val').textContent='+'+fmt(roundDiff);}
+  else rRow.style.display='none';
+
+  renderBreakdown('r-team-breakdown',roleItems.filter(i=>i.label||i.hours||i.rate).map(i=>({label:(i.label||'(tanpa nama)')+` (${i.hours}j × ${fmtShort(i.rate)})`,val:(i.hours||0)*(i.rate||0)})));
+  renderBreakdown('r-extra-breakdown',extraItems.filter(i=>i.label||i.value).map(i=>({label:i.label||'(tanpa nama)',val:i.value||0})));
+  updateSliderFill('margin',margin,0,100);
+}
+function renderBreakdown(elId,items){
+  const el=document.getElementById(elId);
+  if(!items.length){el.innerHTML='';return;}
+  el.innerHTML=items.map(i=>`<div class="result-row indent"><span class="r-label">${i.label}</span><span class="r-val">${fmt(i.val)}</span></div>`).join('');
+}
+
+/* ── Helpers ── */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function updateMarginLabel(){const v=document.getElementById('margin').value;document.getElementById('marginPct').textContent=v+'%';}
+function updateSliderFill(id,val,min,max){document.getElementById(id).style.setProperty('--fill',((val-min)/(max-min))*100+'%');}
+function setRound(val,el){roundTo=val;document.querySelectorAll('#roundTags .tag').forEach(t=>t.classList.remove('active'));el.classList.add('active');recalc();}
+function togglePpn(){ppnOn=!ppnOn;document.getElementById('ppnToggle').classList.toggle('active',ppnOn);document.getElementById('ppnOptions').style.display=ppnOn?'block':'none';recalc();}
+function setPpnRate(val,el){document.getElementById('ppnRate').value=val;document.querySelectorAll('.ppn-preset').forEach(p=>p.classList.remove('active'));el.classList.add('active');recalc();}
+function syncPpnPreset(){const val=parseFloat(document.getElementById('ppnRate').value)||0;document.querySelectorAll('.ppn-preset').forEach(p=>p.classList.toggle('active',(parseFloat(p.textContent)||0)===val));}
+
+/* ── PDF Mode ── */
+function setPdfMode(mode){
+  pdfMode=mode;
+  ['Internal','Penawaran','Penugasan','Penagihan','BuktiBayar'].forEach(m=>{
+    document.getElementById('mode'+m).classList.toggle('active',mode===m.toLowerCase());
+  });
+  const labels={internal:'Cetak / Download PDF',penawaran:'Cetak Surat Penawaran',penugasan:'Cetak SPK',penagihan:'Cetak Invoice',buktibayar:'Cetak Bukti Bayar'};
+  document.getElementById('pdfBtnLabel').textContent=labels[mode]||'Cetak PDF';
+  renderDocExtraFields(mode);
+}
+
+function renderDocExtraFields(mode){
+  const wrap=document.getElementById('docExtraFields');
+  if(mode==='internal'){wrap.style.display='none';wrap.innerHTML='';return;}
+  wrap.style.display='block';
+  const today=new Date().toISOString().split('T')[0];
+
+  if(mode==='penawaran'){
+    const due14=new Date();due14.setDate(due14.getDate()+14);
+    wrap.innerHTML=`
+      <div class="doc-section-hd">Info Penawaran</div>
+      <div class="field" style="margin-bottom:10px">
+        <div class="field-label">Berlaku Hingga</div>
+        <input type="date" id="penawaranValidUntil" value="${due14.toISOString().split('T')[0]}"/>
+      </div>
+      <div class="field">
+        <div class="field-label">Catatan / Syarat <span class="field-hint">satu per baris</span></div>
+        <textarea id="penawaranNotes" rows="5">Harga bersifat estimasi dan dapat berubah sesuai spesifikasi final yang disepakati.
+Pembayaran dibagi dalam termin: DP, progress, dan pelunasan saat serah terima.
+Perubahan scope di luar kesepakatan awal dapat mempengaruhi biaya dan timeline.</textarea>
+      </div>`;
+
+  } else if(mode==='penugasan'){
+    wrap.innerHTML=`
+      <div class="doc-section-hd">Info SPK</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="field">
+          <div class="field-label">Penerima Kerja</div>
+          <input type="text" id="spkPenerimaName" value="Dionisius Nanda Priyadi"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Jabatan</div>
+          <input type="text" id="spkPenerimaRole" value="Software Engineer"/>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <div class="field-label">Nama Pemberi Kerja <span class="field-hint">kosong = nama klien</span></div>
+        <input type="text" id="spkPemberiName" placeholder="kosong = gunakan nama klien"/>
+      </div>
+      <div class="doc-section-hd">Daftar Output <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.58rem;color:rgba(255,255,255,.13)">— platform & biaya tambahan otomatis masuk</span></div>
+      <div id="spkOutputList"></div>
+      <button class="add-btn" onclick="addSpkOutput()" style="margin-top:3px">+ Tambah Output</button>`;
+    renderSpkOutputs();
+
+  } else if(mode==='penagihan'){
+    wrap.innerHTML=`
+      <div class="doc-section-hd">Info Invoice</div>
+      <div class="field" style="margin-bottom:10px">
+        <div class="field-label">No. Invoice</div>
+        <input type="text" id="docNumber" placeholder="cth. INV/2026/001"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="field">
+          <div class="field-label">Tanggal Invoice</div>
+          <input type="date" id="docDate" value="${today}"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Jatuh Tempo</div>
+          <input type="date" id="docDue"/>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <div class="field-label">Ditagihkan Kepada <span class="field-hint">kosong = nama klien</span></div>
+        <input type="text" id="billTo" placeholder="nama atau perusahaan"/>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <div class="field-label">Alamat Penagihan <span class="field-hint">opsional</span></div>
+        <input type="text" id="billToAddress" placeholder="cth. Jl. Sudirman No. 1, Jakarta"/>
+      </div>
+      <div class="doc-section-hd">Info Rekening</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="field">
+          <div class="field-label">Nama Bank</div>
+          <input type="text" id="bankName" placeholder="cth. BCA"/>
+        </div>
+        <div class="field">
+          <div class="field-label">No. Rekening</div>
+          <input type="text" id="bankAcc" placeholder="cth. 1234567890"/>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Atas Nama</div>
+        <input type="text" id="bankHolder" placeholder="cth. Dionisius Nanda Priyadi"/>
+      </div>`;
+    const due=new Date();due.setDate(due.getDate()+14);
+    document.getElementById('docDue').value=due.toISOString().split('T')[0];
+
+  } else if(mode==='buktibayar'){
+    wrap.innerHTML=`
+      <div class="doc-section-hd">Info Pembayaran</div>
+      <div class="field" style="margin-bottom:10px">
+        <div class="field-label">No. Kwitansi</div>
+        <input type="text" id="docNumber" placeholder="cth. RCP/2026/001"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="field">
+          <div class="field-label">Tanggal Bayar</div>
+          <input type="date" id="docDate" value="${today}"/>
+        </div>
+        <div class="field">
+          <div class="field-label">Metode Bayar</div>
+          <select id="payMethod">
+            <option>Transfer Bank</option>
+            <option>QRIS</option>
+            <option>Tunai</option>
+            <option>Virtual Account</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <div class="field-label">Diterima Dari <span class="field-hint">kosong = nama klien</span></div>
+        <input type="text" id="payerName" placeholder="nama pembayar"/>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <div class="field-label">Jumlah Dibayar <span class="field-hint">kosong = lunas</span></div>
+        <div class="input-wrap has-prefix">
+          <span class="input-prefix">Rp</span>
+          <input type="number" id="paidAmount" placeholder="0" min="0" style="padding-left:34px" oninput="recalc()"/>
+        </div>
+      </div>
+      <div class="doc-section-hd">Info Rekening</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="field">
+          <div class="field-label">Nama Bank</div>
+          <input type="text" id="bankName" placeholder="cth. BCA"/>
+        </div>
+        <div class="field">
+          <div class="field-label">No. Rekening</div>
+          <input type="text" id="bankAcc" placeholder="cth. 1234567890"/>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Atas Nama</div>
+        <input type="text" id="bankHolder" placeholder="cth. Dionisius Nanda Priyadi"/>
+      </div>`;
+  }
+}
+
+function renderSpkOutputs(){
+  const el=document.getElementById('spkOutputList');
+  if(!el)return;
+  el.innerHTML='';
+  spkOutputItems.forEach(item=>{
+    const row=document.createElement('div');
+    row.className='spk-out-row';
+    row.innerHTML=`
+      <input type="text" value="${esc(item.label)}" placeholder="cth. Dokumentasi teknis"
+        oninput="updateSpkOutput(${item.id},this.value)" style="flex:1;font-size:.74rem"/>
+      <button class="item-del" onclick="delSpkOutput(${item.id})">×</button>`;
+    el.appendChild(row);
+  });
+}
+function addSpkOutput(){spkOutputItems.push({id:++spkOutputCounter,label:''});renderSpkOutputs();}
+function delSpkOutput(id){spkOutputItems=spkOutputItems.filter(i=>i.id!==id);renderSpkOutputs();}
+function updateSpkOutput(id,v){const i=spkOutputItems.find(i=>i.id===id);if(i)i.label=v;}
+
+/* ── KOP helpers ── */
+function getKop(){
+  return{
+    brand:document.getElementById('kopBrand').value.trim()||'dionisiusnp · Software Development',
+    tagline:document.getElementById('kopTagline').value.trim(),
+    alamat:document.getElementById('kopAlamat').value.trim(),
+    kontak:document.getElementById('kopKontak').value.trim(),
+    footerNote:document.getElementById('kopFooterNote').value.trim(),
+  };
+}
+function buildKopHtml(kop,docType,docSub,rightExtra){
+  const dateStr=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  return`<div class="pd-kop">
+    <div>
+      <div class="pd-kop-brand">${kop.brand}</div>
+      ${kop.tagline?`<div class="pd-kop-tagline">${kop.tagline}</div>`:''}
+      ${kop.alamat?`<div class="pd-kop-alamat">${kop.alamat}</div>`:''}
+      ${kop.kontak?`<div class="pd-kop-kontak">${kop.kontak}</div>`:''}
+    </div>
+    <div class="pd-kop-right">
+      <div class="pd-doc-type">${docType}</div>
+      <div class="pd-doc-sub">${docSub||'–'}</div>
+      <div class="pd-doc-date">${dateStr}</div>
+      ${rightExtra||''}
+    </div>
+  </div>`;
+}
+function buildFooterHtml(kop,leftText,rightText){
+  const dateStr=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  const left=[leftText,kop.footerNote].filter(Boolean).join(' · ');
+  return`<div class="pd-foot"><span class="pd-foot-note">${left||''}</span><span>${rightText||dateStr}</span></div>`;
+}
+
+/* ── Generate PDF ── */
+function terbilang(n){
+  const sat=['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
+  function rec(x){
+    if(x<12)return sat[x];
+    if(x<20)return rec(x-10)+' belas';
+    if(x<100)return rec(Math.floor(x/10))+' puluh'+(x%10?' '+rec(x%10):'');
+    if(x<200)return 'seratus'+(x%100?' '+rec(x%100):'');
+    if(x<1000)return rec(Math.floor(x/100))+' ratus'+(x%100?' '+rec(x%100):'');
+    if(x<2000)return 'seribu'+(x%1000?' '+rec(x%1000):'');
+    if(x<1e6)return rec(Math.floor(x/1000))+' ribu'+(x%1000?' '+rec(x%1000):'');
+    if(x<1e9)return rec(Math.floor(x/1e6))+' juta'+(x%1e6?' '+rec(x%1e6):'');
+    return rec(Math.floor(x/1e9))+' miliar'+(x%1e9?' '+rec(x%1e9):'');
+  }
+  if(n===0)return 'nol';
+  const r=rec(Math.round(n));
+  return r.charAt(0).toUpperCase()+r.slice(1)+' Rupiah';
+}
+function fmtDate(str){if(!str)return'–';return new Date(str).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});}
+function getDocField(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+
+function generatePdf(){
+  const margin=parseInt(document.getElementById('margin').value)||0;
+  const ppnRate=ppnOn?(parseFloat(document.getElementById('ppnRate').value)||0):0;
+  const duration=parseInt(document.getElementById('duration').value)||1;
+  const clientName=document.getElementById('clientName').value.trim();
+  const projectName=document.getElementById('projectName').value.trim();
+  const projectType=document.getElementById('projectType').options[document.getElementById('projectType').selectedIndex].text;
+  const platforms=getSelectedPlatforms();
+  const kop=getKop();
+
+  const totalTeam=roleItems.reduce((s,i)=>s+(i.hours||0)*(i.rate||0),0);
+  const totalExtra=extraItems.reduce((s,i)=>s+(i.value||0),0);
+  const totalHours=roleItems.reduce((s,i)=>s+(i.hours||0),0);
+  const hpp=totalTeam+totalExtra;
+  const marginVal=hpp*(margin/100);
+  const afterMargin=hpp+marginVal;
+  const ppnVal=afterMargin*(ppnRate/100);
+  const beforeRound=afterMargin+ppnVal;
+  let final=beforeRound;
+  if(roundTo>0)final=Math.ceil(beforeRound/roundTo)*roundTo;
+  const roundDiff=final-beforeRound;
+
+  const dateStr=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  const ppnRowHtml=ppnOn&&ppnRate>0?`<tr><td>PPN (${ppnRate}%)</td><td>${fmt(ppnVal)}</td></tr>`:'';
+  const platformChips=platforms.length?`<div class="pd-chips">${platforms.map(p=>`<span class="pd-chip">${p}</span>`).join('')}</div>`:'';
+  const scopeMap={'🌐 Website':['🌐','Website'],'🤖 Android':['🤖','Android App'],'🍎 iOS':['🍎','iOS App'],'⚙️ Backend/API':['⚙️','Backend / API'],'🖥️ Admin Panel':['🖥️','Admin Panel']};
+  const extraRows=extraItems.filter(i=>i.label||i.value).map(i=>`<tr><td>${i.label||'(item)'}</td><td>${fmt(i.value||0)}</td></tr>`).join('');
+
+  /* ── INTERNAL ── */
+  if(pdfMode==='internal'){
+    const roleRows=roleItems.filter(i=>i.label||i.hours||i.rate).map(i=>`<tr><td>${i.label||'(tanpa nama)'}</td><td style="text-align:center">${i.hours||0} jam</td><td>${fmt(i.rate||0)}</td><td>${fmt((i.hours||0)*(i.rate||0))}</td></tr>`).join('');
+    const roundRow=roundTo>0&&roundDiff>0?`<tr><td style="color:#9ca3af">Pembulatan</td><td>${fmt(roundDiff)}</td></tr>`:'';
+    document.getElementById('printDoc').innerHTML=
+      buildKopHtml(kop,'Dokumen Internal',projectName||'Estimasi Penawaran',
+        clientName?`<div style="font-size:.6rem;color:#9ca3af;margin-top:2px">Klien: ${clientName}</div>`:'')+
+      `<div class="pd-confidential">🔒 Rahasia — jangan disebarkan</div>
+      <div class="pd-two">
+        <div class="pd-section"><div class="pd-section-title">Biaya Tim — ${totalHours} jam</div>
+          <table class="pd-table"><thead><tr><th>Peran</th><th>Jam</th><th>Rate/Jam</th><th>Subtotal</th></tr></thead>
+          <tbody>${roleRows||'<tr><td colspan="4" style="color:#d1d5db">–</td></tr>'}
+          <tr class="sub"><td colspan="3">Total Tim</td><td>${fmt(totalTeam)}</td></tr></tbody></table>
+        </div>
+        <div class="pd-section"><div class="pd-section-title">Biaya Tambahan</div>
+          <table class="pd-table"><thead><tr><th>Keterangan</th><th>Biaya</th></tr></thead>
+          <tbody>${extraRows||'<tr><td colspan="2" style="color:#d1d5db">–</td></tr>'}
+          <tr class="sub"><td>Total</td><td>${fmt(totalExtra)}</td></tr></tbody></table>
+        </div>
+      </div>
+      <div class="pd-section"><div class="pd-section-title">Kalkulasi Harga</div>
+        <table class="pd-table"><tbody>
+          <tr class="hpp"><td>HPP (Modal)</td><td>${fmt(hpp)}</td></tr>
+          <tr><td>+ Margin (${margin}%)</td><td>${fmt(marginVal)}</td></tr>
+          ${ppnRowHtml}${roundRow}
+          <tr class="final-row"><td>Harga Jual ke Klien</td><td>${fmt(final)}</td></tr>
+        </tbody></table>
+      </div>
+      <div class="pd-section" style="font-size:.7rem;color:#6b7280">
+        ${projectType} · ${duration} bulan · Rate efektif: ${totalHours>0?fmt(final/totalHours)+'/jam':'–'}
+      </div>`+
+      buildFooterHtml(kop,'🔒 Internal — Jangan disebarkan',dateStr);
+  }
+
+  /* ── PENAWARAN ── */
+  else if(pdfMode==='penawaran'){
+    const validUntil=fmtDate(getDocField('penawaranValidUntil'));
+    const notesRaw=document.getElementById('penawaranNotes')?.value||'';
+    const noteLines=notesRaw.split('\n').filter(l=>l.trim());
+    const scopeItems=platforms.map(p=>{const m=scopeMap[p]||['📦',p];return`<div class="pd-scope-item"><div class="pd-scope-ico">${m[0]}</div><div class="pd-scope-label">${m[1]}</div></div>`;}).join('');
+    const clientRows=[
+      `<tr><td>Biaya Pengembangan (${projectType})</td><td>${fmt(totalTeam)}</td></tr>`,
+      ...extraItems.filter(i=>i.label||i.value).map(i=>`<tr><td>${i.label||'(item)'}</td><td>${fmt(i.value||0)}</td></tr>`)
+    ].join('');
+    document.getElementById('printDoc').innerHTML=
+      buildKopHtml(kop,'Surat Penawaran',projectName||'Penawaran Aplikasi',
+        clientName?`<div style="font-size:.62rem;color:#9ca3af;margin-top:2px">Kepada: ${clientName}</div>`:'')+
+      `<div class="pd-price-hero">
+        ${clientName?`<div class="pd-price-for">Untuk: <strong style="color:#1a1a2e">${clientName}</strong></div>`:''}
+        <div class="pd-price-project">${projectName||'Penawaran Aplikasi'}</div>
+        <div class="pd-price-wrap">
+          <div class="pd-price-label">Total Investasi</div>
+          <div class="pd-price-num">${fmt(final)}</div>
+          <div class="pd-price-note">${ppnOn&&ppnRate>0?`Sudah termasuk PPN ${ppnRate}%`:'Belum termasuk pajak'} · ${duration} bulan pengerjaan</div>
+        </div>
+      </div>
+      ${platforms.length?`<div class="pd-section"><div class="pd-section-title">Lingkup Platform</div><div class="pd-scope-grid">${scopeItems}</div></div>`:''}
+      <div class="pd-section"><div class="pd-section-title">Rincian Penawaran</div>
+        <table class="pd-table"><thead><tr><th>Keterangan</th><th>Biaya</th></tr></thead>
+        <tbody>${clientRows}<tr class="final-row"><td>Total${ppnOn&&ppnRate>0?` (termasuk PPN ${ppnRate}%)`:''}</td><td>${fmt(final)}</td></tr></tbody></table>
+      </div>
+      ${noteLines.length?`<div class="pd-terms-box"><div class="pd-terms-title">Catatan &amp; Syarat</div><ul class="pd-terms-list">${noteLines.map(l=>`<li>${l}</li>`).join('')}</ul></div>`:''}`+
+      buildFooterHtml(kop,validUntil?`Berlaku hingga ${validUntil}`:'',dateStr);
+  }
+
+  /* ── PENUGASAN ── */
+  else if(pdfMode==='penugasan'){
+    const penerimaName=getDocField('spkPenerimaName')||'Dionisius Nanda Priyadi';
+    const penerimaRole=getDocField('spkPenerimaRole')||'Software Engineer';
+    const pemberiName=getDocField('spkPemberiName')||clientName;
+    const deliverables=[
+      ...platforms.map(p=>{const m=scopeMap[p]||['📦',p];return`${m[0]} ${m[1]}`;}),
+      ...extraItems.filter(i=>i.label).map(i=>i.label),
+      ...spkOutputItems.filter(i=>i.label).map(i=>i.label),
+    ];
+    const checklistHtml=deliverables.map(d=>`<li><div class="pd-check-box">✓</div><span>${d}</span></li>`).join('');
+    document.getElementById('printDoc').innerHTML=
+      buildKopHtml(kop,'Surat Penugasan / SPK',projectName||'–',
+        `<div style="font-size:.6rem;color:#9ca3af;margin-top:2px">${projectType} · ${duration} bulan</div>`)+
+      `<div class="pd-spk-parties">
+        <div class="pd-party-box">
+          <div class="pd-party-label">Pemberi Kerja</div>
+          <div class="pd-party-name">${pemberiName||'_________________________'}</div>
+          <div class="pd-party-sub">Selanjutnya disebut Klien</div>
+        </div>
+        <div class="pd-party-box">
+          <div class="pd-party-label">Penerima Kerja</div>
+          <div class="pd-party-name">${penerimaName}</div>
+          <div class="pd-party-sub">${penerimaRole}</div>
+        </div>
+      </div>
+      <div class="pd-section"><div class="pd-section-title">Lingkup &amp; Nilai Pekerjaan</div>
+        <table class="pd-table"><tbody>
+          <tr><td>Jenis Proyek</td><td>${projectType}</td></tr>
+          <tr><td>Platform</td><td>${platforms.join(', ')||'–'}</td></tr>
+          <tr><td>Estimasi Durasi</td><td>${duration} bulan</td></tr>
+          <tr class="final-row"><td>Nilai Kontrak</td><td>${fmt(final)}${ppnOn&&ppnRate>0?` (termasuk PPN ${ppnRate}%)`:''}</td></tr>
+        </tbody></table>
+      </div>
+      <div class="pd-section"><div class="pd-section-title">Daftar Output yang Diterima Klien</div>
+        <ul class="pd-checklist">${checklistHtml||'<li><div class="pd-check-box"></div><span>–</span></li>'}</ul>
+      </div>
+      <div class="pd-section"><div class="pd-section-title">Persetujuan &amp; Tanda Tangan</div>
+        <div class="pd-ttd-row">
+          <div class="pd-ttd-box">
+            <div class="pd-ttd-label">Pemberi Kerja<br/><span style="font-size:.58rem;color:#9ca3af">( materai + tanda tangan )</span></div>
+            <div class="pd-ttd-line"><div class="pd-ttd-name">${pemberiName||'_________________________'}</div><div class="pd-ttd-role">Klien</div></div>
+          </div>
+          <div class="pd-ttd-box">
+            <div class="pd-ttd-label">Penerima Kerja<br/><span style="font-size:.58rem;color:#9ca3af">( tanda tangan )</span></div>
+            <div class="pd-ttd-line"><div class="pd-ttd-name">${penerimaName}</div><div class="pd-ttd-role">${penerimaRole}</div></div>
+          </div>
+        </div>
+      </div>`+
+      buildFooterHtml(kop,'Surat Perintah Kerja (SPK)',dateStr);
+  }
+
+  /* ── PENAGIHAN ── */
+  else if(pdfMode==='penagihan'){
+    const invNo=getDocField('docNumber')||'INV/'+new Date().getFullYear()+'/001';
+    const invDate=fmtDate(getDocField('docDate'))||dateStr;
+    const invDue=fmtDate(getDocField('docDue'));
+    const billTo=getDocField('billTo')||clientName;
+    const billToAddress=getDocField('billToAddress');
+    const bankName=getDocField('bankName');
+    const bankAcc=getDocField('bankAcc');
+    const bankHolder=getDocField('bankHolder');
+    const invoiceRows=[
+      `<tr><td>Biaya Pengembangan (${projectType})</td><td style="text-align:center">1</td><td>${fmt(totalTeam)}</td><td>${fmt(totalTeam)}</td></tr>`,
+      ...extraItems.filter(i=>i.label||i.value).map(i=>`<tr><td>${i.label||'(item)'}</td><td style="text-align:center">1</td><td>${fmt(i.value||0)}</td><td>${fmt(i.value||0)}</td></tr>`)
+    ].join('');
+    const bankSection=bankName||bankAcc?`<div class="pd-bank-box">
+      <div class="pd-bank-label">Transfer ke Rekening</div>
+      <div class="pd-bank-name">${bankName||'–'}</div>
+      <div class="pd-bank-acc">${bankAcc||'–'}</div>
+      <div class="pd-bank-holder">a.n. ${bankHolder||'–'}</div>
+    </div>`:'';
+    document.getElementById('printDoc').innerHTML=
+      buildKopHtml(kop,'Invoice',invNo,
+        `<div style="font-size:.6rem;color:#9ca3af;margin-top:2px">${invDate}${invDue?' · Jatuh Tempo: '+invDue:''}</div>`)+
+      `${platformChips}
+      <div class="pd-inv-meta">
+        <div>
+          <div class="pd-inv-no">${invNo}</div>
+          <div class="pd-inv-title">INVOICE</div>
+          <div class="pd-inv-date">Tanggal: ${invDate}${invDue?' · Jatuh Tempo: '+invDue:''}</div>
+        </div>
+        <div class="pd-bill-box">
+          <div class="pd-bill-label">Ditagihkan Kepada</div>
+          <div class="pd-bill-name">${billTo||'_________________________'}</div>
+          ${billToAddress?`<div class="pd-bill-addr">${billToAddress}</div>`:''}
+        </div>
+      </div>
+      <div class="pd-section"><div class="pd-section-title">${projectName||'Detail Pekerjaan'}</div>
+        <table class="pd-table">
+          <thead><tr><th>Deskripsi</th><th style="text-align:center">Qty</th><th>Harga</th><th>Total</th></tr></thead>
+          <tbody>
+            ${invoiceRows}
+            <tr style="border-top:2px solid #e5e7eb"><td colspan="3" style="text-align:right;font-weight:600">Subtotal</td><td>${fmt(hpp)}</td></tr>
+            ${ppnOn&&ppnRate>0?`<tr><td colspan="3" style="text-align:right;font-weight:600">PPN (${ppnRate}%)</td><td>${fmt(ppnVal)}</td></tr>`:''}
+            <tr class="final-row"><td colspan="3" style="text-align:right">TOTAL</td><td>${fmt(final)}</td></tr>
+          </tbody>
+        </table>
+        <div class="pd-terbilang"># ${terbilang(final)}</div>
+        ${bankSection}
+      </div>`+
+      buildFooterHtml(kop,invNo,invDate);
+  }
+
+  /* ── BUKTI BAYAR ── */
+  else if(pdfMode==='buktibayar'){
+    const rcptNo=getDocField('docNumber')||'RCP/'+new Date().getFullYear()+'/001';
+    const rcptDate=fmtDate(getDocField('docDate'))||dateStr;
+    const payMethod=getDocField('payMethod')||'Transfer Bank';
+    const payerName=getDocField('payerName')||clientName;
+    const bankName=getDocField('bankName');
+    const bankAcc=getDocField('bankAcc');
+    const bankHolder=getDocField('bankHolder');
+    const paidRaw=parseFloat(document.getElementById('paidAmount')?.value)||0;
+    const paidAmt=paidRaw>0?paidRaw:final;
+    const isLunas=paidAmt>=final;
+    document.getElementById('printDoc').innerHTML=
+      buildKopHtml(kop,'Bukti Pembayaran',rcptNo,
+        `<div style="font-size:.6rem;color:#9ca3af;margin-top:2px">${rcptDate}</div>`)+
+      `<div class="pd-receipt-wrap">
+        <div class="pd-receipt-stamp">${isLunas?'LUNAS':'DP /'}<br/>${isLunas?'':'CICILAN'}<br/>${new Date().getFullYear()}</div>
+      </div>
+      <div class="pd-section"><div class="pd-section-title">Detail Pembayaran</div>
+        <table class="pd-table"><tbody>
+          <tr><td>Diterima dari</td><td>${payerName||'_________________________'}</td></tr>
+          <tr><td>Untuk pekerjaan</td><td>${projectName||'–'}</td></tr>
+          <tr><td>Platform</td><td>${platforms.join(', ')||'–'}</td></tr>
+          <tr><td>Metode Pembayaran</td><td>${payMethod}</td></tr>
+          ${bankName||bankAcc?`<tr><td>Rekening</td><td>${bankName||''} ${bankAcc?'· '+bankAcc:''} ${bankHolder?'('+bankHolder+')':''}</td></tr>`:''}
+          <tr><td>Tanggal Bayar</td><td>${rcptDate}</td></tr>
+          <tr><td>Total Tagihan</td><td>${fmt(final)}</td></tr>
+          <tr class="final-row"><td>Jumlah Dibayar</td><td>${fmt(paidAmt)}</td></tr>
+          ${!isLunas?`<tr style="background:#fff7ed"><td style="color:#92400e">Sisa Tagihan</td><td style="color:#d97706;font-weight:700">${fmt(final-paidAmt)}</td></tr>`:''}
+        </tbody></table>
+        <div class="pd-terbilang"># ${terbilang(paidAmt)}</div>
+      </div>
+      <div class="pd-section"><div class="pd-section-title">Tanda Tangan</div>
+        <div class="pd-ttd-row">
+          <div class="pd-ttd-box">
+            <div class="pd-ttd-label">Pembayar<br/><span style="font-size:.58rem;color:#9ca3af">( tanda tangan )</span></div>
+            <div class="pd-ttd-line"><div class="pd-ttd-name">${payerName||'_________________________'}</div><div class="pd-ttd-role">Klien</div></div>
+          </div>
+          <div class="pd-ttd-box">
+            <div class="pd-ttd-label">Penerima<br/><span style="font-size:.58rem;color:#9ca3af">( tanda tangan )</span></div>
+            <div class="pd-ttd-line"><div class="pd-ttd-name">${kop.brand}</div><div class="pd-ttd-role">${kop.tagline||'Software Engineer'}</div></div>
+          </div>
+        </div>
+      </div>`+
+      buildFooterHtml(kop,`${rcptNo} · ${isLunas?'LUNAS':'Pembayaran Sebagian'}`,rcptDate);
+  }
+
+  window.print();
+}
+
+/* ── Reset ── */
+function resetAll(){
+  document.getElementById('clientName').value='';
+  document.getElementById('projectName').value='';
+  document.getElementById('duration').value=3;
+  document.getElementById('margin').value=30;
+  document.getElementById('projectType').value='new';
+  document.querySelectorAll('.pchip input').forEach(cb=>{cb.checked=false;cb.closest('.pchip').classList.remove('checked');});
+  ppnOn=false;
+  document.getElementById('ppnToggle').classList.remove('active');
+  document.getElementById('ppnOptions').style.display='none';
+  document.getElementById('ppnRate').value=11;
+  document.querySelectorAll('.ppn-preset').forEach(p=>p.classList.toggle('active',p.textContent==='11%'));
+  updateMarginLabel();
+  roleCounter=0;extraCounter=0;
+  roleItems=[];extraItems=[];
+  spkOutputCounter=DEFAULT_SPK_OUTPUTS.length;
+  spkOutputItems=DEFAULT_SPK_OUTPUTS.map((label,i)=>({id:i+1,label}));
+  renderRoles();renderExtras();
+  renderDocExtraFields(pdfMode);
+  recalc();
+}
+
+/* ── Init ── */
+(function(){
+  const defaultRoles=[
+    {label:'Project Manager',hours:40,rate:150000},
+    {label:'UI/UX Designer',hours:80,rate:120000},
+    {label:'Frontend Developer',hours:160,rate:175000},
+    {label:'Backend Developer',hours:160,rate:200000},
+    {label:'Mobile Developer',hours:120,rate:190000},
+    {label:'QA / Tester',hours:40,rate:100000},
+  ];
+  const defaultExtras=[
+    {label:'Domain (1 tahun)',value:150000},
+    {label:'Hosting / VPS (1 tahun)',value:2400000},
+    {label:'Google Play Store',value:400000},
+    {label:'Apple Developer Account',value:1600000},
+  ];
+  defaultRoles.forEach(r=>{roleItems.push({id:++roleCounter,...r});});
+  defaultExtras.forEach(e=>{extraItems.push({id:++extraCounter,...e});});
+  renderRoles();
+  renderExtras();
+  updateSliderFill('margin',30,0,100);
+})();
+</script>
+</body>
+</html>
