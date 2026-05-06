@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cocothink — Desain Teknis Gameplay</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:#09090f;
+  --surface:#0f0f18;
+  --surface2:#13131e;
+  --card:rgba(255,255,255,.04);
+  --bd:rgba(255,255,255,.08);
+  --bd2:rgba(255,255,255,.13);
+  --text:#e2e2ee;
+  --muted:#8888aa;
+  --dim:rgba(255,255,255,.22);
+  --accent:#6366f1;
+  --a2:#a855f7;
+  --a3:#22d3ee;
+  --green:#3fb950;
+  --gold:#fbbf24;
+  --red:#f87171;
+  --blue:#58a6ff;
+  --orange:#f78166;
+  --purple:#bc8cff;
+  --teal:#2dd4bf;
+  --font-sans:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --r-xs:4px; --r-sm:7px; --r-md:10px; --r-lg:14px; --r-xl:20px; --r-pill:999px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(rgba(99,102,241,.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── DION NAV ── */
+#dion-nav {
+  position: sticky; top: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 20px;
+  background: rgba(9,9,15,.95);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--bd);
+  font-family: var(--font-sans); font-size: .72rem;
+}
+#dion-nav a.back {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 600; color: var(--muted);
+  padding: 4px 11px; border-radius: var(--r-sm);
+  border: 1px solid var(--bd); text-decoration: none;
+  transition: color .18s, border-color .18s;
+}
+#dion-nav a.back:hover { color: var(--accent); border-color: rgba(99,102,241,.3); }
+#dion-nav .breadcrumb { color: var(--muted); font-size: 11px; }
+#dion-nav .breadcrumb span { color: var(--purple); font-weight: 600; }
+
+/* ── PAGE NAV ── */
+nav {
+  position: sticky; top: 44px;
+  background: rgba(9,9,15,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bd);
+  z-index: 100;
+}
+.nav-inner {
+  max-width: 960px; margin: auto;
+  padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 50px;
+}
+.nav-logo {
+  font-size: 13px; font-weight: 700;
+  color: var(--text); text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-logo .logo-badge {
+  background: rgba(168,85,247,.15);
+  border: 1px solid rgba(168,85,247,.3);
+  color: var(--purple);
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: var(--r-pill);
+  letter-spacing: .08em; text-transform: uppercase;
+}
+.nav-links { display: flex; gap: 2px; list-style: none; }
+.nav-links a {
+  font-size: 12px; color: var(--muted);
+  text-decoration: none; padding: 5px 10px;
+  border-radius: var(--r-sm); transition: color .15s, background .15s;
+}
+.nav-links a:hover { color: var(--text); background: var(--card); }
+
+/* ── LAYOUT ── */
+.wrap { max-width: 960px; margin: auto; padding: 0 24px; position: relative; z-index: 1; }
+section { padding: 60px 0; }
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--bd), transparent); }
+
+/* ── SECTION HEADER ── */
+.sec-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10.5px; font-weight: 600;
+  letter-spacing: .13em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.sec-label::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.sec-h2 { font-size: clamp(18px,2.5vw,26px); font-weight: 800; color: #f0f6fc; margin-bottom: 8px; }
+.sec-desc { font-size: 14px; color: var(--muted); max-width: 600px; line-height: 1.7; margin-bottom: 32px; }
+
+/* color variants */
+.c-purple { color: var(--purple); } .c-purple::before { background: var(--purple); }
+.c-green  { color: var(--green);  } .c-green::before  { background: var(--green);  }
+.c-gold   { color: var(--gold);   } .c-gold::before   { background: var(--gold);   }
+.c-blue   { color: var(--blue);   } .c-blue::before   { background: var(--blue);   }
+.c-orange { color: var(--orange); } .c-orange::before { background: var(--orange); }
+.c-teal   { color: var(--teal);   } .c-teal::before   { background: var(--teal);   }
+.c-red    { color: var(--red);    } .c-red::before    { background: var(--red);    }
+
+/* ── HERO ── */
+.hero { padding: 64px 0 52px; position: relative; overflow: hidden; }
+.hero-glow {
+  position: absolute; top: -100px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse, rgba(168,85,247,.1) 0%, rgba(99,102,241,.06) 40%, transparent 70%);
+  filter: blur(60px); pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(168,85,247,.08);
+  border: 1px solid rgba(168,85,247,.22);
+  border-radius: var(--r-pill); padding: 5px 14px;
+  font-size: 12px; color: var(--purple); font-weight: 500;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: clamp(22px,4vw,42px);
+  font-weight: 800; line-height: 1.2;
+  color: #f0f6fc; max-width: 800px;
+  margin-bottom: 18px;
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(90deg, var(--purple), var(--blue));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-desc { font-size: 15px; color: var(--muted); max-width: 640px; line-height: 1.75; margin-bottom: 32px; }
+
+.hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.hchip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--bd);
+  border-radius: var(--r-md); padding: 9px 14px;
+  transition: border-color .2s;
+}
+.hchip:hover { border-color: rgba(168,85,247,.3); }
+.hchip-icon { font-size: 18px; }
+.hchip-v { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.hchip-s { font-size: 11px; color: var(--muted); }
+
+/* ── MECHANIC CARDS ── */
+.mech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px; margin-top: 28px;
+}
+.mech-card {
+  background: var(--surface);
+  border: 1px solid var(--bd);
+  border-radius: var(--r-xl); padding: 22px;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.mech-card::after {
+  content: '';
+  position: absolute; bottom: -30px; right: -20px;
+  width: 120px; height: 120px; border-radius: 50%;
+  opacity: .06; pointer-events: none;
+}
+.mech-card.recommended {
+  border-color: rgba(63,185,80,.3);
+  background: linear-gradient(135deg, rgba(63,185,80,.04), var(--surface));
+}
+.mech-card.recommended::after { background: var(--green); }
+.mech-card.recommended:hover { border-color: rgba(63,185,80,.55); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(63,185,80,.08); }
+
+.mech-card.alt1 { border-color: rgba(88,166,255,.2); }
+.mech-card.alt1::after { background: var(--blue); }
+.mech-card.alt1:hover { border-color: rgba(88,166,255,.45); transform: translateY(-3px); }
+
+.mech-card.alt2 { border-color: rgba(188,140,255,.2); }
+.mech-card.alt2::after { background: var(--purple); }
+.mech-card.alt2:hover { border-color: rgba(188,140,255,.45); transform: translateY(-3px); }
+
+.mech-card.alt3 { border-color: rgba(45,212,191,.2); }
+.mech-card.alt3::after { background: var(--teal); }
+.mech-card.alt3:hover { border-color: rgba(45,212,191,.45); transform: translateY(-3px); }
+
+.mech-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 9.5px; font-weight: 700;
+  padding: 3px 10px; border-radius: var(--r-pill);
+  text-transform: uppercase; letter-spacing: .1em;
+  margin-bottom: 14px;
+}
+.badge-recommend { background: rgba(63,185,80,.1); color: var(--green); border: 1px solid rgba(63,185,80,.2); }
+.badge-possible   { background: rgba(88,166,255,.1); color: var(--blue); border: 1px solid rgba(88,166,255,.2); }
+.badge-bonus      { background: rgba(188,140,255,.1); color: var(--purple); border: 1px solid rgba(188,140,255,.2); }
+
+.mech-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+.mech-card h3 { font-size: 16px; font-weight: 700; color: #f0f6fc; margin-bottom: 6px; }
+.mech-card p  { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+
+.mech-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.mtag {
+  font-size: 10.5px; font-weight: 500;
+  padding: 2px 8px; border-radius: var(--r-xs);
+  font-family: var(--font-mono);
+  background: var(--card); border: 1px solid var(--bd);
+  color: var(--muted);
+}
+.mech-card.recommended .mtag { color: var(--green); border-color: rgba(63,185,80,.18); background: rgba(63,185,80,.06); }
+.mech-card.alt1 .mtag { color: var(--blue); border-color: rgba(88,166,255,.18); background: rgba(88,166,255,.06); }
+.mech-card.alt2 .mtag { color: var(--purple); border-color: rgba(188,140,255,.18); background: rgba(188,140,255,.06); }
+.mech-card.alt3 .mtag { color: var(--teal); border-color: rgba(45,212,191,.18); background: rgba(45,212,191,.06); }
+
+.mech-note {
+  font-size: 11px; padding: 7px 11px;
+  border-radius: var(--r-sm);
+  background: rgba(63,185,80,.06);
+  border-left: 2px solid var(--green);
+  color: var(--green); margin-top: 2px;
+}
+
+/* ── DUNGEON TABLE ── */
+.dungeon-grid {
+  display: grid; grid-template-columns: 1fr;
+  gap: 12px; margin-top: 28px;
+}
+.dungeon-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 2fr 1fr;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--bd);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.dungeon-row:hover { border-color: var(--bd2); transform: translateX(3px); }
+
+.drow-num {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-weight: 700;
+  font-size: 14px; padding: 0 12px;
+  border-right: 1px solid var(--bd);
+  flex-shrink: 0;
+}
+.drow-main { padding: 14px 16px; border-right: 1px solid var(--bd); }
+.drow-main h4 { font-size: 14px; font-weight: 700; color: #f0f6fc; margin-bottom: 3px; }
+.drow-main p { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+
+.drow-quests { padding: 14px 16px; border-right: 1px solid var(--bd); }
+.drow-quests p { font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.quest-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.qpill {
+  font-size: 10px; padding: 2px 7px;
+  border-radius: var(--r-xs); font-family: var(--font-mono);
+  background: var(--card); border: 1px solid var(--bd); color: var(--muted);
+}
+
+.drow-meta { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+.dmeta-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+.dmeta-icon { font-size: 13px; }
+
+/* dungeon colors */
+.d1 .drow-num { background: rgba(247,129,102,.08); color: var(--orange); border-right-color: rgba(247,129,102,.15); }
+.d2 .drow-num { background: rgba(63,185,80,.08); color: var(--green); border-right-color: rgba(63,185,80,.15); }
+.d3 .drow-num { background: rgba(88,166,255,.08); color: var(--blue); border-right-color: rgba(88,166,255,.15); }
+.d4 .drow-num { background: rgba(168,85,247,.08); color: var(--a2); border-right-color: rgba(168,85,247,.15); }
+.d5 .drow-num { background: rgba(188,140,255,.08); color: var(--purple); border-right-color: rgba(188,140,255,.15); }
+.d6 .drow-num { background: rgba(45,212,191,.08); color: var(--teal); border-right-color: rgba(45,212,191,.15); }
+.d7 .drow-num { background: rgba(251,191,36,.08); color: var(--gold); border-right-color: rgba(251,191,36,.15); }
+
+.d1:hover { border-color: rgba(247,129,102,.35); }
+.d2:hover { border-color: rgba(63,185,80,.35); }
+.d3:hover { border-color: rgba(88,166,255,.35); }
+.d4:hover { border-color: rgba(168,85,247,.35); }
+.d5:hover { border-color: rgba(188,140,255,.35); }
+.d6:hover { border-color: rgba(45,212,191,.35); }
+.d7:hover { border-color: rgba(251,191,36,.35); }
+
+/* ── FLOW STEPS ── */
+.flow-wrapper { position: relative; margin-top: 32px; }
+.flow-line {
+  position: absolute; left: 22px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--purple) 0%, var(--blue) 40%, var(--green) 80%, var(--gold) 100%);
+  opacity: .25;
+}
+.flow-steps { display: flex; flex-direction: column; gap: 0; }
+
+.fstep {
+  display: flex; gap: 20px;
+  padding: 0 0 28px 0;
+  position: relative;
+}
+.fstep:last-child { padding-bottom: 0; }
+
+.fstep-dot {
+  flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; border: 2px solid;
+  background: var(--bg);
+  position: relative; z-index: 1;
+  transition: transform .2s;
+}
+.fstep:hover .fstep-dot { transform: scale(1.1); }
+
+.fstep-body {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--bd);
+  border-radius: var(--r-lg); padding: 18px 20px;
+  transition: border-color .2s;
+  margin-top: 0;
+}
+.fstep:hover .fstep-body { border-color: var(--bd2); }
+
+.fstep-phase {
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fstep-body h3 { font-size: 15px; font-weight: 700; color: #f0f6fc; margin-bottom: 8px; }
+.fstep-body p  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+.fstep-details {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+  gap: 8px; margin-top: 14px;
+}
+.fdetail {
+  background: var(--card); border: 1px solid var(--bd);
+  border-radius: var(--r-sm); padding: 10px 12px;
+  font-size: 11.5px;
+}
+.fdetail strong { display: block; color: var(--text); font-weight: 600; margin-bottom: 2px; }
+.fdetail span { color: var(--muted); font-size: 11px; }
+
+.inline-code {
+  font-family: var(--font-mono); font-size: 11.5px;
+  background: rgba(88,166,255,.08); color: var(--blue);
+  border: 1px solid rgba(88,166,255,.15);
+  padding: 1px 6px; border-radius: var(--r-xs);
+}
+
+/* step colors */
+.fstep.s-start .fstep-dot  { border-color: rgba(168,85,247,.6); color: var(--a2); }
+.fstep.s-lobby .fstep-dot  { border-color: rgba(88,166,255,.5); color: var(--blue); }
+.fstep.s-map   .fstep-dot  { border-color: rgba(45,212,191,.5); color: var(--teal); }
+.fstep.s-move  .fstep-dot  { border-color: rgba(63,185,80,.5); color: var(--green); }
+.fstep.s-quiz  .fstep-dot  { border-color: rgba(251,191,36,.5); color: var(--gold); }
+.fstep.s-wrong .fstep-dot  { border-color: rgba(248,113,113,.5); color: var(--red); }
+.fstep.s-right .fstep-dot  { border-color: rgba(63,185,80,.7); color: var(--green); }
+.fstep.s-next  .fstep-dot  { border-color: rgba(247,129,102,.5); color: var(--orange); }
+.fstep.s-end   .fstep-dot  { border-color: rgba(251,191,36,.7); color: var(--gold); }
+
+.fstep.s-start:hover .fstep-body  { border-color: rgba(168,85,247,.3); }
+.fstep.s-lobby:hover .fstep-body  { border-color: rgba(88,166,255,.3); }
+.fstep.s-map:hover   .fstep-body  { border-color: rgba(45,212,191,.3); }
+.fstep.s-move:hover  .fstep-body  { border-color: rgba(63,185,80,.3); }
+.fstep.s-quiz:hover  .fstep-body  { border-color: rgba(251,191,36,.3); }
+.fstep.s-wrong:hover .fstep-body  { border-color: rgba(248,113,113,.3); }
+.fstep.s-right:hover .fstep-body  { border-color: rgba(63,185,80,.3); }
+.fstep.s-next:hover  .fstep-body  { border-color: rgba(247,129,102,.3); }
+.fstep.s-end:hover   .fstep-body  { border-color: rgba(251,191,36,.3); }
+
+/* ── REWARD SYSTEM ── */
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px; margin-top: 28px;
+}
+.reward-card {
+  background: var(--surface);
+  border: 1px solid var(--bd);
+  border-radius: var(--r-xl); padding: 22px;
+  text-align: center;
+  transition: transform .2s, border-color .2s;
+}
+.reward-card:hover { transform: translateY(-4px); }
+.reward-card.heart  { border-color: rgba(248,113,113,.2); }
+.reward-card.heart:hover  { border-color: rgba(248,113,113,.45); box-shadow: 0 12px 28px rgba(248,113,113,.07); }
+.reward-card.exp    { border-color: rgba(251,191,36,.2); }
+.reward-card.exp:hover    { border-color: rgba(251,191,36,.45); box-shadow: 0 12px 28px rgba(251,191,36,.07); }
+.reward-card.level  { border-color: rgba(168,85,247,.2); }
+.reward-card.level:hover  { border-color: rgba(168,85,247,.45); box-shadow: 0 12px 28px rgba(168,85,247,.07); }
+
+.reward-icon { font-size: 36px; margin-bottom: 12px; }
+.reward-card h3 { font-size: 15px; font-weight: 700; color: #f0f6fc; margin-bottom: 6px; }
+.reward-card p  { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+
+.reward-rules { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+.rrule {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 11.5px; padding: 6px 10px;
+  border-radius: var(--r-sm);
+  background: var(--card); border: 1px solid var(--bd);
+}
+.rrule-icon { flex-shrink: 0; font-size: 13px; }
+.rrule span { color: var(--muted); line-height: 1.45; }
+.rrule strong { color: var(--text); }
+
+/* ── GREENFOOT TECH ── */
+.gf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
+.gf-card {
+  background: var(--surface);
+  border: 1px solid var(--bd);
+  border-radius: var(--r-lg); padding: 20px;
+  transition: border-color .2s;
+}
+.gf-card:hover { border-color: rgba(63,185,80,.3); }
+.gf-card-hd {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.gf-card-hd .icon {
+  width: 36px; height: 36px; border-radius: var(--r-sm);
+  background: rgba(63,185,80,.1);
+  border: 1px solid rgba(63,185,80,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.gf-card-hd h4 { font-size: 14px; font-weight: 700; color: #f0f6fc; }
+.gf-card-hd small { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+.gf-card p { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+
+.code-block {
+  background: rgba(0,0,0,.45);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: var(--r-sm); padding: 12px 14px;
+  font-family: var(--font-mono); font-size: 11.5px;
+  line-height: 1.7; overflow-x: auto;
+}
+.code-block .kw { color: var(--purple); }
+.code-block .cls { color: var(--blue); }
+.code-block .fn { color: var(--green); }
+.code-block .cm { color: #555577; font-style: italic; }
+.code-block .str { color: var(--gold); }
+
+/* ── INTEGRATION ── */
+.integ-row {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 16px; align-items: center;
+  margin-top: 28px;
+}
+.integ-box {
+  background: var(--surface);
+  border: 1px solid var(--bd);
+  border-radius: var(--r-xl); padding: 22px;
+}
+.integ-box.laravel { border-color: rgba(247,129,102,.2); }
+.integ-box.greenfoot { border-color: rgba(63,185,80,.2); }
+.integ-logo {
+  width: 40px; height: 40px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; font-family: var(--font-mono);
+  margin-bottom: 12px;
+}
+.laravel .integ-logo { background: rgba(247,129,102,.12); color: var(--orange); }
+.greenfoot .integ-logo { background: rgba(63,185,80,.12); color: var(--green); }
+.integ-box h3 { font-size: 14px; font-weight: 700; color: #f0f6fc; margin-bottom: 10px; }
+.integ-list { display: flex; flex-direction: column; gap: 5px; }
+.iitem {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12px; color: var(--muted);
+}
+.iitem::before {
+  content: '▸'; font-size: 10px; flex-shrink: 0;
+  margin-top: 3px;
+}
+.laravel .iitem::before { color: var(--orange); }
+.greenfoot .iitem::before { color: var(--green); }
+
+.integ-arrow {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+  color: var(--muted); font-size: 11px;
+}
+.integ-arrow .arr { font-size: 22px; color: var(--purple); opacity: .6; }
+.integ-arrow span { font-size: 10px; text-align: center; line-height: 1.4; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 40px 0; border-top: 1px solid var(--bd);
+  text-align: center; position: relative; z-index: 1;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .mech-grid, .gf-grid, .reward-grid { grid-template-columns: 1fr; }
+  .dungeon-row { grid-template-columns: 44px 1fr; }
+  .drow-quests, .drow-meta { display: none; }
+  .integ-row { grid-template-columns: 1fr; }
+  .integ-arrow { flex-direction: row; }
+  .nav-links { display: none; }
+  .hero { padding: 48px 0 40px; }
+}
+</style>
+</head>
+<body>
+
+<div id="dion-nav">
+  <a href="/team-for-laravel-gamification/" class="back">
+    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>
+    Kembali
+  </a>
+  <span class="breadcrumb">Cocothink &rsaquo; <span>Desain Teknis Gameplay</span></span>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">
+      🎮 Cocothink
+      <span class="logo-badge">Game Design Doc</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#mekanik">Mekanik</a></li>
+      <li><a href="#dungeon">Dungeon</a></li>
+      <li><a href="#alur">Alur Game</a></li>
+      <li><a href="#reward">Reward</a></li>
+      <li><a href="#teknis">Teknis</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="wrap">
+    <div class="hero-eyebrow">🔬 Dokumen Internal Tim Riset · Cocothink</div>
+    <h1>
+      Desain Teknis<br>
+      <em>Gameplay & Alur Permainan</em>
+    </h1>
+    <p class="hero-desc">
+      Dokumen ini menjelaskan secara rinci bagaimana game Cocothink berjalan — dari mekanik yang dipilih, struktur dungeon Laravel, alur bermain tahap demi tahap, hingga implementasi teknis di Greenfoot. Ditujukan untuk tim riset agar memiliki gambaran lengkap jalannya permainan.
+    </p>
+    <div class="hero-chips">
+      <div class="hchip">
+        <span class="hchip-icon">🗺️</span>
+        <div>
+          <div class="hchip-v">7 Dungeon</div>
+          <div class="hchip-s">Segmentasi materi Laravel</div>
+        </div>
+      </div>
+      <div class="hchip">
+        <span class="hchip-icon">❤️</span>
+        <div>
+          <div class="hchip-v">3 Heart</div>
+          <div class="hchip-s">Nyawa pemain per sesi</div>
+        </div>
+      </div>
+      <div class="hchip">
+        <span class="hchip-icon">⭐</span>
+        <div>
+          <div class="hchip-v">EXP & Level</div>
+          <div class="hchip-s">Sistem penghargaan progres</div>
+        </div>
+      </div>
+      <div class="hchip">
+        <span class="hchip-icon">🎮</span>
+        <div>
+          <div class="hchip-v">Greenfoot</div>
+          <div class="hchip-s">Game engine berbasis Java</div>
+        </div>
+      </div>
+      <div class="hchip">
+        <span class="hchip-icon">🔴</span>
+        <div>
+          <div class="hchip-v">Laravel Backend</div>
+          <div class="hchip-s">Platform & manajemen progres</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══ MEKANIK ═══ -->
+<section id="mekanik">
+  <div class="wrap">
+    <div class="sec-label c-green">Rekomendasi Mekanik</div>
+    <h2 class="sec-h2">Pilihan Game Mechanics di Greenfoot</h2>
+    <p class="sec-desc">
+      Berikut empat mekanik permainan yang bisa diimplementasikan di Greenfoot sesuai konsep Cocothink. Pilihan utama ditandai khusus — paling sesuai dengan alur dungeon + quiz yang dirancang.
+    </p>
+
+    <div class="mech-grid">
+
+      <!-- UTAMA -->
+      <div class="mech-card recommended">
+        <span class="mech-badge badge-recommend">⭐ Pilihan Utama</span>
+        <span class="mech-icon">🏰</span>
+        <h3>Top-Down Dungeon Explorer</h3>
+        <p>
+          Karakter bergerak 4 arah (WASD / arrow key) di peta dungeon 2D. Setiap zona/pintu yang dimasuki memicu <strong>quiz overlay</strong> berisi soal pilihan ganda. Jawaban salah mengurangi heart; jawaban benar memberikan EXP dan membuka jalur ke quest berikutnya. Sangat natural dengan konsep "arena → tantangan → lanjut".
+        </p>
+        <div class="mech-tags">
+          <span class="mtag">Arrow Key Movement</span>
+          <span class="mtag">Collision Detection</span>
+          <span class="mtag">QuizOverlay Actor</span>
+          <span class="mtag">Room Transition</span>
+          <span class="mtag">HUD (Heart, EXP)</span>
+        </div>
+        <div class="mech-note" style="margin-top:12px">
+          💡 Paling mudah dibangun di Greenfoot — World + Actor sudah mendukung movement dan collision secara native.
+        </div>
+      </div>
+
+      <!-- ALT 1 -->
+      <div class="mech-card alt2">
+        <span class="mech-badge badge-possible">✅ Possible</span>
+        <span class="mech-icon">⚔️</span>
+        <h3>Turn-Based Battle vs Bug Monster</h3>
+        <p>
+          Setiap quest memunculkan "musuh" berupa <em>Bug</em> atau <em>Error Monster</em>. Pemain memilih jawaban yang berfungsi sebagai serangan. Jawaban benar = damage ke musuh; jawaban salah = musuh menyerang balik (heart berkurang). Musuh dikalahkan → EXP diperoleh → lanjut ke quest berikutnya.
+        </p>
+        <div class="mech-tags">
+          <span class="mtag">Turn System</span>
+          <span class="mtag">Health Bar Actor</span>
+          <span class="mtag">Enemy AI (static)</span>
+          <span class="mtag">Battle Animation</span>
+          <span class="mtag">Damage Feedback</span>
+        </div>
+        <div class="mech-note" style="margin-top:12px;border-left-color:var(--purple);background:rgba(188,140,255,.06);color:var(--purple)">
+          💡 Cocok digabung dengan mekanik utama — dungeon explorer lalu battle saat boss room.
+        </div>
+      </div>
+
+      <!-- ALT 2 -->
+      <div class="mech-card alt1">
+        <span class="mech-badge badge-possible">✅ Possible</span>
+        <span class="mech-icon">🏃</span>
+        <h3>Side-Scrolling Checkpoint Runner</h3>
+        <p>
+          Karakter berlari otomatis ke kanan. Saat menabrak <em>papan pertanyaan</em> atau <em>NPC</em>, permainan berhenti dan quiz muncul. Jawaban benar membuka rintangan; jawaban salah memunculkan hambatan. Cocok untuk segmentasi materi yang linear dan berurutan.
+        </p>
+        <div class="mech-tags">
+          <span class="mtag">Auto-Runner</span>
+          <span class="mtag">Obstacle Actor</span>
+          <span class="mtag">Trigger Zone</span>
+          <span class="mtag">Scrolling World</span>
+          <span class="mtag">Checkpoint Flag</span>
+        </div>
+        <div class="mech-note" style="margin-top:12px;border-left-color:var(--blue);background:rgba(88,166,255,.06);color:var(--blue)">
+          💡 Alternatif untuk materi yang harus diselesaikan urut (misal: setup → route → controller).
+        </div>
+      </div>
+
+      <!-- ALT 3 -->
+      <div class="mech-card alt3">
+        <span class="mech-badge badge-bonus">🎁 Bonus</span>
+        <span class="mech-icon">🧩</span>
+        <h3>Grid Maze Explorer</h3>
+        <p>
+          Peta berbasis grid (tile map). Karakter berpindah tile per tile. Setiap persimpangan atau portal mewakili satu quest. Greenfoot sangat mendukung grid-based world karena ukuran cell dapat dikonfigurasi langsung di constructor <span class="inline-code">World</span>. Cocok untuk pemula karena movement-nya sederhana.
+        </p>
+        <div class="mech-tags">
+          <span class="mtag">Grid World</span>
+          <span class="mtag">Tile Movement</span>
+          <span class="mtag">Path Unlock</span>
+          <span class="mtag">Portal Actor</span>
+          <span class="mtag">Fog of War</span>
+        </div>
+        <div class="mech-note" style="margin-top:12px;border-left-color:var(--teal);background:rgba(45,212,191,.06);color:var(--teal)">
+          💡 Sangat mudah diimplementasikan karena Greenfoot dirancang khusus untuk grid world.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ DUNGEON ═══ -->
+<section id="dungeon">
+  <div class="wrap">
+    <div class="sec-label c-blue">Struktur Konten</div>
+    <h2 class="sec-h2">7 Dungeon — Segmentasi Materi Laravel</h2>
+    <p class="sec-desc">
+      Setiap dungeon merepresentasikan satu topik utama Laravel. Pemain harus menyelesaikan seluruh quest dalam satu dungeon sebelum membuka dungeon berikutnya. Setiap dungeon memiliki 3–5 quest soal pilihan ganda.
+    </p>
+
+    <div class="dungeon-grid">
+
+      <div class="dungeon-row d1">
+        <div class="drow-num">D1</div>
+        <div class="drow-main">
+          <h4>⚙️ The Foundation Gate</h4>
+          <p>Setup & Struktur Proyek Laravel</p>
+        </div>
+        <div class="drow-quests">
+          <p>Contoh Quest</p>
+          <div class="quest-pills">
+            <span class="qpill">composer create-project</span>
+            <span class="qpill">Struktur folder</span>
+            <span class="qpill">File .env</span>
+            <span class="qpill">php artisan serve</span>
+          </div>
+        </div>
+        <div class="drow-meta">
+          <div class="dmeta-item"><span class="dmeta-icon">🎯</span> 4 quest</div>
+          <div class="dmeta-item"><span class="dmeta-icon">⭐</span> +40 EXP total</div>
+          <div class="dmeta-item"><span class="dmeta-icon">🔓</span> Dungeon awal</div>
+        </div>
+      </div>
+
+      <div class="dungeon-row d2">
+        <div class="drow-num">D2</div>
+        <div class="drow-main">
+          <h4>🗺️ The Route Maze</h4>
+          <p>Routing & Request Handling</p>
+        </div>
+        <div class="drow-quests">
+          <p>Contoh Quest</p>
+          <div class="quest-pills">
+            <span class="qpill">Route::get()</span>
+            <span class="qpill">Route::post()</span>
+            <span class="qpill">Named Route</span>
+            <span class="qpill">Route Group</span>
+            <span class="qpill">Route Parameter</span>
+          </div>
+        </div>
+        <div class="drow-meta">
+          <div class="dmeta-item"><span class="dmeta-icon">🎯</span> 5 quest</div>
+          <div class="dmeta-item"><span class="dmeta-icon">⭐</span> +50 EXP total</div>
+          <div class="dmeta-item"><span class="dmeta-icon">🔒</span> Buka setelah D1</div>
+        </div>
+      </div>
+
+      <div class="dungeon-row d3">
+        <div class="drow-num">D3</div>
+        <div class="drow-main">
+          <h4>🗄️ The Migration Vault</h4>
+          <p>Database & Migrasi</p>
+        </div>
+        <div class="drow-quests">
+          <p>Contoh Quest</p>
+          <div class="quest-pills">
+            <span class="qpill">php artisan migrate</span>
+            <span class="qpill">Schema::create()</span>
+            <span class="qpill">$table->string()</span>
+            <span class="qpill">Foreign Key</span>
+            <span class="qpill">Rollback</span>
+          </div>
+        </div>
+        <div class="drow-meta">
+          <div class="dmeta-item"><span class="dmeta-icon">🎯</span> 5 quest</div>
+          <div class="dmeta-item"><span class="dmeta-icon">⭐</span> +50 EXP total</div>
+          <div class="dmeta-item"><span class="dmeta-icon">🔒</span> Buka setelah D2</div>
+        </div>
+      </div>
+
+      <div class="dungeon-row d4">
+        <div class="drow-num">D4</div>
+        <div class="drow-main">
+          <h4>📦 The Model Realm</h4>
+          <p>Eloquent ORM & Relasi</p>
+        </div>
+        <div class="drow-quests">
+          <p>Contoh Quest</p>
+          <div class="quest-pills">
+            <span class="qpill">Model::all()</span>
+            <span class="qpill">find() / where()</span>
+            <span class="qpill">hasMany()</span>
+            <span class="qpill">belongsTo()</span>
+            <span class="qpill">$fillable</span>
+          </div>
+        </div>
+        <div class="drow-meta">
+          <div class="dmeta-item"><span class="dmeta-icon">🎯</span> 5 quest</div>
+          <div class="dmeta-item"><span class="dmeta-icon">⭐</span> +60 EXP total</div>
+          <div class="dmeta-item"><span class="dmeta-icon">🔒</span> Buka setelah D3</div>
+        </div>
+      </div>
+
+      <div class="dungeon-row d5">
+        <div class="drow-num">D5</div>
+        <div class="drow-main">
+          <h4>🏛️ The Controller Castle</h4>
+          <p>Controller & Middleware</p>
+        </div>
+        <div class="drow-quests">
+          <p>Contoh Quest</p>
+          <div class="quest-pills">
+            <span class="qpill">make:controller</span>
+            <span class="qpill">CRUD methods</span>
+            <span class="qpill">Request validation</span>
+            <span class="qpill">Middleware</span>
+            <span class="qpill">return view()</span>
+          </div>
+        </div>
+        <div class="drow-meta">
+          <div class="dmeta-item"><span class="dmeta-icon">🎯</span> 5 quest</div>
+          <div class="dmeta-item"><span class="dmeta-icon">⭐</span> +60 EXP total</div>
+          <div class="dmeta-item"><span class="dmeta-icon">🔒</span> Buka setelah D4</div>
+        </div>
+      </div>
+
+      <div class="dungeon-row d6">
+        <div class="drow-num">D6</div>
+        <div class="drow-main">
+          <h4>🖼️ The View Sanctuary</h4>
+          <p>Blade Template & Frontend</p>
+        </div>
+        <div class="drow-quests">
+          <p>Contoh Quest</p>
+          <div class="quest-pills">
+            <span class="qpill">@extends</span>
+            <span class="qpill">@section / @yield</span>
+            <span class="qpill">@if / @foreach</span>
+            <span class="qpill">{{ $var }}</span>
+            <span class="qpill">@include</span>
+          </div>
+        </div>
+        <div class="drow-meta">
+          <div class="dmeta-item"><span class="dmeta-icon">🎯</span> 5 quest</div>
+          <div class="dmeta-item"><span class="dmeta-icon">⭐</span> +60 EXP total</div>
+          <div class="dmeta-item"><span class="dmeta-icon">🔒</span> Buka setelah D5</div>
+        </div>
+      </div>
+
+      <div class="dungeon-row d7">
+        <div class="drow-num">D7</div>
+        <div class="drow-main">
+          <h4>🔐 The Auth Fortress</h4>
+          <p>Autentikasi & Keamanan</p>
+        </div>
+        <div class="drow-quests">
+          <p>Contoh Quest</p>
+          <div class="quest-pills">
+            <span class="qpill">Auth::check()</span>
+            <span class="qpill">Auth::user()</span>
+            <span class="qpill">login / logout</span>
+            <span class="qpill">auth middleware</span>
+            <span class="qpill">Breeze / Sanctum</span>
+          </div>
+        </div>
+        <div class="drow-meta">
+          <div class="dmeta-item"><span class="dmeta-icon">🎯</span> 4 quest + Boss</div>
+          <div class="dmeta-item"><span class="dmeta-icon">⭐</span> +80 EXP total</div>
+          <div class="dmeta-item"><span class="dmeta-icon">🏆</span> Final Dungeon</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ ALUR ═══ -->
+<section id="alur">
+  <div class="wrap">
+    <div class="sec-label c-purple">Alur Permainan</div>
+    <h2 class="sec-h2">Tahap Demi Tahap — Dari Login ke Selesai</h2>
+    <p class="sec-desc">
+      Berikut alur lengkap yang dialami pemain sejak membuka game hingga menyelesaikan seluruh dungeon. Setiap tahap dirancang berurutan dan saling terhubung.
+    </p>
+
+    <div class="flow-wrapper">
+      <div class="flow-line"></div>
+      <div class="flow-steps">
+
+        <!-- 1 START -->
+        <div class="fstep s-start">
+          <div class="fstep-dot">🚀</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-purple">Tahap 1 — Masuk Platform</div>
+            <h3>Login & Verifikasi Akun via Laravel</h3>
+            <p>
+              Pemain membuka platform Cocothink di browser (Laravel web app). Login menggunakan akun yang sudah terdaftar. Setelah autentikasi berhasil, sistem memuat data progres pemain dari database — dungeon mana yang sudah selesai, total EXP, level, dan jumlah heart tersisa.
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Platform</strong><span>Laravel web app (browser)</span></div>
+              <div class="fdetail"><strong>Data dimuat</strong><span>Progres, EXP, Level, Heart</span></div>
+              <div class="fdetail"><strong>Jika baru</strong><span>Heart = 3, EXP = 0, Level = 1</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 LOBBY -->
+        <div class="fstep s-lobby">
+          <div class="fstep-dot">🏠</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-blue">Tahap 2 — Lobby & Pilih Dungeon</div>
+            <h3>Layar Peta Dungeon — Pilih Arena</h3>
+            <p>
+              Setelah login, pemain masuk ke <strong>layar peta dunia</strong>. Ditampilkan 7 dungeon dalam urutan linear. Dungeon yang sudah diselesaikan ditandai dengan ikon gembok terbuka dan lencana bintang. Dungeon yang belum dibuka terlihat terkunci (gembok tertutup, abu-abu).
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Tampilan</strong><span>Peta 2D dengan 7 titik dungeon</span></div>
+              <div class="fdetail"><strong>Terkunci</strong><span>Abu-abu, tidak bisa diklik</span></div>
+              <div class="fdetail"><strong>Tersedia</strong><span>Berwarna, ada tombol "Masuk"</span></div>
+              <div class="fdetail"><strong>Selesai</strong><span>Tanda ✓ + bintang perolehan</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 MAP -->
+        <div class="fstep s-map">
+          <div class="fstep-dot">🗺️</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-teal">Tahap 3 — Masuk Dungeon</div>
+            <h3>Game Greenfoot Dimuat — Pemain di Dalam Dungeon</h3>
+            <p>
+              Saat pemain menekan "Masuk Dungeon", game Greenfoot diluncurkan (embed di halaman Laravel atau dibuka terpisah). Pemain melihat karakter mereka di pintu masuk dungeon. Layout dungeon sesuai segmentasi topik — misal Dungeon 3 bertema "ruang server" untuk materi migrasi database.
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Engine</strong><span>Greenfoot (Java/embed)</span></div>
+              <div class="fdetail"><strong>World size</strong><span>±800×600 px, tile 32px</span></div>
+              <div class="fdetail"><strong>HUD aktif</strong><span>Heart ❤️ · EXP bar · Nama dungeon</span></div>
+              <div class="fdetail"><strong>Karakter</strong><span>Muncul di spawn point</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 MOVE -->
+        <div class="fstep s-move">
+          <div class="fstep-dot">🧭</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-green">Tahap 4 — Eksplorasi & Navigasi</div>
+            <h3>Pemain Menggerakkan Karakter Menuju Quest Zone</h3>
+            <p>
+              Pemain menggunakan <span class="inline-code">↑ ↓ ← →</span> atau <span class="inline-code">W A S D</span> untuk menggerakkan karakter. Di dalam dungeon terdapat beberapa <em>Quest Zone</em> yang ditandai secara visual (tanda tanya berkilau, portal glowing, atau NPC). Pemain harus mendatangi setiap zone secara berurutan.
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Kontrol</strong><span>Arrow key atau WASD</span></div>
+              <div class="fdetail"><strong>Quest Zone</strong><span>Visual: ikon ❓ beranimasi</span></div>
+              <div class="fdetail"><strong>Urutan</strong><span>Zone 1 → 2 → 3 → Boss (opsional)</span></div>
+              <div class="fdetail"><strong>Zone terkunci</strong><span>Tidak bisa diakses sebelum zone sebelumnya selesai</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 QUIZ -->
+        <div class="fstep s-quiz">
+          <div class="fstep-dot">❓</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-gold">Tahap 5 — Trigger Quest & Quiz Muncul</div>
+            <h3>Overlay Quiz Tampil — Pilih Jawaban</h3>
+            <p>
+              Saat karakter menyentuh Quest Zone, game <strong>pause sejenak</strong> dan quiz overlay muncul di atas layar Greenfoot. Ditampilkan pertanyaan beserta <strong>4 opsi jawaban</strong> (A, B, C, D). Timer opsional berjalan (misal 30 detik). Pemain memilih jawaban dengan menekan tombol atau mengklik.
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Format soal</strong><span>Pilihan ganda 4 opsi (A–D)</span></div>
+              <div class="fdetail"><strong>Contoh soal</strong><span>"Perintah artisan untuk membuat migration adalah..."</span></div>
+              <div class="fdetail"><strong>Opsi jawaban</strong><span>A. make:model &nbsp; B. make:migration &nbsp; C. make:controller &nbsp; D. migrate</span></div>
+              <div class="fdetail"><strong>Timer</strong><span>30 detik (opsional, dikonfigurasi)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 WRONG -->
+        <div class="fstep s-wrong">
+          <div class="fstep-dot">💔</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-red">Tahap 6a — Jawaban Salah</div>
+            <h3>Heart Berkurang — Feedback Kesalahan Tampil</h3>
+            <p>
+              Jika pemain memilih jawaban yang salah: efek visual merah muncul (screen shake atau flash), satu heart berkurang dari HUD, dan pesan singkat ditampilkan yang menjelaskan <strong>jawaban yang benar beserta alasannya</strong>. Quest zone tetap aktif — pemain bisa mencoba lagi setelah feedlback ditutup.
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Efek</strong><span>Screen flash merah + suara "buzz"</span></div>
+              <div class="fdetail"><strong>Heart</strong><span>Berkurang 1 (dari 3 → 2 → 1 → Game Over)</span></div>
+              <div class="fdetail"><strong>Feedback</strong><span>Jawaban benar + penjelasan singkat</span></div>
+              <div class="fdetail"><strong>Game Over</strong><span>Heart = 0 → kembali ke lobby, heart reset</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7 RIGHT -->
+        <div class="fstep s-right">
+          <div class="fstep-dot">✅</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-green">Tahap 6b — Jawaban Benar</div>
+            <h3>EXP Bertambah — Quest Zone Selesai</h3>
+            <p>
+              Jika jawaban benar: efek visual hijau muncul (partikel bintang, layar glow), EXP bertambah sesuai kesulitan soal, dan animasi "Quest Complete" tampil sebentar. Quest Zone berubah tampilan (tanda centang, warna berubah, ikon terkunci hilang) dan pemain bisa melanjutkan eksplorasi menuju quest berikutnya.
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Efek</strong><span>Partikel ⭐ + suara "ding"</span></div>
+              <div class="fdetail"><strong>EXP</strong><span>+10 EXP (normal), +15 EXP (bonus: jawab cepat)</span></div>
+              <div class="fdetail"><strong>Zone status</strong><span>Berubah jadi ikon ✓ (selesai)</span></div>
+              <div class="fdetail"><strong>Progres</strong><span>Tersimpan otomatis ke Laravel backend</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8 NEXT -->
+        <div class="fstep s-next">
+          <div class="fstep-dot">🚪</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-orange">Tahap 7 — Pindah Quest / Dungeon</div>
+            <h3>Lanjut ke Quest Berikutnya atau Dungeon Selanjutnya</h3>
+            <p>
+              Setelah semua quest zone dalam satu dungeon selesai, pintu keluar dungeon terbuka. Pemain mendatangi pintu dan memilih: <strong>lanjut ke dungeon berikutnya</strong> atau kembali ke peta dunia. Jika dungeon memiliki Boss Quest (dungeon terakhir tiap segmen), Boss akan muncul sebelum pintu keluar terbuka.
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Kondisi lanjut</strong><span>Semua quest zone selesai</span></div>
+              <div class="fdetail"><strong>Boss Quest</strong><span>Soal gabungan dari seluruh quest dungeon (D7 saja)</span></div>
+              <div class="fdetail"><strong>Dungeon clear</strong><span>Badge + bonus EXP "Dungeon Complete"</span></div>
+              <div class="fdetail"><strong>Akses buka</strong><span>Dungeon berikutnya terbuka di peta</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9 END -->
+        <div class="fstep s-end">
+          <div class="fstep-dot">🏆</div>
+          <div class="fstep-body">
+            <div class="fstep-phase c-gold">Tahap 8 — Penyelesaian & Pencapaian</div>
+            <h3>Semua Dungeon Selesai — Profil & Sertifikat</h3>
+            <p>
+              Setelah semua 7 dungeon diselesaikan, pemain mendapatkan layar <strong>"Cocothink Complete"</strong> dengan ringkasan: total EXP, level akhir, jumlah jawaban benar/salah, dan badge koleksi. Data sinkron ke Laravel — profil pemain diperbarui, dan sertifikat digital dapat diunduh dari platform.
+            </p>
+            <div class="fstep-details">
+              <div class="fdetail"><strong>Ringkasan</strong><span>EXP total · Level · Akurasi jawaban</span></div>
+              <div class="fdetail"><strong>Badge</strong><span>Koleksi badge per dungeon + badge "Cocothink Master"</span></div>
+              <div class="fdetail"><strong>Sertifikat</strong><span>PDF digital dari platform Laravel</span></div>
+              <div class="fdetail"><strong>Leaderboard</strong><span>Skor dibandingkan dengan pemain lain</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ REWARD ═══ -->
+<section id="reward">
+  <div class="wrap">
+    <div class="sec-label c-gold">Sistem Reward</div>
+    <h2 class="sec-h2">Heart, EXP & Level — Mekanisme Penghargaan</h2>
+    <p class="sec-desc">
+      Tiga elemen utama gamifikasi yang mengatur dinamika permainan dan motivasi belajar pemain.
+    </p>
+
+    <div class="reward-grid">
+
+      <div class="reward-card heart">
+        <div class="reward-icon">❤️</div>
+        <h3>Heart (Nyawa)</h3>
+        <p>Mengatur konsekuensi dari jawaban salah. Mendorong pemain untuk berpikir sebelum menjawab.</p>
+        <div class="reward-rules">
+          <div class="rrule"><span class="rrule-icon">🔴</span><span>Awal sesi: <strong>3 heart</strong></span></div>
+          <div class="rrule"><span class="rrule-icon">💔</span><span>Jawab salah: <strong>-1 heart</strong> + feedback jawaban benar</span></div>
+          <div class="rrule"><span class="rrule-icon">💀</span><span>Heart = 0: <strong>Game Over</strong> — kembali ke lobby, heart reset</span></div>
+          <div class="rrule"><span class="rrule-icon">❤️</span><span>Heart tidak bisa bertambah dalam satu sesi dungeon</span></div>
+          <div class="rrule"><span class="rrule-icon">🔄</span><span>Heart reset setiap kali mulai dungeon baru</span></div>
+        </div>
+      </div>
+
+      <div class="reward-card exp">
+        <div class="reward-icon">⭐</div>
+        <h3>EXP (Pengalaman)</h3>
+        <p>Mengukur progres belajar. Terakumulasi dari seluruh dungeon dan tersimpan permanen di profil.</p>
+        <div class="reward-rules">
+          <div class="rrule"><span class="rrule-icon">✅</span><span>Jawab benar: <strong>+10 EXP</strong></span></div>
+          <div class="rrule"><span class="rrule-icon">⚡</span><span>Jawab benar dalam 10 detik: <strong>+15 EXP</strong> (bonus speed)</span></div>
+          <div class="rrule"><span class="rrule-icon">🏰</span><span>Dungeon Clear: <strong>+20 EXP</strong> bonus tambahan</span></div>
+          <div class="rrule"><span class="rrule-icon">🏆</span><span>Boss Quest benar: <strong>+25 EXP</strong></span></div>
+          <div class="rrule"><span class="rrule-icon">❌</span><span>Jawab salah: <strong>0 EXP</strong> (tidak dikurangi)</span></div>
+        </div>
+      </div>
+
+      <div class="reward-card level">
+        <div class="reward-icon">🏅</div>
+        <h3>Level & Badge</h3>
+        <p>Representasi visual pencapaian pemain. Memberi rasa progres yang terlihat jelas.</p>
+        <div class="reward-rules">
+          <div class="rrule"><span class="rrule-icon">1️⃣</span><span><strong>Lv.1 Novice</strong> — 0–99 EXP (mulai)</span></div>
+          <div class="rrule"><span class="rrule-icon">2️⃣</span><span><strong>Lv.2 Apprentice</strong> — 100–249 EXP</span></div>
+          <div class="rrule"><span class="rrule-icon">3️⃣</span><span><strong>Lv.3 Developer</strong> — 250–449 EXP</span></div>
+          <div class="rrule"><span class="rrule-icon">4️⃣</span><span><strong>Lv.4 Engineer</strong> — 450+ EXP</span></div>
+          <div class="rrule"><span class="rrule-icon">🏆</span><span><strong>Badge per dungeon</strong> — diperoleh setelah dungeon clear</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ TEKNIS GREENFOOT ═══ -->
+<section id="teknis">
+  <div class="wrap">
+    <div class="sec-label c-teal">Implementasi Teknis</div>
+    <h2 class="sec-h2">Greenfoot — Komponen & Struktur Kode</h2>
+    <p class="sec-desc">
+      Gambaran teknis bagaimana game dibangun di Greenfoot menggunakan hierarki World dan Actor. Ini adalah panduan referensi bagi tim yang mengerjakan bagian game engine.
+    </p>
+
+    <div class="gf-grid">
+
+      <div class="gf-card">
+        <div class="gf-card-hd">
+          <div class="icon">🌍</div>
+          <div>
+            <h4>DungeonWorld</h4>
+            <small>extends World</small>
+          </div>
+        </div>
+        <p>World utama game. Setiap dungeon adalah satu subclass DungeonWorld. Berisi semua Actor dan logika spawn karakter, quest zone, dan HUD.</p>
+        <div class="code-block">
+<span class="kw">public class</span> <span class="cls">Dungeon3World</span> <span class="kw">extends</span> <span class="cls">DungeonWorld</span> {
+  <span class="fn">Dungeon3World</span>() {
+    <span class="kw">super</span>(<span class="str">800</span>, <span class="str">600</span>, <span class="str">1</span>);
+    addObject(<span class="kw">new</span> <span class="cls">PlayerActor</span>(), <span class="str">60</span>, <span class="str">300</span>);
+    addObject(<span class="kw">new</span> <span class="cls">QuestZone</span>(<span class="str">"Q1"</span>), <span class="str">200</span>, <span class="str">200</span>);
+  }
+}
+        </div>
+      </div>
+
+      <div class="gf-card">
+        <div class="gf-card-hd">
+          <div class="icon">🧑</div>
+          <div>
+            <h4>PlayerActor</h4>
+            <small>extends Actor</small>
+          </div>
+        </div>
+        <p>Karakter pemain. Menangani input keyboard (WASD/arrow), animasi sprite, dan deteksi collision dengan QuestZone dan dinding.</p>
+        <div class="code-block">
+<span class="kw">public class</span> <span class="cls">PlayerActor</span> <span class="kw">extends</span> <span class="cls">Actor</span> {
+  <span class="kw">public void</span> <span class="fn">act</span>() {
+    <span class="fn">handleMovement</span>();
+    <span class="cls">QuestZone</span> z = (<span class="cls">QuestZone</span>)
+      getOneIntersectingObject(<span class="cls">QuestZone</span>.class);
+    <span class="kw">if</span> (z != <span class="kw">null</span>) z.<span class="fn">trigger</span>();
+  }
+}
+        </div>
+      </div>
+
+      <div class="gf-card">
+        <div class="gf-card-hd">
+          <div class="icon">❓</div>
+          <div>
+            <h4>QuestZone</h4>
+            <small>extends Actor</small>
+          </div>
+        </div>
+        <p>Area trigger di dungeon. Saat PlayerActor menyentuhnya, game pause dan QuizOverlay ditampilkan. Menyimpan ID soal yang akan diambil dari bank soal.</p>
+        <div class="code-block">
+<span class="kw">public class</span> <span class="cls">QuestZone</span> <span class="kw">extends</span> <span class="cls">Actor</span> {
+  <span class="kw">private</span> String questId;
+  <span class="kw">boolean</span> completed = <span class="kw">false</span>;
+
+  <span class="kw">public void</span> <span class="fn">trigger</span>() {
+    <span class="kw">if</span> (!completed) {
+      <span class="cm">// tampilkan quiz overlay</span>
+      (<span class="cls">DungeonWorld</span>)getWorld()
+        .<span class="fn">showQuiz</span>(questId);
+    }
+  }
+}
+        </div>
+      </div>
+
+      <div class="gf-card">
+        <div class="gf-card-hd">
+          <div class="icon">📋</div>
+          <div>
+            <h4>QuizOverlay</h4>
+            <small>extends Actor</small>
+          </div>
+        </div>
+        <p>Overlay yang menampilkan pertanyaan dan 4 tombol jawaban. Render teks langsung di Greenfoot menggunakan GreenfootImage. Mengirim hasil ke HUDManager.</p>
+        <div class="code-block">
+<span class="kw">public class</span> <span class="cls">QuizOverlay</span> <span class="kw">extends</span> <span class="cls">Actor</span> {
+  <span class="kw">void</span> <span class="fn">drawQuestion</span>(String q, String[] opts) {
+    <span class="cls">GreenfootImage</span> img =
+      <span class="kw">new</span> <span class="cls">GreenfootImage</span>(<span class="str">600</span>,<span class="str">300</span>);
+    img.<span class="fn">setColor</span>(<span class="cls">Color</span>.BLACK);
+    img.<span class="fn">fill</span>();
+    img.<span class="fn">drawString</span>(q, <span class="str">20</span>, <span class="str">40</span>);
+    <span class="cm">// render opsi A–D...</span>
+    setImage(img);
+  }
+}
+        </div>
+      </div>
+
+      <div class="gf-card">
+        <div class="gf-card-hd">
+          <div class="icon">💗</div>
+          <div>
+            <h4>HUDManager</h4>
+            <small>extends Actor</small>
+          </div>
+        </div>
+        <p>Mengelola dan merender HUD di sudut layar: ikon heart, EXP bar, nama dungeon, dan nama pemain. Update otomatis setiap act() cycle.</p>
+        <div class="code-block">
+<span class="kw">public class</span> <span class="cls">HUDManager</span> <span class="kw">extends</span> <span class="cls">Actor</span> {
+  <span class="kw">int</span> hearts = <span class="str">3</span>;
+  <span class="kw">int</span> exp    = <span class="str">0</span>;
+
+  <span class="kw">void</span> <span class="fn">onWrong</span>() {
+    hearts--;
+    <span class="kw">if</span> (hearts &lt;= <span class="str">0</span>) <span class="fn">triggerGameOver</span>();
+    <span class="kw">else</span> <span class="fn">redrawHUD</span>();
+  }
+  <span class="kw">void</span> <span class="fn">onCorrect</span>(<span class="kw">int</span> expGain) {
+    exp += expGain;
+    <span class="fn">redrawHUD</span>();
+  }
+}
+        </div>
+      </div>
+
+      <div class="gf-card">
+        <div class="gf-card-hd">
+          <div class="icon">💾</div>
+          <div>
+            <h4>ProgressSync</h4>
+            <small>HTTP → Laravel API</small>
+          </div>
+        </div>
+        <p>Komponen yang mengirim data progres dari Greenfoot ke backend Laravel via HTTP request setelah setiap quest selesai atau dungeon clear. Disimpan ke database pemain.</p>
+        <div class="code-block">
+<span class="cm">// Dipanggil setelah quest selesai</span>
+<span class="kw">void</span> <span class="fn">syncToLaravel</span>(String userId, String questId,
+                     <span class="kw">int</span> expEarned) {
+  <span class="cm">// POST ke API Laravel:</span>
+  <span class="cm">// /api/progress/update</span>
+  <span class="cm">// { user_id, quest_id, exp }</span>
+  <span class="cls">URL</span> url = <span class="kw">new</span> <span class="cls">URL</span>(API_BASE +
+    <span class="str">"/api/progress/update"</span>);
+  <span class="cm">// ... HttpURLConnection request</span>
+}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ INTEGRASI ═══ -->
+<section>
+  <div class="wrap">
+    <div class="sec-label c-orange">Arsitektur Sistem</div>
+    <h2 class="sec-h2">Bagaimana Laravel & Greenfoot Terhubung</h2>
+    <p class="sec-desc">
+      Laravel bertindak sebagai platform utama (manajemen user, konten soal, progres, leaderboard). Greenfoot adalah media belajar visual yang berjalan di dalam platform dan berkomunikasi dengan Laravel via API.
+    </p>
+
+    <div class="integ-row">
+
+      <div class="integ-box laravel">
+        <div class="integ-logo">L</div>
+        <h3>Laravel — Platform Hub</h3>
+        <div class="integ-list">
+          <div class="iitem">Autentikasi pemain (login/register)</div>
+          <div class="iitem">Bank soal per dungeon (database)</div>
+          <div class="iitem">Menyimpan progres & EXP pemain</div>
+          <div class="iitem">Leaderboard & perbandingan antar pemain</div>
+          <div class="iitem">Manajemen badge & sertifikat</div>
+          <div class="iitem">API endpoint untuk Greenfoot: <span class="inline-code">/api/progress</span>, <span class="inline-code">/api/questions</span></div>
+          <div class="iitem">Dashboard admin tim riset</div>
+        </div>
+      </div>
+
+      <div class="integ-arrow">
+        <div class="arr">⇄</div>
+        <span>REST API<br>HTTP JSON</span>
+      </div>
+
+      <div class="integ-box greenfoot">
+        <div class="integ-logo">GF</div>
+        <h3>Greenfoot — Game Engine</h3>
+        <div class="integ-list">
+          <div class="iitem">Render dungeon & karakter (2D visual)</div>
+          <div class="iitem">Menangani input keyboard pemain</div>
+          <div class="iitem">Menampilkan quiz overlay soal</div>
+          <div class="iitem">Logika heart berkurang / EXP bertambah</div>
+          <div class="iitem">Animasi feedback jawaban (benar/salah)</div>
+          <div class="iitem">Ambil soal dari Laravel: <span class="inline-code">GET /api/questions/{dungeon}</span></div>
+          <div class="iitem">Kirim progres ke Laravel setelah quest clear</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="wrap">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:6px">
+      <strong style="color:var(--purple)">Cocothink</strong> — Desain Teknis Gameplay · Dokumen Internal Tim Riset
+    </p>
+    <p style="font-size:12px;color:rgba(255,255,255,.2)">
+      Platform: <code style="font-family:'JetBrains Mono',monospace;color:var(--orange)">Laravel</code>
+      &nbsp;·&nbsp;
+      Game Engine: <code style="font-family:'JetBrains Mono',monospace;color:var(--green)">Greenfoot</code>
+      &nbsp;·&nbsp;
+      Metode: <code style="font-family:'JetBrains Mono',monospace;color:var(--blue)">Design Thinking R&D</code>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
