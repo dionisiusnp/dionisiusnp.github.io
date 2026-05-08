@@ -11,7 +11,7 @@
 1. Buka `https://referensi.data.kemendikdasmen.go.id` di Chrome
 2. Tekan `F12` → Console
 3. Isi daftar NPSN di bagian konfigurasi, lalu paste dan jalankan
-4. Tunggu selesai — Excel otomatis terdownload
+4. Tunggu selesai — file CSV otomatis terdownload
 
 ---
 
@@ -37,17 +37,7 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const rand  = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
-  // Load SheetJS
-  async function loadSheetJS() {
-    if (window.XLSX) return;
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-    console.log('✅ SheetJS loaded');
-  }
+
 
   // Load progress sebelumnya
   window._sekolahResults = window._sekolahResults?.length
@@ -208,58 +198,30 @@
   console.log(`\n✅ SELESAI — ${window._sekolahResults.length} sekolah ditemukan`);
   console.table(window._sekolahResults.slice(0, 5));
 
-  await loadSheetJS();
-  exportExcel(window._sekolahResults);
+  downloadCSV(window._sekolahResults);
 
-  // ── Export Excel ─────────────────────────────────────
-  function exportExcel(data) {
+  // ── Download CSV (tanpa library eksternal) ────────────
+  function downloadCSV(data) {
     if (!data.length) { console.warn('Tidak ada data.'); return; }
-
-    const rows = data.map((r, i) => ({
-      'No':                  i + 1,
-      'NPSN':                r.npsn,
-      'Nama Sekolah':        r.nama,
-      'Alamat':              r.alamat,
-      'Desa/Kelurahan':      r.desa_kelurahan,
-      'Kecamatan':           r.kecamatan,
-      'Kabupaten/Kota':      r.kabupaten_kota,
-      'Provinsi':            r.provinsi,
-      'Status':              r.status_sekolah,
-      'Bentuk Pendidikan':   r.bentuk_pendidikan,
-      'Jenjang':             r.jenjang,
-      'Telepon':             r.telepon,
-      'Fax':                 r.fax,
-      'Email':               r.email,
-      'Website':             r.website,
-      'Operator':            r.operator,
-      'URL':                 r.url,
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = [
-      { wch: 5 },  // No
-      { wch: 12 }, // NPSN
-      { wch: 40 }, // Nama
-      { wch: 40 }, // Alamat
-      { wch: 20 }, // Desa
-      { wch: 20 }, // Kecamatan
-      { wch: 22 }, // Kabupaten
-      { wch: 20 }, // Provinsi
-      { wch: 10 }, // Status
-      { wch: 18 }, // Bentuk
-      { wch: 12 }, // Jenjang
-      { wch: 15 }, // Telepon
-      { wch: 15 }, // Fax
-      { wch: 30 }, // Email
-      { wch: 30 }, // Website
-      { wch: 30 }, // Operator
-      { wch: 55 }, // URL
-    ];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sekolah');
-    XLSX.writeFile(wb, `sekolah_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    console.log(`💾 Excel didownload! (${data.length} rows)`);
+    var header = 'No,NPSN,Nama Sekolah,Alamat,Desa/Kelurahan,Kecamatan,Kabupaten/Kota,Provinsi,Status,Bentuk Pendidikan,Jenjang,Telepon,Fax,Email,Website,Operator,URL';
+    function esc(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+    var rows = [header];
+    data.forEach(function(r, i) {
+      rows.push([
+        i + 1, esc(r.npsn), esc(r.nama), esc(r.alamat), esc(r.desa_kelurahan),
+        esc(r.kecamatan), esc(r.kabupaten_kota), esc(r.provinsi), esc(r.status_sekolah),
+        esc(r.bentuk_pendidikan), esc(r.jenjang), esc(r.telepon), esc(r.fax),
+        esc(r.email), esc(r.website), esc(r.operator), esc(r.url)
+      ].join(','));
+    });
+    var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sekolah_' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    console.log('CSV didownload! (' + data.length + ' rows)');
   }
 })();
 ```
@@ -276,44 +238,37 @@ console.log('Resume:', window._sekolahResults.length, 'sekolah dimuat');
 
 ---
 
-## Download Ulang Excel
+## Download Ulang CSV
 
 ```javascript
-(async function() {
-  const data = JSON.parse(localStorage.getItem('sekolah_results') || '[]');
+(function() {
+  var data = JSON.parse(localStorage.getItem('sekolah_results') || '[]');
   if (!data.length) { console.warn('Belum ada hasil.'); return; }
-
-  if (!window.XLSX) {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-  }
-
-  const rows = data.map((r, i) => ({
-    'No': i + 1, 'NPSN': r.npsn, 'Nama Sekolah': r.nama,
-    'Alamat': r.alamat, 'Desa/Kelurahan': r.desa_kelurahan,
-    'Kecamatan': r.kecamatan, 'Kabupaten/Kota': r.kabupaten_kota,
-    'Provinsi': r.provinsi, 'Status': r.status_sekolah,
-    'Bentuk Pendidikan': r.bentuk_pendidikan, 'Jenjang': r.jenjang,
-    'Telepon': r.telepon, 'Fax': r.fax,
-    'Email': r.email, 'Website': r.website,
-    'Operator': r.operator, 'URL': r.url,
-  }));
-
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Sekolah');
-  XLSX.writeFile(wb, `sekolah_${new Date().toISOString().slice(0,10)}.xlsx`);
-  console.log('💾 Didownload!', data.length, 'records');
+  var header = 'No,NPSN,Nama Sekolah,Alamat,Desa/Kelurahan,Kecamatan,Kabupaten/Kota,Provinsi,Status,Bentuk Pendidikan,Jenjang,Telepon,Fax,Email,Website,Operator,URL';
+  function esc(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+  var rows = [header];
+  data.forEach(function(r, i) {
+    rows.push([
+      i + 1, esc(r.npsn), esc(r.nama), esc(r.alamat), esc(r.desa_kelurahan),
+      esc(r.kecamatan), esc(r.kabupaten_kota), esc(r.provinsi), esc(r.status_sekolah),
+      esc(r.bentuk_pendidikan), esc(r.jenjang), esc(r.telepon), esc(r.fax),
+      esc(r.email), esc(r.website), esc(r.operator), esc(r.url)
+    ].join(','));
+  });
+  var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sekolah_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  console.log('Downloaded', data.length, 'records');
 })();
 ```
 
 ---
 
-## Output Kolom Excel
+## Output Kolom CSV
 
 | Kolom | Contoh |
 |---|---|
