@@ -13,12 +13,12 @@
 1. Buka `https://sisparnas.kemenpar.go.id/datapanel?scope=dtw` di Chrome
 2. Tekan `F12` → Console
 3. Paste dan jalankan script di bawah
-4. Tunggu selesai — CSV otomatis terdownload
+4. Tunggu selesai — file CSV otomatis terdownload
 5. Kalau browser ditutup, jalankan **Resume** untuk lanjutkan
 
 ---
 
-## Script Utama — Scan & Export Excel
+## Script Utama — Scan & Export CSV
 
 ```javascript
 (async function scanDTW() {
@@ -40,18 +40,6 @@
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const rand  = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
-
-  // Load SheetJS untuk export Excel
-  async function loadSheetJS() {
-    if (window.XLSX) return;
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-    console.log('✅ SheetJS loaded');
-  }
 
   // Load progress sebelumnya
   window._sisResults = window._sisResults?.length
@@ -160,38 +148,24 @@
   console.log(`\n✅ SELESAI — ${window._sisResults.length} wisata ditemukan`);
   console.table(window._sisResults.slice(0, 5));
 
-  await loadSheetJS();
-  exportExcel(window._sisResults);
+  downloadCSV(window._sisResults);
 
-  // ── Export Excel ──────────────────────────────────────
-  function exportExcel(data) {
+  // ── Download CSV (tanpa library eksternal) ────────────
+  function downloadCSV(data) {
     if (!data.length) { console.warn('Tidak ada data.'); return; }
-
-    const rows = data.map((r, i) => ({
-      'No':          i + 1,
-      'Nama Wisata': r.name,
-      'PIC':         r.pic,
-      'No. Telepon': r.phone,
-      'ID':          r.id,
-      'URL':         r.url,
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(rows);
-
-    // Lebar kolom
-    ws['!cols'] = [
-      { wch: 5 },   // No
-      { wch: 40 },  // Nama Wisata
-      { wch: 25 },  // PIC
-      { wch: 18 },  // No. Telepon
-      { wch: 8 },   // ID
-      { wch: 50 },  // URL
+    const cols = ['no', 'name', 'pic', 'phone', 'id', 'url'];
+    const esc  = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const rows = [
+      ['No', 'Nama Wisata', 'PIC', 'No. Telepon', 'ID', 'URL'].join(','),
+      ...data.map((r, i) => [i + 1, esc(r.name), esc(r.pic), esc(r.phone), r.id, esc(r.url)].join(','))
     ];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'DTW');
-    XLSX.writeFile(wb, `sisparnas_dtw_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    console.log(`💾 Excel didownload! (${data.length} rows)`);
+    const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a    = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: `sisparnas_dtw_${new Date().toISOString().slice(0, 10)}.csv`
+    });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    console.log(`💾 CSV didownload! (${data.length} rows)`);
   }
 })();
 ```
@@ -206,32 +180,25 @@ console.log('Resume:', window._sisResults.length, 'data dimuat');
 // Lalu ubah START_ID di script utama ke ID terakhir yang diproses, jalankan ulang
 ```
 
-## Download Ulang Excel
+## Download Ulang CSV
 
 ```javascript
-(async function() {
-  const data = JSON.parse(localStorage.getItem('sis_results') || '[]');
+(function() {
+  var data = JSON.parse(localStorage.getItem('sis_results') || '[]');
   if (!data.length) { console.warn('Belum ada hasil.'); return; }
-
-  if (!window.XLSX) {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-  }
-
-  const rows = data.map((r, i) => ({
-    'No': i + 1, 'Nama Wisata': r.name, 'PIC': r.pic,
-    'No. Telepon': r.phone, 'ID': r.id, 'URL': r.url,
-  }));
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{ wch:5 },{ wch:40 },{ wch:25 },{ wch:18 },{ wch:8 },{ wch:50 }];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'DTW');
-  XLSX.writeFile(wb, `sisparnas_dtw_${new Date().toISOString().slice(0,10)}.xlsx`);
-  console.log('💾 Didownload!', data.length, 'records');
+  function esc(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+  var rows = ['No,Nama Wisata,PIC,No. Telepon,ID,URL'];
+  data.forEach(function(r, i) {
+    rows.push([i + 1, esc(r.name), esc(r.pic), esc(r.phone), r.id, esc(r.url)].join(','));
+  });
+  var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sisparnas_dtw_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  console.log('Downloaded', data.length, 'records');
 })();
 ```
 
