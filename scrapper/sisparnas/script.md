@@ -130,11 +130,12 @@
     scanned += batch.length;
     batchNo++;
 
-    // Log progress setiap 100 batch
-    if (batchNo % 100 === 0) {
-      const pct      = ((scanned / total) * 100).toFixed(1);
+    // Log progress setiap 10 batch
+    if (batchNo % 10 === 0) {
+      const pct       = ((scanned / total) * 100).toFixed(1);
       const lastFound = results.find(Boolean);
-      console.log(`📦 ${scanned}/${total} (${pct}%) | valid: ${found} | ${lastFound ? `"${lastFound.name}"` : '-'}`);
+      const eta       = Math.round(((total - scanned) / CONCURRENCY) * ((DELAY_MIN + DELAY_MAX) / 2) / 1000 / 60);
+      console.log(`📦 ${scanned}/${total} (${pct}%) | valid: ${found} | ETA: ~${eta}m | ${lastFound ? `"${lastFound.name}"` : 'tidak ada'}`);
     }
 
     // Simpan progress setiap 500 scan
