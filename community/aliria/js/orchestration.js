@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────
 
 class OrchestrationGraph {
-  constructor(canvasId, onNodeClick) {
+  constructor(canvasId, onNodeClick, nodeConfig = null, orbitRatio = 0.30) {
     this.canvas = document.getElementById(canvasId);
     this.ctx    = this.canvas.getContext('2d');
     this.onNodeClick = onNodeClick;
@@ -14,7 +14,8 @@ class OrchestrationGraph {
     this.tick        = 0;
     this.packets     = [];
 
-    this.nodeConfig = [
+    this.orbitRatio = orbitRatio;
+    this.nodeConfig = nodeConfig || [
       { id: 'aliria',    label: 'ALIRIA',    type: null,        isCenter: true,  color: '#3b82f6', glow: '#1d4ed8', emoji: null,  href: null         },
       { id: 'mentor',    label: 'Mentor',    type: 'mentor',    isCenter: false, color: '#60a5fa', glow: '#2563eb', emoji: '🧑‍🏫', href: null         },
       { id: 'project',   label: 'Project',   type: 'project',   isCenter: false, color: '#f87171', glow: '#b91c1c', emoji: '🛠️',  href: null         },
@@ -49,7 +50,7 @@ class OrchestrationGraph {
 
   _buildNodes() {
     const cx = this.W / 2, cy = this.H / 2;
-    const r  = Math.min(this.W, this.H) * .30;
+    const r  = Math.min(this.W, this.H) * this.orbitRatio;
     // 5 surrounding nodes evenly spaced, starting from top
     const surroundCount = this.nodeConfig.filter(c => !c.isCenter).length;
     let si = 0;
@@ -64,7 +65,7 @@ class OrchestrationGraph {
         y = cy + Math.sin(angle) * r;
         si++;
       }
-      return { ...cfg, x, y, ox: x, oy: y, radius: cfg.isCenter ? 36 : 26, alpha: 1, phase: i * 1.1 };
+      return { ...cfg, x, y, ox: x, oy: y, radius: cfg.radius || (cfg.isCenter ? 36 : 26), alpha: 1, phase: i * 1.1 };
     });
   }
 
@@ -118,9 +119,7 @@ class OrchestrationGraph {
       this.nodes.forEach(n => { n.alpha = (n.isCenter || n.id === hit.id) ? 1 : 0.2; });
       this.packets = [];
       this._spawnPackets(hit.id);
-      if (hit.href) {
-        this.onNodeClick(hit.type);
-      }
+      this.onNodeClick(hit.type);
     }
   }
 
@@ -252,10 +251,15 @@ class OrchestrationGraph {
       this.ctx.stroke();
       this.ctx.shadowBlur  = 0;
 
-      // center logo image
+      // center logo image (clipped to circle)
       if (n.isCenter && this._logoImg && this._logoImg.complete && this._logoImg.naturalWidth) {
-        const s = r * 1.1;
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(n.x, n.y, r - 1, 0, Math.PI * 2);
+        this.ctx.clip();
+        const s = r * 2;
         this.ctx.drawImage(this._logoImg, n.x - s / 2, n.y - s / 2, s, s);
+        this.ctx.restore();
       }
 
       // emoji + label
@@ -282,6 +286,16 @@ class OrchestrationGraph {
   loadLogo(src) {
     this._logoImg = new Image();
     this._logoImg.src = src;
+  }
+
+  loadSegment(nodeConfig) {
+    this.nodeConfig  = nodeConfig;
+    this.state       = 'idle';
+    this.focusedType = null;
+    this.packets     = [];
+    this._buildNodes();
+    this._buildEdges();
+    this.nodes.forEach(n => { n.alpha = 1; });
   }
 
   reset() {
