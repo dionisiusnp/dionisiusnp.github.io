@@ -274,6 +274,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 </head>
 <body>
 
+<!-- PIN GATE -->
+<div id="pin-gate" style="position:fixed;inset:0;z-index:9999;background:#09090f;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif">
+  <div id="pin-box" style="display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%;max-width:320px;padding:2.5rem 2rem;background:#0f0f18;border:1px solid rgba(255,255,255,.09);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.6)">
+    <div style="font-size:2rem;line-height:1">🔐</div>
+    <div style="font-size:1.05rem;font-weight:700;color:#fff">Akses Terbatas</div>
+    <div style="font-size:.78rem;color:rgba(255,255,255,.35);text-align:center">Masukkan kode untuk membuka kalkulator ini</div>
+    <input id="pin-input" type="password" maxlength="32" placeholder="Kode akses"
+      style="width:100%;padding:.65rem .9rem;background:#09090f;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:.9rem;font-family:'JetBrains Mono',monospace;text-align:center;letter-spacing:.2em;outline:none"
+      onfocus="this.style.borderColor='rgba(99,102,241,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
+    <button onclick="checkPin()" style="width:100%;padding:.65rem;background:linear-gradient(135deg,#6366f1,#a855f7);border:none;border-radius:8px;color:#fff;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Masuk →</button>
+    <div id="pin-error" style="font-size:.72rem;color:#f87171;min-height:1em"></div>
+  </div>
+</div>
+<style>
+@keyframes pin-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pin-shaking{animation:pin-shake .35s ease}
+</style>
+
 <div id="dion-nav">
   <a href="/" class="back">
     <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>
@@ -1197,6 +1215,48 @@ function resetAll(){
   renderRoles();
   renderExtras();
   updateSliderFill('margin',30,0,100);
+})();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script>
+// ── PIN GATE ──────────────────────────────────────────────────────────────────
+// Ganti GATE_HASH dengan hasil: pinHelper("kode_baru") di console browser
+const GATE_HASH = '6e65b61d030e5ac6492802c6f619a63006e5b0e2cafc0170ab92a68083162528'; // SHA-256("0000")
+const GATE_KEY  = 'gate_dion_v1';
+
+function _hash(s) { return CryptoJS.SHA256(s).toString(); }
+window.pinHelper = s => { const h = _hash(s); console.log('Hash untuk "'+s+'":\n'+h); return h; };
+
+function checkPin() {
+  const val = document.getElementById('pin-input').value.trim();
+  if (!val) return;
+  if (_hash(val) === GATE_HASH) {
+    sessionStorage.setItem(GATE_KEY, '1');
+    const gate = document.getElementById('pin-gate');
+    gate.style.transition = 'opacity .25s';
+    gate.style.opacity = '0';
+    setTimeout(() => { gate.remove(); document.body.style.overflow = ''; }, 260);
+  } else {
+    document.getElementById('pin-error').textContent = 'Kode salah, coba lagi.';
+    const box = document.getElementById('pin-box');
+    box.classList.add('pin-shaking');
+    setTimeout(() => box.classList.remove('pin-shaking'), 360);
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+  }
+}
+
+(function initGate() {
+  if (sessionStorage.getItem(GATE_KEY)) {
+    document.getElementById('pin-gate')?.remove();
+    return;
+  }
+  document.body.style.overflow = 'hidden';
+  document.getElementById('pin-input')?.focus();
+  document.getElementById('pin-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPin();
+  });
 })();
 </script>
 </body>
