@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aliria Tech — IT Community</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --bg:#07090e; --surface:#0d1117; --navy:#1d4ed8; --red:#b91c1c; --blue:#3b82f6; }
+    * { box-sizing:border-box; }
+    body { background:var(--bg); color:#e2e8f0; font-family:'Inter',sans-serif; }
+
+    .dot-grid {
+      background-image: radial-gradient(circle, rgba(59,130,246,.12) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    #side-panel { transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .35s; }
+    #side-panel.hidden-panel { transform:translateX(100%); opacity:0; pointer-events:none; }
+
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .marquee-track { animation: marquee 22s linear infinite; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .reveal { animation: fadeUp .6s ease both; }
+    .reveal-d1 { animation-delay:.1s; }
+    .reveal-d2 { animation-delay:.2s; }
+    .reveal-d3 { animation-delay:.3s; }
+
+    .node-card { transition:border-color .2s,box-shadow .2s; }
+    .node-card:hover { box-shadow:0 0 24px rgba(59,130,246,.18); }
+
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(99,163,255,.2); border-radius:3px; }
+
+    .font-mono { font-family:'JetBrains Mono',monospace; }
+    canvas { display:block; }
+  </style>
+</head>
+<body class="min-h-screen overflow-x-hidden">
+
+<!-- NAV -->
+<nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-10 px-6 py-3 bg-[#07090e]/80 backdrop-blur-md border-b border-white/[0.06]">
+  <div class="flex items-center gap-3">
+    <img src="logo.png" alt="Aliria" class="h-8 w-8 object-contain rounded-full"/>
+    <span class="font-semibold tracking-wide text-white/90 text-sm">Aliria Tech</span>
+  </div>
+  <div class="hidden md:flex items-center gap-7 text-xs text-white/50">
+    <a href="#about"      class="hover:text-white transition-colors">Tentang</a>
+    <a href="#programs"   class="hover:text-white transition-colors">Program</a>
+    <a href="#activities" class="hover:text-white transition-colors">Aktivitas</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden dot-grid pt-16">
+  <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-blue-700/10 blur-3xl pointer-events-none"></div>
+  <div class="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-red-800/10 blur-3xl pointer-events-none"></div>
+
+  <div class="relative z-10 text-center mb-6 px-4">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-blue-500/30 text-blue-400 mb-5 bg-blue-500/10">
+      <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+      IT Community · Universitas
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white mb-3">
+      Bangun Kariermu<br/>
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Bersama Aliria</span>
+    </h1>
+    <p class="text-white/50 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+      Komunitas IT yang menghubungkan mentor, project nyata, marketing, dan partner kolaborasi.
+    </p>
+  </div>
+
+  <div id="canvas-wrap" style="position:relative;z-index:10;width:min(100vw,672px);height:420px;flex-shrink:0">
+    <canvas id="orchestration-canvas" style="width:100%;height:100%;display:block"></canvas>
+  </div>
+
+  <p class="relative z-10 text-white/25 text-xs mt-3 tracking-wide">Klik node untuk eksplorasi ekosistem</p>
+
+  <div class="relative z-10 flex flex-wrap items-center justify-center gap-3 mt-8">
+    <a href="#about" class="px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all shadow-lg shadow-blue-600/30">
+      Jelajahi Komunitas
+    </a>
+  </div>
+</section>
+
+<!-- SIDE PANEL -->
+<div id="side-panel" class="hidden-panel fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm bg-[#0b1120]/95 backdrop-blur-xl border-l border-white/10 flex flex-col shadow-2xl">
+  <div id="panel-header" class="flex items-center justify-between px-5 py-4 border-b border-white/10">
+    <div class="flex items-center gap-3">
+      <span id="panel-emoji" class="text-xl"></span>
+      <div>
+        <div id="panel-title" class="text-sm font-semibold text-white"></div>
+        <div id="panel-subtitle" class="text-[11px] text-white/40"></div>
+      </div>
+    </div>
+    <button id="panel-close" class="w-8 h-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-4 space-y-3" id="panel-body"></div>
+  <div class="p-4 border-t border-white/10" id="panel-footer"></div>
+  </div>
+</div>
+<div id="panel-backdrop" class="hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"></div>
+
+<!-- MARQUEE -->
+<div class="overflow-hidden border-y border-white/[0.05] py-3 bg-white/[0.01]">
+  <div class="marquee-track flex gap-10 whitespace-nowrap text-xs text-white/25 font-mono w-max">
+    <span>git push origin main</span><span class="text-white/10">·</span>
+    <span>php artisan migrate</span><span class="text-white/10">·</span>
+    <span>npm run build</span><span class="text-white/10">·</span>
+    <span>docker compose up -d</span><span class="text-white/10">·</span>
+    <span>Hook: [Angka] + [Manfaat]</span><span class="text-white/10">·</span>
+    <span>Daily standup: Done / Doing / Block</span><span class="text-white/10">·</span>
+    <span>LGTM — Looks Good To Me</span><span class="text-white/10">·</span>
+    <span>git clone &lt;url&gt;</span><span class="text-white/10">·</span>
+    <span>npm install</span><span class="text-white/10">·</span>
+    <span>Ctrl + Shift + P</span><span class="text-white/10">·</span>
+    <span>git push origin main</span><span class="text-white/10">·</span>
+    <span>php artisan migrate</span><span class="text-white/10">·</span>
+    <span>npm run build</span><span class="text-white/10">·</span>
+    <span>docker compose up -d</span><span class="text-white/10">·</span>
+    <span>Hook: [Angka] + [Manfaat]</span><span class="text-white/10">·</span>
+    <span>Daily standup: Done / Doing / Block</span><span class="text-white/10">·</span>
+    <span>LGTM — Looks Good To Me</span><span class="text-white/10">·</span>
+    <span>git clone &lt;url&gt;</span><span class="text-white/10">·</span>
+    <span>npm install</span><span class="text-white/10">·</span>
+    <span>Ctrl + Shift + P</span><span class="text-white/10">·</span>
+  </div>
+</div>
+
+<!-- ABOUT + VALUE -->
+<section id="about" class="py-24 px-6 max-w-6xl mx-auto">
+  <div class="reveal text-center mb-16">
+    <p class="text-xs text-blue-400/70 font-mono mb-3">// about aliria</p>
+    <h2 class="text-3xl font-bold text-white mb-4">Mengapa Aliria?</h2>
+    <p class="text-white/40 max-w-xl mx-auto text-sm leading-relaxed">
+      Aliria Tech adalah komunitas IT mahasiswa yang dirancang sebagai ekosistem nyata —
+      bukan sekadar forum, tapi tempat belajar, berkarya, dan berkolaborasi.
+    </p>
+  </div>
+  <div class="grid md:grid-cols-3 gap-5 reveal">
+    <div class="node-card rounded-2xl border border-blue-500/20 bg-white/[0.03] p-6">
+      <div class="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center mb-4 text-xl">🧑‍🏫</div>
+      <h3 class="font-semibold text-white mb-2">Mentorship Nyata</h3>
+      <p class="text-white/40 text-sm leading-relaxed">Belajar langsung dari senior dan praktisi. Dari Git hingga deployment, kamu punya panduan.</p>
+    </div>
+    <div class="node-card rounded-2xl border border-red-500/20 bg-white/[0.03] p-6">
+      <div class="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center mb-4 text-xl">🛠️</div>
+      <h3 class="font-semibold text-white mb-2">Project Kolaboratif</h3>
+      <p class="text-white/40 text-sm leading-relaxed">Kerjakan project nyata bersama tim. Portfolio berkembang, skill terasah, relasi terbentuk.</p>
+    </div>
+    <div class="node-card rounded-2xl border border-green-500/20 bg-white/[0.03] p-6">
+      <div class="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center mb-4 text-xl">🤝</div>
+      <h3 class="font-semibold text-white mb-2">Partner & Ekosistem</h3>
+      <p class="text-white/40 text-sm leading-relaxed">Terhubung dengan komunitas lain, HMTI, dan mitra industri yang membuka peluang karier.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS — Bento Grid -->
+<section id="programs" class="py-20 px-6 max-w-6xl mx-auto">
+  <div class="reveal text-center mb-14">
+    <p class="text-xs text-blue-400/70 font-mono mb-3">// programs</p>
+    <h2 class="text-3xl font-bold text-white mb-4">Ekosistem Program</h2>
+    <p class="text-white/40 text-sm max-w-lg mx-auto">Empat pilar utama yang menjalankan komunitas Aliria Tech.</p>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 reveal">
+    <div class="col-span-2 node-card rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-900/20 to-transparent p-6">
+      <div class="text-2xl mb-3">🧑‍🏫</div>
+      <div class="font-mono text-xs text-blue-400/60 mb-1">node::mentor</div>
+      <h3 class="font-semibold text-white mb-2">Mentor Program</h3>
+      <p class="text-white/40 text-xs leading-relaxed">Workshop mingguan, code review, pair programming, dan sesi tanya jawab terbuka untuk semua level.</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">Git</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">Terminal</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">VSCode</span>
+      </div>
+    </div>
+    <div class="node-card rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-900/20 to-transparent p-6">
+      <div class="text-2xl mb-3">🛠️</div>
+      <div class="font-mono text-xs text-red-400/60 mb-1">node::project</div>
+      <h3 class="font-semibold text-white mb-2">Dev Projects</h3>
+      <p class="text-white/40 text-xs leading-relaxed">Laravel, React, Docker — sprint nyata dengan deliverable tiap dua minggu.</p>
+    </div>
+    <div class="node-card rounded-2xl border border-yellow-500/20 bg-gradient-to-br from-yellow-900/20 to-transparent p-6">
+      <div class="text-2xl mb-3">📢</div>
+      <div class="font-mono text-xs text-yellow-400/60 mb-1">node::marketing</div>
+      <h3 class="font-semibold text-white mb-2">Marketing</h3>
+      <p class="text-white/40 text-xs leading-relaxed">Konten, Canva, social media strategy — tim kreatif di balik Aliria.</p>
+    </div>
+    <div class="node-card rounded-2xl border border-green-500/20 bg-gradient-to-br from-green-900/20 to-transparent p-6">
+      <div class="text-2xl mb-3">🤝</div>
+      <div class="font-mono text-xs text-green-400/60 mb-1">node::partner</div>
+      <h3 class="font-semibold text-white mb-2">Partner</h3>
+      <p class="text-white/40 text-xs leading-relaxed">Kolaborasi lintas komunitas, open source, dan Agile standar industri.</p>
+    </div>
+    <div class="col-span-3 node-card rounded-2xl border border-white/10 bg-white/[0.02] p-6 flex flex-col justify-between">
+      <div>
+        <div class="font-mono text-xs text-white/20 mb-1">sys::status</div>
+        <h3 class="font-semibold text-white mb-2">Komunitas Aktif</h3>
+      </div>
+      <div class="grid grid-cols-3 gap-4 mt-4">
+        <div><div class="text-2xl font-bold text-blue-400">50+</div><div class="text-xs text-white/30 mt-0.5">Anggota Aktif</div></div>
+        <div><div class="text-2xl font-bold text-red-400">10+</div><div class="text-xs text-white/30 mt-0.5">Project Selesai</div></div>
+        <div><div class="text-2xl font-bold text-green-400">4</div><div class="text-xs text-white/30 mt-0.5">Divisi Utama</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACTIVITIES -->
+<section id="activities" class="py-20 px-6 max-w-6xl mx-auto">
+  <div class="reveal text-center mb-14">
+    <p class="text-xs text-blue-400/70 font-mono mb-3">// activities</p>
+    <h2 class="text-3xl font-bold text-white mb-4">Yang Bisa Kamu Lakukan</h2>
+  </div>
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 reveal">
+    <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
+      <span class="text-2xl mt-0.5">💻</span>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Workshop Coding</h4><p class="text-white/35 text-xs leading-relaxed">Sesi hands-on setiap minggu, dari dasar hingga advanced tech stack.</p></div>
+    </div>
+    <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
+      <span class="text-2xl mt-0.5">🎯</span>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Sprint Project</h4><p class="text-white/35 text-xs leading-relaxed">Bergabung sebagai developer atau designer di project komunitas.</p></div>
+    </div>
+    <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
+      <span class="text-2xl mt-0.5">📱</span>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Konten Kreator</h4><p class="text-white/35 text-xs leading-relaxed">Buat konten edukatif tech yang menjangkau ribuan mahasiswa.</p></div>
+    </div>
+    <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
+      <span class="text-2xl mt-0.5">🏆</span>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Kompetisi & Hackathon</h4><p class="text-white/35 text-xs leading-relaxed">Ikut kompetisi bersama tim yang sudah solid dan terlatih.</p></div>
+    </div>
+    <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
+      <span class="text-2xl mt-0.5">🔗</span>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Networking</h4><p class="text-white/35 text-xs leading-relaxed">Terhubung dengan alumni, mentor, dan partner industri.</p></div>
+    </div>
+    <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
+      <span class="text-2xl mt-0.5">📚</span>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Study Group</h4><p class="text-white/35 text-xs leading-relaxed">Belajar bareng, problem solving, dan code review sesama anggota.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-24 px-6">
+  <div class="max-w-2xl mx-auto text-center reveal">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-blue-500/30 text-blue-400 mb-6 bg-blue-500/10">
+      <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+      Open Recruitment
+    </div>
+    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Siap Bergabung?</h2>
+    <p class="text-white/40 text-sm leading-relaxed mb-8">
+      Aliria Tech terbuka untuk semua mahasiswa yang ingin berkembang di dunia IT.
+      Tidak perlu jago dulu — yang penting mau belajar dan berkolaborasi.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <a href="#" class="px-7 py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all shadow-lg shadow-blue-600/30">Daftar Sekarang</a>
+      <a href="#" class="px-7 py-3 rounded-full border border-white/15 text-white/60 hover:text-white hover:border-white/30 text-sm transition-all">Hubungi Kami</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-white/[0.06] py-10 px-6">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" alt="Aliria" class="h-7 w-7 object-contain rounded-full opacity-80"/>
+      <span class="text-white/40 text-sm">Aliria Tech © 2024</span>
+    </div>
+    <div class="flex items-center gap-6 text-xs text-white/25">
+      <a href="#" class="hover:text-white/60 transition-colors">Instagram</a>
+      <a href="#" class="hover:text-white/60 transition-colors">GitHub</a>
+      <a href="#" class="hover:text-white/60 transition-colors">LinkedIn</a>
+    </div>
+    <div class="font-mono text-[10px] text-white/15">node_status: <span class="text-green-400/50">active</span></div>
+  </div>
+</footer>
+
+<script src="js/orchestration.js"></script>
+<script>
+const TYPE_META = {
+  mentor:    { emoji:'🧑‍🏫', title:'Mentor',    subtitle:'Learning & Development'  },
+  project:   { emoji:'🛠️',  title:'Project',   subtitle:'Dev Tools & Commands'    },
+  marketing: { emoji:'📢',  title:'Marketing', subtitle:'Content & Tools'         },
+  partner:   { emoji:'🤝',  title:'Partner',   subtitle:'Collaboration Workflow'  },
+};
+
+// Side panel static content
+const PANEL_CONTENT = {
+  aliria: {
+    emoji:'⚡', title:'Aliria Tech', subtitle:'IT Community Overview',
+    items:[
+      { label:'Mentor Program',    desc:'Workshop, code review, dan bimbingan langsung dari senior developer' },
+      { label:'Dev Projects',      desc:'Sprint project nyata dengan tech stack modern dan deliverable nyata' },
+      { label:'Marketing & Brand', desc:'Tim kreatif di balik konten dan sosial media komunitas' },
+      { label:'Partner Network',   desc:'Kolaborasi lintas komunitas, HMTI, dan mitra industri' },
+      { label:'Cheat Sheet',       desc:'Klik node Cheat untuk akses command siap pakai — Flutter, Laravel, Docker, AI' },
+    ],
+    footer: null,
+  },
+  mentor: {
+    emoji:'🧑‍🏫', title:'Mentor', subtitle:'Learning & Development',
+    items:[
+      { label:'Weekly Workshop',   desc:'Sesi hands-on mingguan — dari Git dasar hingga deployment production' },
+      { label:'Code Review',       desc:'Review code bersama mentor, feedback langsung dan konstruktif' },
+      { label:'Pair Programming',  desc:'Coding bareng mentor untuk selesaikan fitur atau debug masalah nyata' },
+      { label:'Q&A Terbuka',       desc:'Tanya apa saja — tidak ada pertanyaan yang terlalu basic' },
+      { label:'Study Group',       desc:'Belajar bareng sesama anggota, saling bantu dan diskusi konsep' },
+    ],
+    footer: null,
+  },
+  project: {
+    emoji:'🛠️', title:'Project', subtitle:'Dev Build & Sprint',
+    items:[
+      { label:'Sprint 2 Minggu',   desc:'Project dibagi sprint — setiap 2 minggu ada deliverable yang bisa diukur' },
+      { label:'Tech Stack Modern', desc:'Laravel, Flutter, React, Docker — pilih sesuai project yang kamu masuki' },
+      { label:'Git Workflow',      desc:'Branch strategy, pull request, dan code review standar industri' },
+      { label:'Portfolio Nyata',   desc:'Hasil project bisa langsung masuk portfolio dan ditampilkan ke rekruter' },
+      { label:'Tim Kolaboratif',   desc:'Kerjakan bersama 3–5 anggota dengan role yang jelas' },
+    ],
+    footer: null,
+  },
+  marketing: {
+    emoji:'📢', title:'Marketing', subtitle:'Content & Creative',
+    items:[
+      { label:'Konten Edukatif',   desc:'Buat thread, carousel, dan video tentang tech yang menjangkau ribuan mahasiswa' },
+      { label:'Social Media',      desc:'Kelola Instagram, LinkedIn, dan Telegram komunitas Aliria' },
+      { label:'Desain Grafis',     desc:'Produksi visual dengan Canva, Figma, atau tools kreatif lain' },
+      { label:'Copywriting',       desc:'Tulis caption, hook, dan CTA yang menarik engagement tinggi' },
+      { label:'Content Planning',  desc:'Rencanakan kalender konten mingguan bersama tim marketing' },
+    ],
+    footer: null,
+  },
+  partner: {
+    emoji:'🤝', title:'Partner', subtitle:'Collaboration & Network',
+    items:[
+      { label:'Open Source',       desc:'Kontribusi ke project open source menggunakan workflow GitHub standar' },
+      { label:'Agile/Scrum',       desc:'Daily standup, sprint planning, dan retrospective seperti tim profesional' },
+      { label:'Lintas Komunitas',  desc:'Kolaborasi dengan HMTI, komunitas kampus lain, dan komunitas tech regional' },
+      { label:'Networking',        desc:'Terhubung dengan alumni, mentor industri, dan mitra yang membuka peluang karier' },
+      { label:'Co-Project',        desc:'Kerjakan project bersama komunitas partner dengan pembagian peran yang jelas' },
+    ],
+    footer: null,
+  },
+  cheat: {
+    emoji:'📋', title:'Cheat Sheet', subtitle:'Command siap pakai',
+    items:[
+      { label:'🐘 Laravel',     desc:'php artisan serve, migrate, make:model, tinker, route:list dan lainnya' },
+      { label:'🐦 Flutter',     desc:'flutter create, run, pub get, pub add, build apk, doctor, clean' },
+      { label:'☕ Java',        desc:'javac, java, java -jar, mvn clean install, gradle build' },
+      { label:'🍃 Spring Boot', desc:'@RestController, @Entity, @Autowired, application.properties config' },
+      { label:'🐳 Docker',      desc:'docker compose up/down, logs, exec, build, ps, system prune' },
+      { label:'🤖 AI & Prompt', desc:'Install Claude Code CLI (Windows/Mac) + tips struktur prompt hemat context' },
+    ],
+    footer: '<a href="cheat.html" style="display:block;text-align:center;padding:.625rem;border-radius:.75rem;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.35);color:#c4b5fd;font-size:.8rem;text-decoration:none;transition:background .15s" onmouseenter="this.style.background=\'rgba(167,139,250,.25)\'" onmouseleave="this.style.background=\'rgba(167,139,250,.15)\'">Buka Full Cheat Sheet →</a>',
+  },
+};
+
+function openPanel(type) {
+  const panel    = document.getElementById('side-panel');
+  const backdrop = document.getElementById('panel-backdrop');
+  const body     = document.getElementById('panel-body');
+  const footer   = document.getElementById('panel-footer');
+  const emojiEl  = document.getElementById('panel-emoji');
+  const titleEl  = document.getElementById('panel-title');
+  const subEl    = document.getElementById('panel-subtitle');
+
+  if (type === null) {
+    panel.classList.add('hidden-panel');
+    backdrop.classList.add('hidden');
+    return;
+  }
+
+  const data = PANEL_CONTENT[type];
+  if (!data) return;
+
+  emojiEl.textContent = data.emoji;
+  titleEl.textContent = data.title;
+  subEl.textContent   = data.subtitle;
+
+  body.innerHTML = data.items.map(item => `
+    <div class="rounded-xl border border-white/10 bg-white/[0.03] p-4 hover:bg-white/[0.06] transition-all">
+      <div class="text-sm font-medium text-white mb-1">${item.label}</div>
+      <div class="text-xs text-white/40 leading-relaxed">${item.desc}</div>
+    </div>
+  `).join('');
+
+  footer.innerHTML = data.footer || '';
+
+  panel.classList.remove('hidden-panel');
+  backdrop.classList.remove('hidden');
+}
+
+// Orchestration graph
+let graph;
+function initGraph() {
+  const wrap = document.getElementById('canvas-wrap');
+  if (!wrap) return;
+  const w = wrap.offsetWidth || wrap.getBoundingClientRect().width;
+  if (w === 0) { setTimeout(initGraph, 50); return; }
+  graph = new OrchestrationGraph('orchestration-canvas', openPanel);
+  graph.loadLogo('logo.png');
+}
+// Safely init regardless of whether load already fired
+if (document.readyState === 'complete') {
+  setTimeout(initGraph, 0);
+} else {
+  window.addEventListener('load', initGraph);
+}
+
+document.getElementById('panel-close').addEventListener('click', () => { openPanel(null); if(graph) graph.reset(); });
+document.getElementById('panel-backdrop').addEventListener('click', () => { openPanel(null); if(graph) graph.reset(); });
+
+</script>
+</body>
+</html>
