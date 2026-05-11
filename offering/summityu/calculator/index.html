@@ -333,9 +333,17 @@ input[type=range]::-webkit-slider-thumb{
     <div style="font-size:2rem;line-height:1">🔐</div>
     <div style="font-size:1.05rem;font-weight:700;color:#fff">Akses Terbatas</div>
     <div style="font-size:.78rem;color:rgba(255,255,255,.35);text-align:center">Masukkan kode untuk membuka kalkulator ini</div>
-    <input id="pin-input" type="password" maxlength="32" placeholder="Kode akses"
-      style="width:100%;padding:.65rem .9rem;background:#09090f;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:.9rem;font-family:'JetBrains Mono',monospace;text-align:center;letter-spacing:.2em;outline:none"
-      onfocus="this.style.borderColor='rgba(99,102,241,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
+    <div style="position:relative;width:100%">
+      <input id="pin-input" type="password" maxlength="32" placeholder="Kode akses"
+        style="width:100%;padding:.65rem 2.6rem .65rem .9rem;background:#09090f;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:.9rem;font-family:'JetBrains Mono',monospace;text-align:center;letter-spacing:.2em;outline:none"
+        onfocus="this.style.borderColor='rgba(99,102,241,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
+      <button id="eye-btn" type="button" onclick="togglePinEye()"
+        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:rgba(255,255,255,.3);padding:4px;display:flex;align-items:center"
+        onmouseenter="this.style.color='rgba(255,255,255,.7)'" onmouseleave="this.style.color='rgba(255,255,255,.3)'">
+        <svg id="eye-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+      </button>
+    </div>
+    <div style="font-size:.65rem;color:rgba(255,255,255,.2);margin-top:-.4rem">Petunjuk: kelahiran Aliria</div>
     <button onclick="checkPin()" style="width:100%;padding:.65rem;background:linear-gradient(135deg,#6366f1,#a855f7);border:none;border-radius:8px;color:#fff;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Masuk →</button>
     <div id="pin-error" style="font-size:.72rem;color:#f87171;min-height:1em"></div>
   </div>
@@ -1169,6 +1177,18 @@ const GATE_KEY  = 'gate_dion_v1';
 
 function _hash(s) { return CryptoJS.SHA256(s).toString(); }
 window.pinHelper = s => { const h = _hash(s); console.log('Hash untuk "'+s+'":\n'+h); return h; };
+
+function togglePinEye() {
+  const inp = document.getElementById('pin-input');
+  const icon = document.getElementById('eye-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>';
+  } else {
+    inp.type = 'password';
+    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+  }
+}
 
 function checkPin() {
   const val = document.getElementById('pin-input').value.trim();
