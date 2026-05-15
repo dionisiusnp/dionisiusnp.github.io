@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sistem Chatbot AI PMB — Dokumentasi Riset</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#09090f;--surface:#0f0f18;--card:rgba(255,255,255,.04);
+  --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.13);
+  --text:#e2e2ee;--muted:#8888aa;--dim:rgba(255,255,255,.22);
+  --accent:#6366f1;--a2:#a855f7;--a3:#22d3ee;
+  --green:#34d399;--gold:#fbbf24;--red:#f87171;
+  --wa:#25D366;--py:#fbbf24;--lv:#f87171;
+  --font-sans:'Segoe UI',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --r-xs:4px;--r-sm:7px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:999px;
+  --shadow-hover:0 8px 38px rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.65}
+
+.hero{background:linear-gradient(135deg,#0a2318,#0d4a3a 45%,#0a1a2e);color:#fff;padding:72px 20px 56px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-pill);padding:5px 16px;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:20px}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--wa);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:14px}
+.hero h1 em{font-style:normal;color:#a7f3d0}
+.hero>p{font-size:1rem;opacity:.8;max-width:600px;margin:0 auto 28px}
+.pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-sm);padding:7px 14px;font-size:.82rem}
+
+.stats{background:var(--card);border-bottom:1px solid var(--bd);padding:18px 0}
+.si{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-n{font-size:1.7rem;font-weight:900;color:var(--wa)}
+.stat-l{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px}
+.sec{padding:44px 0 28px}
+.sec-hd{margin-bottom:24px}
+.stag{display:inline-block;border-radius:var(--r-pill);padding:3px 12px;font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+.stag.g{background:rgba(37,211,102,.1);color:#6ee7b7}
+.stag.b{background:rgba(99,102,241,.1);color:#93c5fd}
+.stag.o{background:rgba(249,115,22,.1);color:#fb923c}
+.stag.tl{background:rgba(20,184,166,.1);color:#5eead4}
+.stag.y{background:rgba(251,191,36,.1);color:var(--gold)}
+.stag.r{background:rgba(248,113,113,.1);color:#fca5a5}
+.stag.v{background:rgba(139,92,246,.1);color:#c4b5fd}
+.sec-hd h2{font-size:1.55rem;font-weight:900}
+.sec-hd p{color:var(--muted);margin-top:4px;font-size:.9rem}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-md);padding:20px;display:flex;gap:13px;align-items:flex-start;position:relative;overflow:hidden}
+.card.click{cursor:pointer;transition:all .2s}
+.card.click::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--ca,var(--accent));transform:scaleX(0);transition:transform .2s;transform-origin:left}
+.card.click:hover{border-color:transparent;box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.card.click:hover::after{transform:scaleX(1)}
+.cicon{width:44px;height:44px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;background:var(--ib,#e8f5e9)}
+.cbody{flex:1;min-width:0}
+.cnum{font-size:.68rem;font-weight:800;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px}
+.ctitle{font-size:.97rem;font-weight:800;margin-bottom:4px;line-height:1.3}
+.cdesc{font-size:.79rem;color:var(--muted);line-height:1.5}
+.ctags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.tag{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r-pill);padding:2px 8px;font-size:.68rem;color:var(--muted)}
+.tag.g{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.25);color:var(--green)}
+.tag.e{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.25);color:var(--gold)}
+.tag.a{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.25);color:#c4b5fd}
+.tag.b{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.25);color:#93c5fd}
+.tag.wa{background:rgba(37,211,102,.1);border-color:rgba(37,211,102,.25);color:var(--wa)}
+.tag.r{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.25);color:#fca5a5}
+.carr{position:absolute;top:16px;right:14px;opacity:.2;font-size:.8rem;transition:opacity .2s}
+.card.click:hover .carr{opacity:.5}
+
+.mini-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.mini-label::after{content:'';flex:1;height:1px;background:var(--bd)}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.mcard{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r-md);padding:11px 13px;display:flex;gap:9px;align-items:flex-start}
+.micon{font-size:1rem;flex-shrink:0;margin-top:2px}
+.mname{font-size:.83rem;font-weight:700;line-height:1.2}
+.mdesc{font-size:.72rem;color:var(--muted);margin-top:2px;line-height:1.4}
+.mlayer{font-size:.65rem;border-radius:var(--r-xs);padding:1px 5px;font-weight:700;margin-top:3px;display:inline-block}
+.mlayer.py{background:rgba(251,191,36,.12);color:var(--gold)}
+.mlayer.lv{background:rgba(248,113,113,.12);color:#fca5a5}
+.mlayer.both{background:rgba(99,102,241,.12);color:#93c5fd}
+
+/* ARSITEKTUR TERPADU */
+.arch-wrap{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-lg);padding:24px;margin:16px 0;overflow-x:auto}
+.arch-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:20px}
+.arch-layers{display:flex;flex-direction:column;gap:10px}
+.arch-layer{display:flex;align-items:stretch;gap:10px}
+.arch-layer-label{width:90px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:right;padding-right:10px;border-right:2px solid var(--bd)}
+.arch-boxes{display:flex;gap:8px;flex:1;flex-wrap:wrap}
+.abox{flex:1;min-width:130px;border-radius:var(--r-md);padding:11px 13px;border:1px solid}
+.abox.ext{background:rgba(37,211,102,.05);border-color:rgba(37,211,102,.25)}
+.abox.py{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.25)}
+.abox.lv{background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.25)}
+.abox.db{background:rgba(99,102,241,.05);border-color:rgba(99,102,241,.25)}
+.abox.ai{background:rgba(139,92,246,.05);border-color:rgba(139,92,246,.25)}
+.abox-head{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.abox.ext .abox-head{color:var(--wa)}
+.abox.py .abox-head{color:var(--gold)}
+.abox.lv .abox-head{color:#fca5a5}
+.abox.db .abox-head{color:#93c5fd}
+.abox.ai .abox-head{color:#c4b5fd}
+.abox-items{display:flex;flex-direction:column;gap:2px}
+.abox-item{font-size:.72rem;color:var(--muted);padding-left:10px;position:relative}
+.abox-item::before{content:'·';position:absolute;left:2px}
+.arch-connector{text-align:center;font-size:.72rem;color:var(--muted);font-family:var(--font-mono);padding:2px 0;letter-spacing:.03em}
+
+/* ALUR PROSES */
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;position:relative}
+.flow::before{content:'';position:absolute;top:28px;left:calc(50% / var(--steps, 6));right:calc(50% / var(--steps, 6));height:2px;background:linear-gradient(90deg,var(--wa),#22d3ee);z-index:0}
+.fstep{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-md);padding:14px 12px;position:relative;z-index:1;margin:0 4px;text-align:center}
+.fnum{width:28px;height:28px;border-radius:50%;font-size:.75rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:#000;background:var(--wa)}
+.ftitle{font-size:.8rem;font-weight:800;margin-bottom:4px;line-height:1.3}
+.fdesc{font-size:.71rem;color:var(--muted);line-height:1.4}
+.flayer{font-size:.62rem;font-weight:700;border-radius:var(--r-xs);padding:1px 6px;margin-top:6px;display:inline-block}
+.flayer.py{background:rgba(251,191,36,.12);color:var(--gold)}
+.flayer.lv{background:rgba(248,113,113,.12);color:#fca5a5}
+
+/* TABEL */
+.tbl-wrap{overflow-x:auto;margin:14px 0}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.tbl th{background:var(--surface);color:var(--muted);font-weight:700;text-transform:uppercase;font-size:.67rem;letter-spacing:.05em;padding:10px 12px;text-align:left;border-bottom:1px solid var(--bd2)}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--bd);color:var(--text);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;border-radius:var(--r-pill);padding:1px 8px;font-size:.67rem;font-weight:700;white-space:nowrap}
+.badge.g{background:rgba(37,211,102,.12);color:var(--wa)}
+.badge.b{background:rgba(99,102,241,.12);color:#93c5fd}
+.badge.y{background:rgba(251,191,36,.12);color:var(--gold)}
+.badge.r{background:rgba(248,113,113,.12);color:#fca5a5}
+.badge.v{background:rgba(139,92,246,.12);color:#c4b5fd}
+.badge.both{background:rgba(99,102,241,.1);color:#93c5fd}
+
+/* LAYER SPLIT */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.split-panel{border-radius:var(--r-md);padding:18px;border:1px solid}
+.split-panel.py{background:rgba(251,191,36,.04);border-color:rgba(251,191,36,.2)}
+.split-panel.lv{background:rgba(248,113,113,.04);border-color:rgba(248,113,113,.2)}
+.split-head{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.split-panel.py .split-head{color:var(--gold)}
+.split-panel.lv .split-head{color:#fca5a5}
+.split-items{display:flex;flex-direction:column;gap:5px}
+.split-item{font-size:.79rem;color:var(--text);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.split-item::before{content:'→';color:var(--muted);flex-shrink:0;font-size:.7rem;margin-top:2px}
+
+/* INFO BOX */
+.ibox{border-radius:var(--r-sm);padding:12px 14px;margin:10px 0;font-size:.82rem;line-height:1.6}
+.ibox.tip{background:rgba(37,211,102,.07);border-left:4px solid var(--wa);color:#6ee7b7}
+.ibox.warn{background:rgba(251,191,36,.08);border-left:4px solid var(--gold);color:var(--gold)}
+.ibox.info{background:rgba(99,102,241,.08);border-left:4px solid #6366f1;color:#93c5fd}
+.ibox.purple{background:rgba(139,92,246,.08);border-left:4px solid #a855f7;color:#c4b5fd}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(10,5,20,.6);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:36px 16px;opacity:0;pointer-events:none;transition:opacity .22s,visibility .22s;visibility:hidden}
+.ov.open{opacity:1;pointer-events:all;backdrop-filter:blur(4px);visibility:visible}
+.modal{background:var(--surface);border-radius:var(--r-xl);width:100%;max-width:760px;max-height:88vh;overflow-y:auto;box-shadow:0 28px 70px rgba(0,0,0,.22);transform:translateY(20px) scale(.98);transition:transform .26s cubic-bezier(.34,1.3,.64,1)}
+.ov.open .modal{transform:translateY(0) scale(1)}
+.mhd{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--bd);padding:18px 24px;display:flex;align-items:center;gap:12px}
+.mhicon{width:44px;height:44px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.mhtxt{flex:1}.mhtxt h2{font-size:1.08rem;font-weight:900;line-height:1.2}
+.mhtxt p{font-size:.76rem;color:var(--muted);margin-top:2px}
+.mcl{width:34px;height:34px;border:none;background:rgba(255,255,255,.08);border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);transition:background .15s}
+.mcl:hover{background:rgba(248,113,113,.14);color:var(--red)}
+.mb{padding:22px 24px}
+.mb h3{font-size:1rem;font-weight:800;margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--bd)}
+.mb h3:first-child{margin-top:0}
+.mb p{font-size:.85rem;color:var(--text);line-height:1.7;margin-bottom:8px}
+.mb ul{padding-left:18px;margin-bottom:10px}
+.mb li{font-size:.84rem;color:var(--text);line-height:1.7;margin-bottom:3px}
+.mb code{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.2);border-radius:var(--r-xs);padding:1px 5px;font-size:.79rem;font-family:var(--font-mono);color:#6ee7b7}
+
+footer{background:var(--card);border-top:1px solid var(--bd);padding:28px 0;margin-top:50px;text-align:center}
+footer p{font-size:.82rem;color:var(--muted);line-height:1.8}
+footer strong{color:var(--wa)}
+
+#dion-nav{position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:10px;padding:9px 20px;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);font-size:.72rem}
+#dion-nav a.back{display:flex;align-items:center;gap:6px;font-weight:600;color:#8888aa;padding:4px 11px;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,.1);text-decoration:none;transition:color .18s,border-color .18s}
+#dion-nav a.back:hover{color:var(--wa);border-color:rgba(37,211,102,.3)}
+
+@media(max-width:640px){
+  .hero{padding:48px 16px 40px}
+  .split{grid-template-columns:1fr}
+  .flow{grid-template-columns:repeat(2,1fr)}
+  .flow::before{display:none}
+  .ov{padding:0;align-items:flex-end}
+  .modal{border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:92vh}
+  .grid{grid-template-columns:1fr}
+  .arch-layer{flex-direction:column}
+  .arch-layer-label{width:auto;border-right:none;border-bottom:2px solid var(--bd);padding-right:0;padding-bottom:4px;justify-content:flex-start;text-align:left}
+}
+</style>
+</head>
+<body>
+<div id="dion-nav"><a href="/" class="back"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>dionisiusnp.github.io</a></div>
+
+<header class="hero">
+  <div class="hero-badge"><span class="dot"></span>Dokumentasi Riset · Universitas Dinamika</div>
+  <h1>Sistem <em>Chatbot AI</em> untuk Penerimaan Mahasiswa Baru</h1>
+  <p>Satu sistem utuh yang terdiri dari dua lapisan: <strong>mesin AI berbasis Python</strong> yang melayani percakapan WhatsApp secara otomatis, dan <strong>panel kontrol berbasis Laravel</strong> yang memungkinkan tim admin mengelola seluruh ekosistem — keduanya berbagi satu database dan bekerja sebagai satu kesatuan.</p>
+  <div class="pills">
+    <div class="pill">🤖 AI · RAG · LLM</div>
+    <div class="pill">💬 WhatsApp Business API</div>
+    <div class="pill">🐍 Python · FastAPI</div>
+    <div class="pill">🐘 PHP · Laravel</div>
+    <div class="pill">🏫 Universitas Dinamika</div>
+  </div>
+</header>
+
+<div class="stats"><div class="si">
+  <div class="stat"><div class="stat-n">1</div><div class="stat-l">Sistem Terintegrasi</div></div>
+  <div class="stat"><div class="stat-n">2</div><div class="stat-l">Lapisan Teknologi</div></div>
+  <div class="stat"><div class="stat-n">3</div><div class="stat-l">Tier Pencarian AI</div></div>
+  <div class="stat"><div class="stat-n">10+</div><div class="stat-l">Tabel Database Bersama</div></div>
+</div></div>
+
+<div class="wrap">
+
+<!-- KONSEP SISTEM -->
+<section class="sec">
+  <div class="sec-hd">
+    <span class="stag g">Konsep Sistem</span>
+    <h2>Satu Sistem, Dua Lapisan Teknologi</h2>
+    <p>Bukan dua aplikasi terpisah — melainkan satu sistem yang dirancang dengan pembagian peran yang jelas antara lapisan AI dan lapisan manajemen</p>
+  </div>
+
+  <div class="ibox tip">
+    Sistem ini menganut prinsip <strong>separation of concerns</strong>: Python menangani semua pekerjaan real-time yang berat (parsing pesan, pencarian AI, memanggil LLM), sementara Laravel menangani semua kebutuhan manajemen yang memerlukan antarmuka visual (CRUD data, konfigurasi, monitoring). Keduanya terhubung melalui <strong>satu database MySQL yang sama</strong>.
+  </div>
+
+  <div class="split">
+    <div class="split-panel py">
+      <div class="split-head">Lapisan AI Engine · Python (FastAPI)</div>
+      <div class="split-items">
+        <div class="split-item">Menerima pesan WhatsApp dari Meta secara real-time via webhook</div>
+        <div class="split-item">Menjalankan pipeline pencarian tiga tingkat (FAQ → Vector → Web)</div>
+        <div class="split-item">Memilih dan memanggil LLM (lokal atau cloud) untuk merumuskan jawaban</div>
+        <div class="split-item">Mengirim balasan ke pengguna melalui WhatsApp Business API</div>
+        <div class="split-item">Mencatat semua percakapan, biaya, dan log error ke database</div>
+        <div class="split-item">Menjalankan jadwal broadcast yang dibuat oleh admin</div>
+      </div>
+    </div>
+    <div class="split-panel lv">
+      <div class="split-head">Lapisan Admin Panel · PHP (Laravel)</div>
+      <div class="split-items">
+        <div class="split-item">Menampilkan riwayat percakapan semua calon mahasiswa dalam antarmuka visual</div>
+        <div class="split-item">Memberi kendali kepada admin untuk mengambil alih percakapan dari bot</div>
+        <div class="split-item">Menyediakan form CRUD untuk mengelola FAQ yang digunakan bot sebagai rujukan</div>
+        <div class="split-item">Memungkinkan pembuatan jadwal broadcast dan template pesan WhatsApp</div>
+        <div class="split-item">Menampilkan dashboard analitik biaya, penggunaan token, dan status sistem</div>
+        <div class="split-item">Mengelola dokumen-dokumen di vector database (Qdrant) lewat antarmuka web</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARSITEKTUR -->
+<section class="sec">
+  <div class="sec-hd">
+    <span class="stag tl">Arsitektur</span>
+    <h2>Arsitektur Sistem Lengkap</h2>
+    <p>Seluruh komponen beserta hubungan dan tanggung jawab masing-masing dalam ekosistem yang terpadu</p>
+  </div>
+
+  <div class="arch-wrap">
+    <div class="arch-title">Lapisan Komponen — dari Pengguna Akhir hingga Database</div>
+    <div class="arch-layers">
+
+      <div class="arch-layer">
+        <div class="arch-layer-label">Pengguna</div>
+        <div class="arch-boxes">
+          <div class="abox ext">
+            <div class="abox-head">Calon Mahasiswa (WhatsApp)</div>
+            <div class="abox-items">
+              <div class="abox-item">Kirim pertanyaan via WhatsApp</div>
+              <div class="abox-item">Terima jawaban otomatis dari bot</div>
+              <div class="abox-item">Terima pesan broadcast dari kampus</div>
+            </div>
+          </div>
+          <div class="abox ext" style="background:rgba(99,102,241,.05);border-color:rgba(99,102,241,.25)">
+            <div class="abox-head" style="color:#93c5fd">Admin / Tim PMB (Browser)</div>
+            <div class="abox-items">
+              <div class="abox-item">Login ke panel web Laravel</div>
+              <div class="abox-item">Pantau dan kelola percakapan</div>
+              <div class="abox-item">Konfigurasi FAQ &amp; broadcast</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-connector">↕ Meta Cloud API &nbsp;·&nbsp; HTTPS Browser</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-label">Aplikasi</div>
+        <div class="arch-boxes">
+          <div class="abox py">
+            <div class="abox-head">Python · FastAPI (AI Engine)</div>
+            <div class="abox-items">
+              <div class="abox-item">Webhook handler (POST /webhook/whatsapp)</div>
+              <div class="abox-item">Rate limiter &amp; budget guard</div>
+              <div class="abox-item">Pipeline: FAQ → Qdrant → Web Scraping</div>
+              <div class="abox-item">LLM queue manager (lokal + cloud)</div>
+              <div class="abox-item">Scheduler broadcast (APScheduler)</div>
+            </div>
+          </div>
+          <div class="abox lv">
+            <div class="abox-head">PHP · Laravel (Admin Panel)</div>
+            <div class="abox-items">
+              <div class="abox-item">Auth multi-peran (Breeze)</div>
+              <div class="abox-item">CRUD: FAQ, template, broadcast</div>
+              <div class="abox-item">Chat takeover (kirim pesan sebagai admin)</div>
+              <div class="abox-item">Dashboard analitik &amp; monitoring</div>
+              <div class="abox-item">Manajemen dokumen Qdrant via UI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-connector">↕ read / write · tabel yang sama</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-label">Data &amp; AI</div>
+        <div class="arch-boxes">
+          <div class="abox db">
+            <div class="abox-head">MySQL (Database Bersama)</div>
+            <div class="abox-items">
+              <div class="abox-item">chatbot_leads — data calon mahasiswa</div>
+              <div class="abox-item">chatbot_messages — riwayat percakapan</div>
+              <div class="abox-item">chatbot_faqs — basis pengetahuan</div>
+              <div class="abox-item">chatbot_broadcast_* — jadwal &amp; target</div>
+              <div class="abox-item">chatbot_usages — log biaya harian</div>
+            </div>
+          </div>
+          <div class="abox ai">
+            <div class="abox-head">AI &amp; Vector Layer</div>
+            <div class="abox-items">
+              <div class="abox-item">Qdrant — vector database semantik</div>
+              <div class="abox-item">Ollama llama3:8b — LLM lokal</div>
+              <div class="abox-item">OpenAI GPT-4o-mini — LLM cloud</div>
+              <div class="abox-item">text-embedding-3-small — embedding</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CARA KERJA SISTEM -->
+<section class="sec">
+  <div class="sec-hd">
+    <span class="stag y">Cara Kerja</span>
+    <h2>Alur Kerja Sistem — dari Pesan Masuk hingga Jawaban Terkirim</h2>
+    <p>Setiap pesan dari calon mahasiswa melewati pipeline ini sebelum mendapat respons</p>
+  </div>
+  <div class="ibox info" style="margin-bottom:18px">
+    Semua langkah di bawah dikerjakan oleh <strong>Python (AI Engine)</strong>. Laravel hanya membaca hasil prosesnya via database — yaitu percakapan yang sudah tersimpan — untuk ditampilkan di dashboard admin.
+  </div>
+  <div class="flow" style="--steps:6">
+    <div class="fstep">
+      <div class="fnum">1</div>
+      <div class="ftitle">Webhook Masuk</div>
+      <div class="fdesc">Meta mengirim pesan ke endpoint FastAPI. Sistem verifikasi sumber, catat biaya sesi (+Rp 400), cek rate limit pengguna.</div>
+      <div class="flayer py">Python</div>
+    </div>
+    <div class="fstep">
+      <div class="fnum">2</div>
+      <div class="ftitle">Deteksi Sapaan</div>
+      <div class="fdesc">Jika pesan berisi sapaan ("halo", "info", dll.) → kirim menu interaktif FAQ langsung. Gratis, instan, tanpa LLM.</div>
+      <div class="flayer py">Python</div>
+    </div>
+    <div class="fstep">
+      <div class="fnum">3</div>
+      <div class="ftitle">Cari di FAQ</div>
+      <div class="fdesc">Pencocokan kata kunci di tabel <code style="font-family:monospace;font-size:.72rem">chatbot_faqs</code>. Jika cocok, jawaban langsung dikirim — tidak ada biaya AI.</div>
+      <div class="flayer py">Python ↔ MySQL</div>
+    </div>
+    <div class="fstep">
+      <div class="fnum">4</div>
+      <div class="ftitle">Pencarian Semantik</div>
+      <div class="fdesc">Pertanyaan diubah jadi vektor numerik, dibandingkan dengan ribuan dokumen di Qdrant. Menangkap makna meski kata berbeda (cosine similarity > 0.28).</div>
+      <div class="flayer py">Python ↔ Qdrant</div>
+    </div>
+    <div class="fstep">
+      <div class="fnum">5</div>
+      <div class="ftitle">Web Scraping</div>
+      <div class="fdesc">Jika Qdrant tidak cukup yakin, sistem mencari konteks terbaru dari internet via DuckDuckGo sebagai penunjang jawaban.</div>
+      <div class="flayer py">Python</div>
+    </div>
+    <div class="fstep">
+      <div class="fnum">6</div>
+      <div class="ftitle">LLM Merumuskan</div>
+      <div class="fdesc">Konteks dikirim ke LLM (lokal atau cloud berdasarkan ketersediaan). LLM menghasilkan jawaban natural → dikirim ke WhatsApp pengguna.</div>
+      <div class="flayer py">Python ↔ AI</div>
+    </div>
+  </div>
+</section>
+
+<!-- FITUR-FITUR SISTEM -->
+<section class="sec">
+  <div class="sec-hd">
+    <span class="stag b">Fitur Sistem</span>
+    <h2>Kapabilitas Lengkap Sistem</h2>
+    <p>Seluruh fitur yang tersedia, dengan keterangan lapisan mana yang menjalankannya</p>
+  </div>
+
+  <div class="grid">
+    <div class="card click" onclick="openModal('f01')" style="--ca:#25D366;--ib:#dcfce7">
+      <div class="cicon">🔍</div>
+      <div class="cbody">
+        <div class="ctitle">Pipeline Pencarian Tiga Tier</div>
+        <div class="cdesc">FAQ lokal → pencarian semantik (Qdrant) → web scraping real-time. Setiap tier hanya aktif jika tier sebelumnya tidak memberikan jawaban yang cukup meyakinkan.</div>
+        <div class="ctags"><span class="tag wa">FAQ</span><span class="tag a">Vector Search</span><span class="tag">Web Scraping</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('f02')" style="--ca:#a855f7;--ib:#f3e8ff">
+      <div class="cicon">🤖</div>
+      <div class="cbody">
+        <div class="ctitle">Dual LLM — Lokal &amp; Cloud</div>
+        <div class="cdesc">Sistem memilih secara otomatis antara LLM lokal (Ollama/llama3, gratis) dan LLM cloud (OpenAI, berbayar). Keputusan didasarkan pada beban antrian dan ketersediaan.</div>
+        <div class="ctags"><span class="tag a">Ollama Lokal</span><span class="tag b">OpenAI Cloud</span><span class="tag">Auto Failover</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('f03')" style="--ca:#fbbf24;--ib:#fefce8">
+      <div class="cicon">💰</div>
+      <div class="cbody">
+        <div class="ctitle">Budget Guard Real-time</div>
+        <div class="cdesc">Pemantauan biaya per percakapan WhatsApp (Rp 400/sesi) dan token LLM secara live. Jika batas harian terlampaui, bot otomatis berhenti untuk menghindari tagihan berlebih.</div>
+        <div class="ctags"><span class="tag e">Batas Harian</span><span class="tag">Token Tracking</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('f04')" style="--ca:#f87171;--ib:#fee2e2">
+      <div class="cicon">🤝</div>
+      <div class="cbody">
+        <div class="ctitle">Takeover Percakapan oleh Admin</div>
+        <div class="cdesc">Admin menonaktifkan bot untuk calon tertentu via Laravel → Python membaca flag tersebut dan berhenti merespons → admin kirim pesan langsung dari panel web.</div>
+        <div class="ctags"><span class="tag r">Handover</span><span class="tag wa">Pesan Kaya</span><span class="tag b">Panel Laravel</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('f05')" style="--ca:#22d3ee;--ib:#ecfeff">
+      <div class="cicon">📣</div>
+      <div class="cbody">
+        <div class="ctitle">Broadcast Terjadwal</div>
+        <div class="cdesc">Admin membuat jadwal di Laravel → tersimpan di MySQL → Python secara otomatis mengirim pesan ke ribuan calon mahasiswa pada waktu yang ditentukan via template resmi WhatsApp.</div>
+        <div class="ctags"><span class="tag wa">Template Meta</span><span class="tag b">Dijadwalkan Laravel</span><span class="tag">Dikirim Python</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('f06')" style="--ca:#34d399;--ib:#d1fae5">
+      <div class="cicon">📚</div>
+      <div class="cbody">
+        <div class="ctitle">Manajemen Knowledge Base</div>
+        <div class="cdesc">FAQ dikelola lewat CRUD Laravel → langsung tersedia untuk bot Python tanpa restart. Dokumen semantik dikelola via UI Laravel → disimpan ke Qdrant → digunakan Python saat pencarian.</div>
+        <div class="ctags"><span class="tag g">CRUD di Laravel</span><span class="tag a">Dipakai Python</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+
+  <div class="mini-label">Kemampuan Tambahan Sistem</div>
+  <div class="mgrid">
+    <div class="mcard"><span class="micon">⏱️</span><div><div class="mname">Rate Limiting</div><div class="mdesc">Maks 20 pesan/menit per pengguna</div><div class="mlayer py">Python</div></div></div>
+    <div class="mcard"><span class="micon">🚨</span><div><div class="mname">Eskalasi Otomatis</div><div class="mdesc">Skor kepercayaan &lt;40% → notif admin</div><div class="mlayer py">Python</div></div></div>
+    <div class="mcard"><span class="micon">📧</span><div><div class="mname">Notifikasi Email</div><div class="mdesc">Admin diberitahu via SMTP saat eskalasi</div><div class="mlayer py">Python</div></div></div>
+    <div class="mcard"><span class="micon">🔐</span><div><div class="mname">Auth Multi-peran</div><div class="mdesc">Admin, operator, viewer (Breeze)</div><div class="mlayer lv">Laravel</div></div></div>
+    <div class="mcard"><span class="micon">📊</span><div><div class="mname">Dashboard Analitik</div><div class="mdesc">Biaya, penggunaan, status koneksi</div><div class="mlayer lv">Laravel</div></div></div>
+    <div class="mcard"><span class="micon">📑</span><div><div class="mname">Export Excel</div><div class="mdesc">Data calon mahasiswa ke spreadsheet</div><div class="mlayer lv">Laravel</div></div></div>
+    <div class="mcard"><span class="micon">🏗️</span><div><div class="mname">Template Builder</div><div class="mdesc">Pembuat template WhatsApp visual</div><div class="mlayer lv">Laravel</div></div></div>
+    <div class="mcard"><span class="micon">🌐</span><div><div class="mname">Landing Page PMB</div><div class="mdesc">Halaman kampanye publik &amp; sortlink</div><div class="mlayer lv">Laravel</div></div></div>
+  </div>
+</section>
+
+<!-- TITIK INTEGRASI -->
+<section class="sec">
+  <div class="sec-hd">
+    <span class="stag r">Database Bersama</span>
+    <h2>Titik Integrasi — Tabel yang Dibagi Dua Lapisan</h2>
+    <p>Inilah yang menyatukan Python dan Laravel menjadi satu sistem: mereka membaca dan menulis tabel yang sama</p>
+  </div>
+
+  <div class="ibox purple">
+    Pola ini disebut <strong>database-as-integration-layer</strong>: alih-alih Python dan Laravel berkomunikasi lewat REST API atau message queue, keduanya cukup membaca dan menulis database MySQL yang sama. Perubahan data oleh satu lapisan langsung terlihat oleh lapisan lainnya.
+  </div>
+
+  <div class="tbl-wrap">
+  <table class="tbl">
+    <thead><tr><th>Tabel MySQL</th><th>Ditulis oleh</th><th>Dibaca &amp; dipakai oleh</th><th>Isi &amp; Fungsi</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code style="font-family:monospace;font-size:.8rem;color:#6ee7b7">chatbot_leads</code></td>
+        <td><span class="badge y">Python</span></td>
+        <td><span class="badge r">Laravel</span> <span class="badge y">Python</span></td>
+        <td>Data calon mahasiswa — nomor HP, nama, waktu pertama interaksi, status aktif bot, siapa admin yang menangani</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:monospace;font-size:.8rem;color:#6ee7b7">chatbot_messages</code></td>
+        <td><span class="badge y">Python</span> <span class="badge r">Laravel</span></td>
+        <td><span class="badge y">Python</span> <span class="badge r">Laravel</span></td>
+        <td>Seluruh riwayat pesan — baik dari pengguna, dari bot, maupun dari admin yang takeover. Kolom <code style="font-family:monospace;font-size:.78rem">role</code> membedakan ketiganya</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:monospace;font-size:.8rem;color:#6ee7b7">chatbot_faqs</code></td>
+        <td><span class="badge r">Laravel</span></td>
+        <td><span class="badge y">Python</span></td>
+        <td>Daftar pertanyaan-jawaban yang dikelola admin via CRUD. Python membaca tabel ini sebagai Tier 1 pencarian setiap kali ada pesan masuk</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:monospace;font-size:.8rem;color:#6ee7b7">chatbot_broadcast_schedules</code></td>
+        <td><span class="badge r">Laravel</span></td>
+        <td><span class="badge y">Python</span></td>
+        <td>Jadwal broadcast yang dibuat admin. Python scheduler mengecek tabel ini setiap menit dan mengeksekusi pengiriman saat waktu tiba</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:monospace;font-size:.8rem;color:#6ee7b7">chatbot_broadcast_targets</code></td>
+        <td><span class="badge r">Laravel</span> <span class="badge y">Python</span></td>
+        <td><span class="badge r">Laravel</span> <span class="badge y">Python</span></td>
+        <td>Daftar penerima per jadwal broadcast. Laravel mengisi daftar, Python memperbarui status per penerima (PENDING → SENT/FAILED)</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:monospace;font-size:.8rem;color:#6ee7b7">chatbot_templates</code></td>
+        <td><span class="badge r">Laravel</span></td>
+        <td><span class="badge y">Python</span></td>
+        <td>Template pesan WhatsApp resmi. Dibuat via form builder Laravel, disimpan di database, digunakan Python saat mengirim broadcast</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:monospace;font-size:.8rem;color:#6ee7b7">chatbot_usages</code></td>
+        <td><span class="badge y">Python</span></td>
+        <td><span class="badge r">Laravel</span></td>
+        <td>Log biaya harian: jumlah sesi WhatsApp, token LLM terpakai, total rupiah dan dolar. Laravel menampilkan data ini di dashboard analitik</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:monospace;font-size:.8rem;color:#6ee7b7">chatbot_error_logs</code></td>
+        <td><span class="badge y">Python</span></td>
+        <td><span class="badge r">Laravel</span></td>
+        <td>Catatan error dan exception dari sisi AI engine. Admin dapat melihat dan memantau masalah teknis melalui panel Laravel</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- RELEVANSI RISET -->
+<section class="sec">
+  <div class="sec-hd">
+    <span class="stag v">Kontribusi Riset</span>
+    <h2>Relevansi untuk Penelitian Jurnal</h2>
+    <p>Dimensi-dimensi ilmiah yang dapat digali dari sistem ini sebagai objek atau referensi studi</p>
+  </div>
+
+  <div class="grid">
+    <div class="card click" onclick="openModal('r01')" style="--ca:#a855f7;--ib:#f3e8ff">
+      <div class="cicon">🔬</div>
+      <div class="cbody">
+        <div class="ctitle">Retrieval-Augmented Generation (RAG)</div>
+        <div class="cdesc">Sistem menggabungkan pencarian dokumen semantik dengan kemampuan LLM. Relevan untuk penelitian NLP, sistem tanya-jawab berbasis AI, dan evaluasi kualitas retrieval dalam domain pendidikan.</div>
+        <div class="ctags"><span class="tag a">NLP · RAG</span><span class="tag b">Vector Search</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('r02')" style="--ca:#fbbf24;--ib:#fefce8">
+      <div class="cicon">💡</div>
+      <div class="cbody">
+        <div class="ctitle">Hybrid LLM — Efisiensi Biaya AI</div>
+        <div class="cdesc">Strategi mengombinasikan model lokal (gratis, privat) dengan model cloud (canggih, berbayar). Relevan untuk penelitian pengelolaan biaya AI dan keberlanjutan sistem AI di institusi pendidikan.</div>
+        <div class="ctags"><span class="tag e">Cost Efficiency</span><span class="tag a">Model Routing</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('r03')" style="--ca:#22d3ee;--ib:#ecfeff">
+      <div class="cicon">📐</div>
+      <div class="cbody">
+        <div class="ctitle">Integrasi Sistem Heterogen via Database</div>
+        <div class="cdesc">Pola database-as-integration-layer yang menghubungkan dua framework berbeda (Python + PHP) tanpa API langsung. Relevan untuk penelitian desain dan integrasi sistem enterprise di kampus.</div>
+        <div class="ctags"><span class="tag b">System Design</span><span class="tag">Integration</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('r04')" style="--ca:#34d399;--ib:#d1fae5">
+      <div class="cicon">🎓</div>
+      <div class="cbody">
+        <div class="ctitle">Chatbot AI dalam Layanan Akademik</div>
+        <div class="cdesc">Implementasi nyata di PMB Universitas Dinamika. Relevan untuk penelitian transformasi digital pendidikan, kualitas layanan mahasiswa, dan adopsi teknologi AI di perguruan tinggi Indonesia.</div>
+        <div class="ctags"><span class="tag g">EdTech</span><span class="tag">Transformasi Digital</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('r05')" style="--ca:#f87171;--ib:#fee2e2">
+      <div class="cicon">📊</div>
+      <div class="cbody">
+        <div class="ctitle">Tata Kelola Anggaran AI Real-time</div>
+        <div class="cdesc">Sistem aktif memantau dan membatasi pengeluaran layanan AI secara otomatis. Relevan untuk penelitian AI governance dan penganggaran teknologi di institusi non-profit.</div>
+        <div class="ctags"><span class="tag e">AI Governance</span><span class="tag r">Budget Control</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+    <div class="card click" onclick="openModal('r06')" style="--ca:#25D366;--ib:#dcfce7">
+      <div class="cicon">🌐</div>
+      <div class="cbody">
+        <div class="ctitle">WhatsApp sebagai Kanal Layanan Institusi</div>
+        <div class="cdesc">Pemanfaatan platform pesan instan terpopuler di Indonesia untuk layanan PMB resmi. Relevan untuk penelitian komunikasi digital institusi, UX layanan akademik, dan aksesibilitas teknologi.</div>
+        <div class="ctags"><span class="tag wa">Komunikasi Digital</span><span class="tag">UX · Aksesibilitas</span></div>
+      </div>
+      <span class="carr">↗</span>
+    </div>
+  </div>
+
+  <div class="ibox warn" style="margin-top:20px">
+    <strong>Catatan untuk Tim Peneliti:</strong> Sistem ini berstatus aktif digunakan di Universitas Dinamika. Log percakapan, data penggunaan token, rekam jejak eskalasi, dan metrik biaya tersedia sebagai bahan analisis empiris untuk mendukung klaim kuantitatif dalam penulisan jurnal.
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Dokumentasi teknis untuk keperluan penelitian jurnal ilmiah · <strong>Universitas Dinamika</strong><br>
+  Disusun oleh <strong>Dionisius Nanda Priyadi</strong> · Sistem Chatbot AI PMB</p>
+</footer>
+
+<!-- MODALS FITUR -->
+<div class="ov" id="ov-f01" onclick="if(event.target===this)closeModal('f01')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dcfce7">🔍</div>
+  <div class="mhtxt"><h2>Pipeline Pencarian Tiga Tier</h2><p>Strategi multi-lapisan untuk menjawab pertanyaan secara efisien dan akurat</p></div>
+  <button class="mcl" onclick="closeModal('f01')">✕</button></div>
+  <div class="mb">
+    <h3>Mengapa Tiga Tier?</h3>
+    <p>Setiap tier pencarian memiliki trade-off biaya vs. kualitas yang berbeda. Sistem dirancang untuk menggunakan sumber daya seminimal mungkin — hanya naik ke tier lebih mahal jika tier sebelumnya tidak memadai.</p>
+    <h3>Tier 1 — FAQ Lokal (Gratis, Deterministik)</h3>
+    <ul>
+      <li>Pencarian berbasis kata kunci di tabel <code>chatbot_faqs</code> MySQL</li>
+      <li>Dikelola oleh admin via panel Laravel — tidak perlu sentuh kode</li>
+      <li>Respons instan, tidak ada biaya API, tidak ada latensi AI</li>
+      <li>Cocok untuk pertanyaan yang sudah diketahui pola jawabannya</li>
+    </ul>
+    <h3>Tier 2 — Pencarian Semantik Qdrant (Berbayar ringan, Kontekstual)</h3>
+    <ul>
+      <li>Pertanyaan diubah menjadi vektor 1536 dimensi menggunakan model embedding OpenAI</li>
+      <li>Dibandingkan dengan ribuan dokumen yang sudah di-embed di Qdrant via cosine similarity</li>
+      <li>Aktif jika skor cosine &gt; 0.28 (threshold dapat dikonfigurasi)</li>
+      <li>Mampu menangkap pertanyaan yang diparafrase berbeda namun bermakna sama</li>
+    </ul>
+    <h3>Tier 3 — Web Scraping Real-time (Konteks terkini)</h3>
+    <ul>
+      <li>Menggunakan DuckDuckGo Search + BeautifulSoup untuk mencari informasi terbaru</li>
+      <li>Aktif hanya jika Tier 2 tidak mencapai skor kepercayaan minimal</li>
+      <li>Berguna untuk pertanyaan tentang jadwal, pengumuman, atau informasi yang sering berubah</li>
+    </ul>
+    <h3>Confidence Guard</h3>
+    <p>Jika setelah ketiga tier skor kepercayaan gabungan masih di bawah 0.4, sistem tidak memaksakan jawaban — melainkan mengeskalasi ke admin manusia dan mengirim menu FAQ interaktif kepada pengguna.</p>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-f02" onclick="if(event.target===this)closeModal('f02')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f3e8ff">🤖</div>
+  <div class="mhtxt"><h2>Dual LLM — Lokal &amp; Cloud</h2><p>Pemilihan model AI otomatis berdasarkan ketersediaan dan anggaran</p></div>
+  <button class="mcl" onclick="closeModal('f02')">✕</button></div>
+  <div class="mb">
+    <h3>Dua Model, Satu Keputusan Otomatis</h3>
+    <p>Sistem memiliki dua pilihan LLM yang diperlakukan sebagai primary dan fallback. Keputusan dilakukan per permintaan, bukan dikonfigurasi secara statis.</p>
+    <h3>LLM Lokal — Ollama (llama3:8b)</h3>
+    <ul>
+      <li>Berjalan di server sendiri, tidak ada biaya token</li>
+      <li>Data tidak keluar ke pihak ketiga — privasi terjaga</li>
+      <li>Kapasitas: maks 6 proses paralel, maks 30 antrian aktif</li>
+      <li>Diprioritaskan selama antrian tidak penuh dan server sehat</li>
+    </ul>
+    <h3>LLM Cloud — OpenAI GPT-4o-mini</h3>
+    <ul>
+      <li>Diaktifkan otomatis jika Ollama penuh atau tidak tersedia</li>
+      <li>Biaya per token dipantau real-time, batas harian USD 5,00</li>
+      <li>Kualitas jawaban lebih tinggi untuk pertanyaan kompleks</li>
+    </ul>
+    <h3>Budget Guard sebagai Penentu Akhir</h3>
+    <p>Sebelum memanggil LLM mana pun, sistem mengecek sisa anggaran harian. Jika batas telah tercapai, sistem tidak memanggil model apapun dan langsung mengeskalasi ke admin — mencegah tagihan tak terduga.</p>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-f03" onclick="if(event.target===this)closeModal('f03')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fefce8">💰</div>
+  <div class="mhtxt"><h2>Budget Guard Real-time</h2><p>Mekanisme kontrol biaya otomatis untuk layanan AI berbayar</p></div>
+  <button class="mcl" onclick="closeModal('f03')">✕</button></div>
+  <div class="mb">
+    <h3>Komponen Biaya yang Dipantau</h3>
+    <ul>
+      <li><strong>Biaya percakapan WhatsApp:</strong> Meta mengenakan biaya ~Rp 400 per sesi baru (24 jam window). Sistem mencatat setiap sesi baru.</li>
+      <li><strong>Biaya token LLM cloud:</strong> OpenAI mengenakan biaya per token yang diproses. Sistem mencatat jumlah token input dan output setiap panggilan.</li>
+      <li><strong>LLM lokal:</strong> Tidak ada biaya token, tetapi ada biaya infrastruktur server.</li>
+    </ul>
+    <h3>Alur Pemeriksaan Anggaran</h3>
+    <ul>
+      <li>Setiap pesan masuk → cek biaya sesi WA vs. batas harian (default Rp 150.000)</li>
+      <li>Sebelum panggil LLM cloud → cek biaya token vs. batas harian (default USD 5,00)</li>
+      <li>Jika salah satu terlampaui → bot offline, pengguna diarahkan ke admin</li>
+      <li>Batas dikonfigurasi via tabel <code>settings</code> di database, dapat diubah admin</li>
+    </ul>
+    <h3>Pencatatan untuk Analitik</h3>
+    <p>Seluruh pemakaian dicatat di tabel <code>chatbot_usages</code> per hari. Data ini dapat dilihat melalui dashboard Laravel dan berguna untuk audit biaya bulanan dan perencanaan anggaran IT.</p>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-f04" onclick="if(event.target===this)closeModal('f04')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fee2e2">🤝</div>
+  <div class="mhtxt"><h2>Takeover Percakapan oleh Admin</h2><p>Mekanisme serah terima dari bot ke manusia secara mulus</p></div>
+  <button class="mcl" onclick="closeModal('f04')">✕</button></div>
+  <div class="mb">
+    <h3>Alur Takeover</h3>
+    <ul>
+      <li>Admin membuka riwayat chat calon mahasiswa di panel Laravel</li>
+      <li>Klik "Nonaktifkan Bot" → kolom <code>is_bot_active</code> di tabel <code>chatbot_leads</code> berubah ke <code>false</code></li>
+      <li>Pesan berikutnya dari calon mahasiswa masuk ke Python → sistem cek flag → bot tidak membalas</li>
+      <li>Admin mengirim pesan dari panel Laravel → disimpan di <code>chatbot_messages</code> dengan <code>role = 'admin'</code></li>
+      <li>Python mengirimkan pesan tersebut ke WhatsApp calon mahasiswa atas nama nomor kampus</li>
+    </ul>
+    <h3>Jenis Pesan yang Dapat Dikirim Admin</h3>
+    <ul>
+      <li>Teks biasa</li>
+      <li>Gambar, dokumen, audio, video (via URL)</li>
+      <li>Tombol interaktif (quick reply, URL, nomor telepon)</li>
+    </ul>
+    <h3>Batasan Jendela 24 Jam</h3>
+    <p>Meta hanya mengizinkan pengiriman pesan bebas dalam jendela 24 jam setelah pengguna terakhir mengirim pesan. Di luar itu, hanya template yang disetujui Meta yang boleh digunakan. Sistem menegakkan aturan ini secara otomatis.</p>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-f05" onclick="if(event.target===this)closeModal('f05')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#ecfeff">📣</div>
+  <div class="mhtxt"><h2>Broadcast Terjadwal</h2><p>Pengiriman massal terpadu antara panel admin dan mesin pengiriman</p></div>
+  <button class="mcl" onclick="closeModal('f05')">✕</button></div>
+  <div class="mb">
+    <h3>Pembagian Peran dalam Broadcast</h3>
+    <p>Ini adalah contoh paling nyata bagaimana Laravel dan Python bekerja dalam satu alur:</p>
+    <ul>
+      <li><strong>Laravel (konfigurasi):</strong> Admin memilih template, menentukan waktu kirim, mengunggah daftar target nomor HP via form web</li>
+      <li><strong>MySQL (perantara):</strong> Data tersimpan di <code>chatbot_broadcast_schedules</code> dan <code>chatbot_broadcast_targets</code></li>
+      <li><strong>Python (eksekusi):</strong> Scheduler APScheduler mengecek database setiap menit. Saat waktu tiba, Python memanggil Meta API untuk mengirim pesan ke setiap target</li>
+      <li><strong>MySQL (status):</strong> Python memperbarui status setiap target (PENDING → SENT atau FAILED beserta pesan error)</li>
+      <li><strong>Laravel (monitoring):</strong> Admin dapat memantau progres dan status per penerima di panel</li>
+    </ul>
+    <h3>Template WhatsApp</h3>
+    <p>Template dibuat via form visual di Laravel (header, body, footer, tombol, variabel dinamis), kemudian dikirim ke Meta untuk disetujui. Hanya template berstatus APPROVED yang dapat digunakan untuk broadcast.</p>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-f06" onclick="if(event.target===this)closeModal('f06')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#d1fae5">📚</div>
+  <div class="mhtxt"><h2>Manajemen Knowledge Base</h2><p>FAQ dan dokumen semantik yang dikelola admin, digunakan AI</p></div>
+  <button class="mcl" onclick="closeModal('f06')">✕</button></div>
+  <div class="mb">
+    <h3>FAQ — Basis Pengetahuan Terstruktur</h3>
+    <ul>
+      <li>Admin menambah/edit/nonaktifkan FAQ via CRUD Laravel tanpa perlu restart Python</li>
+      <li>Python membaca tabel <code>chatbot_faqs</code> secara langsung saat ada pesan masuk</li>
+      <li>Sistem sudah dilengkapi 100+ FAQ awal tentang: program studi, biaya, beasiswa, prosedur daftar, fasilitas kampus</li>
+    </ul>
+    <h3>Qdrant — Knowledge Base Semantik</h3>
+    <ul>
+      <li>Admin dapat menambah dokumen (PDF, konten web) melalui antarmuka Laravel</li>
+      <li>Dokumen di-embed oleh Python menjadi vektor dan disimpan di Qdrant</li>
+      <li>Admin dapat mencari dokumen, melihat daftar isi, dan menghapus dokumen yang usang</li>
+      <li>Python menggunakan koleksi Qdrant sebagai Tier 2 pencarian saat FAQ tidak cukup</li>
+    </ul>
+    <h3>Pembaruan Tanpa Downtime</h3>
+    <p>Baik FAQ maupun dokumen Qdrant dapat diperbarui kapan saja oleh admin tanpa perlu me-restart layanan Python. Perubahan FAQ aktif langsung pada panggilan berikutnya.</p>
+  </div>
+</div></div>
+
+<!-- MODALS RISET -->
+<div class="ov" id="ov-r01" onclick="if(event.target===this)closeModal('r01')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#f3e8ff">🔬</div>
+  <div class="mhtxt"><h2>Retrieval-Augmented Generation (RAG)</h2><p>Arsitektur AI untuk sistem tanya-jawab berbasis dokumen</p></div>
+  <button class="mcl" onclick="closeModal('r01')">✕</button></div>
+  <div class="mb">
+    <h3>Konsep RAG dalam Sistem Ini</h3>
+    <p>RAG adalah pendekatan di mana LLM tidak hanya mengandalkan pengetahuan bawaan modelnya, tetapi secara aktif <em>mengambil</em> dokumen relevan dari sumber eksternal terlebih dahulu, kemudian menggunakannya sebagai konteks saat menghasilkan jawaban. Hasilnya: jawaban lebih akurat, terverifikasi, dan tidak mengarang.</p>
+    <h3>Implementasi Teknis</h3>
+    <ul>
+      <li><strong>Embedding:</strong> Pertanyaan diubah ke vektor 1536 dimensi via <code>text-embedding-3-small</code></li>
+      <li><strong>Retrieval:</strong> Cosine similarity di Qdrant menemukan dokumen paling relevan</li>
+      <li><strong>Augmentation:</strong> Dokumen relevan (score &gt; 0.28) dikirim sebagai konteks ke prompt LLM</li>
+      <li><strong>Generation:</strong> LLM merumuskan jawaban berdasarkan konteks — bukan memori model</li>
+    </ul>
+    <h3>Potensi Topik Penelitian</h3>
+    <ul>
+      <li>Evaluasi akurasi RAG vs. chatbot berbasis rule/FAQ murni dalam konteks PMB</li>
+      <li>Pengaruh kualitas dan kuantitas dokumen training terhadap relevansi jawaban</li>
+      <li>Optimasi threshold cosine similarity untuk domain Bahasa Indonesia / pendidikan tinggi</li>
+      <li>Perbandingan model embedding untuk teks Bahasa Indonesia</li>
+    </ul>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-r02" onclick="if(event.target===this)closeModal('r02')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fefce8">💡</div>
+  <div class="mhtxt"><h2>Hybrid LLM — Efisiensi Biaya AI</h2><p>Strategi pengelolaan model AI di lingkungan sumber daya terbatas</p></div>
+  <button class="mcl" onclick="closeModal('r02')">✕</button></div>
+  <div class="mb">
+    <h3>Mengapa Ini Relevan untuk Riset?</h3>
+    <p>Adopsi AI di institusi pendidikan, terutama perguruan tinggi swasta, sering terhambat oleh biaya operasional layanan cloud AI yang tidak terduga. Sistem ini menawarkan pendekatan hybrid sebagai solusi: gunakan model lokal selama mampu, eskalasi ke cloud hanya bila diperlukan.</p>
+    <h3>Parameter Teknis</h3>
+    <ul>
+      <li>Ollama: gratis, privat, butuh GPU (VRAM ~6GB), latensi ~2-5 detik</li>
+      <li>OpenAI GPT-4o-mini: ~USD 0.0002/1K token, latensi ~1-2 detik, kualitas lebih tinggi</li>
+      <li>Pengambilan keputusan: berbasis ukuran antrian lokal bukan kualitas pertanyaan</li>
+    </ul>
+    <h3>Potensi Topik Penelitian</h3>
+    <ul>
+      <li>Perbandingan kualitas respons LLM open-source vs. proprietary untuk Bahasa Indonesia</li>
+      <li>Model penganggaran AI yang berkelanjutan untuk institusi pendidikan non-profit</li>
+      <li>Analisis trade-off privasi data vs. kualitas layanan pada deployment LLM lokal di kampus</li>
+    </ul>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-r03" onclick="if(event.target===this)closeModal('r03')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#ecfeff">📐</div>
+  <div class="mhtxt"><h2>Integrasi Sistem Heterogen via Database</h2><p>Pola arsitektur untuk menghubungkan dua stack teknologi berbeda</p></div>
+  <button class="mcl" onclick="closeModal('r03')">✕</button></div>
+  <div class="mb">
+    <h3>Tantangan: Dua Bahasa, Satu Ekosistem</h3>
+    <p>Python dan PHP adalah dua ekosistem yang berbeda dengan konvensi, framework, dan cara kerja masing-masing. Menghubungkan keduanya dalam satu sistem terpadu memerlukan strategi integrasi yang tepat.</p>
+    <h3>Solusi: Database sebagai Lapisan Integrasi</h3>
+    <p>Alih-alih membangun REST API internal atau message queue yang menambah kompleksitas, sistem ini menggunakan MySQL bersama sebagai satu-satunya titik pertukaran data. Ini sederhana, mudah di-debug, dan tidak menambah dependency jaringan internal.</p>
+    <h3>Trade-off Desain</h3>
+    <ul>
+      <li><strong>Keuntungan:</strong> Sederhana, tidak ada overhead jaringan antar service, data langsung konsisten, mudah dimonitor via SQL query</li>
+      <li><strong>Risiko:</strong> Perubahan skema tabel berdampak ke kedua aplikasi sekaligus — perlu koordinasi saat migrasi</li>
+    </ul>
+    <h3>Potensi Topik Penelitian</h3>
+    <ul>
+      <li>Evaluasi pola integrasi sistem informasi akademik berbasis shared database vs. API-first</li>
+      <li>Strategi pengelolaan skema database dalam sistem multi-framework di lingkungan kampus</li>
+      <li>Analisis trade-off arsitektur untuk pengembangan sistem informasi di perguruan tinggi skala menengah</li>
+    </ul>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-r04" onclick="if(event.target===this)closeModal('r04')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#d1fae5">🎓</div>
+  <div class="mhtxt"><h2>Chatbot AI dalam Layanan Akademik</h2><p>Implementasi nyata di lingkungan penerimaan mahasiswa baru</p></div>
+  <button class="mcl" onclick="closeModal('r04')">✕</button></div>
+  <div class="mb">
+    <h3>Konteks Implementasi</h3>
+    <p>Sistem ini tidak hanya prototipe — melainkan digunakan secara nyata di <strong>Universitas Dinamika</strong> untuk melayani pertanyaan calon mahasiswa baru (PMB). Pertanyaan yang ditangani mencakup prosedur pendaftaran, biaya kuliah, beasiswa, jalur masuk, dan informasi umum kampus.</p>
+    <h3>Dimensi yang Dapat Diukur</h3>
+    <ul>
+      <li><strong>Ketersediaan:</strong> 24/7 tanpa biaya SDM tambahan untuk shift malam</li>
+      <li><strong>Konsistensi:</strong> Setiap calon mahasiswa mendapat jawaban dari sumber resmi yang sama</li>
+      <li><strong>Skalabilitas:</strong> Dapat melayani ratusan percakapan paralel tanpa tambahan staf</li>
+      <li><strong>Akurasi:</strong> Dapat diukur dari rasio eskalasi ke admin (skor kepercayaan &lt;0.4)</li>
+    </ul>
+    <h3>Potensi Topik Penelitian</h3>
+    <ul>
+      <li>Efektivitas chatbot AI berbasis WhatsApp dalam meningkatkan kualitas layanan PMB</li>
+      <li>Tingkat kepuasan calon mahasiswa terhadap respons chatbot vs. layanan manual</li>
+      <li>Dampak implementasi chatbot terhadap beban kerja staf PMB</li>
+      <li>Pola pertanyaan calon mahasiswa sebagai cerminan kebutuhan informasi pra-pendaftaran</li>
+    </ul>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-r05" onclick="if(event.target===this)closeModal('r05')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#fee2e2">📊</div>
+  <div class="mhtxt"><h2>Tata Kelola Anggaran AI Real-time</h2><p>Mekanisme kontrol pengeluaran untuk keberlanjutan sistem AI</p></div>
+  <button class="mcl" onclick="closeModal('r05')">✕</button></div>
+  <div class="mb">
+    <h3>Permasalahan yang Diatasi</h3>
+    <p>Layanan AI berbasis cloud (seperti OpenAI dan Meta WhatsApp API) dikenakan biaya per penggunaan. Tanpa kontrol yang tepat, lonjakan traffic atau kesalahan konfigurasi dapat menghasilkan tagihan yang jauh melebihi anggaran yang dialokasikan — masalah kritis untuk institusi pendidikan non-profit.</p>
+    <h3>Mekanisme Kontrol Berjenjang</h3>
+    <ul>
+      <li><strong>Budget Guard:</strong> Setiap panggilan layanan berbayar didahului pengecekan saldo harian</li>
+      <li><strong>Hard Limit:</strong> Jika batas tercapai, sistem berhenti otomatis — tidak ada override</li>
+      <li><strong>Reset Harian:</strong> Penghitung biaya direset setiap tengah malam WIB</li>
+      <li><strong>Audit Trail:</strong> Semua pemakaian tercatat di <code>chatbot_usages</code> untuk laporan keuangan IT</li>
+    </ul>
+    <h3>Potensi Topik Penelitian</h3>
+    <ul>
+      <li>Model tata kelola anggaran AI yang berkelanjutan untuk perguruan tinggi Indonesia</li>
+      <li>Analisis biaya-manfaat implementasi chatbot AI di perguruan tinggi swasta</li>
+      <li>Kerangka kebijakan penggunaan AI yang bertanggung jawab di institusi pendidikan</li>
+    </ul>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-r06" onclick="if(event.target===this)closeModal('r06')">
+<div class="modal">
+  <div class="mhd"><div class="mhicon" style="background:#dcfce7">🌐</div>
+  <div class="mhtxt"><h2>WhatsApp sebagai Kanal Layanan Institusi</h2><p>Pemanfaatan platform pesan instan dalam komunikasi akademik resmi</p></div>
+  <button class="mcl" onclick="closeModal('r06')">✕</button></div>
+  <div class="mb">
+    <h3>Mengapa WhatsApp?</h3>
+    <p>WhatsApp adalah aplikasi dengan penetrasi tertinggi di Indonesia (&gt;90% pengguna smartphone). Calon mahasiswa tidak perlu mengunduh aplikasi baru, membuat akun, atau mempelajari antarmuka asing — mereka cukup mengirim pesan ke nomor kampus seperti biasa.</p>
+    <h3>Kemampuan Teknis yang Dimanfaatkan</h3>
+    <ul>
+      <li><strong>Interactive Messages:</strong> Menu list dan tombol quick reply untuk navigasi FAQ</li>
+      <li><strong>Template Messaging:</strong> Broadcast pesan promosi resmi yang disetujui Meta</li>
+      <li><strong>24-hour Window:</strong> Jendela komunikasi bebas setelah pengguna memulai percakapan</li>
+      <li><strong>Rich Media:</strong> Dukungan gambar, video, dan dokumen dalam satu percakapan</li>
+    </ul>
+    <h3>Keterbatasan yang Perlu Dicatat</h3>
+    <ul>
+      <li>Ketergantungan pada platform pihak ketiga (Meta) — rentan perubahan kebijakan</li>
+      <li>Biaya per sesi dapat signifikan pada volume tinggi</li>
+      <li>Template broadcast harus melewati proses persetujuan Meta sebelum dapat digunakan</li>
+    </ul>
+    <h3>Potensi Topik Penelitian</h3>
+    <ul>
+      <li>Efektivitas WhatsApp Business API vs. kanal digital lain (email, website, media sosial) untuk layanan PMB</li>
+      <li>Analisis pola respons calon mahasiswa terhadap komunikasi institusi via WhatsApp</li>
+      <li>Studi UX chatbot berbasis platform pesan instan dalam konteks pendidikan tinggi Indonesia</li>
+    </ul>
+  </div>
+</div></div>
+
+<script>
+function openModal(id){document.getElementById('ov-'+id).classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(id){document.getElementById('ov-'+id).classList.remove('open');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.ov.open').forEach(o=>o.classList.remove('open'));document.body.style.overflow=''}});
+</script>
+</body>
+</html>
