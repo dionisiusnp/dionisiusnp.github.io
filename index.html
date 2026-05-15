@@ -378,8 +378,9 @@ const SEGMENTS = {
   ],
   calculator: [
     C,
-    { id:'app-calc',    label:'Kalkulator Aplikasi',       type:'app-calc',    isCenter:false, color:'#34d399', glow:'#059669', emoji:'📱', href:null, radius:40 },
-    { id:'summit-calc', label:'Kalkulator Summit Yu',     type:'summit-calc', isCenter:false, color:'#6ee7b7', glow:'#10b981', emoji:'🏔️', href:null, radius:40 },
+    { id:'app-calc',      label:'Kalkulator Aplikasi',  type:'app-calc',      isCenter:false, color:'#34d399', glow:'#059669', emoji:'📱', href:null, radius:40 },
+    { id:'summit-calc',   label:'Kalkulator Summit Yu', type:'summit-calc',   isCenter:false, color:'#6ee7b7', glow:'#10b981', emoji:'🏔️', href:null, radius:40 },
+    { id:'mentoring-calc',label:'Kalkulator Mentoring', type:'mentoring-calc',isCenter:false, color:'#a5b4fc', glow:'#6366f1', emoji:'🎓', href:null, radius:40 },
   ],
   log: [
     C,
@@ -447,6 +448,13 @@ const PANEL = {
     emoji:'🏔️', title:'Kalkulator Summit Yu', sub:'Kalkulator · HPP Tiket',
     items:[
       { label:'Kalkulator Summit Yu', desc:'Kalkulator HPP tiket pendakian untuk operator jalur gunung', href:'/offering/summityu/calculator/' },
+    ],
+    cta: null,
+  },
+  'mentoring-calc': {
+    emoji:'🎓', title:'Kalkulator Mentoring', sub:'Kalkulator · Jasa Mentoring',
+    items:[
+      { label:'Kalkulator Jasa Mentoring', desc:'Hitung harga jasa mentoring berdasarkan sesi, durasi, mode, dan biaya tambahan', href:'/offering/mentoring-calculator/' },
     ],
     cta: null,
   },
