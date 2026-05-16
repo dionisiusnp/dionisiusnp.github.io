@@ -21,7 +21,7 @@
     #side-panel.hidden-panel { transform:translateX(100%); opacity:0; pointer-events:none; }
 
     @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-    .marquee-track { animation: marquee 22s linear infinite; }
+    .marquee-track { animation: marquee 36s linear infinite; }
 
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
     .reveal { animation: fadeUp .6s ease both; }
@@ -38,6 +38,52 @@
 
     .font-mono { font-family:'JetBrains Mono',monospace; }
     canvas { display:block; }
+
+    .doc-thumb {
+      position:relative; border-radius:12px; overflow:hidden;
+      aspect-ratio:4/3; cursor:pointer;
+      border:1px solid rgba(255,255,255,.07);
+      background:#111;
+    }
+    .doc-thumb img {
+      width:100%; height:100%; object-fit:cover;
+      transition:transform .3s, filter .3s;
+      filter:brightness(.85);
+    }
+    .doc-thumb:hover img { transform:scale(1.05); filter:brightness(1); }
+    .doc-thumb span {
+      position:absolute; bottom:0; left:0; right:0;
+      padding:20px 10px 8px;
+      background:linear-gradient(to top, rgba(0,0,0,.7), transparent);
+      font-size:.68rem; font-weight:600; color:rgba(255,255,255,.8);
+      opacity:0; transition:opacity .2s;
+    }
+    .doc-thumb:hover span { opacity:1; }
+
+    .mitra-logo-item {
+      display: flex; align-items: center; justify-content: center;
+      width: 180px; height: 108px; flex-shrink: 0;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 20px;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, transform .2s;
+    }
+    .mitra-logo-item:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(59,130,246,0.3);
+      transform: translateY(-2px);
+    }
+    .mitra-logo-item img {
+      max-width: 100%; max-height: 100%; object-fit: contain;
+      filter: grayscale(1) brightness(1.5);
+      opacity: 0.5;
+      transition: filter .25s, opacity .25s;
+    }
+    .mitra-logo-item:hover img {
+      filter: grayscale(0) brightness(1);
+      opacity: 1;
+    }
   </style>
 </head>
 <body class="min-h-screen overflow-x-hidden">
@@ -67,14 +113,14 @@
   <div class="relative z-10 text-center mb-6 px-4">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-blue-500/30 text-blue-400 mb-5 bg-blue-500/10">
       <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-      IT Community · Universitas
+      IT Community · Universitas Dinamika
     </div>
     <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white mb-3">
-      Bangun Kariermu<br/>
-      <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Bersama Aliria</span>
+      Ngoprek. Berkarya.<br/>
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Berkembang Bersama.</span>
     </h1>
     <p class="text-white/50 text-sm md:text-base max-w-md mx-auto leading-relaxed">
-      Komunitas IT yang menghubungkan mentor, project nyata, marketing, dan partner kolaborasi.
+      Komunitas IT mahasiswa Universitas Dinamika — tempat eksplorasi teknologi secara nyata, dari ngoprek bareng hingga project yang sudah live.
     </p>
   </div>
 
@@ -85,9 +131,9 @@
   <p class="relative z-10 text-white/25 text-xs mt-3 tracking-wide">Klik node untuk eksplorasi ekosistem</p>
 
   <div class="relative z-10 flex flex-wrap items-center justify-center gap-3 mt-8">
-    <a href="#about" class="px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all shadow-lg shadow-blue-600/30">
-      Jelajahi Komunitas
-    </a>
+    <button onclick="openDocs()" class="px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all shadow-lg shadow-blue-600/30">
+      Dokumentasi
+    </button>
   </div>
 </section>
 
@@ -116,24 +162,28 @@
   <div class="marquee-track flex gap-10 whitespace-nowrap text-xs text-white/25 font-mono w-max">
     <span>git push origin main</span><span class="text-white/10">·</span>
     <span>php artisan migrate</span><span class="text-white/10">·</span>
-    <span>npm run build</span><span class="text-white/10">·</span>
+    <span>laragon start</span><span class="text-white/10">·</span>
+    <span>flutter create .</span><span class="text-white/10">·</span>
     <span>docker compose up -d</span><span class="text-white/10">·</span>
-    <span>Hook: [Angka] + [Manfaat]</span><span class="text-white/10">·</span>
-    <span>Daily standup: Done / Doing / Block</span><span class="text-white/10">·</span>
-    <span>LGTM — Looks Good To Me</span><span class="text-white/10">·</span>
-    <span>git clone &lt;url&gt;</span><span class="text-white/10">·</span>
-    <span>npm install</span><span class="text-white/10">·</span>
-    <span>Ctrl + Shift + P</span><span class="text-white/10">·</span>
+    <span>php artisan tinker</span><span class="text-white/10">·</span>
+    <span>adb logcat</span><span class="text-white/10">·</span>
+    <span>python manage.py runserver</span><span class="text-white/10">·</span>
+    <span>flutter pub get</span><span class="text-white/10">·</span>
+    <span>nmap -sV target</span><span class="text-white/10">·</span>
+    <span>npm run build</span><span class="text-white/10">·</span>
+    <span>godot --headless</span><span class="text-white/10">·</span>
     <span>git push origin main</span><span class="text-white/10">·</span>
     <span>php artisan migrate</span><span class="text-white/10">·</span>
-    <span>npm run build</span><span class="text-white/10">·</span>
+    <span>laragon start</span><span class="text-white/10">·</span>
+    <span>flutter create .</span><span class="text-white/10">·</span>
     <span>docker compose up -d</span><span class="text-white/10">·</span>
-    <span>Hook: [Angka] + [Manfaat]</span><span class="text-white/10">·</span>
-    <span>Daily standup: Done / Doing / Block</span><span class="text-white/10">·</span>
-    <span>LGTM — Looks Good To Me</span><span class="text-white/10">·</span>
-    <span>git clone &lt;url&gt;</span><span class="text-white/10">·</span>
-    <span>npm install</span><span class="text-white/10">·</span>
-    <span>Ctrl + Shift + P</span><span class="text-white/10">·</span>
+    <span>php artisan tinker</span><span class="text-white/10">·</span>
+    <span>adb logcat</span><span class="text-white/10">·</span>
+    <span>python manage.py runserver</span><span class="text-white/10">·</span>
+    <span>flutter pub get</span><span class="text-white/10">·</span>
+    <span>nmap -sV target</span><span class="text-white/10">·</span>
+    <span>npm run build</span><span class="text-white/10">·</span>
+    <span>godot --headless</span><span class="text-white/10">·</span>
   </div>
 </div>
 
@@ -151,17 +201,17 @@
     <div class="node-card rounded-2xl border border-blue-500/20 bg-white/[0.03] p-6">
       <div class="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center mb-4 text-xl">🧑‍🏫</div>
       <h3 class="font-semibold text-white mb-2">Mentorship Nyata</h3>
-      <p class="text-white/40 text-sm leading-relaxed">Belajar langsung dari senior dan praktisi. Dari Git hingga deployment, kamu punya panduan.</p>
+      <p class="text-white/40 text-sm leading-relaxed">Belajar langsung dari senior dan praktisi — mulai instalasi tools (Laragon, DBeaver), ngoprek server, security, hingga AI dan mobile.</p>
     </div>
     <div class="node-card rounded-2xl border border-red-500/20 bg-white/[0.03] p-6">
       <div class="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center mb-4 text-xl">🛠️</div>
       <h3 class="font-semibold text-white mb-2">Project Kolaboratif</h3>
-      <p class="text-white/40 text-sm leading-relaxed">Kerjakan project nyata bersama tim. Portfolio berkembang, skill terasah, relasi terbentuk.</p>
+      <p class="text-white/40 text-sm leading-relaxed">Kerjakan project nyata seperti Info PMB (infopmb.dinamika.ac.id) dan WA Chatbot AI. Sprint 2 minggu, deliverable terukur, portofolio langsung jalan.</p>
     </div>
     <div class="node-card rounded-2xl border border-green-500/20 bg-white/[0.03] p-6">
       <div class="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center mb-4 text-xl">🤝</div>
       <h3 class="font-semibold text-white mb-2">Partner & Ekosistem</h3>
-      <p class="text-white/40 text-sm leading-relaxed">Terhubung dengan komunitas lain, HMTI, dan mitra industri yang membuka peluang karier.</p>
+      <p class="text-white/40 text-sm leading-relaxed">Terhubung dengan 11+ mitra nyata: SSI Academy, Java Developer Group, GADAS, Savendra, Hima SI, Ukki, Mighty, Mitsu Tech, dan lainnya.</p>
     </div>
   </div>
 </section>
@@ -171,37 +221,38 @@
   <div class="reveal text-center mb-14">
     <p class="text-xs text-blue-400/70 font-mono mb-3">// programs</p>
     <h2 class="text-3xl font-bold text-white mb-4">Ekosistem Program</h2>
-    <p class="text-white/40 text-sm max-w-lg mx-auto">Empat pilar utama yang menjalankan komunitas Aliria Tech.</p>
+    <p class="text-white/40 text-sm max-w-lg mx-auto">Empat pilar yang menggerakkan komunitas — dari belajar bareng hingga project live dan kolaborasi mitra nyata.</p>
   </div>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 reveal">
     <div class="col-span-2 node-card rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-900/20 to-transparent p-6">
       <div class="text-2xl mb-3">🧑‍🏫</div>
       <div class="font-mono text-xs text-blue-400/60 mb-1">node::mentor</div>
       <h3 class="font-semibold text-white mb-2">Mentor Program</h3>
-      <p class="text-white/40 text-xs leading-relaxed">Workshop mingguan, code review, pair programming, dan sesi tanya jawab terbuka untuk semua level.</p>
+      <p class="text-white/40 text-xs leading-relaxed">Workshop mingguan ngoprek website, mobile, server, AI, security, game, dan IoT — dari instalasi tools sampai deploy ke production, untuk semua level.</p>
       <div class="mt-4 flex flex-wrap gap-2">
-        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">Git</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">Terminal</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">VSCode</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">Laravel</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">Flutter</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">Docker</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/15 text-blue-300">Security</span>
       </div>
     </div>
     <div class="node-card rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-900/20 to-transparent p-6">
       <div class="text-2xl mb-3">🛠️</div>
       <div class="font-mono text-xs text-red-400/60 mb-1">node::project</div>
       <h3 class="font-semibold text-white mb-2">Dev Projects</h3>
-      <p class="text-white/40 text-xs leading-relaxed">Laravel, React, Docker — sprint nyata dengan deliverable tiap dua minggu.</p>
+      <p class="text-white/40 text-xs leading-relaxed">Info PMB (live), WA Chatbot AI, CMS Ormawa — Laravel, Flutter, React, Docker. Sprint nyata, deliverable tiap dua minggu.</p>
     </div>
     <div class="node-card rounded-2xl border border-yellow-500/20 bg-gradient-to-br from-yellow-900/20 to-transparent p-6">
       <div class="text-2xl mb-3">📢</div>
       <div class="font-mono text-xs text-yellow-400/60 mb-1">node::marketing</div>
       <h3 class="font-semibold text-white mb-2">Marketing</h3>
-      <p class="text-white/40 text-xs leading-relaxed">Konten, Canva, social media strategy — tim kreatif di balik Aliria.</p>
+      <p class="text-white/40 text-xs leading-relaxed">Instagram, Telegram, dan LinkedIn komunitas — tim kreatif yang bikin konten edukatif tech pakai Canva Pro, copywriting, dan content planning mingguan.</p>
     </div>
     <div class="node-card rounded-2xl border border-green-500/20 bg-gradient-to-br from-green-900/20 to-transparent p-6">
       <div class="text-2xl mb-3">🤝</div>
       <div class="font-mono text-xs text-green-400/60 mb-1">node::partner</div>
       <h3 class="font-semibold text-white mb-2">Partner</h3>
-      <p class="text-white/40 text-xs leading-relaxed">Kolaborasi lintas komunitas, open source, dan Agile standar industri.</p>
+      <p class="text-white/40 text-xs leading-relaxed">Bareng SSI Academy, Java Developer Group, GADAS, Novo, Bimbasi, Hima SI, dan 11+ mitra lainnya — kolaborasi media, aplikasi, hingga kegiatan bersama.</p>
     </div>
     <div class="col-span-3 node-card rounded-2xl border border-white/10 bg-white/[0.02] p-6 flex flex-col justify-between">
       <div>
@@ -209,9 +260,9 @@
         <h3 class="font-semibold text-white mb-2">Komunitas Aktif</h3>
       </div>
       <div class="grid grid-cols-3 gap-4 mt-4">
-        <div><div class="text-2xl font-bold text-blue-400">50+</div><div class="text-xs text-white/30 mt-0.5">Anggota Aktif</div></div>
-        <div><div class="text-2xl font-bold text-red-400">10+</div><div class="text-xs text-white/30 mt-0.5">Project Selesai</div></div>
-        <div><div class="text-2xl font-bold text-green-400">4</div><div class="text-xs text-white/30 mt-0.5">Divisi Utama</div></div>
+        <div><div class="text-2xl font-bold text-blue-400">200</div><div class="text-xs text-white/30 mt-0.5">Anggota</div></div>
+        <div><div class="text-2xl font-bold text-red-400">0</div><div class="text-xs text-white/30 mt-0.5">Project Selesai</div></div>
+        <div><div class="text-2xl font-bold text-green-400">11+</div><div class="text-xs text-white/30 mt-0.5">Mitra Aktif</div></div>
       </div>
     </div>
   </div>
@@ -226,49 +277,151 @@
   <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 reveal">
     <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
       <span class="text-2xl mt-0.5">💻</span>
-      <div><h4 class="font-medium text-white mb-1 text-sm">Workshop Coding</h4><p class="text-white/35 text-xs leading-relaxed">Sesi hands-on setiap minggu, dari dasar hingga advanced tech stack.</p></div>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Workshop & Ngoprek</h4><p class="text-white/35 text-xs leading-relaxed">Sesi hands-on tiap minggu — website, mobile, AI, IoT, security, game, server. Semua level welcome.</p></div>
     </div>
     <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
       <span class="text-2xl mt-0.5">🎯</span>
-      <div><h4 class="font-medium text-white mb-1 text-sm">Sprint Project</h4><p class="text-white/35 text-xs leading-relaxed">Bergabung sebagai developer atau designer di project komunitas.</p></div>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Sprint Project</h4><p class="text-white/35 text-xs leading-relaxed">Kerjakan project nyata: Info PMB yang sudah live, WA Chatbot AI v1.0, dan CMS Ormawa yang sedang berjalan. Sprint 2 minggu, hasil terukur.</p></div>
     </div>
     <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
       <span class="text-2xl mt-0.5">📱</span>
-      <div><h4 class="font-medium text-white mb-1 text-sm">Konten Kreator</h4><p class="text-white/35 text-xs leading-relaxed">Buat konten edukatif tech yang menjangkau ribuan mahasiswa.</p></div>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Konten Kreator</h4><p class="text-white/35 text-xs leading-relaxed">Bikin konten edukatif tech untuk Instagram, Telegram, dan LinkedIn komunitas — dari carousel Canva sampai copywriting yang nge-hook.</p></div>
     </div>
     <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
       <span class="text-2xl mt-0.5">🏆</span>
-      <div><h4 class="font-medium text-white mb-1 text-sm">Kompetisi & Hackathon</h4><p class="text-white/35 text-xs leading-relaxed">Ikut kompetisi bersama tim yang sudah solid dan terlatih.</p></div>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Kompetisi & Hackathon</h4><p class="text-white/35 text-xs leading-relaxed">Ikut kompetisi dan hackathon bareng tim yang terlatih — termasuk Hackathon Summit yang pernah kami selenggarakan sendiri.</p></div>
     </div>
     <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
       <span class="text-2xl mt-0.5">🔗</span>
-      <div><h4 class="font-medium text-white mb-1 text-sm">Networking</h4><p class="text-white/35 text-xs leading-relaxed">Terhubung dengan alumni, mentor, dan partner industri.</p></div>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Networking</h4><p class="text-white/35 text-xs leading-relaxed">Terhubung dengan alumni, GADAS, SSI Academy, Java Developer Group, dan komunitas tech aktif di Sidoarjo–Surabaya.</p></div>
     </div>
     <div class="node-card rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex gap-4">
       <span class="text-2xl mt-0.5">📚</span>
-      <div><h4 class="font-medium text-white mb-1 text-sm">Study Group</h4><p class="text-white/35 text-xs leading-relaxed">Belajar bareng, problem solving, dan code review sesama anggota.</p></div>
+      <div><h4 class="font-medium text-white mb-1 text-sm">Study Group</h4><p class="text-white/35 text-xs leading-relaxed">Ngoprek bareng di kampus Undika, cafe sekitar kampus, atau online via Google Meet — belajar, problem solving, dan code review bareng anggota lain.</p></div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section class="py-24 px-6">
-  <div class="max-w-2xl mx-auto text-center reveal">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-blue-500/30 text-blue-400 mb-6 bg-blue-500/10">
-      <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-      Open Recruitment
-    </div>
-    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Siap Bergabung?</h2>
-    <p class="text-white/40 text-sm leading-relaxed mb-8">
-      Aliria Tech terbuka untuk semua mahasiswa yang ingin berkembang di dunia IT.
-      Tidak perlu jago dulu — yang penting mau belajar dan berkolaborasi.
-    </p>
-    <div class="flex flex-wrap items-center justify-center gap-3">
-      <a href="#" class="px-7 py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all shadow-lg shadow-blue-600/30">Daftar Sekarang</a>
-      <a href="mailto:dionisiusn1@gmail.com" class="px-7 py-3 rounded-full border border-white/15 text-white/60 hover:text-white hover:border-white/30 text-sm transition-all">Hubungi Kami</a>
+<!-- MITRA -->
+<section class="py-16 px-6 max-w-6xl mx-auto">
+  <div class="reveal text-center mb-10">
+    <p class="text-xs text-blue-400/70 font-mono mb-3">// mitra</p>
+    <h2 class="text-2xl font-bold text-white mb-2">Mitra &amp; Ekosistem</h2>
+    <p class="text-white/40 text-sm">Terhubung dengan komunitas, organisasi, dan mitra industri aktif.</p>
+  </div>
+  <div class="relative">
+    <!-- Prev / Next -->
+    <button id="mitra-prev" onclick="mitraScroll(-1)" aria-label="Sebelumnya"
+      class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10
+             w-9 h-9 flex items-center justify-center rounded-full
+             bg-[#0d1117] border border-white/10 text-white/50
+             hover:border-blue-500/40 hover:text-white hover:bg-blue-500/10
+             transition-all shadow-lg">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button id="mitra-next" onclick="mitraScroll(1)" aria-label="Berikutnya"
+      class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10
+             w-9 h-9 flex items-center justify-center rounded-full
+             bg-[#0d1117] border border-white/10 text-white/50
+             hover:border-blue-500/40 hover:text-white hover:bg-blue-500/10
+             transition-all shadow-lg">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <!-- Scroll container -->
+    <div id="mitra-track" class="overflow-hidden mx-2">
+      <div id="mitra-inner" class="flex gap-8" style="will-change:transform">
+        <div class="mitra-logo-item" data-src="mitra/ssiacademy.png" data-label="SSI Academy"><img src="mitra/ssiacademy.png" alt="SSI Academy"/></div>
+        <div class="mitra-logo-item" data-src="mitra/jdg.png" data-label="Java Developer Group"><img src="mitra/jdg.png" alt="Java Developer Group"/></div>
+        <div class="mitra-logo-item" data-src="mitra/gadas.png" data-label="GADAS"><img src="mitra/gadas.png" alt="GADAS"/></div>
+        <div class="mitra-logo-item" data-src="mitra/hmsi.png" data-label="Hima Sistem Informasi"><img src="mitra/hmsi.png" alt="Hima Sistem Informasi"/></div>
+        <div class="mitra-logo-item" data-src="mitra/mitsutech.png" data-label="Mitsu Tech"><img src="mitra/mitsutech.png" alt="Mitsu Tech"/></div>
+        <div class="mitra-logo-item" data-src="mitra/novo.png" data-label="Novo"><img src="mitra/novo.png" alt="Novo"/></div>
+        <div class="mitra-logo-item" data-src="mitra/savendra.png" data-label="Savendra"><img src="mitra/savendra.png" alt="Savendra"/></div>
+        <div class="mitra-logo-item" data-src="mitra/mighty.png" data-label="Mighty"><img src="mitra/mighty.png" alt="Mighty"/></div>
+        <div class="mitra-logo-item" data-src="mitra/bimbasi.png" data-label="Bimbasi"><img src="mitra/bimbasi.png" alt="Bimbasi"/></div>
+        <div class="mitra-logo-item" data-src="mitra/himakuntansi.png" data-label="Hima Akuntansi"><img src="mitra/himakuntansi.png" alt="Hima Akuntansi"/></div>
+        <div class="mitra-logo-item" data-src="mitra/ukki.png" data-label="Ukki"><img src="mitra/ukki.png" alt="Ukki"/></div>
+        <!-- duplicate for seamless loop -->
+        <div class="mitra-logo-item" data-src="mitra/ssiacademy.png" data-label="SSI Academy"><img src="mitra/ssiacademy.png" alt="SSI Academy"/></div>
+        <div class="mitra-logo-item" data-src="mitra/jdg.png" data-label="Java Developer Group"><img src="mitra/jdg.png" alt="Java Developer Group"/></div>
+        <div class="mitra-logo-item" data-src="mitra/gadas.png" data-label="GADAS"><img src="mitra/gadas.png" alt="GADAS"/></div>
+        <div class="mitra-logo-item" data-src="mitra/hmsi.png" data-label="Hima Sistem Informasi"><img src="mitra/hmsi.png" alt="Hima Sistem Informasi"/></div>
+        <div class="mitra-logo-item" data-src="mitra/mitsutech.png" data-label="Mitsu Tech"><img src="mitra/mitsutech.png" alt="Mitsu Tech"/></div>
+        <div class="mitra-logo-item" data-src="mitra/novo.png" data-label="Novo"><img src="mitra/novo.png" alt="Novo"/></div>
+        <div class="mitra-logo-item" data-src="mitra/savendra.png" data-label="Savendra"><img src="mitra/savendra.png" alt="Savendra"/></div>
+        <div class="mitra-logo-item" data-src="mitra/mighty.png" data-label="Mighty"><img src="mitra/mighty.png" alt="Mighty"/></div>
+        <div class="mitra-logo-item" data-src="mitra/bimbasi.png" data-label="Bimbasi"><img src="mitra/bimbasi.png" alt="Bimbasi"/></div>
+        <div class="mitra-logo-item" data-src="mitra/himakuntansi.png" data-label="Hima Akuntansi"><img src="mitra/himakuntansi.png" alt="Hima Akuntansi"/></div>
+        <div class="mitra-logo-item" data-src="mitra/ukki.png" data-label="Ukki"><img src="mitra/ukki.png" alt="Ukki"/></div>
+      </div>
     </div>
   </div>
 </section>
+
+<!-- DOCS MODAL -->
+<div id="docs-modal" onclick="closeDocs()"
+  style="display:none;position:fixed;inset:0;z-index:990;background:rgba(0,0,0,.7);
+         backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div onclick="event.stopPropagation()"
+    style="background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:20px;
+           width:min(720px,100%);max-height:90vh;overflow-y:auto;padding:28px 28px 24px">
+    <!-- header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:rgba(59,130,246,.7);margin-bottom:4px">// dokumentasi</p>
+        <h3 style="font-size:1rem;font-weight:700;color:#fff;margin:0">Kegiatan Komunitas IT</h3>
+      </div>
+      <button onclick="closeDocs()"
+        style="width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.1);
+               background:transparent;color:rgba(255,255,255,.4);cursor:pointer;font-size:1rem;
+               display:flex;align-items:center;justify-content:center;transition:all .15s"
+        onmouseenter="this.style.color='#fff';this.style.background='rgba(255,255,255,.08)'"
+        onmouseleave="this.style.color='rgba(255,255,255,.4)';this.style.background='transparent'">✕</button>
+    </div>
+    <!-- photo grid -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+      <div class="doc-thumb" onclick="openLightboxFromDocs('docs/awal.jpg','Pertemuan Awal')">
+        <img src="docs/awal.jpg" alt="Pertemuan Awal"/>
+        <span>Pertemuan Awal</span>
+      </div>
+      <div class="doc-thumb" onclick="openLightboxFromDocs('docs/mubes.jpg','Musyawarah Besar')">
+        <img src="docs/mubes.jpg" alt="Musyawarah Besar"/>
+        <span>Musyawarah Besar</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGO LIGHTBOX -->
+<div id="logo-lightbox" onclick="closeLogo()"
+  style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+         align-items:center;justify-content:center;flex-direction:column;gap:16px;cursor:pointer">
+  <div onclick="event.stopPropagation()"
+    style="background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:20px;
+           padding:40px 48px;display:flex;flex-direction:column;align-items:center;gap:16px;
+           max-width:min(480px,90vw);cursor:default">
+    <img id="lightbox-img" src="" alt="" style="max-width:320px;max-height:240px;object-fit:contain"/>
+    <p id="lightbox-label" style="font-size:.8rem;color:rgba(255,255,255,.4);margin:0"></p>
+  </div>
+  <p style="font-size:.7rem;color:rgba(255,255,255,.25)">Klik di luar untuk tutup</p>
+</div>
+
+<!-- FLOATING WA BUTTON -->
+<a href="https://chat.whatsapp.com/ErP2OwRTR5rKRDTkaBnXCo" target="_blank" rel="noopener"
+   id="wa-fab"
+   title="Gabung Grup WhatsApp"
+   style="position:fixed;bottom:28px;right:28px;z-index:900;
+          display:flex;align-items:center;gap:10px;
+          background:#25d366;color:#fff;
+          padding:12px 20px 12px 14px;border-radius:999px;
+          text-decoration:none;font-size:.8rem;font-weight:600;
+          box-shadow:0 4px 20px rgba(37,211,102,.45);
+          transition:transform .2s,box-shadow .2s">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+  </svg>
+  Gabung Grup WA
+</a>
 
 <!-- FOOTER -->
 <footer class="border-t border-white/[0.06] py-10 px-6">
@@ -299,10 +452,10 @@ const PANEL_CONTENT = {
   aliria: {
     emoji:'⚡', title:'Aliria Tech', subtitle:'IT Community Overview',
     items:[
-      { label:'Mentor Program',    desc:'Workshop, code review, dan bimbingan langsung dari senior developer' },
-      { label:'Dev Projects',      desc:'Sprint project nyata dengan tech stack modern dan deliverable nyata' },
-      { label:'Marketing & Brand', desc:'Tim kreatif di balik konten dan sosial media komunitas' },
-      { label:'Partner Network',   desc:'Kolaborasi lintas komunitas, HMTI, dan mitra industri' },
+      { label:'Mentor Program',    desc:'Workshop ngoprek mingguan — website, mobile, server, AI, security, IoT, game — untuk semua level mahasiswa Undika' },
+      { label:'Dev Projects',      desc:'Sprint project nyata: Info PMB (live), WA Chatbot AI v1.0, CMS Ormawa — tech stack Laravel, Flutter, React, Docker' },
+      { label:'Marketing & Brand', desc:'Tim kreatif konten di Instagram, Telegram, LinkedIn — Canva Pro, copywriting, dan content planning komunitas' },
+      { label:'Partner Network',   desc:'11+ mitra aktif: SSI Academy, Java Developer Group, GADAS, Savendra, Hima SI, Ukki, Mighty, Mitsu Tech, dan lainnya' },
       { label:'Cheat Sheet',       desc:'Klik node Cheat untuk akses command siap pakai — Flutter, Laravel, Docker, AI' },
     ],
     footer: null,
@@ -310,44 +463,44 @@ const PANEL_CONTENT = {
   mentor: {
     emoji:'🧑‍🏫', title:'Mentor', subtitle:'Learning & Development',
     items:[
-      { label:'Weekly Workshop',   desc:'Sesi hands-on mingguan — dari Git dasar hingga deployment production' },
-      { label:'Code Review',       desc:'Review code bersama mentor, feedback langsung dan konstruktif' },
-      { label:'Pair Programming',  desc:'Coding bareng mentor untuk selesaikan fitur atau debug masalah nyata' },
-      { label:'Q&A Terbuka',       desc:'Tanya apa saja — tidak ada pertanyaan yang terlalu basic' },
-      { label:'Study Group',       desc:'Belajar bareng sesama anggota, saling bantu dan diskusi konsep' },
+      { label:'Weekly Workshop',   desc:'Sesi hands-on mingguan — ngoprek website (BE/FE), mobile (Android/iOS), server, AI, security, game (Godot/Unity), hingga IoT' },
+      { label:'Code Review',       desc:'Review code bersama mentor, feedback langsung dan konstruktif — standar tim profesional' },
+      { label:'Pair Programming',  desc:'Ngoprek bareng mentor buat selesaikan fitur atau debug masalah nyata di project komunitas' },
+      { label:'Q&A Terbuka',       desc:'Tanya apa saja — instalasi tools, konsep framework, sampai strategi karier IT. Tidak ada pertanyaan yang terlalu basic' },
+      { label:'Study Group',       desc:'Ngoprek bareng di kampus Undika, cafe sekitar kampus, atau online via Google Meet — santai tapi produktif' },
     ],
     footer: null,
   },
   project: {
     emoji:'🛠️', title:'Project', subtitle:'Dev Build & Sprint',
     items:[
-      { label:'Sprint 2 Minggu',   desc:'Project dibagi sprint — setiap 2 minggu ada deliverable yang bisa diukur' },
-      { label:'Tech Stack Modern', desc:'Laravel, Flutter, React, Docker — pilih sesuai project yang kamu masuki' },
-      { label:'Git Workflow',      desc:'Branch strategy, pull request, dan code review standar industri' },
-      { label:'Portfolio Nyata',   desc:'Hasil project bisa langsung masuk portfolio dan ditampilkan ke rekruter' },
-      { label:'Tim Kolaboratif',   desc:'Kerjakan bersama 3–5 anggota dengan role yang jelas' },
+      { label:'Sprint 2 Minggu',   desc:'Project dibagi sprint — setiap 2 minggu ada deliverable yang bisa diukur dan dipamerkan' },
+      { label:'Project Live',      desc:'Info PMB (infopmb.dinamika.ac.id) sudah live, WA Chatbot AI v1.0 jalan, CMS Ormawa sedang dikembangkan' },
+      { label:'Tech Stack Nyata',  desc:'Laravel, Flutter, React, Docker, Python — pilih sesuai project yang kamu masuki' },
+      { label:'Portfolio Nyata',   desc:'Hasil project langsung bisa masuk portfolio — bukan project fiktif, tapi yang beneran dipakai orang' },
+      { label:'Tim Kolaboratif',   desc:'Kerjakan bersama 3–5 anggota dengan role yang jelas: dev, designer, atau project manager' },
     ],
     footer: null,
   },
   marketing: {
     emoji:'📢', title:'Marketing', subtitle:'Content & Creative',
     items:[
-      { label:'Konten Edukatif',   desc:'Buat thread, carousel, dan video tentang tech yang menjangkau ribuan mahasiswa' },
-      { label:'Social Media',      desc:'Kelola Instagram, LinkedIn, dan Telegram komunitas Aliria' },
-      { label:'Desain Grafis',     desc:'Produksi visual dengan Canva, Figma, atau tools kreatif lain' },
-      { label:'Copywriting',       desc:'Tulis caption, hook, dan CTA yang menarik engagement tinggi' },
-      { label:'Content Planning',  desc:'Rencanakan kalender konten mingguan bersama tim marketing' },
+      { label:'Konten Edukatif',   desc:'Buat carousel, thread, dan reels tech edukatif yang menjangkau mahasiswa Undika dan komunitas IT luas' },
+      { label:'Social Media',      desc:'Kelola Instagram, Telegram, dan LinkedIn komunitas — posting terjadwal, interaksi, dan growth organik' },
+      { label:'Desain Grafis',     desc:'Produksi visual dengan Canva Pro (akses pengurus) — template, poster kegiatan, cover konten komunitas' },
+      { label:'Copywriting',       desc:'Tulis caption, hook, dan CTA yang menarik — dengan tone informal tapi informatif khas mahasiswa tech' },
+      { label:'Content Planning',  desc:'Rencanakan kalender konten mingguan bareng tim — sync dengan kegiatan workshop, sprint, dan mitra komunitas' },
     ],
     footer: null,
   },
   partner: {
     emoji:'🤝', title:'Partner', subtitle:'Collaboration & Network',
     items:[
-      { label:'Open Source',       desc:'Kontribusi ke project open source menggunakan workflow GitHub standar' },
-      { label:'Agile/Scrum',       desc:'Daily standup, sprint planning, dan retrospective seperti tim profesional' },
-      { label:'Lintas Komunitas',  desc:'Kolaborasi dengan HMTI, komunitas kampus lain, dan komunitas tech regional' },
-      { label:'Networking',        desc:'Terhubung dengan alumni, mentor industri, dan mitra yang membuka peluang karier' },
-      { label:'Co-Project',        desc:'Kerjakan project bersama komunitas partner dengan pembagian peran yang jelas' },
+      { label:'Mitra Aktif',        desc:'11+ mitra nyata: SSI Academy, Java Developer Group, GADAS, Novo, Savendra, Bimbasi, Hima Akuntansi, Hima SI, Ukki, Mighty, Mitsu Tech' },
+      { label:'Agile/Scrum',       desc:'Sprint planning, daily check-in, dan retrospective — workflow tim profesional yang dipraktikkan langsung di project komunitas' },
+      { label:'Lintas Komunitas',  desc:'Kolaborasi dengan Hima SI, Hima Akuntansi, Ukki, dan komunitas tech aktif di Sidoarjo–Surabaya' },
+      { label:'Networking',        desc:'Terhubung dengan alumni, SSI Academy, GADAS, dan mentor industri yang membuka peluang karier nyata' },
+      { label:'Co-Project',        desc:'Kerjakan project bareng komunitas mitra — kolaborasi media, aplikasi, hingga kegiatan bersama yang saling menguntungkan' },
     ],
     footer: null,
   },
@@ -427,6 +580,118 @@ if (document.readyState === 'complete') {
 
 document.getElementById('panel-close').addEventListener('click', () => { openPanel(null); if(graph) graph.reset(); });
 document.getElementById('panel-backdrop').addEventListener('click', () => { openPanel(null); if(graph) graph.reset(); });
+
+// ── Mitra auto-scroll + prev/next + lightbox ──────────────────
+(function() {
+  const inner = document.getElementById('mitra-inner');
+  const track = document.getElementById('mitra-track');
+  if (!inner || !track) return;
+
+  const ITEM_COUNT = 11;          // original items (not duplicates)
+  const GAP        = 32;          // gap-8 = 32px
+  const ITEM_W     = 180 + GAP;   // 212px per slot
+  const LOOP_W     = ITEM_W * ITEM_COUNT;
+  const SPEED      = 0.5;         // px per frame
+
+  let pos         = 0;
+  let paused      = false;
+  let pauseTimer  = null;
+  let isAnimating = false;
+  let rafId;
+
+  // Click on logo items → lightbox
+  inner.querySelectorAll('.mitra-logo-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const src   = el.dataset.src;
+      const label = el.dataset.label;
+      if (!src) return;
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-label').textContent = label;
+      document.getElementById('logo-lightbox').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function applyPos() {
+    inner.style.transform = `translateX(-${pos}px)`;
+  }
+
+  function resume() {
+    paused = false;
+  }
+
+  function pauseTemp(ms) {
+    paused = true;
+    clearTimeout(pauseTimer);
+    pauseTimer = setTimeout(resume, ms);
+  }
+
+  // Smooth jump via CSS transition, then hand back to rAF
+  function jumpBy(delta) {
+    if (isAnimating) return;
+    isAnimating = true;
+    pauseTemp(2500);
+    pos += delta;
+    pos = ((pos % LOOP_W) + LOOP_W) % LOOP_W;
+    inner.style.transition = 'transform .4s ease';
+    applyPos();
+    setTimeout(() => {
+      inner.style.transition = 'none';
+      isAnimating = false;
+    }, 420);
+  }
+
+  window.mitraScroll = function(dir) {
+    jumpBy(dir * ITEM_W);
+  };
+
+  function tick() {
+    if (!paused) {
+      pos += SPEED;
+      if (pos >= LOOP_W) pos -= LOOP_W;
+      applyPos();
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  // Wait until layout ready so ITEM_W is accurate
+  requestAnimationFrame(() => {
+    inner.style.transition = 'none';
+    tick();
+  });
+})();
+
+// ── Docs modal ────────────────────────────────────────────────
+window.openDocs = function() {
+  document.getElementById('docs-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+window.closeDocs = function() {
+  document.getElementById('docs-modal').style.display = 'none';
+  document.body.style.overflow = '';
+};
+window.openLightboxFromDocs = function(src, label) {
+  closeDocs();
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-label').textContent = label;
+  document.getElementById('logo-lightbox').style.display = 'flex';
+};
+
+// ── Logo lightbox ─────────────────────────────────────────────
+window.closeLogo = function() {
+  document.getElementById('logo-lightbox').style.display = 'none';
+  document.body.style.overflow = '';
+};
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { window.closeLogo(); window.closeDocs(); }
+});
+
+// WA FAB hover
+const fab = document.getElementById('wa-fab');
+if (fab) {
+  fab.addEventListener('mouseenter', () => { fab.style.transform='translateY(-3px)'; fab.style.boxShadow='0 8px 28px rgba(37,211,102,.6)'; });
+  fab.addEventListener('mouseleave', () => { fab.style.transform=''; fab.style.boxShadow='0 4px 20px rgba(37,211,102,.45)'; });
+}
 
 </script>
 </body>
