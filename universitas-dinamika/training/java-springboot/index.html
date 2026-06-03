@@ -779,9 +779,41 @@
 #dion-nav .crumb-sep{color:var(--dim)}
 #dion-nav a.crumb{color:rgba(255,255,255,.3);text-decoration:none;transition:color .18s}
 #dion-nav a.crumb:hover{color:var(--accent)}
+
+/* ===== MODE TABS ===== */
+.mode-tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);}
+.mode-tabs-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;gap:4px;height:52px;align-items:center;}
+.mode-tab{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;padding:8px 18px;border-radius:var(--r-sm);cursor:pointer;transition:color .2s,background .2s;}
+.mode-tab:hover{color:var(--text);background:var(--card);}
+.mode-tab.active{color:var(--green);background:var(--green-subtle);}
+.tab-badge{font-family:var(--font-mono);font-size:11px;font-weight:600;background:rgba(255,255,255,.06);border:1px solid currentColor;border-radius:var(--r-pill);padding:1px 7px;opacity:.7;}
+.mode-tab.active .tab-badge{opacity:1;}
+
+/* ===== SERIES PANEL ===== */
+#series-hero{padding:80px 24px 64px;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(34,197,94,.07) 0%,transparent 70%),linear-gradient(180deg,var(--surface) 0%,var(--bg) 100%);}
+.series-hero-inner{max-width:760px;margin:0 auto;text-align:center;}
+.series-hero-inner .hero-badges{justify-content:center;}
+.series-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;}
+.series-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px 24px;display:flex;flex-direction:column;gap:14px;transition:border-color .2s,transform .2s,background .2s;}
+.series-card:hover{border-color:var(--green);transform:translateY(-4px);background:var(--bg-card-hover);}
+.series-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.series-icon{width:48px;height:48px;border-radius:var(--r-sm);background:var(--green-subtle);border:1px solid rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.series-num{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.series-duration{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--green);background:var(--green-subtle);border:1px solid rgba(34,197,94,.2);border-radius:var(--r-pill);padding:2px 10px;white-space:nowrap;}
+.series-title{font-size:15px;font-weight:700;color:var(--text);}
+.series-card .topic-tag{font-size:11px;padding:3px 8px;}
+.series-card:hover .topic-tag{color:var(--green);border-color:rgba(34,197,94,.25);background:var(--green-subtle);}
+.series-cta{margin-top:auto;display:flex;align-items:center;gap:8px;}
+.btn-series-reg{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#000;background:var(--green);padding:8px 16px;border-radius:var(--r-sm);transition:background .2s,transform .15s;}
+.btn-series-reg:hover{background:#16a34a;transform:translateY(-1px);}
+.btn-series-info{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--muted);border:1px solid var(--border-bright);padding:7px 14px;border-radius:var(--r-sm);transition:border-color .2s,color .2s;}
+.btn-series-info:hover{border-color:var(--green);color:var(--green);}
+.series-pricing-banner{margin-top:48px;padding:28px 32px;background:var(--card);border:1px solid var(--border-bright);border-radius:var(--r-lg);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;}
+@media(max-width:900px){.series-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.series-grid{grid-template-columns:1fr;}.series-pricing-banner{flex-direction:column;}}
   </style>
 </head>
-<body><div id="dion-nav"><a href="/universitas-dinamika/" class="back"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>Universitas Dinamika</a><span class="crumb-sep">·</span><a href="/" class="crumb">Portfolio</a></div>
+<body><div id="dion-nav"><a href="/universitas-dinamika/" class="back"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 12H5m7-7l-7 7 7 7"/></svg>Universitas Dinamika</a></div>
 
 <!-- ===== NAV ===== -->
 <nav>
@@ -798,6 +830,16 @@
     </ul>
   </div>
 </nav>
+
+<!-- ===== MODE TABS ===== -->
+<div class="mode-tabs-bar">
+  <div class="mode-tabs-inner">
+    <button class="mode-tab active" data-tab="bootcamp">🎓 Bootcamp Utuh <span class="tab-badge">45 Hari</span></button>
+    <button class="mode-tab" data-tab="series">📚 Series <span class="tab-badge">Modular</span></button>
+  </div>
+</div>
+
+<div id="panel-bootcamp">
 
 <!-- ===== HERO ===== -->
 <section id="hero">
@@ -1136,6 +1178,194 @@
   </div>
 </section>
 
+</div><!-- end panel-bootcamp -->
+
+<!-- ===== SERIES PANEL ===== -->
+<div id="panel-series" style="display:none;">
+
+  <section id="series-hero">
+    <div class="series-hero-inner">
+      <div class="hero-badges">
+        <span class="badge badge-green">Modular Learning</span>
+        <span class="badge badge-orange">7 Series</span>
+      </div>
+      <h2 class="section-title" style="font-size:clamp(32px,5vw,52px);font-weight:900;letter-spacing:-.03em;margin-bottom:16px;">
+        Belajar <span style="color:var(--green)">per Topik</span><br>Sesuai Kebutuhanmu
+      </h2>
+      <p class="section-sub" style="margin:0 auto 40px;text-align:center;max-width:580px;">
+        Tidak harus ambil bootcamp penuh. Pilih series yang relevan dengan skill gap kamu—setiap series bisa diambil secara mandiri.
+      </p>
+      <div class="hero-stats" style="justify-content:center;">
+        <div class="stat-chip"><span class="stat-chip-value">7</span><span class="stat-chip-label">Series</span></div>
+        <div class="stat-chip"><span class="stat-chip-value">10</span><span class="stat-chip-label">Peserta/Series</span></div>
+        <div class="stat-chip"><span class="stat-chip-value">✓</span><span class="stat-chip-label">Certificate</span></div>
+        <div class="stat-chip"><span class="stat-chip-value">Flex</span><span class="stat-chip-label">Schedule</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="series-list" style="background:var(--bg);padding:96px 24px;">
+    <div class="container">
+      <p class="section-label">// Daftar Series</p>
+      <h2 class="section-title">7 Series Tersedia</h2>
+      <p class="section-sub">Setiap series adalah unit pembelajaran mandiri. Ambil satu atau kombinasikan sesuai goalmu.</p>
+
+      <div class="series-grid">
+
+        <div class="series-card">
+          <div class="series-card-head">
+            <div class="series-icon">☕</div>
+            <span class="series-duration">7 Hari</span>
+          </div>
+          <p class="series-num">// Series 01</p>
+          <h3 class="series-title">Core Java &amp; OOP Foundation</h3>
+          <div class="series-topics">
+            <span class="topic-tag">Java 17/21</span>
+            <span class="topic-tag">OOP Principles</span>
+            <span class="topic-tag">Lambda &amp; Streams</span>
+            <span class="topic-tag">Maven/Gradle</span>
+          </div>
+          <div class="series-cta">
+            <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-series-reg">Daftar →</a>
+            <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" class="btn-series-info">Tanya WA</a>
+          </div>
+        </div>
+
+        <div class="series-card">
+          <div class="series-card-head">
+            <div class="series-icon">🌱</div>
+            <span class="series-duration">10 Hari</span>
+          </div>
+          <p class="series-num">// Series 02</p>
+          <h3 class="series-title">Spring Core &amp; Dependency Injection</h3>
+          <div class="series-topics">
+            <span class="topic-tag">IoC Container</span>
+            <span class="topic-tag">Beans &amp; Scopes</span>
+            <span class="topic-tag">@Autowired</span>
+            <span class="topic-tag">Spring AOP</span>
+          </div>
+          <div class="series-cta">
+            <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-series-reg">Daftar →</a>
+            <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" class="btn-series-info">Tanya WA</a>
+          </div>
+        </div>
+
+        <div class="series-card">
+          <div class="series-card-head">
+            <div class="series-icon">🚀</div>
+            <span class="series-duration">14 Hari</span>
+          </div>
+          <p class="series-num">// Series 03</p>
+          <h3 class="series-title">Spring Boot &amp; REST API</h3>
+          <div class="series-topics">
+            <span class="topic-tag">@RestController</span>
+            <span class="topic-tag">Validation</span>
+            <span class="topic-tag">Swagger/OpenAPI</span>
+            <span class="topic-tag">Exception Handling</span>
+          </div>
+          <div class="series-cta">
+            <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-series-reg">Daftar →</a>
+            <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" class="btn-series-info">Tanya WA</a>
+          </div>
+        </div>
+
+        <div class="series-card">
+          <div class="series-card-head">
+            <div class="series-icon">🗄️</div>
+            <span class="series-duration">14 Hari</span>
+          </div>
+          <p class="series-num">// Series 04</p>
+          <h3 class="series-title">Database, JPA &amp; Hibernate</h3>
+          <div class="series-topics">
+            <span class="topic-tag">Spring Data JPA</span>
+            <span class="topic-tag">Entity &amp; Relations</span>
+            <span class="topic-tag">JPQL</span>
+            <span class="topic-tag">Transactions</span>
+          </div>
+          <div class="series-cta">
+            <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-series-reg">Daftar →</a>
+            <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" class="btn-series-info">Tanya WA</a>
+          </div>
+        </div>
+
+        <div class="series-card">
+          <div class="series-card-head">
+            <div class="series-icon">🔐</div>
+            <span class="series-duration">14 Hari</span>
+          </div>
+          <p class="series-num">// Series 05</p>
+          <h3 class="series-title">Security &amp; JWT Authentication</h3>
+          <div class="series-topics">
+            <span class="topic-tag">Spring Security</span>
+            <span class="topic-tag">JWT</span>
+            <span class="topic-tag">Roles &amp; Auth</span>
+            <span class="topic-tag">CORS</span>
+          </div>
+          <div class="series-cta">
+            <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-series-reg">Daftar →</a>
+            <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" class="btn-series-info">Tanya WA</a>
+          </div>
+        </div>
+
+        <div class="series-card">
+          <div class="series-card-head">
+            <div class="series-icon">🏗️</div>
+            <span class="series-duration">14 Hari</span>
+          </div>
+          <p class="series-num">// Series 06</p>
+          <h3 class="series-title">Clean Architecture &amp; Best Practices</h3>
+          <div class="series-topics">
+            <span class="topic-tag">Layered Architecture</span>
+            <span class="topic-tag">DTO Pattern</span>
+            <span class="topic-tag">Unit Testing</span>
+            <span class="topic-tag">Logging</span>
+          </div>
+          <div class="series-cta">
+            <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-series-reg">Daftar →</a>
+            <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" class="btn-series-info">Tanya WA</a>
+          </div>
+        </div>
+
+        <div class="series-card">
+          <div class="series-card-head">
+            <div class="series-icon">🚢</div>
+            <span class="series-duration">10 Hari</span>
+          </div>
+          <p class="series-num">// Series 07</p>
+          <h3 class="series-title">Deployment &amp; DevOps Basics</h3>
+          <div class="series-topics">
+            <span class="topic-tag">Docker</span>
+            <span class="topic-tag">Docker Compose</span>
+            <span class="topic-tag">CI/CD</span>
+            <span class="topic-tag">VPS Deploy</span>
+          </div>
+          <div class="series-cta">
+            <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" class="btn-series-reg">Daftar →</a>
+            <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" class="btn-series-info">Tanya WA</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="series-pricing-banner">
+        <div>
+          <p style="font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:6px;">// Harga Series</p>
+          <p style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;">Hubungi untuk info harga per series</p>
+          <p style="font-size:13px;color:var(--muted);">Diskon bundle jika ambil 3+ series sekaligus. Mahasiswa &amp; alumni Undika dapat diskon 15%.</p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="https://wa.me/6285183009828" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#000;background:var(--green);padding:12px 20px;border-radius:var(--r-sm);white-space:nowrap;transition:background .2s;" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='var(--green)'">📱 Tanya via WA</a>
+          <a href="https://bit.ly/UNDIKABootcampJavaSpring" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);border:1px solid var(--border-bright);padding:11px 20px;border-radius:var(--r-sm);white-space:nowrap;transition:color .2s,border-color .2s;" onmouseover="this.style.color='var(--green)';this.style.borderColor='rgba(34,197,94,.3)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border-bright)'">Daftar Online →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div><!-- end panel-series -->
+
 <!-- ===== FOOTER ===== -->
 <footer>
   <div class="footer-inner">
@@ -1176,5 +1406,26 @@
   </div>
 </footer>
 
+
+<script>
+(function(){
+  var tabs = document.querySelectorAll('.mode-tab');
+  var panels = {
+    bootcamp: document.getElementById('panel-bootcamp'),
+    series: document.getElementById('panel-series')
+  };
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var target = tab.dataset.tab;
+      tabs.forEach(function(t){ t.classList.remove('active'); });
+      tab.classList.add('active');
+      Object.keys(panels).forEach(function(k){
+        panels[k].style.display = k === target ? '' : 'none';
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+})();
+</script>
 </body>
 </html>
