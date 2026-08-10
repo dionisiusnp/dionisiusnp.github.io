@@ -160,6 +160,7 @@ code{font-family:var(--mono)}
     <button class="tab" data-tab="docker">Docker</button>
     <button class="tab" data-tab="git">Git</button>
     <button class="tab" data-tab="ai">AI</button>
+    <button class="tab" data-tab="cicd">CI/CD</button>
   </div>
 
   <!-- Laravel -->
@@ -567,6 +568,110 @@ code{font-family:var(--mono)}
           <h4><span class="tag tag-blue">Logging</span> Audit semua query</h4>
           <p>Log semua input dan output yang dikirim ke AI service. Kalau ada serangan, logs ini jadi bukti buat investigasi. Pantau pattern anomali — banyak request dengan instruksi mencurigakan = indikasi serangan.</p>
         </div>
+      </div>
+    </div>
+  </div>
+  <!-- CI/CD -->
+  <div class="panel" id="panel-cicd">
+    <p class="stack-desc">Setup auto-deploy dari GitHub ke VPS via SSH. Stack: GitHub Actions + appleboy/ssh-action + Laravel + Ubuntu + PostgreSQL + CSF Firewall.</p>
+
+    <div class="tips-section" style="margin-top:0;padding-top:0;border-top:none">
+      <div class="tips-title" style="margin-bottom:10px">1. Setup SSH Key di Server</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>ssh-keygen -t ed25519 -C "github-actions" -f ~/.ssh/github_deploy -N ""</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Generate SSH key khusus deploy (jangan pakai id_rsa utama)</div></div>
+      <div class="row"><div class="cmd"><code>cat ~/.ssh/github_deploy.pub >> ~/.ssh/authorized_keys</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Daftarkan public key ke authorized_keys (untuk GitHub Actions masuk server)</div></div>
+      <div class="row"><div class="cmd"><code>cat ~/.ssh/github_deploy</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tampilkan private key — paste seluruhnya ke GitHub Secret SSH_PRIVATE_KEY</div></div>
+      <div class="row"><div class="cmd"><code>chmod 600 ~/.ssh/id_ed25519 && chmod 700 ~/.ssh</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Fix permission file SSH (wajib, kalau 644 key tidak bisa dibaca)</div></div>
+      <div class="row"><div class="cmd"><code>ssh-keyscan github.com >> ~/.ssh/known_hosts</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tambah GitHub ke known_hosts (agar git pull tidak tanya host verification)</div></div>
+      <div class="row"><div class="cmd"><code>su - deployuser -c "ssh-keyscan github.com >> ~/.ssh/known_hosts"</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan ssh-keyscan sebagai user deploy (bukan root)</div></div>
+      <div class="row"><div class="cmd"><code>su - deployuser -c "ssh -T git@github.com"</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Test apakah deploy user sudah bisa autentikasi ke GitHub</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">2. Izin File & Ownership</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>chown -R deployuser:www-data /path/to/project</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Deploy user punya project, group www-data bisa baca (web server)</div></div>
+      <div class="row"><div class="cmd"><code>usermod -aG www-data deployuser</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tambah deploy user ke group www-data</div></div>
+      <div class="row"><div class="cmd"><code>chmod -R 775 storage bootstrap/cache</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Laravel butuh write ke storage dan bootstrap/cache</div></div>
+      <div class="row"><div class="cmd"><code>git config --global --add safe.directory /path/to/project</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Fix error "dubious ownership" saat git pull (ownership beda antara cloner dan puller)</div></div>
+      <div class="row"><div class="cmd"><code>echo "deployuser ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload php8.3-fpm" > /etc/sudoers.d/deploy</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Beri sudo terbatas — hanya untuk reload PHP-FPM, bukan semua command</div></div>
+      <div class="row"><div class="cmd"><code>chmod 440 /etc/sudoers.d/deploy</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Permission wajib untuk file sudoers.d</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">3. CSF Firewall (VPS dengan ConfigServer)</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>csf -tf</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Flush semua temporary IP block (LFD sering block IP GitHub Actions)</div></div>
+      <div class="row"><div class="cmd"><code>curl -s https://api.github.com/meta | python3 -c "import sys,json; [print(ip) for ip in json.load(sys.stdin)['actions']]" >> /etc/csf/csf.ignore</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Whitelist semua IP range GitHub Actions ke csf.ignore</div></div>
+      <div class="row"><div class="cmd"><code>csf -r</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Reload CSF setelah edit csf.ignore atau csf.conf</div></div>
+      <div class="row"><div class="cmd"><code>grep "^TCP_IN" /etc/csf/csf.conf</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Cek port mana saja yang dibuka di inbound CSF</div></div>
+      <div class="row"><div class="cmd"><code>csf -l | grep DROP | head -20</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Lihat IP yang sedang di-block LFD (cek apakah GitHub IP kena blok)</div></div>
+      <div class="row"><div class="cmd"><code>ss -tlnp | grep SSHPORT</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Verifikasi port SSH yang benar-benar digunakan SSH daemon</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">4. PostgreSQL — Grant Akses</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>sudo -u postgres psql</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Masuk psql sebagai superuser postgres</div></div>
+      <div class="row"><div class="cmd"><code>\c nama_database</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Pindah ke database target (wajib sebelum GRANT)</div></div>
+      <div class="row"><div class="cmd"><code>GRANT USAGE ON SCHEMA public TO db_user;</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Wajib di PostgreSQL 15+ — izinkan user akses schema public</div></div>
+      <div class="row"><div class="cmd"><code>GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO db_user;</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Grant akses ke semua tabel yang sudah ada</div></div>
+      <div class="row"><div class="cmd"><code>GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO db_user;</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Grant akses ke sequences (auto-increment)</div></div>
+      <div class="row"><div class="cmd"><code>ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO db_user;</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Grant otomatis untuk tabel yang dibuat di masa depan</div></div>
+      <div class="row"><div class="cmd"><code>ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO db_user;</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Grant otomatis untuk sequences baru</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">5. Git Remote & Deploy Key</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>git remote -v</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Lihat remote URL yang dipakai server untuk git pull</div></div>
+      <div class="row"><div class="cmd"><code>git remote set-url origin git@github.com:user/repo.git</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Ganti remote ke SSH URL (bukan HTTPS) agar pakai Deploy Key</div></div>
+      <div class="row"><div class="cmd"><code>git clean -fd</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Hapus untracked files sebelum pull (cegah conflict)</div></div>
+      <div class="row"><div class="cmd"><code>git pull origin main</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Pull kode terbaru dari branch main</div></div>
+      <div class="row"><div class="cmd"><code>cat ~/.ssh/id_ed25519.pub</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tampilkan public key server — paste ke GitHub repo Deploy Keys</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">6. GitHub Actions Workflow (main.yml)</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>on: push: branches: [main]</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Trigger deploy hanya saat push/merge ke main (hapus pull_request trigger)</div></div>
+      <div class="row"><div class="cmd"><code>uses: appleboy/ssh-action@v1.2.0</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Action untuk SSH ke server dan jalankan script deploy</div></div>
+      <div class="row"><div class="cmd"><code>host: ${{ vars.SERVER_HOST }}</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Gunakan vars.* (bukan secrets.*) untuk data non-sensitif seperti host dan port</div></div>
+      <div class="row"><div class="cmd"><code>key: ${{ secrets.SSH_PRIVATE_KEY }}</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Private key wajib di secrets.* — paste seluruh isi file key termasuk header</div></div>
+      <div class="row"><div class="cmd"><code>command_timeout: 10m</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Perpanjang timeout (default 30s tidak cukup untuk npm install + build)</div></div>
+      <div class="row"><div class="cmd"><code>set -e</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tambahkan di awal script SSH — hentikan deploy jika ada command gagal</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">7. Urutan Script Deploy Laravel</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>php artisan down --refresh=15 --retry=60</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">1. Maintenance mode dulu sebelum semua perubahan</div></div>
+      <div class="row"><div class="cmd"><code>git clean -fd && git pull origin main</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">2. Bersihkan untracked files lalu pull kode terbaru</div></div>
+      <div class="row"><div class="cmd"><code>composer install --no-dev --optimize-autoloader --no-interaction</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">3. Install PHP dependencies (tanpa dev, tanpa konfirmasi)</div></div>
+      <div class="row"><div class="cmd"><code>npm install && npm run build</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">4. Install npm dan compile aset frontend (Vite/Tailwind)</div></div>
+      <div class="row"><div class="cmd"><code>php artisan migrate --force</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">5. Jalankan migration tanpa konfirmasi (production flag)</div></div>
+      <div class="row"><div class="cmd"><code>php artisan db:seed --force</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">6. Seed data wajib (roles, permissions) — pastikan idempotent pakai firstOrCreate</div></div>
+      <div class="row"><div class="cmd"><code>php artisan optimize</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">7. Cache config + route + view + events sekaligus</div></div>
+      <div class="row"><div class="cmd"><code>php artisan storage:link --quiet || true</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">8. Buat symlink storage ke public (idempotent, || true agar tidak gagal jika sudah ada)</div></div>
+      <div class="row"><div class="cmd"><code>php artisan queue:restart || true</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">9. Signal queue workers restart setelah deploy</div></div>
+      <div class="row"><div class="cmd"><code>php artisan up</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">10. Matikan maintenance mode — app live kembali</div></div>
+      <div class="row"><div class="cmd"><code>sudo systemctl reload php8.3-fpm</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">11. Reload PHP-FPM untuk clear opcache</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title">Yang Perlu Diperhatikan</div>
+      <div class="tips-grid">
+        <div class="tip"><h4><span class="tag tag-accent">Key</span> Pisahkan dua key</h4><p>Butuh dua key berbeda: (1) github_deploy — private key di GitHub Secret, public key di server authorized_keys — untuk GitHub Actions SSH ke server. (2) id_ed25519 server — public key di GitHub Deploy Keys — untuk server git pull dari GitHub.</p></div>
+        <div class="tip"><h4><span class="tag tag-green">Seeder</span> Hanya data sistem</h4><p>Jangan seed data yang punya CRUD di UI (fakultas, prodi, master data). Hanya seed data yang wajib ada untuk app berjalan: roles sistem + superadmin. Gunakan firstOrCreate agar idempotent.</p></div>
+        <div class="tip"><h4><span class="tag tag-gold">User</span> Jangan deploy sebagai root</h4><p>Buat user deploy terpisah (misal: ugaas). Beri ownership project ke user itu. Sudo hanya untuk command spesifik seperti systemctl reload php-fpm — bukan NOPASSWD ALL.</p></div>
+        <div class="tip"><h4><span class="tag tag-blue">Firewall</span> CSF vs cloud firewall</h4><p>VPS punya dua lapis firewall: OS-level (CSF) dan cloud-level (Biznet/AWS Security Group). Port harus terbuka di keduanya. Kalau SSH bisa dari lokal tapi timeout dari GitHub — cek cloud firewall provider.</p></div>
       </div>
     </div>
   </div>
