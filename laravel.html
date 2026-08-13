@@ -192,31 +192,42 @@
   ul, ol { padding-left: 22px; margin: 8px 0; }
   li { margin: 4px 0; }
 
-  /* Quiz preview box */
-  .quiz-preview {
-    background: rgba(245, 200, 66, 0.08);
-    border: 1px solid rgba(245, 200, 66, 0.3);
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin: 16px 0;
-  }
-  .quiz-preview .q-label {
-    color: var(--gold);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-  .quiz-preview .q-text { font-weight: 600; margin-bottom: 10px; }
-  .quiz-preview .q-opts { font-size: 0.88rem; color: var(--muted); }
-  .quiz-preview .q-opts span { display: block; margin: 3px 0; }
-  .quiz-preview .correct { color: var(--green); font-weight: 600; }
-
   footer {
     text-align: center;
     color: var(--muted);
     font-size: 0.8rem;
     padding: 40px 20px 0;
+  }
+
+  /* Mobile scroll smoothness */
+  pre { -webkit-overflow-scrolling: touch; }
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  @media (max-width: 640px) {
+    body { font-size: 14px; }
+
+    header { padding: 20px 16px 16px; }
+    header h1 { font-size: 1.45rem; letter-spacing: 1px; }
+    header p { font-size: 0.85rem; }
+
+    .toc { padding: 0 12px; margin-top: 20px; }
+    .toc-box { padding: 16px; }
+
+    main { padding: 0 12px; }
+    section { margin-top: 24px; border-radius: 8px; }
+
+    .section-header { padding: 12px 14px; }
+    .section-header h2 { font-size: 1rem; }
+    .section-body { padding: 14px; }
+
+    pre { font-size: 0.76rem; padding: 10px 12px; }
+    code { font-size: 0.82em; }
+
+    th { padding: 8px 10px; font-size: 0.76rem; }
+    td { padding: 7px 10px; font-size: 0.85rem; }
+
+    h3 { font-size: 0.85rem; }
+    .info-box { padding: 10px 12px; font-size: 0.85rem; }
   }
 </style>
 </head>
@@ -278,17 +289,6 @@ Route::<span class="f">get</span>(<span class="s">'/produk'</span>, [ProdukContr
     <div class="info-box tip">
       <strong>Tips:</strong> Pisahkan tanggung jawab — jangan tulis logika database langsung di View atau Route. Selalu lewat Controller → Model.
     </div>
-
-    <div class="quiz-preview">
-      <div class="q-label">CONTOH SOAL LEVEL 1</div>
-      <div class="q-text">Di Laravel MVC, di mana logika bisnis seharusnya ditulis?</div>
-      <div class="q-opts">
-        <span>A. View</span>
-        <span class="correct">B. Model ✓</span>
-        <span>C. Controller</span>
-        <span>D. Route</span>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -341,17 +341,6 @@ Route::<span class="f">get</span>(<span class="s">'/user/{name?}'</span>, <span 
 
     <div class="info-box">
       <strong>Ingat:</strong> Route diproses dari atas ke bawah. Route yang lebih spesifik harus didefinisikan <em>sebelum</em> yang lebih umum.
-    </div>
-
-    <div class="quiz-preview">
-      <div class="q-label">CONTOH SOAL LEVEL 2</div>
-      <div class="q-text">Apa kegunaan Route::get() di Laravel?</div>
-      <div class="q-opts">
-        <span class="correct">A. Menangani request HTTP GET dari browser ✓</span>
-        <span>B. Menyimpan data ke database</span>
-        <span>C. Membuat file Controller baru</span>
-        <span>D. Menghapus data berdasarkan ID</span>
-      </div>
     </div>
   </div>
 </section>
@@ -414,17 +403,6 @@ php artisan <span class="f">make:controller</span> NamaController --resource  <s
     <div class="info-box warn">
       <strong>Perhatian:</strong> Daftarkan controller di route dengan syntax <code>[NamaController::class, 'method']</code>, bukan string lama <code>'NamaController@method'</code>.
     </div>
-
-    <div class="quiz-preview">
-      <div class="q-label">CONTOH SOAL LEVEL 3</div>
-      <div class="q-text">Perintah Artisan untuk membuat Controller Resource baru?</div>
-      <div class="q-opts">
-        <span>A. php artisan create:controller UserController</span>
-        <span class="correct">B. php artisan make:controller UserController --resource ✓</span>
-        <span>C. php artisan generate:resource UserController</span>
-        <span>D. php artisan new:controller UserController</span>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -486,16 +464,6 @@ php artisan <span class="f">make:controller</span> NamaController --resource  <s
 <span class="k">return</span> <span class="f">view</span>(<span class="s">'users.index'</span>)-><span class="f">with</span>(<span class="s">'users'</span>, <span class="n">$users</span>);
 <span class="k">return</span> <span class="f">view</span>(<span class="s">'users.index'</span>, <span class="k">compact</span>(<span class="s">'users'</span>));</pre>
 
-    <div class="quiz-preview">
-      <div class="q-label">CONTOH SOAL LEVEL 4</div>
-      <div class="q-text">Directive Blade untuk mewarisi layout induk adalah?</div>
-      <div class="q-opts">
-        <span>A. @include('layouts.app')</span>
-        <span class="correct">B. @extends('layouts.app') ✓</span>
-        <span>C. @layout('layouts.app')</span>
-        <span>D. @use('layouts.app')</span>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -564,16 +532,6 @@ Produk::<span class="f">destroy</span>(1);    <span class="c">// by primary key<
 }
 <span class="c">// Akses: $kategori->produk (lazy load) atau Kategori::with('produk')->get()</span></pre>
 
-    <div class="quiz-preview">
-      <div class="q-label">CONTOH SOAL LEVEL 5</div>
-      <div class="q-text">Mengapa $fillable penting di Eloquent Model?</div>
-      <div class="q-opts">
-        <span>A. Agar query lebih cepat</span>
-        <span>B. Wajib untuk relasi antar tabel</span>
-        <span class="correct">C. Menentukan kolom mana yang boleh di-mass assign lewat create() ✓</span>
-        <span>D. Mengenkripsi data sebelum disimpan</span>
-      </div>
-    </div>
   </div>
 </section>
 
