@@ -197,7 +197,7 @@ body{display:flex;flex-direction:column}
 
 <!-- Top bar -->
 <div class="topbar">
-  <span class="tb-title">FGD · Laravel Dungeon</span>
+  <span class="tb-title">FGD · COCOTHINK</span>
   <span class="tb-spacer"></span>
   <span class="tb-progress">Kartu <strong id="curr-num">1</strong> / <strong id="total-num">27</strong></span>
   <button class="tb-btn" id="btn-grid" onclick="toggleGrid()">
@@ -260,11 +260,11 @@ const CARDS = [
     ],
     info: [
       { label: 'Durasi', val: '60–90 menit' },
-      { label: 'Level game', val: '7 level, 34 soal' },
-      { label: 'Mode', val: 'Dungeon Explorer & Quiz Battle' },
+      { label: 'Level game', val: '5 level, 23 soal (Platform Quest)' },
+      { label: 'Mode', val: 'Platform Quest & Ski Quest' },
       { label: 'Aturan', val: 'Tidak ada jawaban salah' },
     ],
-    facilitatorNote: 'Catat level yang dicapai tiap peserta. Ciptakan suasana santai sebelum masuk ke pertanyaan inti.',
+    facilitatorNote: 'Catat level Platform Quest yang dicapai dan apakah sudah mencoba Ski Quest. Ciptakan suasana santai sebelum masuk ke pertanyaan inti.',
   },
 
   /* ─── AKSES GAME ─────────────────────────────── */
@@ -277,7 +277,7 @@ const CARDS = [
       { label: 'URL', val: 'https://greenfoot.org' },
       { label: 'Email demo', val: 'player1@demo.com' },
       { label: 'Password', val: 'password' },
-      { label: 'Browser', val: 'Chrome atau Firefox, pastikan Java plugin aktif' },
+      { label: 'Browser', val: 'Chrome atau Firefox (tidak perlu Java plugin, versi HTML5)' },
     ],
     facilitatorNote: 'Buka URL di browser, login pakai akun demo atau akun masing-masing. Kalau ada masalah loading, coba refresh atau ganti browser.',
   },
@@ -289,7 +289,7 @@ const CARDS = [
     q: 'Kesan pertama waktu mulai main, langsung paham atau butuh waktu dulu?',
     probes: [
       'Bagian mana yang paling cepat dipahami? Mana yang paling bikin bingung?',
-      'Dungeon Explorer sama Quiz Battle, mana yang lebih enak dimainkan? Kenapa?',
+      'Platform Quest sama Ski Quest, mana yang lebih enak dimainkan? Kenapa?',
     ],
     facilitatorNote: 'Kesan pertama cerminan kemudahan masuk ke game. Catat kata yang berulang muncul dari beberapa peserta.',
   },
@@ -322,10 +322,10 @@ const CARDS = [
     cat: '📚 Pembelajaran',
     q: 'Level mana yang paling berhasil "mengajarkan" kamu sesuatu, dan level mana yang paling gagal?',
     probes: [
-      '7 level: MVC → Routing → Controller → Blade → Eloquent → CRUD → Integrasi. Ada yang urutannya terasa salah?',
+      '5 level: MVC → Routing → Controller → Blade → Eloquent. Ada yang urutannya terasa salah?',
       'Soal mana yang sulit karena kontennya susah vs sulit karena cara pertanyaannya membingungkan?',
     ],
-    facilitatorNote: 'Level 5 Eloquent dan Level 7 Integrasi biasanya paling berat. Probe apakah penjelasan setelah salah jawab membantu.',
+    facilitatorNote: 'Level 4 Blade dan Level 5 Eloquent biasanya paling berat. Probe apakah penjelasan setelah salah jawab membantu.',
   },
 
   {
@@ -349,7 +349,7 @@ const CARDS = [
       'Kapan kamu pakai Hint? Apakah pengurangan XP (-5) memengaruhi keputusan kamu?',
       'Feedback validasi kode — apakah kamu tahu kenapa lulus atau gagal?',
     ],
-    facilitatorNote: 'Mini project ada di 6 level. Validasi pakai keyword dan regex. Kualitas pesan kesalahan sangat menentukan apakah peserta bisa belajar dari jawaban yang salah.',
+    facilitatorNote: 'Mini project dalam pengembangan, belum tersedia di versi web saat ini. Pertanyaan ini untuk menggali ekspektasi peserta terhadap fitur coding langsung di dalam game.',
   },
 
   /* ─── MEKANIK ─────────────────────────────────── */
@@ -367,12 +367,12 @@ const CARDS = [
   {
     type: 'mekanik',
     cat: '⚙️ Mekanik Game',
-    q: 'Sistem HP, XP, dan leaderboard, itu yang bikin kamu betah terus main?',
+    q: 'Sistem 5 Heart dan XP, itu yang bikin kamu betah terus main?',
     probes: [
-      'Waktu HP habis dan kalah, langsung coba lagi atau berhenti dulu?',
-      'Kalau tidak ada leaderboard, kamu masih main dengan serius?',
+      'Waktu 5 heart habis dan kalah, langsung coba lagi atau berhenti dulu?',
+      'Kalau tidak ada XP, kamu masih main dengan serius?',
     ],
-    facilitatorNote: 'HP awal 100, jawab salah berkurang 10. Setelah kalah bisa langsung retry. Leaderboard diurutkan dari total XP tertinggi.',
+    facilitatorNote: 'Mulai dengan 5 heart. Jawab salah berkurang 1 heart, habis game over. Setelah kalah bisa langsung retry. Leaderboard belum tersedia di versi ini.',
   },
 
   {
@@ -383,7 +383,7 @@ const CARDS = [
       'Bersaing sama teman itu membantu belajar atau justru mengalihkan fokus?',
       'Siapa teman pertama yang kamu ajak tantang kalau ada fitur ini?',
     ],
-    facilitatorNote: 'Mode Versus belum ada, masih dalam rencana. Ini untuk melihat seberapa besar minat peserta. Kalau mayoritas tertarik, fitur ini layak diprioritaskan.',
+    facilitatorNote: 'Mode Versus tidak dikembangkan di versi ini karena fokus pada single-player. Pertanyaan ini untuk menggali minat peserta — berguna untuk roadmap pengembangan ke depan.',
   },
 
   /* ─── KONTEN & DESAIN ─────────────────────────── */
