@@ -405,9 +405,9 @@ function localLoad(){
 }
 
 async function gistLoad(){
-  const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{
-    headers:{'Authorization':`Bearer ${GIST_PAT}`,'Accept':'application/vnd.github+json'}
-  });
+  const headers={'Accept':'application/vnd.github+json'};
+  if(GIST_PAT) headers['Authorization']=`Bearer ${GIST_PAT}`;
+  const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{headers});
   if(!r.ok) throw new Error('gist fetch '+r.status);
   const gist=await r.json();
   const content=gist.files[GIST_FILE]?.content;
@@ -440,12 +440,8 @@ function save(){
   /* Load data: Gist first, fallback to localStorage */
   const overlay=document.getElementById('loadingOverlay');
   try{
-    if(gistOk()){
-      const remote=await gistLoad();
-      db=remote||localLoad();
-    } else {
-      db=localLoad();
-    }
+    const remote=await gistLoad(); /* read Gist — no PAT needed */
+    db=remote||localLoad();
   }catch(e){
     console.warn('Gist load failed, using local',e);
     db=localLoad();
