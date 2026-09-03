@@ -31,6 +31,8 @@ a{text-decoration:none;color:inherit}
 .card-ico{font-size:1.8rem;margin-bottom:10px}
 .card-label{font-size:.95rem;font-weight:700;margin-bottom:4px;transition:color .2s}
 .card-desc{font-size:.78rem;color:var(--muted);transition:color .25s;line-height:1.5}
+.card-wide{grid-column:span 2;padding:24px 20px;flex-direction:row;align-items:center;text-align:left;gap:16px}
+.card-wide .card-ico{margin-bottom:0;font-size:1.5rem}
 
 .footer{border-top:1px solid var(--bd);padding:18px 28px;text-align:center;transition:border-color .25s}
 .footer span{font-size:.7rem;color:var(--muted);transition:color .25s}
@@ -38,6 +40,8 @@ a{text-decoration:none;color:inherit}
 @media(max-width:540px){
   .grid{grid-template-columns:1fr;max-width:280px}
   .hero{padding:40px 18px}
+  .card-wide{grid-column:span 1;flex-direction:column;align-items:center;text-align:center}
+  .card-wide .card-ico{margin-bottom:10px}
 }
 </style>
 </head>
@@ -73,12 +77,22 @@ a{text-decoration:none;color:inherit}
       <div class="card-label">Mitra</div>
       <div class="card-desc">Mitra yang telah berkolaborasi dalam ekosistem.</div>
     </a>
+    <a href="todolist/index.html" class="card card-wide">
+      <div class="card-ico">🏢</div>
+      <div class="card-label" id="kelolLabel">Kelola Alteco</div>
+    </a>
   </div>
 </div>
 
 <footer class="footer"><span>© 2026 Rak Perpustakaan</span></footer>
 
 <script>
+(function(){
+  try{
+    const d=JSON.parse(localStorage.getItem('rakperpus_alteco_v2'));
+    if(d&&d.orgName) document.getElementById('kelolLabel').textContent='Kelola '+d.orgName;
+  }catch{}
+})();
 (function(){
   const btn=document.getElementById('themeBtn'),html=document.documentElement;
   if(localStorage.getItem('theme')==='light'){html.setAttribute('data-theme','light');btn.textContent='☀️'}

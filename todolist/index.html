@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Kelola Alteco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0b12;--surface:#12121c;--card:#181825;--bd:#23233a;
+  --text:#e2e2f0;--muted:#9494b8;--dim:#5c5c7a;
+  --accent:#6c6ff5;--accent2:#a78bfa;
+  --green:#34d399;--red:#f87171;--gold:#fbbf24;--blue:#60a5fa;--teal:#2dd4bf;
+  --font:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+}
+[data-theme="light"]{
+  --bg:#f4f4f9;--surface:#eaeaef;--card:#dfdfec;--bd:#c5c5d4;
+  --text:#15152a;--muted:#6a6a88;--dim:#9090aa;
+  --accent:#5356d1;--accent2:#8b5cf6;
+  --green:#059669;--red:#dc2626;--gold:#ca8a04;--blue:#2563eb;--teal:#0d9488;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column;transition:background .25s,color .25s}
+input,button,select,textarea{font-family:var(--font)}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+/* ── Gate ── */
+#gate{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;transition:background .25s}
+#gate.hidden{display:none}
+.gate-box{background:var(--surface);border:1px solid var(--bd);border-radius:12px;padding:40px 36px;max-width:340px;width:100%;text-align:center}
+.gate-ico{font-size:2rem;margin-bottom:14px}
+.gate-org{font-size:1.2rem;font-weight:900;letter-spacing:-.03em;margin-bottom:4px}
+.gate-sub{font-size:.72rem;color:var(--muted);margin-bottom:24px;transition:color .25s}
+.gate-input{width:100%;padding:10px 14px;border-radius:7px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-family:var(--mono);font-size:1rem;letter-spacing:.2em;text-align:center;outline:none;transition:border-color .15s,background .25s;margin-bottom:10px}
+.gate-input:focus{border-color:var(--accent)}
+.gate-input.error{border-color:var(--red);animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.gate-btn{width:100%;padding:10px;border-radius:7px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:.85rem;transition:background .15s}
+.gate-btn:hover{background:var(--accent2)}
+.gate-err{font-size:.7rem;color:var(--red);margin-top:8px;min-height:14px}
+
+/* ── Modal ── */
+.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal.hidden{display:none}
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65)}
+.modal-box{position:relative;background:var(--surface);border:1px solid var(--bd);border-radius:12px;width:100%;max-width:420px;z-index:1;transition:background .25s}
+.modal-head{display:flex;align-items:center;padding:16px 20px 12px;border-bottom:1px solid var(--bd);transition:border-color .25s}
+.modal-title{font-size:.9rem;font-weight:800;flex:1}
+.modal-close{width:26px;height:26px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--muted);font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{background:var(--red);border-color:var(--red);color:#fff}
+.modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.form-input,.form-select,.form-textarea{padding:8px 12px;border-radius:7px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem;outline:none;transition:border-color .15s,background .25s;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent)}
+.form-textarea{resize:vertical;min-height:60px;max-height:120px}
+input[type="date"].form-input{color-scheme:dark}
+[data-theme="light"] input[type="date"].form-input{color-scheme:light}
+.form-select option{background:var(--card)}
+.type-toggle{display:flex;gap:6px}
+.type-btn{flex:1;padding:8px;border-radius:7px;border:1px solid var(--bd);background:var(--card);color:var(--muted);font-size:.78rem;font-weight:600;transition:all .15s;text-align:center}
+.type-btn.active-recurring{background:rgba(108,111,245,.15);border-color:rgba(108,111,245,.4);color:var(--accent)}
+.type-btn.active-once{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.35);color:var(--gold)}
+.recur-row{display:flex;gap:6px;flex-wrap:wrap}
+.recur-opt{font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s}
+.recur-opt.active{background:rgba(108,111,245,.15);border-color:rgba(108,111,245,.4);color:var(--accent)}
+.modal-foot{display:flex;gap:8px;padding:12px 20px 18px;justify-content:flex-end}
+.btn-cancel{padding:8px 16px;border-radius:7px;border:1px solid var(--bd);background:transparent;color:var(--muted);font-size:.78rem;font-weight:600;transition:all .15s}
+.btn-cancel:hover{border-color:var(--text);color:var(--text)}
+.btn-save{padding:8px 18px;border-radius:7px;border:none;background:var(--accent);color:#fff;font-size:.78rem;font-weight:700;transition:background .15s}
+.btn-save:hover{background:var(--accent2)}
+
+/* ── Nav ── */
+.nav{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--bd);transition:background .25s,border-color .25s}
+.nav-back{font-size:.72rem;font-weight:600;color:var(--muted);padding:4px 12px;border:1px solid var(--bd);border-radius:5px;text-decoration:none;transition:color .15s,border-color .15s}
+.nav-back:hover{color:var(--accent);border-color:var(--accent)}
+.nav-title{font-size:.82rem;font-weight:700}
+.nav-spacer{flex:1}
+.nav-role-badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid;letter-spacing:.05em;text-transform:uppercase}
+.nav-role-badge.admin{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.35);color:var(--gold)}
+.nav-role-badge.viewer{background:rgba(148,148,184,.08);border-color:var(--bd);color:var(--dim)}
+.theme-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--bd);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s;font-size:14px;line-height:1}
+.theme-btn:hover{background:var(--accent);border-color:var(--accent)}
+
+/* ── App ── */
+.app{flex:1;display:flex;overflow:hidden}
+
+/* ── Sidebar ── */
+.sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s}
+.sidebar-head{padding:10px 12px 8px;border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:center;gap:6px;transition:border-color .25s}
+.sidebar-head-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);flex:1}
+.add-btn{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.admin-only{display:none!important}
+body.is-admin .admin-only{display:flex!important}
+.viewer-only{display:flex}
+body.is-admin .viewer-only{display:none!important}
+
+.all-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;margin:6px 6px 2px;border:1px solid transparent;transition:background .15s}
+.all-item:hover{background:var(--card)}
+.all-item.active{background:rgba(108,111,245,.12);border-color:rgba(108,111,245,.25)}
+.all-item.active .all-label{color:var(--accent)}
+.all-avatar{width:26px;height:26px;border-radius:50%;background:var(--bd);display:flex;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0}
+.all-item.active .all-avatar{background:rgba(108,111,245,.2);border:1px solid rgba(108,111,245,.35)}
+.all-label{font-size:.78rem;font-weight:700;flex:1}
+.all-count{font-size:.6rem;font-family:var(--mono);color:var(--dim)}
+
+.divider{height:1px;background:var(--bd);margin:4px 10px;transition:background .25s}
+.people-scroll{flex:1;overflow-y:auto;padding:4px 6px 6px}
+
+.kelompok-block{margin-bottom:4px}
+.kelompok-label{display:flex;align-items:center;gap:5px;padding:6px 10px 3px;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.kelompok-name-text{flex:1}
+.grp-actions{display:flex;gap:2px;align-items:center;opacity:0;transition:opacity .15s}
+.kelompok-label:hover .grp-actions{opacity:1}
+.grp-act-btn{width:16px;height:16px;border-radius:3px;border:none;background:transparent;color:var(--dim);font-size:.6rem;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.grp-act-btn:hover{color:var(--text)}
+.grp-act-btn.del:hover{color:var(--red)}
+
+.member-item{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;transition:background .15s}
+.member-item:hover{background:var(--card)}
+.member-item.active{background:rgba(108,111,245,.12);border-color:rgba(108,111,245,.25)}
+.member-item.active .member-name{color:var(--accent)}
+.member-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0;background:var(--bd);color:var(--text)}
+.member-item.active .member-avatar{background:rgba(108,111,245,.2);border:1px solid rgba(108,111,245,.35);color:var(--accent)}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:.75rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-role{font-size:.6rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .25s}
+.member-task-count{font-size:.58rem;font-family:var(--mono);color:var(--dim);flex-shrink:0}
+.member-actions{display:none;gap:2px;flex-shrink:0}
+.member-item:hover .member-actions{display:flex}
+.member-item:hover .member-task-count{display:none}
+.m-act-btn{width:16px;height:16px;border-radius:3px;border:none;background:transparent;color:var(--dim);font-size:.6rem;display:flex;align-items:center;justify-content:center}
+.m-act-btn:hover{color:var(--text)}
+.m-act-btn.del:hover{color:var(--red)}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.main-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--dim);text-align:center;padding:24px}
+.main-empty .ico{font-size:2rem;margin-bottom:8px}
+.main-empty p{font-size:.75rem;line-height:1.6;max-width:220px}
+
+/* Member header */
+.member-header{padding:14px 18px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:center;gap:12px;transition:border-color .25s}
+.mh-avatar{width:38px;height:38px;border-radius:50%;background:rgba(108,111,245,.15);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--accent);flex-shrink:0}
+.mh-name{font-size:.95rem;font-weight:800;letter-spacing:-.01em}
+.mh-sub{font-size:.68rem;color:var(--muted);margin-top:1px;transition:color .25s}
+.mh-spacer{flex:1}
+.mh-actions{display:flex;gap:6px;align-items:center}
+.icon-btn{width:28px;height:28px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .15s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-btn.danger:hover{border-color:var(--red);color:var(--red)}
+
+/* Task area */
+.task-area{flex:1;overflow-y:auto;padding:10px 14px 16px}
+
+/* Filter row */
+.filter-row{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-wrap:wrap}
+.filter-label{font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.search-input{flex:1;min-width:120px;padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--dim)}
+.filter-divider{width:1px;height:16px;background:var(--bd);flex-shrink:0}
+.filter-btn{font-size:.64rem;font-weight:600;padding:3px 9px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
+.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── Org chart ── */
+.org-view{flex:1;overflow:auto;padding:32px 24px}
+.org-level-row{display:flex;gap:16px;justify-content:center;flex-shrink:0}
+.org-root-node{background:var(--accent);color:#fff;border-radius:10px;padding:10px 24px;font-size:.9rem;font-weight:800;letter-spacing:-.01em;text-align:center;flex-shrink:0}
+.org-level-row{display:flex;gap:16px;justify-content:center;flex-shrink:0}
+.org-kelompok-node{background:var(--surface);border:2px solid var(--accent);border-radius:8px;padding:8px 14px;font-size:.74rem;font-weight:700;color:var(--accent);text-align:center;width:148px;flex-shrink:0;cursor:pointer;user-select:none;transition:background .15s,border-color .15s}
+.org-kelompok-node.depth-1{background:var(--card);border:1.5px solid var(--bd);color:var(--muted)}
+.org-kelompok-node:hover{background:rgba(108,111,245,.15);border-color:var(--accent);color:var(--accent)}
+.org-k-name{font-size:.78rem;font-weight:700}
+.org-k-meta{font-size:.6rem;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.org-view-btn{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
+.org-view-btn.active{border-color:var(--teal);color:var(--teal);background:rgba(45,212,191,.08)}
+/* modal anggota list */
+.modal-member-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto}
+.modal-member-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;border:1px solid var(--bd);background:var(--card);cursor:pointer;transition:border-color .15s}
+.modal-member-row:hover{border-color:var(--accent)}
+.modal-member-av{width:28px;height:28px;border-radius:50%;background:rgba(108,111,245,.15);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;color:var(--accent);flex-shrink:0}
+.modal-member-info{flex:1;min-width:0}
+.modal-member-name{font-size:.8rem;font-weight:600}
+.modal-member-role{font-size:.62rem;color:var(--dim)}
+.modal-member-tasks{font-size:.6rem;font-family:var(--mono);color:var(--dim);flex-shrink:0}
+/* sidebar indent */
+.kelompok-children{padding-left:14px;border-left:1px solid var(--bd);margin-left:14px;margin-bottom:4px;transition:border-color .25s}
+/* order btns */
+.grp-order-btn{width:14px;height:14px;border-radius:2px;border:none;background:transparent;color:var(--dim);font-size:.55rem;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
+.grp-order-btn:hover{color:var(--text)}
+.task-add-btn-row{flex-shrink:0;padding:8px 14px;border-bottom:1px solid var(--bd);transition:border-color .25s}
+.task-add-inline-btn{font-size:.72rem;font-weight:600;padding:5px 12px;border-radius:6px;border:1px dashed var(--bd);background:transparent;color:var(--muted);width:100%;text-align:left;transition:all .15s;display:flex;align-items:center;gap:6px}
+.task-add-inline-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Section header inside task area */
+.task-section{margin-bottom:4px}
+.task-section-header{display:flex;align-items:center;gap:8px;padding:10px 2px 5px;border-bottom:1px solid var(--bd);margin-bottom:4px;transition:border-color .25s}
+.task-section-ico{font-size:.85rem}
+.task-section-label{font-size:.7rem;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.task-section-count{font-size:.6rem;font-family:var(--mono);color:var(--dim);background:var(--card);padding:1px 7px;border-radius:8px;border:1px solid var(--bd)}
+
+/* Task card */
+.task-card{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 12px;border-radius:8px;border:1px solid var(--bd);
+  background:var(--card);margin-bottom:6px;
+  transition:border-color .15s,background .25s;
+  position:relative;
+}
+.task-card:hover{border-color:var(--accent)}
+.task-left-bar{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch;min-height:24px}
+.task-recurring-bar{background:var(--accent)}
+.task-once-bar{background:var(--gold)}
+.task-body{flex:1;min-width:0}
+.task-title{font-size:.82rem;font-weight:600;line-height:1.45;word-break:break-word}
+.task-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;align-items:center}
+.task-type-badge{font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;border:1px solid}
+.badge-recurring{background:rgba(108,111,245,.12);border-color:rgba(108,111,245,.3);color:var(--accent)}
+.badge-once{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);color:var(--gold)}
+.task-recur-detail{font-size:.62rem;color:var(--muted);font-family:var(--mono)}
+.task-notes{font-size:.72rem;color:var(--muted);margin-top:4px;line-height:1.55;transition:color .25s}
+.task-person-chip{font-size:.6rem;font-weight:600;padding:1px 7px;border-radius:10px;background:var(--surface);border:1px solid var(--bd);color:var(--muted);white-space:nowrap}
+.task-card-actions{display:flex;gap:3px;opacity:0;transition:opacity .15s;flex-shrink:0}
+.task-card:hover .task-card-actions{opacity:1}
+.tc-act{width:22px;height:22px;border-radius:4px;border:none;background:transparent;color:var(--dim);font-size:.7rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.tc-act:hover{background:var(--surface);color:var(--text)}
+.tc-act.del:hover{background:rgba(248,113,113,.1);color:var(--red)}
+
+/* All view group header */
+.group-header{display:flex;align-items:center;gap:8px;padding:10px 2px 5px;border-bottom:1px solid var(--bd);margin:10px 0 6px;transition:border-color .25s}
+.group-header:first-child{margin-top:0}
+.group-avatar{width:22px;height:22px;border-radius:50%;background:rgba(108,111,245,.18);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:var(--accent)}
+.group-name{font-size:.74rem;font-weight:700;flex:1}
+.group-role{font-size:.62rem;color:var(--dim)}
+.group-count{font-size:.6rem;font-family:var(--mono);color:var(--dim);background:var(--card);padding:1px 7px;border-radius:8px;border:1px solid var(--bd)}
+.group-empty{font-size:.72rem;color:var(--dim);padding:6px 2px 10px}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+
+@media(max-width:640px){
+  .sidebar{width:100%;height:210px;flex-shrink:0;border-right:none;border-top:1px solid var(--bd);order:2}
+  .app{flex-direction:column}
+  .main{order:1}
+}
+</style>
+</head>
+<body>
+
+<!-- Gate -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-ico">🏢</div>
+    <div class="gate-org">Alteco</div>
+    <div class="gate-sub">Masukkan kode akses untuk melanjutkan</div>
+    <input type="password" id="gateInput" class="gate-input" placeholder="••••••••" maxlength="20" autocomplete="off" inputmode="numeric"/>
+    <button class="gate-btn" id="gateBtn">Masuk</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal hidden">
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title" id="modalTitle">—</span>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn-cancel" id="modalCancel">Batal</button>
+      <button class="btn-save" id="modalSave">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav class="nav">
+  <a href="../index.html" class="nav-back">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:3px"><path d="M15 18l-6-6 6-6"/></svg>
+    Kembali
+  </a>
+  <span class="nav-title admin-only" id="navOrgName" style="margin-left:4px;cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s" title="Klik untuk edit nama organisasi">Alteco</span>
+  <span class="nav-title viewer-only" id="navOrgNameView" style="margin-left:4px">Alteco</span>
+  <span class="nav-spacer"></span>
+  <span class="nav-role-badge" id="roleBadge">—</span>
+  <button class="theme-btn" id="themeBtn" title="Ganti tema">🌙</button>
+</nav>
+
+<!-- App -->
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <span class="sidebar-head-title">Struktur</span>
+      <button class="org-view-btn" id="btnOrgView" title="Bagan organisasi">Bagan</button>
+    </div>
+
+    <div class="all-item" id="allItem">
+      <div class="all-avatar">☰</div>
+      <span class="all-label">Semua Anggota</span>
+      <span class="all-count" id="allCount"></span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="people-scroll" id="peopleScroll"></div>
+    <div class="admin-only" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
+      <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
+      <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
+      <button class="task-add-inline-btn" id="btnResetData" style="font-size:.68rem;margin-top:4px;border-color:#e05252;color:#e05252">⚠ Reset Semua Data</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="main-empty" id="emptyState">
+      <div class="ico">🏢</div>
+      <p>Pilih anggota untuk melihat tugasnya, atau tampilkan semua.</p>
+    </div>
+
+    <div id="taskView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="member-header" id="memberHeader"></div>
+
+      <div class="filter-row" id="filterRow">
+        <input type="search" class="search-input" id="searchInput" placeholder="Cari tugas…" autocomplete="off"/>
+        <div class="filter-divider"></div>
+        <button class="filter-btn active" data-f="all">Semua Jenis</button>
+        <button class="filter-btn" data-f="recurring">Tugas Berulang</button>
+        <button class="filter-btn" data-f="once">Tugas Sekali</button>
+      </div>
+
+      <div class="task-add-btn-row admin-only" id="taskAddRow">
+        <button class="task-add-inline-btn" id="btnAddTask">＋ Tambah tugas</button>
+      </div>
+
+      <div class="task-area" id="taskArea"></div>
+    </div>
+
+    <!-- Org chart view -->
+    <div id="orgView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="org-view" id="orgArea"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════ */
+const PASS_VIEW  = '20251208';
+const PASS_ADMIN = '19950328';
+const LS_KEY     = 'rakperpus_alteco_v2';
+const ALL        = '__all__';
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let db = load();   /* {kelompoks:[{id,name}], members:[{id,name,role,kelompokId}], tasks:[{id,memberId,title,type,recurrence,notes}]} */
+let role         = null;   /* 'viewer' | 'admin' */
+let activeId     = null;   /* null | ALL | memberId */
+let activeFilter = 'all';  /* 'all' | 'recurring' | 'once' */
+let searchQuery  = '';
+let viewMode     = 'tasks'; /* 'tasks' | 'org' */
+
+/* modal */
+let mMode = null;   /* 'div-add'|'grp-edit'|'mem-add'|'mem-edit'|'task-add'|'task-edit' */
+let mCtx  = null;   /* context object */
+
+/* ══════════════════════════════════════════
+   PERSISTENCE
+══════════════════════════════════════════ */
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS_KEY));
+    if(d&&d.kelompoks&&d.members&&d.tasks){
+      d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i},k));
+      if(!d.orgName) d.orgName='Alteco';
+      return d;
+    }
+  }catch{}
+  return {kelompoks:[],members:[],tasks:[],orgName:'Alteco'};
+}
+function save(){ localStorage.setItem(LS_KEY,JSON.stringify(db)) }
+
+/* ══════════════════════════════════════════
+   GATE
+══════════════════════════════════════════ */
+(function(){
+  const gate=document.getElementById('gate');
+  const inp=document.getElementById('gateInput');
+  const btn=document.getElementById('gateBtn');
+  const err=document.getElementById('gateErr');
+
+  const stored=sessionStorage.getItem('rak_alteco_role');
+  if(stored==='admin'||stored==='viewer'){
+    role=stored;
+    gate.classList.add('hidden');
+    applyRole();
+    return;
+  }
+
+  function attempt(){
+    const val=inp.value.trim();
+    if(val===PASS_ADMIN){ role='admin'; sessionStorage.setItem('rak_alteco_role','admin'); gate.classList.add('hidden'); applyRole(); }
+    else if(val===PASS_VIEW){ role='viewer'; sessionStorage.setItem('rak_alteco_role','viewer'); gate.classList.add('hidden'); applyRole(); }
+    else {
+      inp.classList.add('error'); err.textContent='Kode akses tidak valid.'; inp.value='';
+      setTimeout(()=>{inp.classList.remove('error');err.textContent=''},1500);
+    }
+  }
+  btn.addEventListener('click',attempt);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')attempt()});
+  inp.focus();
+})();
+
+function syncOrgName(){
+  const name=db.orgName||'Alteco';
+  document.getElementById('navOrgName').textContent=name;
+  document.getElementById('navOrgNameView').textContent=name;
+}
+
+function applyRole(){
+  document.body.classList.toggle('is-admin', role==='admin');
+  const badge=document.getElementById('roleBadge');
+  badge.textContent=role==='admin'?'Superadmin':'Viewer';
+  badge.className='nav-role-badge '+(role==='admin'?'admin':'viewer');
+  syncOrgName();
+  renderSidebar();
+  renderMain();
+}
+
+/* Inline edit org name (superadmin only) */
+document.getElementById('navOrgName').addEventListener('click',()=>{
+  if(role!=='admin') return;
+  const el=document.getElementById('navOrgName');
+  const cur=db.orgName||'Alteco';
+  const val=prompt('Nama organisasi:',cur);
+  if(!val||!val.trim()||val.trim()===cur) return;
+  db.orgName=val.trim();
+  save(); syncOrgName();
+  if(viewMode==='org') renderOrgChart();
+});
+document.getElementById('navOrgName').addEventListener('mouseenter',()=>{
+  document.getElementById('navOrgName').style.borderBottomColor='var(--accent)';
+});
+document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
+  document.getElementById('navOrgName').style.borderBottomColor='transparent';
+});
+
+/* ══════════════════════════════════════════
+   THEME
+══════════════════════════════════════════ */
+(function(){
+  const btn=document.getElementById('themeBtn'),html=document.documentElement;
+  if(localStorage.getItem('theme')==='light'){html.setAttribute('data-theme','light');btn.textContent='☀️'}
+  btn.addEventListener('click',()=>{
+    if(html.getAttribute('data-theme')==='light'){html.removeAttribute('data-theme');btn.textContent='🌙';localStorage.setItem('theme','dark')}
+    else{html.setAttribute('data-theme','light');btn.textContent='☀️';localStorage.setItem('theme','light')}
+  });
+})();
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6) }
+function initials(n){ return n.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('') }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function memberTasks(mid){ return db.tasks.filter(t=>t.memberId===mid) }
+function kelompokName(did){ const d=db.kelompoks.find(x=>x.id===did); return d?d.name:'' }
+function recurrenceLabel(r){
+  const map={harian:'Harian',mingguan:'Mingguan',bulanan:'Bulanan',tahunan:'Tahunan'};
+  return map[r]||r||'';
+}
+function fmtDueDate(d){
+  if(!d) return '';
+  const [y,m,day]=d.split('-');
+  const months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+/* ══════════════════════════════════════════
+   SIDEBAR RENDER
+══════════════════════════════════════════ */
+function kelompokChildren(parentId){
+  return db.kelompoks
+    .filter(k=>(k.parentId||null)===parentId)
+    .sort((a,b)=>a.order-b.order);
+}
+
+function renderSidebar(){
+  const allItem=document.getElementById('allItem');
+  allItem.className='all-item'+(activeId===ALL?' active':'');
+  document.getElementById('allCount').textContent=db.tasks.length||'';
+
+  const scroll=document.getElementById('peopleScroll');
+  scroll.innerHTML='';
+
+  /* Recursive render */
+  function renderKelompokGroup(parentId, container){
+    kelompokChildren(parentId).forEach(k=>{
+      const block=document.createElement('div');
+      block.className='kelompok-block';
+
+      const siblings=kelompokChildren(k.parentId||null);
+      const idx=siblings.findIndex(s=>s.id===k.id);
+
+      const hdr=document.createElement('div');
+      hdr.className='kelompok-label';
+      hdr.innerHTML=`
+        <span class="kelompok-name-text">${esc(k.name)}</span>
+        ${role==='admin'?`<span class="grp-actions">
+          ${idx>0?`<button class="grp-order-btn" data-grp-up="${k.id}" title="Naik">▲</button>`:''}
+          ${idx<siblings.length-1?`<button class="grp-order-btn" data-grp-dn="${k.id}" title="Turun">▼</button>`:''}
+          <button class="grp-act-btn" data-grp-edit="${k.id}" title="Edit">✎</button>
+          <button class="grp-act-btn del" data-grp-del="${k.id}" title="Hapus">✕</button>
+          <button class="grp-act-btn" data-grp-add-mem="${k.id}" title="+ Anggota" style="color:var(--accent)">+</button>
+        </span>`:''}
+      `;
+      block.appendChild(hdr);
+
+      db.members.filter(m=>m.kelompokId===k.id).forEach(m=>block.appendChild(makeMemberItem(m)));
+
+      /* children */
+      const childList=kelompokChildren(k.id);
+      if(childList.length){
+        const childWrap=document.createElement('div');
+        childWrap.className='kelompok-children';
+        renderKelompokGroup(k.id, childWrap);
+        block.appendChild(childWrap);
+      }
+
+      container.appendChild(block);
+    });
+  }
+
+  renderKelompokGroup(null, scroll);
+
+  /* No-kelompok members */
+  const noGrpMembers=db.members.filter(m=>!m.kelompokId||!db.kelompoks.find(d=>d.id===m.kelompokId));
+  if(noGrpMembers.length){
+    const block=document.createElement('div');
+    block.className='kelompok-block';
+    const hdr=document.createElement('div');
+    hdr.className='kelompok-label';
+    hdr.innerHTML=`<span class="kelompok-name-text" style="color:var(--dim)">Tanpa Kelompok</span>`;
+    block.appendChild(hdr);
+    noGrpMembers.forEach(m=>block.appendChild(makeMemberItem(m)));
+    scroll.appendChild(block);
+  }
+
+  /* Bind actions */
+  scroll.querySelectorAll('[data-grp-up]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    const k=db.kelompoks.find(x=>x.id===b.dataset.grpUp);
+    if(!k) return;
+    const siblings=kelompokChildren(k.parentId||null);
+    const i=siblings.findIndex(s=>s.id===k.id);
+    if(i>0){ const tmp=siblings[i-1].order; siblings[i-1].order=k.order; k.order=tmp; }
+    save(); renderSidebar();
+  }));
+  scroll.querySelectorAll('[data-grp-dn]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    const k=db.kelompoks.find(x=>x.id===b.dataset.grpDn);
+    if(!k) return;
+    const siblings=kelompokChildren(k.parentId||null);
+    const i=siblings.findIndex(s=>s.id===k.id);
+    if(i<siblings.length-1){ const tmp=siblings[i+1].order; siblings[i+1].order=k.order; k.order=tmp; }
+    save(); renderSidebar();
+  }));
+  scroll.querySelectorAll('[data-grp-edit]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    openModal('grp-edit',{id:b.dataset.grpEdit});
+  }));
+  scroll.querySelectorAll('[data-grp-del]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    const k=db.kelompoks.find(d=>d.id===b.dataset.grpDel);
+    if(!k) return;
+    if(!confirm(`Hapus kelompok "${k.name}"? Anggota & sub-kelompoknya akan jadi tanpa kelompok.`)) return;
+    /* detach children */
+    db.kelompoks.forEach(c=>{if(c.parentId===k.id)c.parentId=null;});
+    db.kelompoks=db.kelompoks.filter(d=>d.id!==k.id);
+    db.members.forEach(m=>{if(m.kelompokId===k.id)m.kelompokId=null});
+    if(activeId===k.id) activeId=null;
+    save(); renderSidebar(); renderMain();
+  }));
+  scroll.querySelectorAll('[data-grp-add-mem]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    openModal('mem-add',{kelompokId:b.dataset.grpAddMem});
+  }));
+}
+
+function makeMemberItem(m){
+  const count=memberTasks(m.id).length;
+  const div=document.createElement('div');
+  div.className='member-item'+(activeId===m.id?' active':'');
+  div.innerHTML=`
+    <div class="member-avatar">${initials(m.name)}</div>
+    <div class="member-info">
+      <div class="member-name">${esc(m.name)}</div>
+      ${m.role?`<div class="member-role">${esc(m.role)}</div>`:''}
+    </div>
+    <span class="member-task-count">${count||''}</span>
+    ${role==='admin'?`<span class="member-actions">
+      <button class="m-act-btn" data-mem-edit="${m.id}">✎</button>
+      <button class="m-act-btn del" data-mem-del="${m.id}">✕</button>
+    </span>`:''}
+  `;
+  div.addEventListener('click',e=>{
+    if(e.target.closest('.member-actions')) return;
+    select(m.id);
+  });
+  if(role==='admin'){
+    div.querySelector(`[data-mem-edit="${m.id}"]`).addEventListener('click',e=>{
+      e.stopPropagation();
+      openModal('mem-edit',{id:m.id});
+    });
+    div.querySelector(`[data-mem-del="${m.id}"]`).addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm(`Hapus "${m.name}" dan semua tugasnya?`)) return;
+      db.members=db.members.filter(x=>x.id!==m.id);
+      db.tasks=db.tasks.filter(t=>t.memberId!==m.id);
+      if(activeId===m.id) activeId=null;
+      save(); renderSidebar(); renderMain();
+    });
+  }
+  return div;
+}
+
+/* ══════════════════════════════════════════
+   SELECT
+══════════════════════════════════════════ */
+function select(id){
+  activeId=id; activeFilter='all';
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
+  renderSidebar(); renderMain();
+}
+
+document.getElementById('allItem').addEventListener('click',()=>select(ALL));
+
+/* ══════════════════════════════════════════
+   MAIN RENDER
+══════════════════════════════════════════ */
+function renderMain(){
+  const empty=document.getElementById('emptyState');
+  const tv=document.getElementById('taskView');
+  document.getElementById('orgView').style.display='none';
+  viewMode='tasks';
+  document.getElementById('btnOrgView').classList.remove('active');
+
+  if(!activeId){
+    empty.style.display='flex'; tv.style.display='none'; return;
+  }
+  empty.style.display='none';
+  tv.style.display='flex';
+
+  const isAll=activeId===ALL;
+
+  /* Header */
+  const mh=document.getElementById('memberHeader');
+  if(isAll){
+    mh.innerHTML=`
+      <div class="mh-avatar" style="font-size:.7rem">☰</div>
+      <div>
+        <div class="mh-name">Semua Anggota</div>
+        <div class="mh-sub">${db.members.length} anggota · ${db.tasks.length} tugas</div>
+      </div>
+    `;
+    document.getElementById('taskAddRow').style.display='none';
+  } else {
+    const m=db.members.find(x=>x.id===activeId);
+    if(!m){ activeId=null; renderSidebar(); renderMain(); return; }
+    const divName=kelompokName(m.kelompokId);
+    mh.innerHTML=`
+      <div class="mh-avatar">${initials(m.name)}</div>
+      <div>
+        <div class="mh-name">${esc(m.name)}</div>
+        <div class="mh-sub">${[m.role,divName].filter(Boolean).map(esc).join(' · ')}</div>
+      </div>
+      <span class="mh-spacer"></span>
+      ${role==='admin'?`<div class="mh-actions">
+        <button class="icon-btn" id="editMemberBtn" title="Edit anggota">✎</button>
+      </div>`:''}
+    `;
+    if(role==='admin'){
+      document.getElementById('editMemberBtn').addEventListener('click',()=>openModal('mem-edit',{id:activeId}));
+      document.getElementById('taskAddRow').style.display='block';
+    } else {
+      document.getElementById('taskAddRow').style.display='none';
+    }
+  }
+
+  renderTasks();
+}
+
+/* ══════════════════════════════════════════
+   TASKS RENDER
+══════════════════════════════════════════ */
+function renderTasks(){
+  const area=document.getElementById('taskArea');
+  area.innerHTML='';
+  const isAll=activeId===ALL;
+
+  function applyFilter(arr){
+    let r=arr;
+    if(activeFilter==='recurring') r=r.filter(t=>t.type==='recurring');
+    else if(activeFilter==='once') r=r.filter(t=>t.type==='once');
+    if(searchQuery) r=r.filter(t=>t.title.toLowerCase().includes(searchQuery));
+    return r;
+  }
+
+  if(isAll){
+    db.members.forEach(m=>{
+      const tasks=applyFilter(memberTasks(m.id));
+      const divName=kelompokName(m.kelompokId);
+
+      const gh=document.createElement('div');
+      gh.className='group-header';
+      gh.innerHTML=`
+        <div class="group-avatar">${initials(m.name)}</div>
+        <span class="group-name">${esc(m.name)}</span>
+        ${m.role?`<span class="group-role">${esc(m.role)}</span>`:''}
+        ${divName?`<span class="group-role" style="color:var(--dim)">· ${esc(divName)}</span>`:''}
+        <span class="group-count">${tasks.length} tugas</span>
+      `;
+      area.appendChild(gh);
+
+      if(!tasks.length){
+        const emp=document.createElement('div');
+        emp.className='group-empty';
+        emp.textContent=activeFilter==='recurring'?'Tidak ada tugas berulang.':activeFilter==='once'?'Tidak ada tugas sekali.':'Belum ada tugas.';
+        area.appendChild(emp);
+      } else {
+        tasks.forEach(t=>area.appendChild(makeTaskCard(t,false)));
+      }
+    });
+    if(!db.members.length){
+      area.innerHTML=`<div style="padding:32px;text-align:center;color:var(--dim);font-size:.78rem">Belum ada anggota.</div>`;
+    }
+  } else {
+    const allTasks=memberTasks(activeId);
+    const recurring=applyFilter(allTasks.filter(t=>t.type==='recurring'));
+    const once=applyFilter(allTasks.filter(t=>t.type==='once'));
+
+    /* Section: Berulang */
+    if(activeFilter!=='once'){
+      const sh=document.createElement('div');
+      sh.className='task-section-header';
+      sh.innerHTML=`<span class="task-section-ico">🔁</span><span class="task-section-label">Berulang</span><span class="task-section-count">${recurring.length}</span>`;
+      area.appendChild(sh);
+      if(!recurring.length){
+        const e=document.createElement('div');
+        e.style.cssText='font-size:.72rem;color:var(--dim);padding:8px 2px 12px';
+        e.textContent='Belum ada tugas berulang.';
+        area.appendChild(e);
+      } else {
+        recurring.forEach(t=>area.appendChild(makeTaskCard(t,true)));
+      }
+    }
+
+    /* Section: Sekali */
+    if(activeFilter!=='recurring'){
+      const sh=document.createElement('div');
+      sh.className='task-section-header';
+      sh.style.marginTop='10px';
+      sh.innerHTML=`<span class="task-section-ico">📌</span><span class="task-section-label">Sekali</span><span class="task-section-count">${once.length}</span>`;
+      area.appendChild(sh);
+      if(!once.length){
+        const e=document.createElement('div');
+        e.style.cssText='font-size:.72rem;color:var(--dim);padding:8px 2px 12px';
+        e.textContent='Belum ada tugas sekali.';
+        area.appendChild(e);
+      } else {
+        once.forEach(t=>area.appendChild(makeTaskCard(t,true)));
+      }
+    }
+  }
+}
+
+function makeTaskCard(t, showActions){
+  const div=document.createElement('div');
+  div.className='task-card';
+  const isRecurring=t.type==='recurring';
+  div.innerHTML=`
+    <div class="task-left-bar ${isRecurring?'task-recurring-bar':'task-once-bar'}"></div>
+    <div class="task-body">
+      <div class="task-title">${esc(t.title)}</div>
+      <div class="task-badges">
+        <span class="task-type-badge ${isRecurring?'badge-recurring':'badge-once'}">${isRecurring?'🔁 Berulang':'📌 Sekali'}</span>
+        ${isRecurring&&t.recurrence?`<span class="task-recur-detail">${esc(recurrenceLabel(t.recurrence))}</span>`:''}
+        ${!isRecurring&&t.dueDate?`<span class="task-recur-detail">📅 ${esc(fmtDueDate(t.dueDate))}</span>`:''}
+      </div>
+      ${t.notes?`<div class="task-notes">${esc(t.notes)}</div>`:''}
+    </div>
+    ${showActions&&role==='admin'?`<div class="task-card-actions">
+      <button class="tc-act" title="Edit" data-task-edit="${t.id}">✎</button>
+      <button class="tc-act del" title="Hapus" data-task-del="${t.id}">✕</button>
+    </div>`:''}
+  `;
+  if(showActions&&role==='admin'){
+    div.querySelector(`[data-task-edit="${t.id}"]`).addEventListener('click',()=>openModal('task-edit',{id:t.id}));
+    div.querySelector(`[data-task-del="${t.id}"]`).addEventListener('click',()=>{
+      if(!confirm('Hapus tugas ini?')) return;
+      db.tasks=db.tasks.filter(x=>x.id!==t.id);
+      save(); renderSidebar(); renderTasks();
+    });
+  }
+  return div;
+}
+
+/* ══════════════════════════════════════════
+   FILTERS + SEARCH
+══════════════════════════════════════════ */
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    activeFilter=btn.dataset.f;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTasks();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input',e=>{
+  searchQuery=e.target.value.trim().toLowerCase();
+  renderTasks();
+});
+
+/* ══════════════════════════════════════════
+   ORG CHART TOGGLE
+══════════════════════════════════════════ */
+document.getElementById('btnOrgView').addEventListener('click',()=>{
+  viewMode=viewMode==='org'?'tasks':'org';
+  document.getElementById('btnOrgView').classList.toggle('active', viewMode==='org');
+  const tv=document.getElementById('taskView');
+  const ov=document.getElementById('orgView');
+  const empty=document.getElementById('emptyState');
+  if(viewMode==='org'){
+    tv.style.display='none';
+    empty.style.display='none';
+    ov.style.display='flex';
+    renderOrgChart();
+  } else {
+    ov.style.display='none';
+    renderMain();
+  }
+});
+
+
+/* ══════════════════════════════════════════
+   ORG CHART RENDER
+══════════════════════════════════════════ */
+function renderOrgChart(){
+  const area=document.getElementById('orgArea');
+  area.innerHTML='';
+
+  if(!db.kelompoks.length){
+    area.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:.78rem;padding:40px">Belum ada kelompok.</div>`;
+    return;
+  }
+
+  const NW=148,NH=54,RH=40,HG=24,VG=56,PAD=24;
+
+  /* subtree width = max(node width, sum of children subtrees + gaps) */
+  function sw(id){
+    const kids=kelompokChildren(id);
+    if(!kids.length) return NW;
+    const total=kids.reduce((s,k)=>s+sw(k.id),0)+(kids.length-1)*HG;
+    return Math.max(NW,total);
+  }
+
+  /* assign absolute X center per node */
+  const posX={};
+  function assignX(kids,startX){
+    let cur=startX;
+    kids.forEach(k=>{
+      const s=sw(k.id);
+      posX[k.id]=cur+s/2;
+      assignX(kelompokChildren(k.id),cur);
+      cur+=s+HG;
+    });
+  }
+  const topKids=kelompokChildren(null);
+  const totalW=topKids.reduce((s,k)=>s+sw(k.id),0)+(topKids.length-1)*HG;
+  assignX(topKids,PAD);
+
+  /* depth per node */
+  function nodeDepth(id){ const k=db.kelompoks.find(x=>x.id===id); return(!k||!k.parentId)?0:1+nodeDepth(k.parentId); }
+  function maxD(id,d){ const kids=kelompokChildren(id); return kids.length?Math.max(...kids.map(c=>maxD(c.id,d+1))):d; }
+  const maxDepth=topKids.length?Math.max(...topKids.map(k=>maxD(k.id,0))):0;
+
+  const canvasW=totalW+PAD*2;
+  const canvasH=PAD+RH+VG+(maxDepth+1)*(NH+VG)+PAD;
+
+  const canvas=document.createElement('div');
+  canvas.style.cssText=`position:relative;width:${canvasW}px;height:${canvasH}px;margin:0 auto`;
+
+  /* Root node */
+  const rootEl=document.createElement('div');
+  rootEl.className='org-root-node';
+  rootEl.textContent=db.orgName||'Alteco';
+  rootEl.style.cssText=`position:absolute;top:${PAD}px;left:50%;transform:translateX(-50%)`;
+  canvas.appendChild(rootEl);
+
+  /* Kelompok nodes — absolutely positioned */
+  db.kelompoks.forEach(k=>{
+    if(posX[k.id]===undefined) return;
+    const d=nodeDepth(k.id);
+    const y=PAD+RH+VG+d*(NH+VG);
+    const mc=db.members.filter(m=>m.kelompokId===k.id).length;
+    const tc=db.tasks.filter(t=>db.members.some(m=>m.id===t.memberId&&m.kelompokId===k.id)).length;
+    const el=document.createElement('div');
+    el.className='org-kelompok-node'+(k.parentId?' depth-1':'');
+    el.dataset.kid=k.id;
+    el.style.cssText=`position:absolute;left:${posX[k.id]-NW/2}px;top:${y}px;width:${NW}px`;
+    el.innerHTML=`<div class="org-k-name">${esc(k.name)}</div><div class="org-k-meta">${mc} anggota${tc?` · ${tc} tugas`:''}</div>`;
+    el.addEventListener('click',()=>openModal('kelompok-members',{kelompokId:k.id}));
+    canvas.appendChild(el);
+  });
+
+  area.appendChild(canvas);
+
+  /* SVG connector lines after DOM is painted */
+  requestAnimationFrame(()=>{
+    const bdColor=getComputedStyle(document.documentElement).getPropertyValue('--bd').trim()||'#888';
+    const cr=canvas.getBoundingClientRect();
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible';
+
+    function getEl(id){ return canvas.querySelector(`[data-kid="${id}"]`); }
+    function cxEl(el){ const r=el.getBoundingClientRect(); return Math.round(r.left+r.width/2-cr.left); }
+    function botEl(el){ return Math.round(el.getBoundingClientRect().bottom-cr.top); }
+    function topEl(el){ return Math.round(el.getBoundingClientRect().top-cr.top); }
+
+    function seg(x1,y1,x2,y2){
+      const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+      l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+      l.setAttribute('stroke',bdColor);l.setAttribute('stroke-width','1.5');l.setAttribute('stroke-linecap','round');
+      svg.appendChild(l);
+    }
+
+    function branch(pCX,pBot,childEls){
+      if(!childEls.length) return;
+      const cTop=topEl(childEls[0]);
+      const midY=Math.round((pBot+cTop)/2);
+      seg(pCX,pBot,pCX,midY);
+      const xs=childEls.map(cxEl);
+      if(childEls.length===1){
+        seg(xs[0],midY,xs[0],cTop);
+      } else {
+        seg(xs[0],midY,xs[xs.length-1],midY);
+        xs.forEach((x,i)=>seg(x,midY,x,topEl(childEls[i])));
+      }
+    }
+
+    /* root → top-level */
+    const rootRect=rootEl.getBoundingClientRect();
+    const rCX=Math.round(rootRect.left+rootRect.width/2-cr.left);
+    const rBot=Math.round(rootRect.bottom-cr.top);
+    branch(rCX,rBot,topKids.map(k=>getEl(k.id)).filter(Boolean));
+
+    /* each kelompok → its children */
+    db.kelompoks.forEach(k=>{
+      const el=getEl(k.id);
+      if(!el) return;
+      const childEls=kelompokChildren(k.id).map(c=>getEl(c.id)).filter(Boolean);
+      if(childEls.length) branch(cxEl(el),botEl(el),childEls);
+    });
+
+    canvas.insertBefore(svg,canvas.firstChild);
+  });
+}
+
+/* ══════════════════════════════════════════
+   ADD BUTTONS
+══════════════════════════════════════════ */
+document.getElementById('btnAddKelompokon').addEventListener('click',()=>openModal('div-add',{}));
+document.getElementById('btnAddMemberRoot').addEventListener('click',()=>openModal('mem-add',{kelompokId:''}));
+document.getElementById('btnResetData').addEventListener('click',()=>{
+  if(!confirm('Reset SEMUA data? Kelompok, anggota, dan tugas akan terhapus permanen. Tidak bisa dibatalkan.')) return;
+  db={kelompoks:[],members:[],tasks:[]};
+  save(); activeId=null; viewMode='tasks';
+  renderSidebar(); renderMain();
+});
+document.getElementById('btnAddTask').addEventListener('click',()=>{
+  if(!activeId||activeId===ALL) return;
+  openModal('task-add',{memberId:activeId});
+});
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+function openModal(mode, ctx){
+  mMode=mode; mCtx=ctx||{};
+  const modal=document.getElementById('modal');
+  const title=document.getElementById('modalTitle');
+  const body=document.getElementById('modalBody');
+
+  modal.classList.remove('hidden');
+  document.getElementById('modalSave').style.display=''; /* reset; kelompok-members hides it */
+
+  if(mode==='div-add'||mode==='grp-edit'){
+    const div=mode==='grp-edit'?db.kelompoks.find(d=>d.id===mCtx.id):null;
+    title.textContent=mode==='div-add'?'Tambah Kelompok':'Edit Kelompok';
+    /* parent options — exclude self and its descendants to avoid circular */
+    function descendants(id){ const ch=db.kelompoks.filter(k=>k.parentId===id); return [id,...ch.flatMap(c=>descendants(c.id))]; }
+    const excludeIds=div?descendants(div.id):[];
+    const parentOpts=db.kelompoks
+      .filter(k=>!excludeIds.includes(k.id))
+      .map(k=>`<option value="${k.id}" ${(div?div.parentId:mCtx.parentId||null)===k.id?'selected':''}>${esc(k.name)}</option>`)
+      .join('');
+    document.getElementById('modalSave').style.display='';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Kelompok</label>
+        <input class="form-input" id="fi-name" type="text" value="${div?esc(div.name):''}" placeholder="contoh: Pengembangan" maxlength="60"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Di bawah kelompok <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label>
+        <select class="form-select" id="fi-parent">
+          <option value="">— Langsung di bawah Alteco —</option>
+          ${parentOpts}
+        </select>
+      </div>
+    `;
+    document.getElementById('fi-name').focus();
+  }
+
+  else if(mode==='kelompok-members'){
+    const k=db.kelompoks.find(x=>x.id===mCtx.kelompokId);
+    if(!k){ return; }
+    title.textContent=k.name;
+    document.getElementById('modalSave').style.display='none';
+    const members=db.members.filter(m=>m.kelompokId===k.id);
+    body.innerHTML=members.length
+      ? `<div class="modal-member-list" id="mmList"></div>`
+      : `<div style="text-align:center;color:var(--dim);font-size:.78rem;padding:20px 0">Belum ada anggota di kelompok ini.</div>`;
+    if(members.length){
+      const list=document.getElementById('mmList');
+      members.forEach(m=>{
+        const rec=db.tasks.filter(t=>t.memberId===m.id&&t.type==='recurring').length;
+        const once=db.tasks.filter(t=>t.memberId===m.id&&t.type==='once').length;
+        const row=document.createElement('div');
+        row.className='modal-member-row';
+        row.innerHTML=`
+          <div class="modal-member-av">${initials(m.name)}</div>
+          <div class="modal-member-info">
+            <div class="modal-member-name">${esc(m.name)}</div>
+            ${m.role?`<div class="modal-member-role">${esc(m.role)}</div>`:''}
+          </div>
+          <span class="modal-member-tasks">${rec?`🔁${rec} `:''}${once?`📌${once}`:''}</span>
+        `;
+        row.addEventListener('click',()=>{
+          closeModal();
+          viewMode='tasks';
+          document.getElementById('btnOrgView').classList.remove('active');
+          document.getElementById('orgView').style.display='none';
+          select(m.id);
+        });
+        list.appendChild(row);
+      });
+    }
+    return;
+  }
+
+  else if(mode==='mem-add'||mode==='mem-edit'){
+    const mem=mode==='mem-edit'?db.members.find(m=>m.id===mCtx.id):null;
+    title.textContent=mode==='mem-add'?'Tambah Anggota':'Edit Anggota';
+    const divOpts=db.kelompoks.map(d=>`<option value="${d.id}" ${(mem?mem.kelompokId:mCtx.kelompokId)===d.id?'selected':''}>${esc(d.name)}</option>`).join('');
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama</label>
+        <input class="form-input" id="fi-name" type="text" value="${mem?esc(mem.name):''}" placeholder="Nama lengkap" maxlength="80"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jabatan / Role</label>
+        <input class="form-input" id="fi-role" type="text" value="${mem?esc(mem.role||''):''}" placeholder="contoh: Ketua, Sekretaris" maxlength="80"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kelompok</label>
+        <select class="form-select" id="fi-div">
+          <option value="">— Tanpa Kelompok —</option>
+          ${divOpts}
+        </select>
+      </div>
+    `;
+    document.getElementById('fi-name').focus();
+  }
+
+  else if(mode==='task-add'||mode==='task-edit'){
+    const task=mode==='task-edit'?db.tasks.find(t=>t.id===mCtx.id):null;
+    const isRec=task?task.type==='recurring':true;
+    title.textContent=mode==='task-add'?'Tambah Tugas':'Edit Tugas';
+    const RECURS=['harian','mingguan','bulanan','tahunan'];
+    const recOptions=RECURS.map(r=>`
+      <button type="button" class="recur-opt${task&&task.recurrence===r?' active':(!task&&r==='mingguan'?' active':'')}" data-recur="${r}">${recurrenceLabel(r)}</button>
+    `).join('');
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Judul Tugas</label>
+        <input class="form-input" id="fi-title" type="text" value="${task?esc(task.title):''}" placeholder="Deskripsi singkat tugas" maxlength="200"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipe</label>
+        <div class="type-toggle">
+          <button type="button" class="type-btn${isRec?' active-recurring':''}" data-type="recurring">🔁 Berulang</button>
+          <button type="button" class="type-btn${!isRec?' active-once':''}" data-type="once">📌 Sekali</button>
+        </div>
+      </div>
+      <div class="form-group" id="recurGroup" style="${isRec?'':'display:none'}">
+        <label class="form-label">Pengulangan</label>
+        <div class="recur-row" id="recurRow">${recOptions}</div>
+      </div>
+      <div class="form-group" id="dueDateGroup" style="${!isRec?'':'display:none'}">
+        <label class="form-label">Tanggal</label>
+        <input class="form-input" id="fi-duedate" type="date" value="${task&&task.dueDate?task.dueDate:''}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-notes" placeholder="Detail tambahan…" maxlength="400">${task?esc(task.notes||''):''}</textarea>
+      </div>
+    `;
+    document.getElementById('fi-title').focus();
+
+    /* Type toggle */
+    let currentType=isRec?'recurring':'once';
+    body.querySelectorAll('[data-type]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        currentType=b.dataset.type;
+        body.querySelectorAll('[data-type]').forEach(x=>x.classList.remove('active-recurring','active-once'));
+        b.classList.add('active-'+currentType);
+        document.getElementById('recurGroup').style.display=currentType==='recurring'?'':'none';
+        document.getElementById('dueDateGroup').style.display=currentType==='once'?'':'none';
+      });
+    });
+    mCtx._getType=()=>currentType;
+
+    /* Recur options */
+    let currentRecur=task?task.recurrence:'mingguan';
+    body.querySelectorAll('[data-recur]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        currentRecur=b.dataset.recur;
+        body.querySelectorAll('[data-recur]').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+      });
+    });
+    mCtx._getRecur=()=>currentRecur;
+    mCtx._getDueDate=()=>document.getElementById('fi-duedate').value||'';
+  }
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.add('hidden');
+  mMode=null; mCtx=null;
+}
+
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalCancel').addEventListener('click',closeModal);
+document.getElementById('modalOverlay').addEventListener('click',closeModal);
+
+document.getElementById('modalSave').addEventListener('click',()=>{
+  if(!mMode) return;
+
+  if(mMode==='div-add'){
+    const name=document.getElementById('fi-name').value.trim();
+    if(!name) return;
+    const parentId=document.getElementById('fi-parent').value||null;
+    const siblings=kelompokChildren(parentId);
+    const order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
+    db.kelompoks.push({id:uid(),name,parentId,order});
+    save(); renderSidebar(); closeModal();
+  }
+  else if(mMode==='grp-edit'){
+    const name=document.getElementById('fi-name').value.trim();
+    if(!name) return;
+    const parentId=document.getElementById('fi-parent').value||null;
+    const k=db.kelompoks.find(d=>d.id===mCtx.id);
+    if(k){
+      if(k.parentId!==parentId){
+        /* moved to different parent — reset order to last */
+        const siblings=kelompokChildren(parentId).filter(s=>s.id!==k.id);
+        k.order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
+      }
+      k.name=name; k.parentId=parentId;
+      save(); renderSidebar(); if(viewMode==='org') renderOrgChart();
+    }
+    closeModal();
+  }
+  else if(mMode==='mem-add'||mMode==='mem-edit'){
+    const name=document.getElementById('fi-name').value.trim();
+    if(!name) return;
+    const role_v=document.getElementById('fi-role').value.trim();
+    const kelompokId=document.getElementById('fi-div').value||null;
+    if(mMode==='mem-add'){
+      const m={id:uid(),name,role:role_v,kelompokId,createdAt:Date.now()};
+      db.members.push(m);
+      save(); closeModal(); select(m.id);
+    } else {
+      const m=db.members.find(x=>x.id===mCtx.id);
+      if(m){m.name=name;m.role=role_v;m.kelompokId=kelompokId;}
+      save(); renderSidebar(); renderMain(); closeModal();
+    }
+  }
+  else if(mMode==='task-add'||mMode==='task-edit'){
+    const title=document.getElementById('fi-title').value.trim();
+    if(!title) return;
+    const type=mCtx._getType();
+    const recurrence=type==='recurring'?mCtx._getRecur():'';
+    const dueDate=type==='once'?mCtx._getDueDate():'';
+    const notes=document.getElementById('fi-notes').value.trim();
+    if(mMode==='task-add'){
+      db.tasks.push({id:uid(),memberId:mCtx.memberId,title,type,recurrence,dueDate,notes,createdAt:Date.now()});
+    } else {
+      const t=db.tasks.find(x=>x.id===mCtx.id);
+      if(t){t.title=title;t.type=type;t.recurrence=recurrence;t.dueDate=dueDate;t.notes=notes;}
+    }
+    save(); renderSidebar(); renderTasks(); closeModal();
+  }
+});
+
+/* Enter key in modal inputs */
+document.getElementById('modal').addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeModal();
+});
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+/* (applyRole called after gate if already authed) */
+</script>
+</body>
+</html>
