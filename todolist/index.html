@@ -253,6 +253,11 @@ body.is-admin .viewer-only{display:none!important}
 </head>
 <body>
 
+<!-- Loading overlay -->
+<div id="loadingOverlay" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s">
+  <div style="text-align:center;color:var(--muted);font-size:.82rem">Memuat data…</div>
+</div>
+
 <!-- Gate -->
 <div id="gate">
   <div class="gate-box">
@@ -360,10 +365,16 @@ const PASS_ADMIN = '19950328';
 const LS_KEY     = 'rakperpus_alteco_v2';
 const ALL        = '__all__';
 
+/* ── Gist config (isi setelah buat Gist + PAT) ── */
+const GIST_ID  = '6bf5ebb0397393324168d3dd14c018c8';
+const GIST_PAT_KEY = 'rak_alteco_pat';
+let GIST_PAT   = localStorage.getItem(GIST_PAT_KEY)||'';
+const GIST_FILE= 'alteco-data.json';
+
 /* ══════════════════════════════════════════
    STATE
 ══════════════════════════════════════════ */
-let db = load();   /* {kelompoks:[{id,name}], members:[{id,name,role,kelompokId}], tasks:[{id,memberId,title,type,recurrence,notes}]} */
+let db = {kelompoks:[],members:[],tasks:[],orgName:'Alteco'};
 let role         = null;   /* 'viewer' | 'admin' */
 let activeId     = null;   /* null | ALL | memberId */
 let activeFilter = 'all';  /* 'all' | 'recurring' | 'once' */
@@ -377,23 +388,71 @@ let mCtx  = null;   /* context object */
 /* ══════════════════════════════════════════
    PERSISTENCE
 ══════════════════════════════════════════ */
-function load(){
+function gistOk(){ return !!GIST_ID && !!GIST_PAT; }
+
+function migrate(d){
+  d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i},k));
+  if(!d.orgName) d.orgName='Alteco';
+  return d;
+}
+
+function localLoad(){
   try{
     const d=JSON.parse(localStorage.getItem(LS_KEY));
-    if(d&&d.kelompoks&&d.members&&d.tasks){
-      d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i},k));
-      if(!d.orgName) d.orgName='Alteco';
-      return d;
-    }
+    if(d&&d.kelompoks&&d.members&&d.tasks) return migrate(d);
   }catch{}
   return {kelompoks:[],members:[],tasks:[],orgName:'Alteco'};
 }
-function save(){ localStorage.setItem(LS_KEY,JSON.stringify(db)) }
+
+async function gistLoad(){
+  const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{
+    headers:{'Authorization':`Bearer ${GIST_PAT}`,'Accept':'application/vnd.github+json'}
+  });
+  if(!r.ok) throw new Error('gist fetch '+r.status);
+  const gist=await r.json();
+  const content=gist.files[GIST_FILE]?.content;
+  if(!content) return null;
+  const d=JSON.parse(content);
+  if(d&&d.kelompoks&&d.members&&d.tasks) return migrate(d);
+  return null;
+}
+
+let _saveTimer=null;
+function save(){
+  localStorage.setItem(LS_KEY,JSON.stringify(db)); /* immediate local backup */
+  if(!gistOk()) return;
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(async()=>{
+    try{
+      await fetch(`https://api.github.com/gists/${GIST_ID}`,{
+        method:'PATCH',
+        headers:{'Authorization':`Bearer ${GIST_PAT}`,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
+        body:JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify(db)}}})
+      });
+    }catch(e){ console.warn('Gist save failed',e); }
+  },600);
+}
 
 /* ══════════════════════════════════════════
    GATE
 ══════════════════════════════════════════ */
-(function(){
+(async function(){
+  /* Load data: Gist first, fallback to localStorage */
+  const overlay=document.getElementById('loadingOverlay');
+  try{
+    if(gistOk()){
+      const remote=await gistLoad();
+      db=remote||localLoad();
+    } else {
+      db=localLoad();
+    }
+  }catch(e){
+    console.warn('Gist load failed, using local',e);
+    db=localLoad();
+  }
+  overlay.style.opacity='0';
+  setTimeout(()=>overlay.style.display='none',300);
+
   const gate=document.getElementById('gate');
   const inp=document.getElementById('gateInput');
   const btn=document.getElementById('gateBtn');
@@ -409,7 +468,15 @@ function save(){ localStorage.setItem(LS_KEY,JSON.stringify(db)) }
 
   function attempt(){
     const val=inp.value.trim();
-    if(val===PASS_ADMIN){ role='admin'; sessionStorage.setItem('rak_alteco_role','admin'); gate.classList.add('hidden'); applyRole(); }
+    if(val===PASS_ADMIN){
+      role='admin'; sessionStorage.setItem('rak_alteco_role','admin');
+      /* PAT prompt for admin if not yet stored */
+      if(!GIST_PAT){
+        const pat=(prompt('Masukkan GitHub PAT untuk sinkronisasi data:')||'').trim();
+        if(pat){ GIST_PAT=pat; localStorage.setItem(GIST_PAT_KEY,pat); }
+      }
+      gate.classList.add('hidden'); applyRole();
+    }
     else if(val===PASS_VIEW){ role='viewer'; sessionStorage.setItem('rak_alteco_role','viewer'); gate.classList.add('hidden'); applyRole(); }
     else {
       inp.classList.add('error'); err.textContent='Kode akses tidak valid.'; inp.value='';
