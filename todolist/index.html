@@ -173,7 +173,7 @@ body.is-admin .viewer-only{display:none!important}
 .member-search-input{width:100%;padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
 .member-search-input:focus{border-color:var(--accent)}
 .member-search-input::placeholder{color:var(--dim)}
-.member-search-list{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:var(--surface);border:1px solid var(--bd);border-radius:7px;z-index:300;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,.35);display:none}
+.member-search-list{position:fixed;background:var(--surface);border:1px solid var(--bd);border-radius:7px;z-index:9000;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,.35);display:none}
 .member-search-item{padding:6px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap;transition:background .1s}
 .member-search-item:hover,.member-search-item.selected{background:rgba(108,111,245,.15);color:var(--accent)}
 .search-input:focus{border-color:var(--accent)}
@@ -859,16 +859,28 @@ function renderTasks(){
           }
         });
       } else {
-        /* not filtered: header only, no tasks */
+        /* not filtered: header only, clickable → filter by name */
         const totalTasks=members.reduce((s,m)=>s+memberTasks(m.id).length,0);
         const gh=document.createElement('div');
         gh.className='group-header';
+        gh.style.cssText='cursor:pointer;transition:background .15s';
         gh.innerHTML=`
           <div class="group-avatar">${initials(name)}</div>
           <span class="group-name">${esc(name)}</span>
           ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
-          <span class="group-count">${totalTasks} tugas</span>
+          <span style="flex:1"></span>
+          <span class="group-count" style="margin-right:4px">${totalTasks} tugas</span>
+          <span style="font-size:.68rem;color:var(--accent);font-weight:600;padding:2px 8px;border:1px solid var(--accent);border-radius:4px;flex-shrink:0">Lihat →</span>
         `;
+        gh.addEventListener('mouseenter',()=>gh.style.background='var(--card)');
+        gh.addEventListener('mouseleave',()=>gh.style.background='');
+        gh.addEventListener('click',()=>{
+          filterMemberName=name;
+          document.getElementById('memberSearchInput').value=name;
+          activeFilter='all';
+          document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
+          renderMain();
+        });
         area.appendChild(gh);
       }
     });
@@ -966,9 +978,17 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
     return [...new Set(db.members.map(m=>m.name))].sort((a,b)=>a.localeCompare(b,'id'));
   }
 
+  function positionList(){
+    const r=inp.getBoundingClientRect();
+    list.style.top=(r.bottom+4)+'px';
+    list.style.left=r.left+'px';
+    list.style.width=Math.max(r.width,160)+'px';
+  }
+
   function showList(names){
     if(!names.length){ list.style.display='none'; return; }
     list.innerHTML=names.map(n=>`<div class="member-search-item${filterMemberName===n?' selected':''}" data-name="${esc(n)}">${esc(n)}</div>`).join('');
+    positionList();
     list.style.display='';
     list.querySelectorAll('.member-search-item').forEach(el=>{
       el.addEventListener('mousedown',e=>{
