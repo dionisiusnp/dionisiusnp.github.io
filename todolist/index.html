@@ -168,7 +168,10 @@ body.is-admin .viewer-only{display:none!important}
 /* Filter row */
 .filter-row{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-wrap:wrap}
 .filter-label{font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
-.search-input{flex:1;min-width:120px;padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
+.search-input{flex:1;min-width:100px;padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
+.member-filter-select{min-width:110px;padding:4px 8px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
+.member-filter-select:focus{border-color:var(--accent)}
+.member-filter-select option{background:var(--card)}
 .search-input:focus{border-color:var(--accent)}
 .search-input::placeholder{color:var(--dim)}
 .filter-divider{width:1px;height:16px;background:var(--bd);flex-shrink:0}
@@ -344,13 +347,14 @@ body.is-admin .viewer-only{display:none!important}
 
       <div class="filter-row" id="filterRow">
         <input type="search" class="search-input" id="searchInput" placeholder="Cari tugas…" autocomplete="off"/>
+        <select class="member-filter-select" id="memberFilterSelect" style="display:none"></select>
         <div class="filter-divider"></div>
         <button class="filter-btn active" data-f="all">Semua Jenis</button>
         <button class="filter-btn" data-f="recurring">Tugas Berulang</button>
         <button class="filter-btn" data-f="once">Tugas Sekali</button>
       </div>
 
-      <div class="task-add-btn-row admin-only" id="taskAddRow">
+      <div class="task-add-btn-row" id="taskAddRow" style="display:none">
         <button class="task-add-inline-btn" id="btnAddTask">＋ Tambah tugas</button>
       </div>
 
@@ -385,9 +389,10 @@ const GIST_FILE= 'alteco-data.json';
 let db = {kelompoks:[],members:[],tasks:[],orgName:'Alteco'};
 let role         = null;   /* 'viewer' | 'admin' */
 let activeId     = null;   /* null | ALL | memberId */
-let activeFilter = 'all';  /* 'all' | 'recurring' | 'once' */
-let searchQuery  = '';
-let viewMode     = 'tasks'; /* 'tasks' | 'org' */
+let activeFilter   = 'all';  /* 'all' | 'recurring' | 'once' */
+let searchQuery    = '';
+let filterMemberId = null;   /* null | memberId — used in isAll view */
+let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
 let mMode = null;   /* 'div-add'|'grp-edit'|'mem-add'|'mem-edit'|'task-add'|'task-edit' */
@@ -709,7 +714,8 @@ function makeMemberItem(m){
    SELECT
 ══════════════════════════════════════════ */
 function select(id){
-  activeId=id; activeFilter='all';
+  activeId=id; activeFilter='all'; filterMemberId=null;
+  document.getElementById('searchInput').value=''; searchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   renderSidebar(); renderMain();
 }
@@ -733,6 +739,8 @@ function renderMain(){
   tv.style.display='flex';
 
   const isAll=activeId===ALL;
+  const mfSel=document.getElementById('memberFilterSelect');
+  const taskAddRow=document.getElementById('taskAddRow');
 
   /* Header */
   const mh=document.getElementById('memberHeader');
@@ -744,8 +752,14 @@ function renderMain(){
         <div class="mh-sub">${db.members.length} anggota · ${db.tasks.length} tugas</div>
       </div>
     `;
-    document.getElementById('taskAddRow').style.display='none';
+    taskAddRow.style.display='none';
+    /* populate member filter dropdown */
+    mfSel.style.display='';
+    mfSel.innerHTML=`<option value="">Semua Anggota</option>`+
+      db.members.map(m=>`<option value="${m.id}"${filterMemberId===m.id?' selected':''}>${esc(m.name)}</option>`).join('');
   } else {
+    filterMemberId=null;
+    mfSel.style.display='none';
     const m=db.members.find(x=>x.id===activeId);
     if(!m){ activeId=null; renderSidebar(); renderMain(); return; }
     const divName=kelompokName(m.kelompokId);
@@ -762,9 +776,9 @@ function renderMain(){
     `;
     if(role==='admin'){
       document.getElementById('editMemberBtn').addEventListener('click',()=>openModal('mem-edit',{id:activeId}));
-      document.getElementById('taskAddRow').style.display='block';
+      taskAddRow.style.display='flex';
     } else {
-      document.getElementById('taskAddRow').style.display='none';
+      taskAddRow.style.display='none';
     }
   }
 
@@ -788,7 +802,8 @@ function renderTasks(){
   }
 
   if(isAll){
-    db.members.forEach(m=>{
+    const membersToShow=filterMemberId?db.members.filter(m=>m.id===filterMemberId):db.members;
+    membersToShow.forEach(m=>{
       const tasks=applyFilter(memberTasks(m.id));
       const divName=kelompokName(m.kelompokId);
 
@@ -812,7 +827,7 @@ function renderTasks(){
         tasks.forEach(t=>area.appendChild(makeTaskCard(t,false)));
       }
     });
-    if(!db.members.length){
+    if(!membersToShow.length){
       area.innerHTML=`<div style="padding:32px;text-align:center;color:var(--dim);font-size:.78rem">Belum ada anggota.</div>`;
     }
   } else {
@@ -900,6 +915,11 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
 
 document.getElementById('searchInput').addEventListener('input',e=>{
   searchQuery=e.target.value.trim().toLowerCase();
+  renderTasks();
+});
+
+document.getElementById('memberFilterSelect').addEventListener('change',e=>{
+  filterMemberId=e.target.value||null;
   renderTasks();
 });
 
