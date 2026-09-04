@@ -391,7 +391,7 @@ let role         = null;   /* 'viewer' | 'admin' */
 let activeId     = null;   /* null | ALL | memberId */
 let activeFilter   = 'all';  /* 'all' | 'recurring' | 'once' */
 let searchQuery    = '';
-let filterMemberId = null;   /* null | memberId — used in isAll view */
+let filterMemberName = null;  /* null | string — used in isAll view, groups by name */
 let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
@@ -602,7 +602,7 @@ function renderSidebar(){
       `;
       block.appendChild(hdr);
 
-      db.members.filter(m=>m.kelompokId===k.id).forEach(m=>block.appendChild(makeMemberItem(m)));
+      db.members.filter(m=>m.kelompokId===k.id).sort((a,b)=>a.name.localeCompare(b.name,'id')).forEach(m=>block.appendChild(makeMemberItem(m)));
 
       /* children */
       const childList=kelompokChildren(k.id);
@@ -628,7 +628,7 @@ function renderSidebar(){
     hdr.className='kelompok-label';
     hdr.innerHTML=`<span class="kelompok-name-text" style="color:var(--dim)">Tanpa Kelompok</span>`;
     block.appendChild(hdr);
-    noGrpMembers.forEach(m=>block.appendChild(makeMemberItem(m)));
+    noGrpMembers.sort((a,b)=>a.name.localeCompare(b.name,'id')).forEach(m=>block.appendChild(makeMemberItem(m)));
     scroll.appendChild(block);
   }
 
@@ -714,7 +714,7 @@ function makeMemberItem(m){
    SELECT
 ══════════════════════════════════════════ */
 function select(id){
-  activeId=id; activeFilter='all'; filterMemberId=null;
+  activeId=id; activeFilter='all'; filterMemberName=null;
   document.getElementById('searchInput').value=''; searchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   renderSidebar(); renderMain();
@@ -753,12 +753,13 @@ function renderMain(){
       </div>
     `;
     taskAddRow.style.display='none';
-    /* populate member filter dropdown */
+    /* populate member filter dropdown — distinct names, sorted alpha */
+    const uniqueNames=[...new Set(db.members.map(m=>m.name))].sort((a,b)=>a.localeCompare(b,'id'));
     mfSel.style.display='';
     mfSel.innerHTML=`<option value="">Semua Anggota</option>`+
-      db.members.map(m=>`<option value="${m.id}"${filterMemberId===m.id?' selected':''}>${esc(m.name)}</option>`).join('');
+      uniqueNames.map(n=>`<option value="${n}"${filterMemberName===n?' selected':''}>${esc(n)}</option>`).join('');
   } else {
-    filterMemberId=null;
+    filterMemberName=null;
     mfSel.style.display='none';
     const m=db.members.find(x=>x.id===activeId);
     if(!m){ activeId=null; renderSidebar(); renderMain(); return; }
@@ -802,18 +803,31 @@ function renderTasks(){
   }
 
   if(isAll){
-    const membersToShow=filterMemberId?db.members.filter(m=>m.id===filterMemberId):db.members;
-    membersToShow.forEach(m=>{
-      const tasks=applyFilter(memberTasks(m.id));
-      const divName=kelompokName(m.kelompokId);
+    /* build name-groups: distinct name → array of member objects, sorted alpha */
+    const nameMap=new Map();
+    db.members.forEach(m=>{
+      if(!nameMap.has(m.name)) nameMap.set(m.name,[]);
+      nameMap.get(m.name).push(m);
+    });
+    let groups=[...nameMap.entries()]
+      .sort((a,b)=>a[0].localeCompare(b[0],'id'))
+      .map(([name,members])=>({name,members}));
+    if(filterMemberName) groups=groups.filter(g=>g.name===filterMemberName);
+
+    groups.forEach(({name,members})=>{
+      /* merge tasks from all members with this name */
+      const allMemberTasks=members.flatMap(m=>memberTasks(m.id));
+      const tasks=applyFilter(allMemberTasks);
+      const kelompokNames=[...new Set(members.map(m=>kelompokName(m.kelompokId)).filter(Boolean))].join(', ');
+      const roles=[...new Set(members.map(m=>m.role).filter(Boolean))].join(', ');
 
       const gh=document.createElement('div');
       gh.className='group-header';
       gh.innerHTML=`
-        <div class="group-avatar">${initials(m.name)}</div>
-        <span class="group-name">${esc(m.name)}</span>
-        ${m.role?`<span class="group-role">${esc(m.role)}</span>`:''}
-        ${divName?`<span class="group-role" style="color:var(--dim)">· ${esc(divName)}</span>`:''}
+        <div class="group-avatar">${initials(name)}</div>
+        <span class="group-name">${esc(name)}</span>
+        ${roles?`<span class="group-role">${esc(roles)}</span>`:''}
+        ${kelompokNames?`<span class="group-role" style="color:var(--dim)">· ${esc(kelompokNames)}</span>`:''}
         <span class="group-count">${tasks.length} tugas</span>
       `;
       area.appendChild(gh);
@@ -827,7 +841,7 @@ function renderTasks(){
         tasks.forEach(t=>area.appendChild(makeTaskCard(t,false)));
       }
     });
-    if(!membersToShow.length){
+    if(!groups.length){
       area.innerHTML=`<div style="padding:32px;text-align:center;color:var(--dim);font-size:.78rem">Belum ada anggota.</div>`;
     }
   } else {
@@ -919,7 +933,7 @@ document.getElementById('searchInput').addEventListener('input',e=>{
 });
 
 document.getElementById('memberFilterSelect').addEventListener('change',e=>{
-  filterMemberId=e.target.value||null;
+  filterMemberName=e.target.value||null;
   renderTasks();
 });
 
