@@ -169,9 +169,13 @@ body.is-admin .viewer-only{display:none!important}
 .filter-row{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-wrap:wrap}
 .filter-label{font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
 .search-input{flex:1;min-width:100px;padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
-.member-filter-select{min-width:100px;max-width:160px;padding:4px 8px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s;overflow:hidden;text-overflow:ellipsis}
-.member-filter-select:focus{border-color:var(--accent)}
-.member-filter-select option{background:var(--card)}
+.member-search-wrap{position:relative;min-width:130px;max-width:190px}
+.member-search-input{width:100%;padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
+.member-search-input:focus{border-color:var(--accent)}
+.member-search-input::placeholder{color:var(--dim)}
+.member-search-list{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:var(--surface);border:1px solid var(--bd);border-radius:7px;z-index:300;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,.35);display:none}
+.member-search-item{padding:6px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap;transition:background .1s}
+.member-search-item:hover,.member-search-item.selected{background:rgba(108,111,245,.15);color:var(--accent)}
 .search-input:focus{border-color:var(--accent)}
 .search-input::placeholder{color:var(--dim)}
 .filter-divider{width:1px;height:16px;background:var(--bd);flex-shrink:0}
@@ -346,7 +350,10 @@ body.is-admin .viewer-only{display:none!important}
       <div class="member-header" id="memberHeader"></div>
 
       <div class="filter-row" id="filterRow">
-        <select class="member-filter-select" id="memberFilterSelect" style="display:none"></select>
+        <div class="member-search-wrap" id="memberSearchWrap" style="display:none">
+          <input class="member-search-input" id="memberSearchInput" placeholder="Cari anggota…" autocomplete="off" type="text"/>
+          <div class="member-search-list" id="memberSearchList"></div>
+        </div>
         <div class="filter-divider" id="filterDivider" style="display:none"></div>
         <button class="filter-btn active" data-f="all" style="display:none">Semua Jenis</button>
         <button class="filter-btn" data-f="recurring" style="display:none">Tugas Berulang</button>
@@ -736,7 +743,8 @@ function renderMain(){
   tv.style.display='flex';
 
   const isAll=activeId===ALL;
-  const mfSel=document.getElementById('memberFilterSelect');
+  const mSearchWrap=document.getElementById('memberSearchWrap');
+  const mSearchInput=document.getElementById('memberSearchInput');
   const taskAddRow=document.getElementById('taskAddRow');
 
   /* Header */
@@ -750,18 +758,16 @@ function renderMain(){
       </div>
     `;
     taskAddRow.style.display='none';
-    /* populate member filter dropdown — distinct names, sorted alpha */
-    const uniqueNames=[...new Set(db.members.map(m=>m.name))].sort((a,b)=>a.localeCompare(b,'id'));
-    mfSel.style.display='';
-    mfSel.innerHTML=`<option value="">Semua Anggota</option>`+
-      uniqueNames.map(n=>`<option value="${n}"${filterMemberName===n?' selected':''}>${esc(n)}</option>`).join('');
+    mSearchWrap.style.display='';
+    mSearchInput.value=filterMemberName||'';
     /* show type-filter only when member selected */
     const showTypeFilter=!!filterMemberName;
     document.getElementById('filterDivider').style.display=showTypeFilter?'':'none';
     document.querySelectorAll('.filter-btn').forEach(b=>b.style.display=showTypeFilter?'':'none');
   } else {
     filterMemberName=null;
-    mfSel.style.display='none';
+    mSearchWrap.style.display='none';
+    document.getElementById('memberSearchList').style.display='none';
     document.getElementById('filterDivider').style.display='';
     document.querySelectorAll('.filter-btn').forEach(b=>b.style.display='');
     const m=db.members.find(x=>x.id===activeId);
@@ -816,8 +822,12 @@ function renderTasks(){
     if(filterMemberName) groups=groups.filter(g=>g.name===filterMemberName);
 
     groups.forEach(({name,members})=>{
-      const kelompokNames=[...new Set(members.map(m=>kelompokName(m.kelompokId)).filter(Boolean))].join(', ');
-      const roles=[...new Set(members.map(m=>m.role).filter(Boolean))].join(', ');
+      /* format: KelompokA (jabatan), KelompokB */
+      const kelompokLabel=members.map(m=>{
+        const kn=kelompokName(m.kelompokId);
+        if(!kn) return m.role?`(${esc(m.role)})`:null;
+        return m.role?`${esc(kn)} (${esc(m.role)})`:esc(kn);
+      }).filter(Boolean).join(', ');
 
       if(filterMemberName){
         /* filtered by name: sub-section per kelompok */
@@ -827,8 +837,7 @@ function renderTasks(){
         gh.innerHTML=`
           <div class="group-avatar">${initials(name)}</div>
           <span class="group-name">${esc(name)}</span>
-          ${roles?`<span class="group-role">${esc(roles)}</span>`:''}
-          ${kelompokNames?`<span class="group-role" style="color:var(--dim)">· ${esc(kelompokNames)}</span>`:''}
+          ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
           <span class="group-count">${totalFiltered} tugas</span>
         `;
         area.appendChild(gh);
@@ -857,8 +866,7 @@ function renderTasks(){
         gh.innerHTML=`
           <div class="group-avatar">${initials(name)}</div>
           <span class="group-name">${esc(name)}</span>
-          ${roles?`<span class="group-role">${esc(roles)}</span>`:''}
-          ${kelompokNames?`<span class="group-role" style="color:var(--dim)">· ${esc(kelompokNames)}</span>`:''}
+          ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
           <span class="group-count">${totalTasks} tugas</span>
         `;
         area.appendChild(gh);
@@ -950,11 +958,57 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
   });
 });
 
-document.getElementById('memberFilterSelect').addEventListener('change',e=>{
-  filterMemberName=e.target.value||null;
-  if(!filterMemberName){ activeFilter='all'; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all')); }
-  renderMain();
-});
+(function(){
+  const inp=document.getElementById('memberSearchInput');
+  const list=document.getElementById('memberSearchList');
+
+  function uniqueNamesSorted(){
+    return [...new Set(db.members.map(m=>m.name))].sort((a,b)=>a.localeCompare(b,'id'));
+  }
+
+  function showList(names){
+    if(!names.length){ list.style.display='none'; return; }
+    list.innerHTML=names.map(n=>`<div class="member-search-item${filterMemberName===n?' selected':''}" data-name="${esc(n)}">${esc(n)}</div>`).join('');
+    list.style.display='';
+    list.querySelectorAll('.member-search-item').forEach(el=>{
+      el.addEventListener('mousedown',e=>{
+        e.preventDefault();
+        const name=el.dataset.name;
+        filterMemberName=name;
+        inp.value=name;
+        list.style.display='none';
+        activeFilter='all';
+        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
+        renderMain();
+      });
+    });
+  }
+
+  inp.addEventListener('focus',()=>{
+    const q=inp.value.trim().toLowerCase();
+    const all=uniqueNamesSorted();
+    showList(q?all.filter(n=>n.toLowerCase().includes(q)):all);
+  });
+
+  inp.addEventListener('input',()=>{
+    const q=inp.value.trim().toLowerCase();
+    if(!q){
+      filterMemberName=null;
+      activeFilter='all';
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
+      renderMain();
+      showList(uniqueNamesSorted());
+      return;
+    }
+    showList(uniqueNamesSorted().filter(n=>n.toLowerCase().includes(q)));
+  });
+
+  inp.addEventListener('blur',()=>setTimeout(()=>{ list.style.display='none'; },150));
+
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ list.style.display='none'; inp.blur(); }
+  });
+})();
 
 /* ══════════════════════════════════════════
    ORG CHART TOGGLE
