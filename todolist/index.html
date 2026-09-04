@@ -352,7 +352,6 @@ body.is-admin .viewer-only{display:none!important}
       <div class="filter-row" id="filterRow">
         <div class="member-search-wrap" id="memberSearchWrap" style="display:none">
           <input class="member-search-input" id="memberSearchInput" placeholder="Cari anggota…" autocomplete="off" type="text"/>
-          <div class="member-search-list" id="memberSearchList"></div>
         </div>
         <div class="filter-divider" id="filterDivider" style="display:none"></div>
         <button class="filter-btn active" data-f="all" style="display:none">Semua Jenis</button>
@@ -395,8 +394,9 @@ const GIST_FILE= 'alteco-data.json';
 let db = {kelompoks:[],members:[],tasks:[],orgName:'Alteco'};
 let role         = null;   /* 'viewer' | 'admin' */
 let activeId     = null;   /* null | ALL | memberId */
-let activeFilter     = 'all';  /* 'all' | 'recurring' | 'once' */
-let filterMemberName = null;   /* null | string — used in isAll view, groups by name */
+let activeFilter      = 'all';  /* 'all' | 'recurring' | 'once' */
+let filterMemberName  = null;   /* null | exact string — selected member, shows tasks */
+let memberSearchQuery = '';     /* partial query — filters member list in real-time */
 let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
@@ -719,7 +719,7 @@ function makeMemberItem(m){
    SELECT
 ══════════════════════════════════════════ */
 function select(id){
-  activeId=id; activeFilter='all'; filterMemberName=null;
+  activeId=id; activeFilter='all'; filterMemberName=null; memberSearchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   renderSidebar(); renderMain();
 }
@@ -759,15 +759,14 @@ function renderMain(){
     `;
     taskAddRow.style.display='none';
     mSearchWrap.style.display='';
-    mSearchInput.value=filterMemberName||'';
+    if(!filterMemberName) mSearchInput.value=memberSearchQuery;
     /* show type-filter only when member selected */
     const showTypeFilter=!!filterMemberName;
     document.getElementById('filterDivider').style.display=showTypeFilter?'':'none';
     document.querySelectorAll('.filter-btn').forEach(b=>b.style.display=showTypeFilter?'':'none');
   } else {
-    filterMemberName=null;
+    filterMemberName=null; memberSearchQuery='';
     mSearchWrap.style.display='none';
-    document.getElementById('memberSearchList').style.display='none';
     document.getElementById('filterDivider').style.display='';
     document.querySelectorAll('.filter-btn').forEach(b=>b.style.display='');
     const m=db.members.find(x=>x.id===activeId);
@@ -820,6 +819,7 @@ function renderTasks(){
       .sort((a,b)=>a[0].localeCompare(b[0],'id'))
       .map(([name,members])=>({name,members}));
     if(filterMemberName) groups=groups.filter(g=>g.name===filterMemberName);
+    else if(memberSearchQuery) groups=groups.filter(g=>g.name.toLowerCase().includes(memberSearchQuery));
 
     groups.forEach(({name,members})=>{
       /* format: KelompokA (jabatan), KelompokB */
@@ -875,7 +875,7 @@ function renderTasks(){
         gh.addEventListener('mouseenter',()=>gh.style.background='var(--card)');
         gh.addEventListener('mouseleave',()=>gh.style.background='');
         gh.addEventListener('click',()=>{
-          filterMemberName=name;
+          filterMemberName=name; memberSearchQuery='';
           document.getElementById('memberSearchInput').value=name;
           activeFilter='all';
           document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
@@ -970,65 +970,13 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
   });
 });
 
-(function(){
-  const inp=document.getElementById('memberSearchInput');
-  const list=document.getElementById('memberSearchList');
-
-  function uniqueNamesSorted(){
-    return [...new Set(db.members.map(m=>m.name))].sort((a,b)=>a.localeCompare(b,'id'));
-  }
-
-  function positionList(){
-    const r=inp.getBoundingClientRect();
-    list.style.top=(r.bottom+4)+'px';
-    list.style.left=r.left+'px';
-    list.style.width=Math.max(r.width,160)+'px';
-  }
-
-  function showList(names){
-    if(!names.length){ list.style.display='none'; return; }
-    list.innerHTML=names.map(n=>`<div class="member-search-item${filterMemberName===n?' selected':''}" data-name="${esc(n)}">${esc(n)}</div>`).join('');
-    positionList();
-    list.style.display='';
-    list.querySelectorAll('.member-search-item').forEach(el=>{
-      el.addEventListener('mousedown',e=>{
-        e.preventDefault();
-        const name=el.dataset.name;
-        filterMemberName=name;
-        inp.value=name;
-        list.style.display='none';
-        activeFilter='all';
-        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
-        renderMain();
-      });
-    });
-  }
-
-  inp.addEventListener('focus',()=>{
-    const q=inp.value.trim().toLowerCase();
-    const all=uniqueNamesSorted();
-    showList(q?all.filter(n=>n.toLowerCase().includes(q)):all);
-  });
-
-  inp.addEventListener('input',()=>{
-    const q=inp.value.trim().toLowerCase();
-    if(!q){
-      filterMemberName=null;
-      activeFilter='all';
-      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
-      renderMain();
-      showList(uniqueNamesSorted());
-      return;
-    }
-    showList(uniqueNamesSorted().filter(n=>n.toLowerCase().includes(q)));
-  });
-
-  inp.addEventListener('blur',()=>setTimeout(()=>{ list.style.display='none'; },150));
-
-  inp.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){ list.style.display='none'; inp.blur(); }
-  });
-})();
+document.getElementById('memberSearchInput').addEventListener('input',function(){
+  memberSearchQuery=this.value.trim().toLowerCase();
+  filterMemberName=null;
+  activeFilter='all';
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
+  renderTasks();
+});
 
 /* ══════════════════════════════════════════
    ORG CHART TOGGLE
