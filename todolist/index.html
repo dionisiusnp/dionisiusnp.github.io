@@ -57,6 +57,14 @@ a{text-decoration:none;color:inherit}
 .form-input,.form-select,.form-textarea{padding:8px 12px;border-radius:7px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem;outline:none;transition:border-color .15s,background .25s;width:100%}
 .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent)}
 .form-textarea{resize:vertical;min-height:60px;max-height:120px}
+.repeater{display:flex;flex-direction:column;gap:8px}
+.repeater-row{display:flex;gap:6px;align-items:flex-start;background:var(--surface);border:1px solid var(--bd);border-radius:8px;padding:10px 10px 10px 12px;transition:border-color .15s}
+.repeater-row:hover{border-color:var(--accent)}
+.repeater-fields{flex:1;display:flex;flex-direction:column;gap:6px}
+.repeater-del{flex-shrink:0;width:26px;height:26px;border-radius:5px;border:1px solid var(--bd);background:transparent;color:var(--dim);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:1px}
+.repeater-del:hover{border-color:var(--red);color:var(--red)}
+.repeater-add{align-self:flex-start;margin-top:2px;font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:6px;border:1px dashed var(--bd);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.repeater-add:hover{border-color:var(--accent);color:var(--accent)}
 input[type="date"].form-input{color-scheme:dark}
 [data-theme="light"] input[type="date"].form-input{color-scheme:light}
 .form-select option{background:var(--card)}
@@ -1068,26 +1076,52 @@ function openModal(mode, ctx){
   modal.classList.remove('hidden');
   document.getElementById('modalSave').style.display=''; /* reset; kelompok-members hides it */
 
-  if(mode==='div-add'||mode==='grp-edit'){
-    const div=mode==='grp-edit'?db.kelompoks.find(d=>d.id===mCtx.id):null;
-    title.textContent=mode==='div-add'?'Tambah Kelompok':'Edit Kelompok';
-    /* parent options — exclude self and its descendants to avoid circular */
+  if(mode==='div-add'){
+    title.textContent='Tambah Kelompok';
+    const allParentOpts=()=>db.kelompoks.map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('');
+    function addKelompokRow(container){
+      const row=document.createElement('div');
+      row.className='repeater-row';
+      row.innerHTML=`
+        <div class="repeater-fields">
+          <input class="form-input" type="text" placeholder="Nama kelompok" maxlength="60"/>
+          <select class="form-select">
+            <option value="">— Langsung di bawah ${esc(db.orgName||'Alteco')} —</option>
+            ${allParentOpts()}
+          </select>
+        </div>
+        <button class="repeater-del" title="Hapus baris">✕</button>
+      `;
+      row.querySelector('.repeater-del').addEventListener('click',()=>{
+        if(container.querySelectorAll('.repeater-row').length>1) row.remove();
+      });
+      container.appendChild(row);
+      row.querySelector('input').focus();
+    }
+    body.innerHTML=`<div class="repeater" id="rptr"></div><button class="repeater-add" id="rptr-add">＋ Tambah baris</button>`;
+    const rptr=body.querySelector('#rptr');
+    addKelompokRow(rptr);
+    body.querySelector('#rptr-add').addEventListener('click',()=>addKelompokRow(rptr));
+  }
+
+  else if(mode==='grp-edit'){
+    const div=db.kelompoks.find(d=>d.id===mCtx.id);
+    title.textContent='Edit Kelompok';
     function descendants(id){ const ch=db.kelompoks.filter(k=>k.parentId===id); return [id,...ch.flatMap(c=>descendants(c.id))]; }
     const excludeIds=div?descendants(div.id):[];
     const parentOpts=db.kelompoks
       .filter(k=>!excludeIds.includes(k.id))
-      .map(k=>`<option value="${k.id}" ${(div?div.parentId:mCtx.parentId||null)===k.id?'selected':''}>${esc(k.name)}</option>`)
+      .map(k=>`<option value="${k.id}" ${(div?div.parentId:null)===k.id?'selected':''}>${esc(k.name)}</option>`)
       .join('');
-    document.getElementById('modalSave').style.display='';
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Nama Kelompok</label>
-        <input class="form-input" id="fi-name" type="text" value="${div?esc(div.name):''}" placeholder="contoh: Pengembangan" maxlength="60"/>
+        <input class="form-input" id="fi-name" type="text" value="${div?esc(div.name):''}" placeholder="Nama kelompok" maxlength="60"/>
       </div>
       <div class="form-group">
         <label class="form-label">Di bawah kelompok <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label>
         <select class="form-select" id="fi-parent">
-          <option value="">— Langsung di bawah Alteco —</option>
+          <option value="">— Langsung di bawah ${esc(db.orgName||'Alteco')} —</option>
           ${parentOpts}
         </select>
       </div>
@@ -1132,10 +1166,39 @@ function openModal(mode, ctx){
     return;
   }
 
-  else if(mode==='mem-add'||mode==='mem-edit'){
-    const mem=mode==='mem-edit'?db.members.find(m=>m.id===mCtx.id):null;
-    title.textContent=mode==='mem-add'?'Tambah Anggota':'Edit Anggota';
-    const divOpts=db.kelompoks.map(d=>`<option value="${d.id}" ${(mem?mem.kelompokId:mCtx.kelompokId)===d.id?'selected':''}>${esc(d.name)}</option>`).join('');
+  else if(mode==='mem-add'){
+    title.textContent='Tambah Anggota';
+    const kelompokOpts=()=>db.kelompoks.map(d=>`<option value="${d.id}"${mCtx.kelompokId===d.id?' selected':''}>${esc(d.name)}</option>`).join('');
+    function addMemberRow(container){
+      const row=document.createElement('div');
+      row.className='repeater-row';
+      row.innerHTML=`
+        <div class="repeater-fields">
+          <input class="form-input" type="text" placeholder="Nama lengkap" maxlength="80"/>
+          <input class="form-input" type="text" placeholder="Jabatan / Role (opsional)" maxlength="80"/>
+          <select class="form-select">
+            <option value="">— Tanpa Kelompok —</option>
+            ${kelompokOpts()}
+          </select>
+        </div>
+        <button class="repeater-del" title="Hapus baris">✕</button>
+      `;
+      row.querySelector('.repeater-del').addEventListener('click',()=>{
+        if(container.querySelectorAll('.repeater-row').length>1) row.remove();
+      });
+      container.appendChild(row);
+      row.querySelector('input').focus();
+    }
+    body.innerHTML=`<div class="repeater" id="rptr"></div><button class="repeater-add" id="rptr-add">＋ Tambah baris</button>`;
+    const rptr=body.querySelector('#rptr');
+    addMemberRow(rptr);
+    body.querySelector('#rptr-add').addEventListener('click',()=>addMemberRow(rptr));
+  }
+
+  else if(mode==='mem-edit'){
+    const mem=db.members.find(m=>m.id===mCtx.id);
+    title.textContent='Edit Anggota';
+    const divOpts=db.kelompoks.map(d=>`<option value="${d.id}" ${mem&&mem.kelompokId===d.id?'selected':''}>${esc(d.name)}</option>`).join('');
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Nama</label>
@@ -1231,13 +1294,19 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   if(!mMode) return;
 
   if(mMode==='div-add'){
-    const name=document.getElementById('fi-name').value.trim();
-    if(!name) return;
-    const parentId=document.getElementById('fi-parent').value||null;
-    const siblings=kelompokChildren(parentId);
-    const order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
-    db.kelompoks.push({id:uid(),name,parentId,order});
-    save(); renderSidebar(); closeModal();
+    const rows=[...document.querySelectorAll('#rptr .repeater-row')];
+    let added=0;
+    rows.forEach(row=>{
+      const name=row.querySelector('input').value.trim();
+      if(!name) return;
+      const parentId=row.querySelector('select').value||null;
+      const siblings=kelompokChildren(parentId);
+      const order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
+      db.kelompoks.push({id:uid(),name,parentId,order});
+      added++;
+    });
+    if(!added) return;
+    save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); closeModal();
   }
   else if(mMode==='grp-edit'){
     const name=document.getElementById('fi-name').value.trim();
@@ -1255,16 +1324,28 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     }
     closeModal();
   }
-  else if(mMode==='mem-add'||mMode==='mem-edit'){
+  else if(mMode==='mem-add'){
+    const rows=[...document.querySelectorAll('#rptr .repeater-row')];
+    let lastMember=null;
+    rows.forEach(row=>{
+      const inputs=row.querySelectorAll('input');
+      const name=inputs[0].value.trim();
+      if(!name) return;
+      const role_v=inputs[1].value.trim();
+      const kelompokId=row.querySelector('select').value||null;
+      const m={id:uid(),name,role:role_v,kelompokId,createdAt:Date.now()};
+      db.members.push(m);
+      lastMember=m;
+    });
+    if(!lastMember) return;
+    save(); renderSidebar(); closeModal(); select(lastMember.id);
+  }
+  else if(mMode==='mem-edit'){
     const name=document.getElementById('fi-name').value.trim();
     if(!name) return;
     const role_v=document.getElementById('fi-role').value.trim();
     const kelompokId=document.getElementById('fi-div').value||null;
-    if(mMode==='mem-add'){
-      const m={id:uid(),name,role:role_v,kelompokId,createdAt:Date.now()};
-      db.members.push(m);
-      save(); closeModal(); select(m.id);
-    } else {
+    {
       const m=db.members.find(x=>x.id===mCtx.id);
       if(m){m.name=name;m.role=role_v;m.kelompokId=kelompokId;}
       save(); renderSidebar(); renderMain(); closeModal();
