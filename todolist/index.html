@@ -169,7 +169,7 @@ body.is-admin .viewer-only{display:none!important}
 .filter-row{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-wrap:wrap}
 .filter-label{font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
 .search-input{flex:1;min-width:100px;padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
-.member-filter-select{min-width:110px;padding:4px 8px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s}
+.member-filter-select{min-width:100px;max-width:160px;padding:4px 8px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.74rem;outline:none;transition:border-color .15s,background .25s;overflow:hidden;text-overflow:ellipsis}
 .member-filter-select:focus{border-color:var(--accent)}
 .member-filter-select option{background:var(--card)}
 .search-input:focus{border-color:var(--accent)}
@@ -815,30 +815,61 @@ function renderTasks(){
     if(filterMemberName) groups=groups.filter(g=>g.name===filterMemberName);
 
     groups.forEach(({name,members})=>{
-      /* merge tasks from all members with this name */
-      const allMemberTasks=members.flatMap(m=>memberTasks(m.id));
-      const tasks=applyFilter(allMemberTasks);
       const kelompokNames=[...new Set(members.map(m=>kelompokName(m.kelompokId)).filter(Boolean))].join(', ');
       const roles=[...new Set(members.map(m=>m.role).filter(Boolean))].join(', ');
 
-      const gh=document.createElement('div');
-      gh.className='group-header';
-      gh.innerHTML=`
-        <div class="group-avatar">${initials(name)}</div>
-        <span class="group-name">${esc(name)}</span>
-        ${roles?`<span class="group-role">${esc(roles)}</span>`:''}
-        ${kelompokNames?`<span class="group-role" style="color:var(--dim)">· ${esc(kelompokNames)}</span>`:''}
-        <span class="group-count">${tasks.length} tugas</span>
-      `;
-      area.appendChild(gh);
+      if(filterMemberName){
+        /* filtered by name: sub-section per kelompok */
+        const totalFiltered=members.reduce((s,m)=>s+applyFilter(memberTasks(m.id)).length,0);
+        const gh=document.createElement('div');
+        gh.className='group-header';
+        gh.innerHTML=`
+          <div class="group-avatar">${initials(name)}</div>
+          <span class="group-name">${esc(name)}</span>
+          ${roles?`<span class="group-role">${esc(roles)}</span>`:''}
+          ${kelompokNames?`<span class="group-role" style="color:var(--dim)">· ${esc(kelompokNames)}</span>`:''}
+          <span class="group-count">${totalFiltered} tugas</span>
+        `;
+        area.appendChild(gh);
 
-      if(!tasks.length){
-        const emp=document.createElement('div');
-        emp.className='group-empty';
-        emp.textContent=activeFilter==='recurring'?'Tidak ada tugas berulang.':activeFilter==='once'?'Tidak ada tugas sekali.':'Belum ada tugas.';
-        area.appendChild(emp);
+        members.forEach(m=>{
+          const kName=kelompokName(m.kelompokId)||'Tanpa Kelompok';
+          const tasks=applyFilter(memberTasks(m.id));
+          const sh=document.createElement('div');
+          sh.className='task-section-header';
+          sh.innerHTML=`<span class="task-section-ico">🏢</span><span class="task-section-label">${esc(kName)}</span><span class="task-section-count">${tasks.length}</span>`;
+          area.appendChild(sh);
+          if(!tasks.length){
+            const emp=document.createElement('div');
+            emp.style.cssText='font-size:.72rem;color:var(--dim);padding:8px 2px 12px';
+            emp.textContent=activeFilter==='recurring'?'Tidak ada tugas berulang.':activeFilter==='once'?'Tidak ada tugas sekali.':'Belum ada tugas.';
+            area.appendChild(emp);
+          } else {
+            tasks.forEach(t=>area.appendChild(makeTaskCard(t,false)));
+          }
+        });
       } else {
-        tasks.forEach(t=>area.appendChild(makeTaskCard(t,false)));
+        /* not filtered: merge all tasks, no sub-section */
+        const allMemberTasks=members.flatMap(m=>memberTasks(m.id));
+        const tasks=applyFilter(allMemberTasks);
+        const gh=document.createElement('div');
+        gh.className='group-header';
+        gh.innerHTML=`
+          <div class="group-avatar">${initials(name)}</div>
+          <span class="group-name">${esc(name)}</span>
+          ${roles?`<span class="group-role">${esc(roles)}</span>`:''}
+          ${kelompokNames?`<span class="group-role" style="color:var(--dim)">· ${esc(kelompokNames)}</span>`:''}
+          <span class="group-count">${tasks.length} tugas</span>
+        `;
+        area.appendChild(gh);
+        if(!tasks.length){
+          const emp=document.createElement('div');
+          emp.className='group-empty';
+          emp.textContent=activeFilter==='recurring'?'Tidak ada tugas berulang.':activeFilter==='once'?'Tidak ada tugas sekali.':'Belum ada tugas.';
+          area.appendChild(emp);
+        } else {
+          tasks.forEach(t=>area.appendChild(makeTaskCard(t,false)));
+        }
       }
     });
     if(!groups.length){
