@@ -1209,7 +1209,7 @@ function openModal(mode, ctx){
     if(!k){ return; }
     title.textContent=k.name;
     document.getElementById('modalSave').style.display='none';
-    const members=db.members.filter(m=>m.kelompokId===k.id);
+    const members=db.members.filter(m=>m.kelompokId===k.id).sort((a,b)=>a.name.localeCompare(b.name,'id'));
     body.innerHTML=members.length
       ? `<div class="modal-member-list" id="mmList"></div>`
       : `<div style="text-align:center;color:var(--dim);font-size:.78rem;padding:20px 0">Belum ada anggota di kelompok ini.</div>`;
