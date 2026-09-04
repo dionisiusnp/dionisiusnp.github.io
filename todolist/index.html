@@ -346,12 +346,11 @@ body.is-admin .viewer-only{display:none!important}
       <div class="member-header" id="memberHeader"></div>
 
       <div class="filter-row" id="filterRow">
-        <input type="search" class="search-input" id="searchInput" placeholder="Cari tugas…" autocomplete="off"/>
         <select class="member-filter-select" id="memberFilterSelect" style="display:none"></select>
-        <div class="filter-divider"></div>
-        <button class="filter-btn active" data-f="all">Semua Jenis</button>
-        <button class="filter-btn" data-f="recurring">Tugas Berulang</button>
-        <button class="filter-btn" data-f="once">Tugas Sekali</button>
+        <div class="filter-divider" id="filterDivider" style="display:none"></div>
+        <button class="filter-btn active" data-f="all" style="display:none">Semua Jenis</button>
+        <button class="filter-btn" data-f="recurring" style="display:none">Tugas Berulang</button>
+        <button class="filter-btn" data-f="once" style="display:none">Tugas Sekali</button>
       </div>
 
       <div class="task-add-btn-row" id="taskAddRow" style="display:none">
@@ -389,9 +388,8 @@ const GIST_FILE= 'alteco-data.json';
 let db = {kelompoks:[],members:[],tasks:[],orgName:'Alteco'};
 let role         = null;   /* 'viewer' | 'admin' */
 let activeId     = null;   /* null | ALL | memberId */
-let activeFilter   = 'all';  /* 'all' | 'recurring' | 'once' */
-let searchQuery    = '';
-let filterMemberName = null;  /* null | string — used in isAll view, groups by name */
+let activeFilter     = 'all';  /* 'all' | 'recurring' | 'once' */
+let filterMemberName = null;   /* null | string — used in isAll view, groups by name */
 let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
@@ -715,7 +713,6 @@ function makeMemberItem(m){
 ══════════════════════════════════════════ */
 function select(id){
   activeId=id; activeFilter='all'; filterMemberName=null;
-  document.getElementById('searchInput').value=''; searchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   renderSidebar(); renderMain();
 }
@@ -758,9 +755,15 @@ function renderMain(){
     mfSel.style.display='';
     mfSel.innerHTML=`<option value="">Semua Anggota</option>`+
       uniqueNames.map(n=>`<option value="${n}"${filterMemberName===n?' selected':''}>${esc(n)}</option>`).join('');
+    /* show type-filter only when member selected */
+    const showTypeFilter=!!filterMemberName;
+    document.getElementById('filterDivider').style.display=showTypeFilter?'':'none';
+    document.querySelectorAll('.filter-btn').forEach(b=>b.style.display=showTypeFilter?'':'none');
   } else {
     filterMemberName=null;
     mfSel.style.display='none';
+    document.getElementById('filterDivider').style.display='';
+    document.querySelectorAll('.filter-btn').forEach(b=>b.style.display='');
     const m=db.members.find(x=>x.id===activeId);
     if(!m){ activeId=null; renderSidebar(); renderMain(); return; }
     const divName=kelompokName(m.kelompokId);
@@ -795,11 +798,9 @@ function renderTasks(){
   const isAll=activeId===ALL;
 
   function applyFilter(arr){
-    let r=arr;
-    if(activeFilter==='recurring') r=r.filter(t=>t.type==='recurring');
-    else if(activeFilter==='once') r=r.filter(t=>t.type==='once');
-    if(searchQuery) r=r.filter(t=>t.title.toLowerCase().includes(searchQuery));
-    return r;
+    if(activeFilter==='recurring') return arr.filter(t=>t.type==='recurring');
+    if(activeFilter==='once') return arr.filter(t=>t.type==='once');
+    return arr;
   }
 
   if(isAll){
@@ -849,9 +850,8 @@ function renderTasks(){
           }
         });
       } else {
-        /* not filtered: merge all tasks, no sub-section */
-        const allMemberTasks=members.flatMap(m=>memberTasks(m.id));
-        const tasks=applyFilter(allMemberTasks);
+        /* not filtered: header only, no tasks */
+        const totalTasks=members.reduce((s,m)=>s+memberTasks(m.id).length,0);
         const gh=document.createElement('div');
         gh.className='group-header';
         gh.innerHTML=`
@@ -859,17 +859,9 @@ function renderTasks(){
           <span class="group-name">${esc(name)}</span>
           ${roles?`<span class="group-role">${esc(roles)}</span>`:''}
           ${kelompokNames?`<span class="group-role" style="color:var(--dim)">· ${esc(kelompokNames)}</span>`:''}
-          <span class="group-count">${tasks.length} tugas</span>
+          <span class="group-count">${totalTasks} tugas</span>
         `;
         area.appendChild(gh);
-        if(!tasks.length){
-          const emp=document.createElement('div');
-          emp.className='group-empty';
-          emp.textContent=activeFilter==='recurring'?'Tidak ada tugas berulang.':activeFilter==='once'?'Tidak ada tugas sekali.':'Belum ada tugas.';
-          area.appendChild(emp);
-        } else {
-          tasks.forEach(t=>area.appendChild(makeTaskCard(t,false)));
-        }
       }
     });
     if(!groups.length){
@@ -958,14 +950,10 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
   });
 });
 
-document.getElementById('searchInput').addEventListener('input',e=>{
-  searchQuery=e.target.value.trim().toLowerCase();
-  renderTasks();
-});
-
 document.getElementById('memberFilterSelect').addEventListener('change',e=>{
   filterMemberName=e.target.value||null;
-  renderTasks();
+  if(!filterMemberName){ activeFilter='all'; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all')); }
+  renderMain();
 });
 
 /* ══════════════════════════════════════════
