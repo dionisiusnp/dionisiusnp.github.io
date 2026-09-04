@@ -1086,7 +1086,7 @@ function openModal(mode, ctx){
         <div class="repeater-fields">
           <input class="form-input" type="text" placeholder="Nama kelompok" maxlength="60"/>
           <select class="form-select">
-            <option value="">— Langsung di bawah ${esc(db.orgName||'Alteco')} —</option>
+            <option value="">— ${esc(db.orgName||'Alteco')} —</option>
             ${allParentOpts()}
           </select>
         </div>
@@ -1121,7 +1121,7 @@ function openModal(mode, ctx){
       <div class="form-group">
         <label class="form-label">Di bawah kelompok <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label>
         <select class="form-select" id="fi-parent">
-          <option value="">— Langsung di bawah ${esc(db.orgName||'Alteco')} —</option>
+          <option value="">— ${esc(db.orgName||'Alteco')} —</option>
           ${parentOpts}
         </select>
       </div>
