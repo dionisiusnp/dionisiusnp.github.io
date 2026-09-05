@@ -2065,7 +2065,7 @@ function renderInfoList(area, today){
       return da.localeCompare(db2);
     });
   const lampau = all.filter(ev=> ev.type==='once' && ev.date && ev.date < today)
-    .sort((a,b)=> b.date.localeCompare(a.date)); // newest first
+    .sort((a,b)=> a.date.localeCompare(b.date)); // ascending by date
 
   if(!all.length){
     const e = document.createElement('div');
