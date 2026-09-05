@@ -1114,13 +1114,13 @@ function renderAssetTable(){
   const table=document.createElement('table');
   table.className='asset-table';
   table.innerHTML=`<thead><tr>
-    <th>#</th><th>Nama Aset</th><th>Kategori</th><th>Jml</th><th>Satuan</th><th>Lokasi</th><th>Tgl Pengadaan</th><th>Keterangan</th>
+    <th>#</th><th>Nama Aset</th><th>Kategori</th><th>Jml</th><th>Satuan</th><th>URL</th><th>Tgl Pengadaan</th><th>Keterangan</th>
     ${role==='admin'?'<th></th>':''}
   </tr></thead>`;
   const tbody=document.createElement('tbody');
   assets.forEach((a,i)=>{
-    const condClass=a.condition==='Baik'?'baik':a.condition==='Rusak Ringan'?'ringan':'berat';
     const tgl=a.acquiredAt?new Date(a.acquiredAt).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const urlCell=a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:.72rem;white-space:nowrap;max-width:160px;display:inline-block;overflow:hidden;text-overflow:ellipsis;vertical-align:middle" title="${esc(a.url)}">${esc(a.url)}</a><button data-copy-url="${esc(a.url)}" style="margin-left:4px;background:none;border:none;cursor:pointer;color:var(--dim);font-size:.7rem;padding:0 2px;vertical-align:middle" title="Salin URL">⧉</button>`:'—';
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--dim);font-size:.68rem">${i+1}</td>
@@ -1128,7 +1128,7 @@ function renderAssetTable(){
       <td>${esc(a.category||'—')}</td>
       <td style="font-family:var(--mono)">${a.qty??'—'}</td>
       <td>${esc(a.unit||'—')}</td>
-      <td>${esc(a.location||'—')}</td>
+      <td style="max-width:180px">${urlCell}</td>
       <td style="font-size:.72rem;white-space:nowrap">${tgl}</td>
       <td style="color:var(--muted);font-size:.72rem">${esc(a.notes||'—')}</td>
       ${role==='admin'?`<td style="white-space:nowrap">
@@ -1147,6 +1147,11 @@ function renderAssetTable(){
     if(!a||!confirm(`Hapus aset "${a.name}"?`)) return;
     db.assets=db.assets.filter(x=>x.id!==a.id);
     save(); renderAssetTable();
+  }));
+  wrap.querySelectorAll('[data-copy-url]').forEach(b=>b.addEventListener('click',()=>{
+    navigator.clipboard.writeText(b.dataset.copyUrl).then(()=>{
+      const orig=b.textContent; b.textContent='✓'; setTimeout(()=>b.textContent=orig,1200);
+    });
   }));
 }
 
@@ -1429,7 +1434,7 @@ function openModal(mode, ctx){
         <div class="form-group" style="flex:1"><label class="form-label">Jumlah</label><input class="form-input" id="fi-aqty" type="number" min="0" placeholder="0"/></div>
         <div class="form-group" style="flex:1"><label class="form-label">Satuan</label><input class="form-input" id="fi-aunit" placeholder="unit, buah, set"/></div>
       </div>
-      <div class="form-group"><label class="form-label">Lokasi</label><input class="form-input" id="fi-aloc" placeholder="Lokasi penyimpanan"/></div>
+      <div class="form-group"><label class="form-label">URL <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><input class="form-input" id="fi-aurl" placeholder="https://…" type="url"/></div>
       <div class="form-group"><label class="form-label">Tanggal Pengadaan</label><input class="form-input" id="fi-adate" type="date"/></div>
       <div class="form-group"><label class="form-label">Keterangan</label><textarea class="form-textarea" id="fi-anotes" placeholder="Keterangan tambahan"></textarea></div>
     `;
@@ -1448,7 +1453,7 @@ function openModal(mode, ctx){
         <div class="form-group" style="flex:1"><label class="form-label">Jumlah</label><input class="form-input" id="fi-aqty" type="number" min="0" value="${a.qty??''}"/></div>
         <div class="form-group" style="flex:1"><label class="form-label">Satuan</label><input class="form-input" id="fi-aunit" value="${esc(a.unit||'')}"/></div>
       </div>
-      <div class="form-group"><label class="form-label">Lokasi</label><input class="form-input" id="fi-aloc" value="${esc(a.location||'')}"/></div>
+      <div class="form-group"><label class="form-label">URL <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><input class="form-input" id="fi-aurl" type="url" value="${esc(a.url||'')}"/></div>
       <div class="form-group"><label class="form-label">Tanggal Pengadaan</label><input class="form-input" id="fi-adate" type="date" value="${a.acquiredAt||''}"/></div>
       <div class="form-group"><label class="form-label">Keterangan</label><textarea class="form-textarea" id="fi-anotes">${esc(a.notes||'')}</textarea></div>
     `;
@@ -1628,7 +1633,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       category:document.getElementById('fi-acat').value.trim(),
       qty:document.getElementById('fi-aqty').value!==''?Number(document.getElementById('fi-aqty').value):null,
       unit:document.getElementById('fi-aunit').value.trim(),
-      location:document.getElementById('fi-aloc').value.trim(),
+      url:document.getElementById('fi-aurl').value.trim()||null,
       acquiredAt:document.getElementById('fi-adate').value||null,
       notes:document.getElementById('fi-anotes').value.trim(),
       createdAt:Date.now()
@@ -1645,7 +1650,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     a.category=document.getElementById('fi-acat').value.trim();
     a.qty=document.getElementById('fi-aqty').value!==''?Number(document.getElementById('fi-aqty').value):null;
     a.unit=document.getElementById('fi-aunit').value.trim();
-    a.location=document.getElementById('fi-aloc').value.trim();
+    a.url=document.getElementById('fi-aurl').value.trim()||null;
     a.acquiredAt=document.getElementById('fi-adate').value||null;
     a.notes=document.getElementById('fi-anotes').value.trim();
     save(); renderAssets(); closeModal(); return;
