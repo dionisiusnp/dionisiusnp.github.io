@@ -513,6 +513,7 @@ function migrate(d){
   if(!d.events) d.events=[];
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00'};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
+  if(d.events) d.events=d.events.map(ev=>Object.assign({notifSentDate:null,notifDaysBefore:0},ev));
   return d;
 }
 
@@ -1763,10 +1764,17 @@ function openModal(mode, ctx){
           <button type="button" class="type-btn" data-etype="recurring">🔁 Berulang</button>
         </div>
       </div>
-      <div class="form-group" id="eDateGroup"><label class="form-label">Tanggal</label><input class="form-input" id="fi-edate" type="date"/></div>
+      <div class="form-group" id="eDateGroup">
+        <label class="form-label">Tanggal</label>
+        <input class="form-input" id="fi-edate" type="date"/>
+      </div>
+      <div class="form-group" id="eNotifDaysGroup">
+        <label class="form-label">Mulai notif H-<span style="color:var(--dim);font-weight:400;text-transform:none">(hari sebelum)</span></label>
+        <input class="form-input" id="fi-edays" type="number" min="0" max="30" value="0" placeholder="0 = hanya hari H" style="width:120px"/>
+      </div>
       <div class="form-group" id="eRecurGroup" style="display:none">
         <label class="form-label">Pengulangan</label>
-        <div class="recur-row" id="eRecurRow">${ERECURS.map(r=>`<button type="button" class="recur-opt${r==='mingguan'?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div>
+        <div class="recur-row">${ERECURS.map(r=>`<button type="button" class="recur-opt${r==='mingguan'?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div>
       </div>
       <div class="form-group" id="eRecurDateGroup" style="display:none"><label class="form-label">Tanggal acuan <span style="color:var(--dim);font-weight:400;text-transform:none">(menentukan hari notif)</span></label><input class="form-input" id="fi-erecurdate" type="date"/></div>
     `;
@@ -1774,6 +1782,7 @@ function openModal(mode, ctx){
     let currentERecur = 'mingguan';
     function syncEGroups(){
       document.getElementById('eDateGroup').style.display = currentEType==='once'?'':'none';
+      document.getElementById('eNotifDaysGroup').style.display = currentEType==='once'?'':'none';
       document.getElementById('eRecurGroup').style.display = currentEType==='recurring'?'':'none';
       document.getElementById('eRecurDateGroup').style.display = currentEType==='recurring'&&currentERecur!=='harian'?'':'none';
     }
@@ -1814,6 +1823,10 @@ function openModal(mode, ctx){
         </div>
       </div>
       <div class="form-group" id="eDateGroup" style="${isRec?'display:none':''}"><label class="form-label">Tanggal</label><input class="form-input" id="fi-edate" type="date" value="${ev.date||''}"/></div>
+      <div class="form-group" id="eNotifDaysGroup" style="${isRec?'display:none':''}">
+        <label class="form-label">Mulai notif H-<span style="color:var(--dim);font-weight:400;text-transform:none">(hari sebelum)</span></label>
+        <input class="form-input" id="fi-edays" type="number" min="0" max="30" value="${ev.notifDaysBefore??0}" placeholder="0 = hanya hari H" style="width:120px"/>
+      </div>
       <div class="form-group" id="eRecurGroup" style="${!isRec?'display:none':''}">
         <label class="form-label">Pengulangan</label>
         <div class="recur-row">${ERECURS.map(r=>`<button type="button" class="recur-opt${r===(ev.recurrence||'mingguan')?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div>
@@ -1824,6 +1837,7 @@ function openModal(mode, ctx){
     let currentERecur = ev.recurrence||'mingguan';
     function syncEGroups(){
       document.getElementById('eDateGroup').style.display=currentEType==='once'?'':'none';
+      document.getElementById('eNotifDaysGroup').style.display=currentEType==='once'?'':'none';
       document.getElementById('eRecurGroup').style.display=currentEType==='recurring'?'':'none';
       document.getElementById('eRecurDateGroup').style.display=currentEType==='recurring'&&currentERecur!=='harian'?'':'none';
     }
@@ -1898,13 +1912,16 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const etype=mCtx._getEType();
     const erecur=etype==='recurring'?mCtx._getERecur():null;
     const recurDateEl=document.getElementById('fi-erecurdate');
+    const daysEl=document.getElementById('fi-edays');
     db.events.push({
       id:uid(), title:title2,
       desc:document.getElementById('fi-edesc').value.trim(),
       type:etype,
       date:etype==='once'?(document.getElementById('fi-edate').value||null):null,
+      notifDaysBefore:etype==='once'?Math.max(0,parseInt(daysEl?.value||'0')||0):0,
       recurrence:erecur,
       recurDate:erecur&&erecur!=='harian'?(recurDateEl?.value||null):null,
+      notifSentDate:null,
       createdAt:Date.now()
     });
     save(); renderInfo(); updateBellBadge(); closeModal(); return;
@@ -1918,12 +1935,15 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const etype=mCtx._getEType();
     const erecur=etype==='recurring'?mCtx._getERecur():null;
     const recurDateEl=document.getElementById('fi-erecurdate');
+    const daysEl=document.getElementById('fi-edays');
     ev.title=title2;
     ev.desc=document.getElementById('fi-edesc').value.trim();
     ev.type=etype;
     ev.date=etype==='once'?(document.getElementById('fi-edate').value||null):null;
+    ev.notifDaysBefore=etype==='once'?Math.max(0,parseInt(daysEl?.value||'0')||0):0;
     ev.recurrence=erecur;
     ev.recurDate=erecur&&erecur!=='harian'?(recurDateEl?.value||null):null;
+    ev.notifSentDate=null; /* reset — trigger notif again */
     ev.updatedAt=Date.now();
     save(); renderInfo(); updateBellBadge(); closeModal(); return;
   }
