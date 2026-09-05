@@ -805,6 +805,12 @@ function makeMemberItem(m){
 function select(id){
   activeId=id; activeFilter='all'; filterMemberName=null; memberSearchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
+  /* deactivate feature nav */
+  document.getElementById('btnOrgView').classList.remove('active');
+  document.getElementById('btnAssetView').classList.remove('active');
+  viewMode='tasks';
+  document.getElementById('orgView').style.display='none';
+  document.getElementById('assetView').style.display='none';
   renderSidebar(); renderMain();
 }
 
@@ -1188,9 +1194,11 @@ document.getElementById('btnOrgView').addEventListener('click',()=>{
   const empty=document.getElementById('emptyState');
   av.style.display='none';
   if(viewMode==='org'){
+    activeId=null;
     tv.style.display='none';
     empty.style.display='none';
     ov.style.display='flex';
+    renderSidebar();
     renderOrgChart();
   } else {
     ov.style.display='none';
@@ -1212,10 +1220,12 @@ document.getElementById('btnAssetView').addEventListener('click',()=>{
     else { empty.style.display='flex'; }
   } else {
     viewMode='tasks';
+    activeId=null;
     tv.style.display='none'; ov.style.display='none'; empty.style.display='none';
     av.style.display='flex';
     document.getElementById('btnAssetView').classList.add('active');
     document.getElementById('btnOrgView').classList.remove('active');
+    renderSidebar();
     renderAssets();
   }
 });
