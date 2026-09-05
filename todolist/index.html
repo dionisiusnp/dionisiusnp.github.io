@@ -98,7 +98,11 @@ input[type="date"].form-input{color-scheme:dark}
 
 /* ── Sidebar ── */
 .sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s}
-.sidebar-head{padding:10px 12px 8px;border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:center;gap:6px;transition:border-color .25s}
+.sidebar-head{padding:10px 12px 6px;flex-shrink:0;display:flex;align-items:center;transition:border-color .25s}
+.sidebar-tabs{display:flex;flex-shrink:0;border-bottom:1px solid var(--bd);transition:border-color .25s}
+.sidebar-tab{flex:1;font-size:.66rem;font-weight:700;padding:5px 0;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s}
+.sidebar-tab:hover{color:var(--text)}
+.sidebar-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .sidebar-head-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);flex:1}
 .add-btn{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
 .add-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -212,8 +216,6 @@ body.is-admin .viewer-only{display:none!important}
 .org-kelompok-node:hover{background:rgba(108,111,245,.15);border-color:var(--accent);color:var(--accent)}
 .org-k-name{font-size:.78rem;font-weight:700}
 .org-k-meta{font-size:.6rem;color:var(--muted);margin-top:3px;font-family:var(--mono)}
-.org-view-btn{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
-.org-view-btn.active{border-color:var(--teal);color:var(--teal);background:rgba(45,212,191,.08)}
 /* modal anggota list */
 .modal-member-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto}
 .modal-member-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;border:1px solid var(--bd);background:var(--card);cursor:pointer;transition:border-color .15s}
@@ -341,8 +343,10 @@ body.is-admin .viewer-only{display:none!important}
   <div class="sidebar">
     <div class="sidebar-head">
       <span class="sidebar-head-title">Struktur</span>
-      <button class="org-view-btn" id="btnOrgView" title="Bagan organisasi">Bagan</button>
-      <button class="org-view-btn" id="btnAssetView" title="Inventaris aset">Inventaris</button>
+    </div>
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab" id="btnOrgView">Bagan</button>
+      <button class="sidebar-tab" id="btnAssetView">Inventaris</button>
     </div>
 
     <div class="all-item" id="allItem">
