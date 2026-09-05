@@ -1429,13 +1429,6 @@ function openModal(mode, ctx){
         <div class="form-group" style="flex:1"><label class="form-label">Jumlah</label><input class="form-input" id="fi-aqty" type="number" min="0" placeholder="0"/></div>
         <div class="form-group" style="flex:1"><label class="form-label">Satuan</label><input class="form-input" id="fi-aunit" placeholder="unit, buah, set"/></div>
       </div>
-      <div class="form-group"><label class="form-label">Kondisi</label>
-        <select class="form-select" id="fi-acond">
-          <option value="Baik">Baik</option>
-          <option value="Rusak Ringan">Rusak Ringan</option>
-          <option value="Rusak Berat">Rusak Berat</option>
-        </select>
-      </div>
       <div class="form-group"><label class="form-label">Lokasi</label><input class="form-input" id="fi-aloc" placeholder="Lokasi penyimpanan"/></div>
       <div class="form-group"><label class="form-label">Tanggal Pengadaan</label><input class="form-input" id="fi-adate" type="date"/></div>
       <div class="form-group"><label class="form-label">Keterangan</label><textarea class="form-textarea" id="fi-anotes" placeholder="Keterangan tambahan"></textarea></div>
@@ -1454,13 +1447,6 @@ function openModal(mode, ctx){
       <div style="display:flex;gap:8px">
         <div class="form-group" style="flex:1"><label class="form-label">Jumlah</label><input class="form-input" id="fi-aqty" type="number" min="0" value="${a.qty??''}"/></div>
         <div class="form-group" style="flex:1"><label class="form-label">Satuan</label><input class="form-input" id="fi-aunit" value="${esc(a.unit||'')}"/></div>
-      </div>
-      <div class="form-group"><label class="form-label">Kondisi</label>
-        <select class="form-select" id="fi-acond">
-          <option value="Baik"${a.condition==='Baik'?' selected':''}>Baik</option>
-          <option value="Rusak Ringan"${a.condition==='Rusak Ringan'?' selected':''}>Rusak Ringan</option>
-          <option value="Rusak Berat"${a.condition==='Rusak Berat'?' selected':''}>Rusak Berat</option>
-        </select>
       </div>
       <div class="form-group"><label class="form-label">Lokasi</label><input class="form-input" id="fi-aloc" value="${esc(a.location||'')}"/></div>
       <div class="form-group"><label class="form-label">Tanggal Pengadaan</label><input class="form-input" id="fi-adate" type="date" value="${a.acquiredAt||''}"/></div>
@@ -1642,7 +1628,6 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       category:document.getElementById('fi-acat').value.trim(),
       qty:document.getElementById('fi-aqty').value!==''?Number(document.getElementById('fi-aqty').value):null,
       unit:document.getElementById('fi-aunit').value.trim(),
-      condition:document.getElementById('fi-acond').value,
       location:document.getElementById('fi-aloc').value.trim(),
       acquiredAt:document.getElementById('fi-adate').value||null,
       notes:document.getElementById('fi-anotes').value.trim(),
@@ -1660,7 +1645,6 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     a.category=document.getElementById('fi-acat').value.trim();
     a.qty=document.getElementById('fi-aqty').value!==''?Number(document.getElementById('fi-aqty').value):null;
     a.unit=document.getElementById('fi-aunit').value.trim();
-    a.condition=document.getElementById('fi-acond').value;
     a.location=document.getElementById('fi-aloc').value.trim();
     a.acquiredAt=document.getElementById('fi-adate').value||null;
     a.notes=document.getElementById('fi-anotes').value.trim();
