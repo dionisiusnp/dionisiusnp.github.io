@@ -1099,7 +1099,7 @@ function renderAssetTable(){
   }
 
   /* filter */
-  let assets=db.assets;
+  let assets=[...db.assets].sort((a,b)=>a.name.localeCompare(b.name,'id'));
   if(assetSearch) assets=assets.filter(a=>a.name.toLowerCase().includes(assetSearch));
   if(assetCatFilter) assets=assets.filter(a=>a.category===assetCatFilter);
 
