@@ -1209,6 +1209,7 @@ document.getElementById('btnAssetView').addEventListener('click',()=>{
     if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
     else { empty.style.display='flex'; }
   } else {
+    viewMode='tasks';
     tv.style.display='none'; ov.style.display='none'; empty.style.display='none';
     av.style.display='flex';
     document.getElementById('btnAssetView').classList.add('active');
