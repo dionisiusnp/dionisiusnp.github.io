@@ -290,6 +290,33 @@ body.is-admin .viewer-only{display:none!important}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
 
+.bell-btn{position:relative;background:none;border:none;font-size:1.1rem;padding:4px 6px;cursor:pointer;color:var(--muted);transition:color .15s}
+.bell-btn:hover{color:var(--text)}
+.bell-badge{position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:.55rem;font-weight:700;border-radius:50%;width:14px;height:14px;align-items:center;justify-content:center;line-height:1}
+
+.info-event-card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;margin-bottom:8px;transition:border-color .15s}
+.info-event-card:hover{border-color:var(--accent)}
+.info-event-title{font-weight:700;font-size:.88rem;margin-bottom:4px}
+.info-event-meta{font-size:.72rem;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.info-event-badge{font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid transparent}
+.info-today{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.3);color:var(--green)}
+.info-soon{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3);color:var(--gold)}
+.info-recur{background:rgba(108,111,245,.12);border-color:rgba(108,111,245,.3);color:var(--accent)}
+.info-past{background:rgba(92,92,122,.12);border-color:rgba(92,92,122,.3);color:var(--dim)}
+
+.settings-section{margin-bottom:20px}
+.settings-section-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd)}
+.settings-row:last-child{border-bottom:none}
+.settings-row-label{font-size:.82rem;font-weight:600}
+.settings-row-desc{font-size:.7rem;color:var(--muted);margin-top:2px}
+.toggle-wrap{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle-inp{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;border-radius:11px;background:var(--bd);cursor:pointer;transition:background .2s}
+.toggle-inp:checked+.toggle-track{background:var(--accent)}
+.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle-inp:checked+.toggle-track::after{transform:translateX(18px)}
+
 @media(max-width:640px){
   .sidebar{width:100%;height:210px;flex-shrink:0;border-right:none;border-top:1px solid var(--bd);order:2}
   .app{flex-direction:column}
@@ -342,6 +369,10 @@ body.is-admin .viewer-only{display:none!important}
   <span class="nav-title viewer-only" id="navOrgNameView" style="margin-left:4px">Alteco</span>
   <span class="nav-spacer"></span>
   <span class="nav-role-badge" id="roleBadge">—</span>
+  <button class="bell-btn" id="bellBtn" title="Notifikasi hari ini">
+    🔔
+    <span class="bell-badge" id="bellBadge" style="display:none">0</span>
+  </button>
   <button class="theme-btn" id="themeBtn" title="Ganti tema">🌙</button>
 </nav>
 
@@ -361,6 +392,14 @@ body.is-admin .viewer-only{display:none!important}
       <button class="feature-nav-item" id="btnAssetView">
         <span class="feature-nav-ico">📦</span>
         <span class="feature-nav-label">Inventaris</span>
+      </button>
+      <button class="feature-nav-item" id="btnInfoView">
+        <span class="feature-nav-ico">🔔</span>
+        <span class="feature-nav-label">Informasi</span>
+      </button>
+      <button class="feature-nav-item admin-only" id="btnSettingsView">
+        <span class="feature-nav-ico">⚙️</span>
+        <span class="feature-nav-label">Pengaturan</span>
       </button>
     </div>
 
@@ -415,6 +454,16 @@ body.is-admin .viewer-only{display:none!important}
     <div id="assetView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="assetArea"></div>
     </div>
+
+    <!-- Informasi view -->
+    <div id="infoView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="infoArea"></div>
+    </div>
+
+    <!-- Settings view -->
+    <div id="settingsView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="settingsArea"></div>
+    </div>
   </div>
 </div>
 
@@ -426,6 +475,7 @@ const PASS_VIEW  = '20251208';
 const PASS_ADMIN = '19950328';
 const LS_KEY     = 'rakperpus_alteco_v2';
 const ALL        = '__all__';
+const ONESIGNAL_APP_ID = 'b03c4a75-c2b0-4de5-ab9c-cb5aa2f58cd2';
 
 /* ── Gist config (isi setelah buat Gist + PAT) ── */
 const GIST_ID  = '6bf5ebb0397393324168d3dd14c018c8';
@@ -436,7 +486,7 @@ const GIST_FILE= 'alteco-data.json';
 /* ══════════════════════════════════════════
    STATE
 ══════════════════════════════════════════ */
-let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco'};
+let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
 let role         = null;   /* 'viewer' | 'admin' */
 let activeId     = null;   /* null | ALL | memberId */
 let expandedKelompoks = new Set(); /* kelompok IDs that are expanded */
@@ -460,6 +510,9 @@ function migrate(d){
   d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i},k));
   if(!d.orgName) d.orgName='Alteco';
   if(!d.assets) d.assets=[];
+  if(!d.events) d.events=[];
+  if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00'};
+  if(!d.settings.notifTime) d.settings.notifTime='07:00';
   return d;
 }
 
@@ -468,7 +521,7 @@ function localLoad(){
     const d=JSON.parse(localStorage.getItem(LS_KEY));
     if(d&&d.kelompoks&&d.members&&d.tasks) return migrate(d);
   }catch{}
-  return {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco'};
+  return {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
 }
 
 async function gistLoad(){
@@ -565,6 +618,9 @@ function applyRole(){
   syncOrgName();
   renderSidebar();
   renderMain();
+  updateBellBadge();
+  checkLocalNotif();
+  if(db.settings?.pushNotifEnabled) loadOneSignalSDK();
 }
 
 /* Inline edit org name (superadmin only) */
@@ -808,9 +864,13 @@ function select(id){
   /* deactivate feature nav */
   document.getElementById('btnOrgView').classList.remove('active');
   document.getElementById('btnAssetView').classList.remove('active');
+  document.getElementById('btnInfoView').classList.remove('active');
+  document.getElementById('btnSettingsView').classList.remove('active');
   viewMode='tasks';
   document.getElementById('orgView').style.display='none';
   document.getElementById('assetView').style.display='none';
+  document.getElementById('infoView').style.display='none';
+  document.getElementById('settingsView').style.display='none';
   renderSidebar(); renderMain();
 }
 
@@ -824,7 +884,11 @@ function renderMain(){
   const tv=document.getElementById('taskView');
   document.getElementById('orgView').style.display='none';
   document.getElementById('assetView').style.display='none';
+  document.getElementById('infoView').style.display='none';
+  document.getElementById('settingsView').style.display='none';
   document.getElementById('btnAssetView').classList.remove('active');
+  document.getElementById('btnInfoView').classList.remove('active');
+  document.getElementById('btnSettingsView').classList.remove('active');
   viewMode='tasks';
   document.getElementById('btnOrgView').classList.remove('active');
 
@@ -1188,11 +1252,15 @@ document.getElementById('btnOrgView').addEventListener('click',()=>{
   viewMode=viewMode==='org'?'tasks':'org';
   document.getElementById('btnOrgView').classList.toggle('active', viewMode==='org');
   document.getElementById('btnAssetView').classList.remove('active');
+  document.getElementById('btnInfoView').classList.remove('active');
+  document.getElementById('btnSettingsView').classList.remove('active');
   const tv=document.getElementById('taskView');
   const ov=document.getElementById('orgView');
   const av=document.getElementById('assetView');
+  const iv=document.getElementById('infoView');
+  const sv=document.getElementById('settingsView');
   const empty=document.getElementById('emptyState');
-  av.style.display='none';
+  av.style.display='none'; iv.style.display='none'; sv.style.display='none';
   if(viewMode==='org'){
     activeId=null;
     tv.style.display='none';
@@ -1211,6 +1279,8 @@ document.getElementById('btnAssetView').addEventListener('click',()=>{
   const av=document.getElementById('assetView');
   const tv=document.getElementById('taskView');
   const ov=document.getElementById('orgView');
+  const iv=document.getElementById('infoView');
+  const sv=document.getElementById('settingsView');
   const empty=document.getElementById('emptyState');
   const isAsset=av.style.display!=='none';
   if(isAsset){
@@ -1221,13 +1291,71 @@ document.getElementById('btnAssetView').addEventListener('click',()=>{
   } else {
     viewMode='tasks';
     activeId=null;
-    tv.style.display='none'; ov.style.display='none'; empty.style.display='none';
+    tv.style.display='none'; ov.style.display='none'; iv.style.display='none'; sv.style.display='none'; empty.style.display='none';
     av.style.display='flex';
     document.getElementById('btnAssetView').classList.add('active');
     document.getElementById('btnOrgView').classList.remove('active');
+    document.getElementById('btnInfoView').classList.remove('active');
+    document.getElementById('btnSettingsView').classList.remove('active');
     renderSidebar();
     renderAssets();
   }
+});
+
+document.getElementById('btnInfoView').addEventListener('click',()=>{
+  const iv=document.getElementById('infoView');
+  const tv=document.getElementById('taskView');
+  const ov=document.getElementById('orgView');
+  const av=document.getElementById('assetView');
+  const sv=document.getElementById('settingsView');
+  const empty=document.getElementById('emptyState');
+  const isInfo=iv.style.display!=='none';
+  if(isInfo){
+    iv.style.display='none';
+    document.getElementById('btnInfoView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null;
+    tv.style.display='none'; ov.style.display='none'; av.style.display='none'; sv.style.display='none'; empty.style.display='none';
+    iv.style.display='flex';
+    document.getElementById('btnInfoView').classList.add('active');
+    document.getElementById('btnOrgView').classList.remove('active');
+    document.getElementById('btnAssetView').classList.remove('active');
+    document.getElementById('btnSettingsView').classList.remove('active');
+    renderSidebar();
+    renderInfo();
+  }
+});
+
+document.getElementById('btnSettingsView').addEventListener('click',()=>{
+  const sv=document.getElementById('settingsView');
+  const tv=document.getElementById('taskView');
+  const ov=document.getElementById('orgView');
+  const av=document.getElementById('assetView');
+  const iv=document.getElementById('infoView');
+  const empty=document.getElementById('emptyState');
+  const isSettings=sv.style.display!=='none';
+  if(isSettings){
+    sv.style.display='none';
+    document.getElementById('btnSettingsView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null;
+    tv.style.display='none'; ov.style.display='none'; av.style.display='none'; iv.style.display='none'; empty.style.display='none';
+    sv.style.display='flex';
+    document.getElementById('btnSettingsView').classList.add('active');
+    document.getElementById('btnOrgView').classList.remove('active');
+    document.getElementById('btnAssetView').classList.remove('active');
+    document.getElementById('btnInfoView').classList.remove('active');
+    renderSidebar();
+    renderSettings();
+  }
+});
+
+document.getElementById('bellBtn').addEventListener('click',()=>{
+  document.getElementById('btnInfoView').click();
 });
 
 /* ══════════════════════════════════════════
@@ -1361,7 +1489,7 @@ document.getElementById('btnAddKelompokon').addEventListener('click',()=>openMod
 document.getElementById('btnAddMemberRoot').addEventListener('click',()=>openModal('mem-add',{kelompokId:''}));
 document.getElementById('btnResetData').addEventListener('click',()=>{
   if(!confirm('Reset SEMUA data? Kelompok, anggota, dan tugas akan terhapus permanen. Tidak bisa dibatalkan.')) return;
-  db={kelompoks:[],members:[],tasks:[]};
+  db={kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
   save(); activeId=null; viewMode='tasks';
   renderSidebar(); renderMain();
 });
@@ -1620,6 +1748,71 @@ function openModal(mode, ctx){
     mCtx._getRecur=()=>currentRecur;
     mCtx._getDueDate=()=>document.getElementById('fi-duedate').value||'';
   }
+
+  else if(mode === 'event-add'){
+    title.textContent = 'Tambah Event';
+    body.innerHTML = `
+      <div class="form-group"><label class="form-label">Judul *</label><input class="form-input" id="fi-etitle" placeholder="Nama event / informasi"/></div>
+      <div class="form-group"><label class="form-label">Deskripsi <span style="color:var(--dim);font-weight:400">(opsional)</span></label><textarea class="form-textarea" id="fi-edesc" placeholder="Detail..."></textarea></div>
+      <div class="form-group"><label class="form-label">Tipe</label>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="recur-opt active-once" data-etype="once" style="flex:1;padding:6px;border-radius:6px;border:1px solid var(--accent);background:var(--card);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">📌 Sekali</button>
+          <button class="recur-opt" data-etype="recurring" style="flex:1;padding:6px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">🔁 Berulang</button>
+        </div>
+      </div>
+      <div class="form-group" id="eDateGroup"><label class="form-label">Tanggal</label><input class="form-input" id="fi-edate" type="date"/></div>
+      <div class="form-group" id="eRecurGroup" style="display:none"><label class="form-label">Pengulangan</label><div class="recur-row" id="eRecurRow">${['harian','mingguan','bulanan'].map(r=>`<button class="recur-btn${r==='mingguan'?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div></div>
+    `;
+    let currentEType = 'once';
+    body.querySelectorAll('[data-etype]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        currentEType = b.dataset.etype;
+        body.querySelectorAll('[data-etype]').forEach(x=>{ x.classList.remove('active-once','active-recurring'); x.style.borderColor='var(--bd)'; });
+        b.classList.add('active-'+currentEType);
+        b.style.borderColor = 'var(--accent)';
+        document.getElementById('eDateGroup').style.display = currentEType==='once'?'':'none';
+        document.getElementById('eRecurGroup').style.display = currentEType==='recurring'?'':'none';
+      });
+    });
+    let currentERecur = 'mingguan';
+    body.querySelectorAll('[data-recur]').forEach(b=>{ b.addEventListener('click',()=>{ currentERecur=b.dataset.recur; body.querySelectorAll('[data-recur]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); }); });
+    mCtx._getEType = ()=>currentEType;
+    mCtx._getERecur = ()=>currentERecur;
+    setTimeout(()=>document.getElementById('fi-etitle').focus(),50);
+  }
+
+  else if(mode === 'event-edit'){
+    const ev = db.events.find(x=>x.id===mCtx.id);
+    if(!ev) return;
+    title.textContent = 'Edit Event';
+    const isRec = ev.type==='recurring';
+    body.innerHTML = `
+      <div class="form-group"><label class="form-label">Judul *</label><input class="form-input" id="fi-etitle" value="${esc(ev.title)}"/></div>
+      <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-edesc">${esc(ev.desc||'')}</textarea></div>
+      <div class="form-group"><label class="form-label">Tipe</label>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="recur-opt ${!isRec?'active-once':''}" data-etype="once" style="flex:1;padding:6px;border-radius:6px;border:1px solid ${!isRec?'var(--accent)':'var(--bd)'};background:var(--card);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">📌 Sekali</button>
+          <button class="recur-opt ${isRec?'active-recurring':''}" data-etype="recurring" style="flex:1;padding:6px;border-radius:6px;border:1px solid ${isRec?'var(--accent)':'var(--bd)'};background:var(--card);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">🔁 Berulang</button>
+        </div>
+      </div>
+      <div class="form-group" id="eDateGroup" style="${isRec?'display:none':''}"><label class="form-label">Tanggal</label><input class="form-input" id="fi-edate" type="date" value="${ev.date||''}"/></div>
+      <div class="form-group" id="eRecurGroup" style="${!isRec?'display:none':''}"><label class="form-label">Pengulangan</label><div class="recur-row" id="eRecurRow">${['harian','mingguan','bulanan'].map(r=>`<button class="recur-btn${r===(ev.recurrence||'mingguan')?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div></div>
+    `;
+    let currentEType = ev.type||'once';
+    body.querySelectorAll('[data-etype]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        currentEType=b.dataset.etype;
+        body.querySelectorAll('[data-etype]').forEach(x=>{ x.classList.remove('active-once','active-recurring'); x.style.borderColor='var(--bd)'; });
+        b.classList.add('active-'+currentEType); b.style.borderColor='var(--accent)';
+        document.getElementById('eDateGroup').style.display=currentEType==='once'?'':'none';
+        document.getElementById('eRecurGroup').style.display=currentEType==='recurring'?'':'none';
+      });
+    });
+    let currentERecur = ev.recurrence||'mingguan';
+    body.querySelectorAll('[data-recur]').forEach(b=>{ b.addEventListener('click',()=>{ currentERecur=b.dataset.recur; body.querySelectorAll('[data-recur]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); }); });
+    mCtx._getEType=()=>currentEType;
+    mCtx._getERecur=()=>currentERecur;
+  }
 }
 
 function closeModal(){
@@ -1664,6 +1857,35 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     a.acquiredAt=document.getElementById('fi-adate').value||null;
     a.notes=document.getElementById('fi-anotes').value.trim();
     save(); renderAssets(); closeModal(); return;
+  }
+
+  if(mMode==='event-add'){
+    const title2=document.getElementById('fi-etitle').value.trim();
+    if(!title2) return;
+    const etype=mCtx._getEType();
+    db.events.push({
+      id:uid(), title:title2,
+      desc:document.getElementById('fi-edesc').value.trim(),
+      type:etype,
+      date:etype==='once'?(document.getElementById('fi-edate').value||null):null,
+      recurrence:etype==='recurring'?mCtx._getERecur():null,
+      createdAt:Date.now()
+    });
+    save(); renderInfo(); closeModal(); return;
+  }
+
+  if(mMode==='event-edit'){
+    const ev=db.events.find(x=>x.id===mCtx.id);
+    if(!ev) return;
+    const title2=document.getElementById('fi-etitle').value.trim();
+    if(!title2) return;
+    const etype=mCtx._getEType();
+    ev.title=title2;
+    ev.desc=document.getElementById('fi-edesc').value.trim();
+    ev.type=etype;
+    ev.date=etype==='once'?(document.getElementById('fi-edate').value||null):null;
+    ev.recurrence=etype==='recurring'?mCtx._getERecur():null;
+    save(); renderInfo(); closeModal(); return;
   }
 
   if(mMode==='div-add'){
@@ -1745,6 +1967,222 @@ document.getElementById('modalSave').addEventListener('click',()=>{
 document.getElementById('modal').addEventListener('keydown',e=>{
   if(e.key==='Escape') closeModal();
 });
+
+/* ══════════════════════════════════════════
+   INFO (EVENTS) VIEW
+══════════════════════════════════════════ */
+function renderInfo(){
+  const area = document.getElementById('infoArea');
+  area.innerHTML = '';
+  const today = new Date().toISOString().slice(0,10);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'asset-toolbar';
+  toolbar.innerHTML = `<span class="asset-toolbar-title">Informasi</span>`;
+  if(role === 'admin'){
+    const btn = document.createElement('button');
+    btn.className = 'task-add-inline-btn';
+    btn.textContent = '＋ Tambah Event';
+    btn.addEventListener('click', ()=>openModal('event-add', {}));
+    toolbar.appendChild(btn);
+  }
+  area.appendChild(toolbar);
+
+  if(!db.events.length){
+    const e = document.createElement('div');
+    e.className = 'asset-empty';
+    e.textContent = 'Belum ada informasi / event.';
+    area.appendChild(e);
+    return;
+  }
+
+  const events = [...db.events].sort((a,b)=>{
+    const da = a.date||'9999', db2 = b.date||'9999';
+    return da.localeCompare(db2);
+  });
+
+  events.forEach(ev=>{
+    const card = document.createElement('div');
+    card.className = 'info-event-card';
+
+    let badgeClass = 'info-recur', badgeText = '🔁 Berulang';
+    let metaDate = '';
+    if(ev.type === 'once'){
+      if(!ev.date) { badgeClass='info-recur'; badgeText='—'; }
+      else if(ev.date === today){ badgeClass='info-today'; badgeText='📌 Hari ini'; }
+      else if(ev.date > today){
+        const diff = Math.round((new Date(ev.date)-new Date(today))/(86400000));
+        badgeClass='info-soon'; badgeText=`📅 ${diff} hari lagi`;
+      } else { badgeClass='info-past'; badgeText='✓ Selesai'; }
+      if(ev.date) metaDate = new Date(ev.date+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+    } else {
+      badgeText = `🔁 ${recurrenceLabel(ev.recurrence||'mingguan')}`;
+    }
+
+    card.innerHTML = `
+      <div class="info-event-title">${esc(ev.title)}</div>
+      <div class="info-event-meta">
+        <span class="info-event-badge ${badgeClass}">${badgeText}</span>
+        ${metaDate?`<span>${metaDate}</span>`:''}
+        ${ev.desc?`<span style="color:var(--muted)">${esc(ev.desc)}</span>`:''}
+      </div>
+    `;
+
+    if(role === 'admin'){
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:6px;margin-top:8px';
+      actions.innerHTML = `
+        <button class="asset-act-btn" data-ev-edit="${ev.id}">✎</button>
+        <button class="asset-act-btn del" data-ev-del="${ev.id}">✕</button>
+      `;
+      card.appendChild(actions);
+    }
+    area.appendChild(card);
+  });
+
+  area.querySelectorAll('[data-ev-edit]').forEach(b=>b.addEventListener('click',()=>openModal('event-edit',{id:b.dataset.evEdit})));
+  area.querySelectorAll('[data-ev-del]').forEach(b=>b.addEventListener('click',()=>{
+    const ev = db.events.find(x=>x.id===b.dataset.evDel);
+    if(!ev||!confirm(`Hapus event "${ev.title}"?`)) return;
+    db.events = db.events.filter(x=>x.id!==ev.id);
+    save(); renderInfo();
+  }));
+}
+
+/* ══════════════════════════════════════════
+   SETTINGS VIEW
+══════════════════════════════════════════ */
+function renderSettings(){
+  const area = document.getElementById('settingsArea');
+  area.innerHTML = '';
+  const s = db.settings;
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'asset-toolbar';
+  toolbar.innerHTML = `<span class="asset-toolbar-title">Pengaturan</span>`;
+  area.appendChild(toolbar);
+
+  const sec = document.createElement('div');
+  sec.className = 'settings-section';
+  sec.innerHTML = `<div class="settings-section-title">Notifikasi</div>`;
+
+  const row1 = document.createElement('div');
+  row1.className = 'settings-row';
+  row1.innerHTML = `
+    <div>
+      <div class="settings-row-label">Push Notification</div>
+      <div class="settings-row-desc">Notif muncul walau browser tutup (via OneSignal). Aktifkan hanya jika OneSignal sudah dikonfigurasi.</div>
+    </div>
+    <label class="toggle-wrap">
+      <input class="toggle-inp" type="checkbox" id="togglePush" ${s.pushNotifEnabled?'checked':''}>
+      <span class="toggle-track"></span>
+    </label>
+  `;
+  sec.appendChild(row1);
+
+  const row2 = document.createElement('div');
+  row2.className = 'settings-row';
+  row2.innerHTML = `
+    <div>
+      <div class="settings-row-label">Waktu Notifikasi</div>
+      <div class="settings-row-desc">Jam pengiriman notif harian (WIB / Asia/Jakarta)</div>
+    </div>
+    <input type="time" id="notifTimeInp" value="${s.notifTime||'07:00'}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem;outline:none;width:90px"/>
+  `;
+  sec.appendChild(row2);
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn-save';
+  saveBtn.style.cssText = 'margin-top:14px;align-self:flex-start';
+  saveBtn.textContent = 'Simpan Pengaturan';
+  saveBtn.addEventListener('click', ()=>{
+    db.settings.pushNotifEnabled = document.getElementById('togglePush').checked;
+    db.settings.notifTime = document.getElementById('notifTimeInp').value || '07:00';
+    save();
+    if(db.settings.pushNotifEnabled) initOneSignal();
+    const ok = document.createElement('span');
+    ok.textContent = ' ✓ Tersimpan';
+    ok.style.cssText = 'color:var(--green);font-size:.78rem;margin-left:8px';
+    saveBtn.parentNode.insertBefore(ok, saveBtn.nextSibling);
+    setTimeout(()=>ok.remove(), 2000);
+  });
+  sec.appendChild(saveBtn);
+  area.appendChild(sec);
+}
+
+/* ══════════════════════════════════════════
+   NOTIFICATION HELPERS
+══════════════════════════════════════════ */
+function getTodayEvents(){
+  const today = new Date().toISOString().slice(0,10);
+  const dayOfWeek = new Date().getDay();
+  return (db.events||[]).filter(ev=>{
+    if(ev.type==='once') return ev.date && ev.date>=today;
+    if(ev.type==='recurring'){
+      if(ev.recurrence==='harian') return true;
+      if(ev.recurrence==='mingguan') return dayOfWeek===1;
+      if(ev.recurrence==='bulanan') return new Date().getDate()===1;
+    }
+    return false;
+  });
+}
+
+function updateBellBadge(){
+  const count = getTodayEvents().length;
+  const badge = document.getElementById('bellBadge');
+  if(!badge) return;
+  if(count>0){ badge.textContent=count; badge.style.display='flex'; }
+  else badge.style.display='none';
+}
+
+function checkLocalNotif(){
+  if(db.settings?.pushNotifEnabled) return;
+  if(!('Notification' in window)) return;
+  const today = new Date().toISOString().slice(0,10);
+  const lastKey = 'alteco_notif_date';
+  if(localStorage.getItem(lastKey)===today) return;
+
+  const todayEvents = getTodayEvents();
+  if(!todayEvents.length) return;
+
+  function showNotifs(){
+    localStorage.setItem(lastKey, today);
+    todayEvents.forEach(ev=>{
+      new Notification('📌 Alteco — '+ev.title, {
+        body: ev.desc||'Event hari ini',
+        icon: '/favicon.ico'
+      });
+    });
+    updateBellBadge();
+  }
+
+  if(Notification.permission==='granted'){
+    showNotifs();
+  } else if(Notification.permission!=='denied'){
+    Notification.requestPermission().then(p=>{ if(p==='granted') showNotifs(); });
+  }
+}
+
+/* ══════════════════════════════════════════
+   ONESIGNAL
+══════════════════════════════════════════ */
+function initOneSignal(){
+  if(!db.settings?.pushNotifEnabled) return;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({ appId: ONESIGNAL_APP_ID, notifyButton: { enable: false } });
+  });
+}
+
+function loadOneSignalSDK(){
+  if(document.getElementById('onesignal-sdk')) return;
+  const s=document.createElement('script');
+  s.id='onesignal-sdk';
+  s.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+  s.defer=true;
+  s.onload=()=>initOneSignal();
+  document.head.appendChild(s);
+}
 
 /* ══════════════════════════════════════════
    INIT
