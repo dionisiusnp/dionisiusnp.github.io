@@ -100,9 +100,9 @@ input[type="date"].form-input{color-scheme:dark}
 .sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s}
 .sidebar-head{padding:10px 12px 6px;flex-shrink:0;display:flex;align-items:center;transition:border-color .25s}
 .sidebar-tabs{display:flex;flex-shrink:0;border-bottom:1px solid var(--bd);transition:border-color .25s}
-.sidebar-tab{flex:1;font-size:.66rem;font-weight:700;padding:5px 0;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s}
-.sidebar-tab:hover{color:var(--text)}
-.sidebar-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.sidebar-tab{flex:1;font-size:.66rem;font-weight:600;padding:6px 0;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;color:var(--dim);cursor:pointer;transition:color .15s,border-color .15s}
+.sidebar-tab:hover{color:var(--muted)}
+.sidebar-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
 .sidebar-head-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);flex:1}
 .add-btn{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
 .add-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -1043,14 +1043,7 @@ function makeTaskCard(t, showActions){
 ══════════════════════════════════════════ */
 function renderAssets(){
   const area=document.getElementById('assetArea');
-  const prevFocus=document.activeElement?.id;
   area.innerHTML='';
-  function restoreFocus(){
-    if(prevFocus==='assetSearchInp'||prevFocus==='assetCatSel'){
-      const el=document.getElementById(prevFocus);
-      if(el){ el.focus(); if(el.tagName==='INPUT'){const l=el.value.length;el.setSelectionRange(l,l);} }
-    }
-  }
 
   /* toolbar */
   const toolbar=document.createElement('div');
@@ -1065,22 +1058,41 @@ function renderAssets(){
   }
   area.appendChild(toolbar);
 
-  /* filter row */
-  const cats=[...new Set(db.assets.map(a=>a.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'id'));
+  /* filter row — built once, never re-rendered */
   const filterRow=document.createElement('div');
   filterRow.className='asset-filter-row';
   filterRow.innerHTML=`
-    <input class="asset-search" id="assetSearchInp" placeholder="Cari nama aset…" value="${esc(assetSearch)}" autocomplete="off"/>
-    <select class="asset-cat-select" id="assetCatSel">
-      <option value="">Semua Kategori</option>
-      ${cats.map(c=>`<option value="${esc(c)}"${assetCatFilter===c?' selected':''}>${esc(c)}</option>`).join('')}
-    </select>
+    <input class="asset-search" id="assetSearchInp" placeholder="Cari nama aset…" autocomplete="off"/>
+    <select class="asset-cat-select" id="assetCatSel"><option value="">Semua Kategori</option></select>
   `;
   area.appendChild(filterRow);
-  document.getElementById('assetSearchInp').addEventListener('input',function(){ assetSearch=this.value.trim().toLowerCase(); renderAssets(); });
-  document.getElementById('assetCatSel').addEventListener('change',function(){ assetCatFilter=this.value; renderAssets(); });
+  const searchInp=document.getElementById('assetSearchInp');
+  const catSel=document.getElementById('assetCatSel');
+  searchInp.value=assetSearch;
+  searchInp.addEventListener('input',function(){ assetSearch=this.value.toLowerCase(); renderAssetTable(); });
+  catSel.addEventListener('change',function(){ assetCatFilter=this.value; renderAssetTable(); });
 
-  /* filter data */
+  /* table wrapper */
+  const wrap=document.createElement('div');
+  wrap.id='assetTableWrap';
+  area.appendChild(wrap);
+
+  renderAssetTable();
+}
+
+function renderAssetTable(){
+  const wrap=document.getElementById('assetTableWrap');
+  if(!wrap) return;
+  wrap.innerHTML='';
+
+  /* update category options */
+  const catSel=document.getElementById('assetCatSel');
+  if(catSel){
+    const cats=[...new Set(db.assets.map(a=>a.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'id'));
+    catSel.innerHTML=`<option value="">Semua Kategori</option>`+cats.map(c=>`<option value="${esc(c)}"${assetCatFilter===c?' selected':''}>${esc(c)}</option>`).join('');
+  }
+
+  /* filter */
   let assets=db.assets;
   if(assetSearch) assets=assets.filter(a=>a.name.toLowerCase().includes(assetSearch));
   if(assetCatFilter) assets=assets.filter(a=>a.category===assetCatFilter);
@@ -1089,8 +1101,8 @@ function renderAssets(){
     const emp=document.createElement('div');
     emp.className='asset-empty';
     emp.textContent=db.assets.length?'Tidak ada aset yang cocok.':'Belum ada aset.';
-    area.appendChild(emp);
-    restoreFocus(); return;
+    wrap.appendChild(emp);
+    return;
   }
 
   const table=document.createElement('table');
@@ -1122,17 +1134,15 @@ function renderAssets(){
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
-  area.appendChild(table);
+  wrap.appendChild(table);
 
-  area.querySelectorAll('[data-asset-edit]').forEach(b=>b.addEventListener('click',()=>openModal('asset-edit',{id:b.dataset.assetEdit})));
-  area.querySelectorAll('[data-asset-del]').forEach(b=>b.addEventListener('click',()=>{
+  wrap.querySelectorAll('[data-asset-edit]').forEach(b=>b.addEventListener('click',()=>openModal('asset-edit',{id:b.dataset.assetEdit})));
+  wrap.querySelectorAll('[data-asset-del]').forEach(b=>b.addEventListener('click',()=>{
     const a=db.assets.find(x=>x.id===b.dataset.assetDel);
     if(!a||!confirm(`Hapus aset "${a.name}"?`)) return;
     db.assets=db.assets.filter(x=>x.id!==a.id);
-    save(); renderAssets();
+    save(); renderAssetTable();
   }));
-
-  restoreFocus();
 }
 
 /* ══════════════════════════════════════════
