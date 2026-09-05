@@ -349,7 +349,7 @@ body.is-admin .viewer-only{display:none!important}
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-head">
-      <span class="sidebar-head-title">Struktur</span>
+      <span class="sidebar-head-title">Fitur</span>
     </div>
     <div class="sidebar-tabs">
       <button class="sidebar-tab" id="btnOrgView">Bagan</button>
@@ -1043,6 +1043,7 @@ function makeTaskCard(t, showActions){
 ══════════════════════════════════════════ */
 function renderAssets(){
   const area=document.getElementById('assetArea');
+  const prevFocus=document.activeElement?.id;
   area.innerHTML='';
 
   /* toolbar */
@@ -1124,6 +1125,12 @@ function renderAssets(){
     db.assets=db.assets.filter(x=>x.id!==a.id);
     save(); renderAssets();
   }));
+
+  /* restore focus after re-render */
+  if(prevFocus==='assetSearchInp'||prevFocus==='assetCatSel'){
+    const el=document.getElementById(prevFocus);
+    if(el){ el.focus(); if(el.tagName==='INPUT'){ const l=el.value.length; el.setSelectionRange(l,l); } }
+  }
 }
 
 /* ══════════════════════════════════════════
