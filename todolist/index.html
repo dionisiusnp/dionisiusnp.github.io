@@ -511,9 +511,10 @@ function migrate(d){
   if(!d.orgName) d.orgName='Alteco';
   if(!d.assets) d.assets=[];
   if(!d.events) d.events=[];
-  if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00'};
+  if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
-  if(d.events) d.events=d.events.map(ev=>Object.assign({notifSentDate:null,notifDaysBefore:0},ev));
+  if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
+  if(d.events) d.events=d.events.map(ev=>Object.assign({notifSentDate:null},ev));
   return d;
 }
 
@@ -1768,10 +1769,6 @@ function openModal(mode, ctx){
         <label class="form-label">Tanggal</label>
         <input class="form-input" id="fi-edate" type="date"/>
       </div>
-      <div class="form-group" id="eNotifDaysGroup">
-        <label class="form-label">Mulai notif H-<span style="color:var(--dim);font-weight:400;text-transform:none">(hari sebelum)</span></label>
-        <input class="form-input" id="fi-edays" type="number" min="0" max="30" value="0" placeholder="0 = hanya hari H" style="width:120px"/>
-      </div>
       <div class="form-group" id="eRecurGroup" style="display:none">
         <label class="form-label">Pengulangan</label>
         <div class="recur-row">${ERECURS.map(r=>`<button type="button" class="recur-opt${r==='mingguan'?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div>
@@ -1782,7 +1779,6 @@ function openModal(mode, ctx){
     let currentERecur = 'mingguan';
     function syncEGroups(){
       document.getElementById('eDateGroup').style.display = currentEType==='once'?'':'none';
-      document.getElementById('eNotifDaysGroup').style.display = currentEType==='once'?'':'none';
       document.getElementById('eRecurGroup').style.display = currentEType==='recurring'?'':'none';
       document.getElementById('eRecurDateGroup').style.display = currentEType==='recurring'&&currentERecur!=='harian'?'':'none';
     }
@@ -1823,10 +1819,6 @@ function openModal(mode, ctx){
         </div>
       </div>
       <div class="form-group" id="eDateGroup" style="${isRec?'display:none':''}"><label class="form-label">Tanggal</label><input class="form-input" id="fi-edate" type="date" value="${ev.date||''}"/></div>
-      <div class="form-group" id="eNotifDaysGroup" style="${isRec?'display:none':''}">
-        <label class="form-label">Mulai notif H-<span style="color:var(--dim);font-weight:400;text-transform:none">(hari sebelum)</span></label>
-        <input class="form-input" id="fi-edays" type="number" min="0" max="30" value="${ev.notifDaysBefore??0}" placeholder="0 = hanya hari H" style="width:120px"/>
-      </div>
       <div class="form-group" id="eRecurGroup" style="${!isRec?'display:none':''}">
         <label class="form-label">Pengulangan</label>
         <div class="recur-row">${ERECURS.map(r=>`<button type="button" class="recur-opt${r===(ev.recurrence||'mingguan')?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div>
@@ -1837,7 +1829,6 @@ function openModal(mode, ctx){
     let currentERecur = ev.recurrence||'mingguan';
     function syncEGroups(){
       document.getElementById('eDateGroup').style.display=currentEType==='once'?'':'none';
-      document.getElementById('eNotifDaysGroup').style.display=currentEType==='once'?'':'none';
       document.getElementById('eRecurGroup').style.display=currentEType==='recurring'?'':'none';
       document.getElementById('eRecurDateGroup').style.display=currentEType==='recurring'&&currentERecur!=='harian'?'':'none';
     }
@@ -1912,13 +1903,11 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const etype=mCtx._getEType();
     const erecur=etype==='recurring'?mCtx._getERecur():null;
     const recurDateEl=document.getElementById('fi-erecurdate');
-    const daysEl=document.getElementById('fi-edays');
     db.events.push({
       id:uid(), title:title2,
       desc:document.getElementById('fi-edesc').value.trim(),
       type:etype,
       date:etype==='once'?(document.getElementById('fi-edate').value||null):null,
-      notifDaysBefore:etype==='once'?Math.max(0,parseInt(daysEl?.value||'0')||0):0,
       recurrence:erecur,
       recurDate:erecur&&erecur!=='harian'?(recurDateEl?.value||null):null,
       notifSentDate:null,
@@ -1935,12 +1924,10 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const etype=mCtx._getEType();
     const erecur=etype==='recurring'?mCtx._getERecur():null;
     const recurDateEl=document.getElementById('fi-erecurdate');
-    const daysEl=document.getElementById('fi-edays');
     ev.title=title2;
     ev.desc=document.getElementById('fi-edesc').value.trim();
     ev.type=etype;
     ev.date=etype==='once'?(document.getElementById('fi-edate').value||null):null;
-    ev.notifDaysBefore=etype==='once'?Math.max(0,parseInt(daysEl?.value||'0')||0):0;
     ev.recurrence=erecur;
     ev.recurDate=erecur&&erecur!=='harian'?(recurDateEl?.value||null):null;
     ev.notifSentDate=null; /* reset — trigger notif again */
@@ -2151,6 +2138,17 @@ function renderSettings(){
   `;
   sec.appendChild(row2);
 
+  const row3 = document.createElement('div');
+  row3.className = 'settings-row';
+  row3.innerHTML = `
+    <div>
+      <div class="settings-row-label">Notif Mulai H-</div>
+      <div class="settings-row-desc">Berapa hari sebelum hari H event sekali mulai dinotif. 0 = hanya hari H.</div>
+    </div>
+    <input type="number" id="notifDaysInp" min="0" max="30" value="${s.notifDaysBefore??1}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem;outline:none;width:70px;text-align:center"/>
+  `;
+  sec.appendChild(row3);
+
   const saveBtn = document.createElement('button');
   saveBtn.className = 'btn-save';
   saveBtn.style.cssText = 'margin-top:14px;align-self:flex-start';
@@ -2158,6 +2156,7 @@ function renderSettings(){
   saveBtn.addEventListener('click', ()=>{
     db.settings.pushNotifEnabled = document.getElementById('togglePush').checked;
     db.settings.notifTime = document.getElementById('notifTimeInp').value || '07:00';
+    db.settings.notifDaysBefore = Math.max(0, parseInt(document.getElementById('notifDaysInp').value)||0);
     save();
     if(db.settings.pushNotifEnabled) initOneSignal();
     const ok = document.createElement('span');
@@ -2176,8 +2175,14 @@ function renderSettings(){
 function getTodayEvents(){
   const now = new Date();
   const today = now.toISOString().slice(0,10);
+  const globalDaysBefore = db.settings?.notifDaysBefore ?? 1;
   return (db.events||[]).filter(ev=>{
-    if(ev.type==='once') return ev.date && ev.date>=today; /* tiap hari s.d. hari H */
+    if(ev.type==='once'){
+      if(!ev.date) return false;
+      const start = new Date(ev.date+'T00:00:00');
+      start.setDate(start.getDate()-globalDaysBefore);
+      return today>=start.toISOString().slice(0,10) && today<=ev.date;
+    }
     if(ev.type==='recurring'){
       if(ev.recurrence==='harian') return true;
       /* berulang: notif hanya PADA hari H sesuai recurDate */

@@ -64,13 +64,14 @@ jobs:
             const sendAfter = `${today} ${String(notifH).padStart(2,'0')}:${String(notifM).padStart(2,'0')}:00 GMT+0700`;
 
             // Filter qualifying events
+            const globalDaysBefore = db.settings.notifDaysBefore ?? 1;
             const qualifying = (db.events || []).filter(ev => {
               // Skip if already sent today
               if (ev.notifSentDate === today) return false;
 
               if (ev.type === 'once') {
                 if (!ev.date) return false;
-                const daysBefore = ev.notifDaysBefore || 0;
+                const daysBefore = globalDaysBefore;
                 // Start notifying from (date - daysBefore) until date
                 const startDate = new Date(ev.date + 'T00:00:00');
                 startDate.setDate(startDate.getDate() - daysBefore);
