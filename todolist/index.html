@@ -395,7 +395,7 @@ body.is-admin .viewer-only{display:none!important}
       </button>
       <button class="feature-nav-item" id="btnInfoView">
         <span class="feature-nav-ico">🔔</span>
-        <span class="feature-nav-label">Informasi</span>
+        <span class="feature-nav-label">Pemberitahuan</span>
       </button>
       <button class="feature-nav-item admin-only" id="btnSettingsView">
         <span class="feature-nav-ico">⚙️</span>
@@ -1755,10 +1755,10 @@ function openModal(mode, ctx){
   }
 
   else if(mode === 'event-add'){
-    title.textContent = 'Tambah Event';
+    title.textContent = 'Tambah Pemberitahuan';
     const ERECURS=['harian','mingguan','bulanan','tahunan'];
     body.innerHTML = `
-      <div class="form-group"><label class="form-label">Judul *</label><input class="form-input" id="fi-etitle" placeholder="Nama event / informasi"/></div>
+      <div class="form-group"><label class="form-label">Judul *</label><input class="form-input" id="fi-etitle" placeholder="Nama pemberitahuan"/></div>
       <div class="form-group"><label class="form-label">Deskripsi <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><textarea class="form-textarea" id="fi-edesc" placeholder="Detail tambahan..."></textarea></div>
       <div class="form-group"><label class="form-label">Tipe</label>
         <div class="type-toggle">
@@ -1807,7 +1807,7 @@ function openModal(mode, ctx){
   else if(mode === 'event-edit'){
     const ev = db.events.find(x=>x.id===mCtx.id);
     if(!ev) return;
-    title.textContent = 'Edit Event';
+    title.textContent = 'Edit Pemberitahuan';
     const isRec = ev.type==='recurring';
     const ERECURS=['harian','mingguan','bulanan','tahunan'];
     body.innerHTML = `
@@ -2026,11 +2026,11 @@ function renderInfo(){
 
   const toolbar = document.createElement('div');
   toolbar.className = 'asset-toolbar';
-  toolbar.innerHTML = `<span class="asset-toolbar-title">Informasi</span>`;
+  toolbar.innerHTML = `<span class="asset-toolbar-title">Pemberitahuan</span>`;
   if(role === 'admin'){
     const btn = document.createElement('button');
     btn.className = 'task-add-inline-btn';
-    btn.textContent = '＋ Tambah Event';
+    btn.textContent = '＋ Tambah Pemberitahuan';
     btn.addEventListener('click', ()=>openModal('event-add', {}));
     toolbar.appendChild(btn);
   }
@@ -2039,7 +2039,7 @@ function renderInfo(){
   if(!db.events.length){
     const e = document.createElement('div');
     e.className = 'asset-empty';
-    e.textContent = 'Belum ada informasi / event.';
+    e.textContent = 'Belum ada pemberitahuan.';
     area.appendChild(e);
     return;
   }
@@ -2230,7 +2230,7 @@ async function forceSendNotif(btn){
 
   const heading = qualifying.length===1
     ? `📋 Alteco — ${qualifying[0].title}`
-    : `📋 Alteco — Rangkuman ${qualifying.length} Informasi`;
+    : `📋 Alteco — Rangkuman ${qualifying.length} Pemberitahuan`;
   const bodyText = lines.join('\n');
 
   const origText = btn.textContent;
