@@ -190,8 +190,15 @@ body.is-admin .viewer-only{display:none!important}
 
 /* ── Asset view ── */
 .asset-view{flex:1;overflow-y:auto;padding:14px 18px}
-.asset-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.asset-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .asset-toolbar-title{font-size:.82rem;font-weight:800;flex:1}
+.asset-filter-row{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.asset-search{flex:1;min-width:120px;padding:5px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.76rem;outline:none;transition:border-color .15s}
+.asset-search:focus{border-color:var(--accent)}
+.asset-search::placeholder{color:var(--dim)}
+.asset-cat-select{padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.76rem;outline:none;transition:border-color .15s}
+.asset-cat-select:focus{border-color:var(--accent)}
+.asset-cat-select option{background:var(--card)}
 .asset-table{width:100%;border-collapse:collapse;font-size:.78rem}
 .asset-table th{text-align:left;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--bd)}
 .asset-table td{padding:8px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
@@ -425,6 +432,8 @@ let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco'};
 let role         = null;   /* 'viewer' | 'admin' */
 let activeId     = null;   /* null | ALL | memberId */
 let expandedKelompoks = new Set(); /* kelompok IDs that are expanded */
+let assetSearch      = '';
+let assetCatFilter   = '';
 let activeFilter      = 'all';  /* 'all' | 'recurring' | 'once' */
 let filterMemberName  = null;   /* null | exact string — selected member, shows tasks */
 let memberSearchQuery = '';     /* partial query — filters member list in real-time */
@@ -1036,6 +1045,7 @@ function renderAssets(){
   const area=document.getElementById('assetArea');
   area.innerHTML='';
 
+  /* toolbar */
   const toolbar=document.createElement('div');
   toolbar.className='asset-toolbar';
   toolbar.innerHTML=`<span class="asset-toolbar-title">Inventaris Aset</span>`;
@@ -1048,10 +1058,30 @@ function renderAssets(){
   }
   area.appendChild(toolbar);
 
-  if(!db.assets.length){
+  /* filter row */
+  const cats=[...new Set(db.assets.map(a=>a.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'id'));
+  const filterRow=document.createElement('div');
+  filterRow.className='asset-filter-row';
+  filterRow.innerHTML=`
+    <input class="asset-search" id="assetSearchInp" placeholder="Cari nama aset…" value="${esc(assetSearch)}" autocomplete="off"/>
+    <select class="asset-cat-select" id="assetCatSel">
+      <option value="">Semua Kategori</option>
+      ${cats.map(c=>`<option value="${esc(c)}"${assetCatFilter===c?' selected':''}>${esc(c)}</option>`).join('')}
+    </select>
+  `;
+  area.appendChild(filterRow);
+  document.getElementById('assetSearchInp').addEventListener('input',function(){ assetSearch=this.value.trim().toLowerCase(); renderAssets(); });
+  document.getElementById('assetCatSel').addEventListener('change',function(){ assetCatFilter=this.value; renderAssets(); });
+
+  /* filter data */
+  let assets=db.assets;
+  if(assetSearch) assets=assets.filter(a=>a.name.toLowerCase().includes(assetSearch));
+  if(assetCatFilter) assets=assets.filter(a=>a.category===assetCatFilter);
+
+  if(!assets.length){
     const emp=document.createElement('div');
     emp.className='asset-empty';
-    emp.textContent='Belum ada aset.';
+    emp.textContent=db.assets.length?'Tidak ada aset yang cocok.':'Belum ada aset.';
     area.appendChild(emp);
     return;
   }
@@ -1059,12 +1089,13 @@ function renderAssets(){
   const table=document.createElement('table');
   table.className='asset-table';
   table.innerHTML=`<thead><tr>
-    <th>#</th><th>Nama Aset</th><th>Kategori</th><th>Jml</th><th>Satuan</th><th>Kondisi</th><th>Lokasi</th><th>Keterangan</th>
+    <th>#</th><th>Nama Aset</th><th>Kategori</th><th>Jml</th><th>Satuan</th><th>Kondisi</th><th>Lokasi</th><th>Tgl Pengadaan</th><th>Keterangan</th>
     ${role==='admin'?'<th></th>':''}
   </tr></thead>`;
   const tbody=document.createElement('tbody');
-  db.assets.forEach((a,i)=>{
+  assets.forEach((a,i)=>{
     const condClass=a.condition==='Baik'?'baik':a.condition==='Rusak Ringan'?'ringan':'berat';
+    const tgl=a.acquiredAt?new Date(a.acquiredAt).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):'—';
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--dim);font-size:.68rem">${i+1}</td>
@@ -1074,6 +1105,7 @@ function renderAssets(){
       <td>${esc(a.unit||'—')}</td>
       <td><span class="asset-cond ${condClass}">${esc(a.condition||'—')}</span></td>
       <td>${esc(a.location||'—')}</td>
+      <td style="font-size:.72rem;white-space:nowrap">${tgl}</td>
       <td style="color:var(--muted);font-size:.72rem">${esc(a.notes||'—')}</td>
       ${role==='admin'?`<td style="white-space:nowrap">
         <button class="asset-act-btn" data-asset-edit="${a.id}" title="Edit">✎</button>
@@ -1377,6 +1409,7 @@ function openModal(mode, ctx){
         </select>
       </div>
       <div class="form-group"><label class="form-label">Lokasi</label><input class="form-input" id="fi-aloc" placeholder="Lokasi penyimpanan"/></div>
+      <div class="form-group"><label class="form-label">Tanggal Pengadaan</label><input class="form-input" id="fi-adate" type="date"/></div>
       <div class="form-group"><label class="form-label">Keterangan</label><textarea class="form-textarea" id="fi-anotes" placeholder="Keterangan tambahan"></textarea></div>
     `;
     setTimeout(()=>document.getElementById('fi-aname').focus(),50);
@@ -1402,6 +1435,7 @@ function openModal(mode, ctx){
         </select>
       </div>
       <div class="form-group"><label class="form-label">Lokasi</label><input class="form-input" id="fi-aloc" value="${esc(a.location||'')}"/></div>
+      <div class="form-group"><label class="form-label">Tanggal Pengadaan</label><input class="form-input" id="fi-adate" type="date" value="${a.acquiredAt||''}"/></div>
       <div class="form-group"><label class="form-label">Keterangan</label><textarea class="form-textarea" id="fi-anotes">${esc(a.notes||'')}</textarea></div>
     `;
     return;
@@ -1582,6 +1616,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       unit:document.getElementById('fi-aunit').value.trim(),
       condition:document.getElementById('fi-acond').value,
       location:document.getElementById('fi-aloc').value.trim(),
+      acquiredAt:document.getElementById('fi-adate').value||null,
       notes:document.getElementById('fi-anotes').value.trim(),
       createdAt:Date.now()
     });
@@ -1599,6 +1634,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     a.unit=document.getElementById('fi-aunit').value.trim();
     a.condition=document.getElementById('fi-acond').value;
     a.location=document.getElementById('fi-aloc').value.trim();
+    a.acquiredAt=document.getElementById('fi-adate').value||null;
     a.notes=document.getElementById('fi-anotes').value.trim();
     save(); renderAssets(); closeModal(); return;
   }
