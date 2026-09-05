@@ -515,7 +515,6 @@ function migrate(d){
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
-  if(d.settings.onesignalRestKey==null) d.settings.onesignalRestKey='';
   if(d.events) d.events=d.events.map(ev=>Object.assign({notifSentDate:null},ev));
   return d;
 }
@@ -2190,17 +2189,6 @@ function renderSettings(){
   `;
   sec.appendChild(row3);
 
-  const row4 = document.createElement('div');
-  row4.className = 'settings-row';
-  row4.innerHTML = `
-    <div>
-      <div class="settings-row-label">OneSignal REST Key</div>
-      <div class="settings-row-desc">Diperlukan untuk kirim notif manual dari browser. Disimpan di Gist (terenkripsi sisi server GitHub).</div>
-    </div>
-    <input type="password" id="notifRestKeyInp" value="${s.onesignalRestKey||''}" placeholder="os_v2_..." style="padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem;outline:none;width:160px;font-family:monospace"/>
-  `;
-  sec.appendChild(row4);
-
   const saveBtn = document.createElement('button');
   saveBtn.className = 'btn-save';
   saveBtn.style.cssText = 'margin-top:14px;align-self:flex-start';
@@ -2209,7 +2197,6 @@ function renderSettings(){
     db.settings.pushNotifEnabled = document.getElementById('togglePush').checked;
     db.settings.notifTime = document.getElementById('notifTimeInp').value || '07:00';
     db.settings.notifDaysBefore = Math.max(0, parseInt(document.getElementById('notifDaysInp').value)||0);
-    db.settings.onesignalRestKey = document.getElementById('notifRestKeyInp').value.trim();
     save();
     if(db.settings.pushNotifEnabled) initOneSignal();
     const ok = document.createElement('span');
@@ -2230,7 +2217,7 @@ function renderSettings(){
   forceRow.innerHTML = `
     <div>
       <div class="settings-row-label">Kirim Rangkuman Sekarang</div>
-      <div class="settings-row-desc">Kirim push notif berisi semua informasi yang tanggalnya belum terlewat ke seluruh subscriber. Tidak mengubah status notif harian.</div>
+      <div class="settings-row-desc">Picu GitHub Actions untuk kirim push notif semua pemberitahuan aktif ke seluruh subscriber sekarang. Tidak mengubah status notif harian. PAT harus punya scope <b>workflow</b>.</div>
     </div>
   `;
   const forceBtn = document.createElement('button');
@@ -2248,56 +2235,37 @@ function renderSettings(){
    FORCE SEND NOTIFICATION
 ══════════════════════════════════════════ */
 async function forceSendNotif(btn){
-  const restKey = db.settings?.onesignalRestKey;
-  if(!restKey){ alert('OneSignal REST Key belum diisi di Pengaturan.'); return; }
-
-  const today = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
-
-  const qualifying = (db.events||[]).filter(ev=>{
-    if(ev.type==='once') return ev.date && ev.date >= today;
-    if(ev.type==='recurring') return true;
-    return false;
-  });
-
-  if(!qualifying.length){ alert('Tidak ada informasi aktif untuk dikirim.'); return; }
-
-  const lines = qualifying.map(ev=>{
-    if(ev.type==='recurring') return `• ${ev.title} — ${ev.recurrence||'berulang'}`;
-    if(ev.date===today) return `• ${ev.title} — hari ini`;
-    const diff = Math.round((new Date(ev.date)-new Date(today))/86400000);
-    return `• ${ev.title} — ${diff} hari lagi`;
-  });
-
-  const heading = qualifying.length===1
-    ? `📋 Alteco — ${qualifying[0].title}`
-    : `📋 Alteco — Rangkuman ${qualifying.length} Pemberitahuan`;
-  const bodyText = lines.join('\n');
+  const pat = localStorage.getItem('rak_alteco_pat');
+  if(!pat){ alert('PAT tidak ditemukan. Login ulang sebagai superadmin terlebih dahulu.'); return; }
 
   const origText = btn.textContent;
-  btn.textContent = 'Mengirim...';
+  btn.textContent = 'Memicu...';
   btn.disabled = true;
 
   try {
-    const resp = await fetch('https://onesignal.com/api/v1/notifications', {
-      method: 'POST',
-      headers: { 'Authorization': `Key ${restKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        app_id: ONESIGNAL_APP_ID,
-        included_segments: ['All'],
-        headings:  { en: heading, id: heading },
-        contents:  { en: bodyText, id: bodyText },
-        url: 'https://dionisiusnp.github.io/todolist/'
-      })
-    });
-    const result = await resp.json();
-    if(result.id){
-      btn.textContent = '✓ Terkirim';
+    const resp = await fetch(
+      'https://api.github.com/repos/dionisiusnp/dionisiusnp.github.io/actions/workflows/daily-notif.yml/dispatches',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${pat}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ref: 'main', inputs: { force: 'true' } })
+      }
+    );
+    if(resp.status === 204){
+      btn.textContent = '✓ Dipicu';
       setTimeout(()=>{ btn.textContent=origText; btn.disabled=false; }, 3000);
+    } else if(resp.status === 403 || resp.status === 401){
+      throw new Error('PAT tidak punya scope "workflow". Buat PAT baru dengan scope gist + workflow.');
     } else {
-      throw new Error(result.errors?.[0] || JSON.stringify(result));
+      const body = await resp.text();
+      throw new Error(`HTTP ${resp.status}: ${body}`);
     }
   } catch(e) {
-    alert('Gagal kirim notif: ' + e.message);
+    alert('Gagal memicu notif: ' + e.message);
     btn.textContent = origText;
     btn.disabled = false;
   }
