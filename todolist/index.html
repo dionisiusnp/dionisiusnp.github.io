@@ -1045,6 +1045,12 @@ function renderAssets(){
   const area=document.getElementById('assetArea');
   const prevFocus=document.activeElement?.id;
   area.innerHTML='';
+  function restoreFocus(){
+    if(prevFocus==='assetSearchInp'||prevFocus==='assetCatSel'){
+      const el=document.getElementById(prevFocus);
+      if(el){ el.focus(); if(el.tagName==='INPUT'){const l=el.value.length;el.setSelectionRange(l,l);} }
+    }
+  }
 
   /* toolbar */
   const toolbar=document.createElement('div');
@@ -1084,7 +1090,7 @@ function renderAssets(){
     emp.className='asset-empty';
     emp.textContent=db.assets.length?'Tidak ada aset yang cocok.':'Belum ada aset.';
     area.appendChild(emp);
-    return;
+    restoreFocus(); return;
   }
 
   const table=document.createElement('table');
@@ -1126,11 +1132,7 @@ function renderAssets(){
     save(); renderAssets();
   }));
 
-  /* restore focus after re-render */
-  if(prevFocus==='assetSearchInp'||prevFocus==='assetCatSel'){
-    const el=document.getElementById(prevFocus);
-    if(el){ el.focus(); if(el.tagName==='INPUT'){ const l=el.value.length; el.setSelectionRange(l,l); } }
-  }
+  restoreFocus();
 }
 
 /* ══════════════════════════════════════════
