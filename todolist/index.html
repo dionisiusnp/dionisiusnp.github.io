@@ -1179,9 +1179,12 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 document.getElementById('btnOrgView').addEventListener('click',()=>{
   viewMode=viewMode==='org'?'tasks':'org';
   document.getElementById('btnOrgView').classList.toggle('active', viewMode==='org');
+  document.getElementById('btnAssetView').classList.remove('active');
   const tv=document.getElementById('taskView');
   const ov=document.getElementById('orgView');
+  const av=document.getElementById('assetView');
   const empty=document.getElementById('emptyState');
+  av.style.display='none';
   if(viewMode==='org'){
     tv.style.display='none';
     empty.style.display='none';
