@@ -611,9 +611,7 @@ function recurrenceLabel(r){
 }
 function fmtDueDate(d){
   if(!d) return '';
-  const [y,m,day]=d.split('-');
-  const months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-  return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+  return new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
 }
 
 /* ══════════════════════════════════════════
@@ -1116,7 +1114,7 @@ function renderAssetTable(){
   const table=document.createElement('table');
   table.className='asset-table';
   table.innerHTML=`<thead><tr>
-    <th>#</th><th>Nama Aset</th><th>Kategori</th><th>Jml</th><th>Satuan</th><th>Kondisi</th><th>Lokasi</th><th>Tgl Pengadaan</th><th>Keterangan</th>
+    <th>#</th><th>Nama Aset</th><th>Kategori</th><th>Jml</th><th>Satuan</th><th>Lokasi</th><th>Tgl Pengadaan</th><th>Keterangan</th>
     ${role==='admin'?'<th></th>':''}
   </tr></thead>`;
   const tbody=document.createElement('tbody');
@@ -1130,7 +1128,6 @@ function renderAssetTable(){
       <td>${esc(a.category||'—')}</td>
       <td style="font-family:var(--mono)">${a.qty??'—'}</td>
       <td>${esc(a.unit||'—')}</td>
-      <td><span class="asset-cond ${condClass}">${esc(a.condition||'—')}</span></td>
       <td>${esc(a.location||'—')}</td>
       <td style="font-size:.72rem;white-space:nowrap">${tgl}</td>
       <td style="color:var(--muted);font-size:.72rem">${esc(a.notes||'—')}</td>
