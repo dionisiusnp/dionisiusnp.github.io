@@ -1325,6 +1325,8 @@ document.getElementById('btnInfoView').addEventListener('click',()=>{
     document.getElementById('btnSettingsView').classList.remove('active');
     renderSidebar();
     renderInfo();
+    localStorage.setItem('alteco_info_read_ts', Date.now().toString());
+    updateBellBadge();
   }
 });
 
@@ -1751,31 +1753,46 @@ function openModal(mode, ctx){
 
   else if(mode === 'event-add'){
     title.textContent = 'Tambah Event';
+    const ERECURS=['harian','mingguan','bulanan','tahunan'];
     body.innerHTML = `
       <div class="form-group"><label class="form-label">Judul *</label><input class="form-input" id="fi-etitle" placeholder="Nama event / informasi"/></div>
-      <div class="form-group"><label class="form-label">Deskripsi <span style="color:var(--dim);font-weight:400">(opsional)</span></label><textarea class="form-textarea" id="fi-edesc" placeholder="Detail..."></textarea></div>
+      <div class="form-group"><label class="form-label">Deskripsi <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><textarea class="form-textarea" id="fi-edesc" placeholder="Detail tambahan..."></textarea></div>
       <div class="form-group"><label class="form-label">Tipe</label>
-        <div style="display:flex;gap:8px;margin-top:4px">
-          <button class="recur-opt active-once" data-etype="once" style="flex:1;padding:6px;border-radius:6px;border:1px solid var(--accent);background:var(--card);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">📌 Sekali</button>
-          <button class="recur-opt" data-etype="recurring" style="flex:1;padding:6px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">🔁 Berulang</button>
+        <div class="type-toggle">
+          <button type="button" class="type-btn active-once" data-etype="once">📌 Sekali</button>
+          <button type="button" class="type-btn" data-etype="recurring">🔁 Berulang</button>
         </div>
       </div>
       <div class="form-group" id="eDateGroup"><label class="form-label">Tanggal</label><input class="form-input" id="fi-edate" type="date"/></div>
-      <div class="form-group" id="eRecurGroup" style="display:none"><label class="form-label">Pengulangan</label><div class="recur-row" id="eRecurRow">${['harian','mingguan','bulanan'].map(r=>`<button class="recur-btn${r==='mingguan'?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div></div>
+      <div class="form-group" id="eRecurGroup" style="display:none">
+        <label class="form-label">Pengulangan</label>
+        <div class="recur-row" id="eRecurRow">${ERECURS.map(r=>`<button type="button" class="recur-opt${r==='mingguan'?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div>
+      </div>
+      <div class="form-group" id="eRecurDateGroup" style="display:none"><label class="form-label">Tanggal acuan <span style="color:var(--dim);font-weight:400;text-transform:none">(menentukan hari notif)</span></label><input class="form-input" id="fi-erecurdate" type="date"/></div>
     `;
     let currentEType = 'once';
+    let currentERecur = 'mingguan';
+    function syncEGroups(){
+      document.getElementById('eDateGroup').style.display = currentEType==='once'?'':'none';
+      document.getElementById('eRecurGroup').style.display = currentEType==='recurring'?'':'none';
+      document.getElementById('eRecurDateGroup').style.display = currentEType==='recurring'&&currentERecur!=='harian'?'':'none';
+    }
     body.querySelectorAll('[data-etype]').forEach(b=>{
       b.addEventListener('click',()=>{
-        currentEType = b.dataset.etype;
-        body.querySelectorAll('[data-etype]').forEach(x=>{ x.classList.remove('active-once','active-recurring'); x.style.borderColor='var(--bd)'; });
+        currentEType=b.dataset.etype;
+        body.querySelectorAll('[data-etype]').forEach(x=>x.classList.remove('active-once','active-recurring'));
         b.classList.add('active-'+currentEType);
-        b.style.borderColor = 'var(--accent)';
-        document.getElementById('eDateGroup').style.display = currentEType==='once'?'':'none';
-        document.getElementById('eRecurGroup').style.display = currentEType==='recurring'?'':'none';
+        syncEGroups();
       });
     });
-    let currentERecur = 'mingguan';
-    body.querySelectorAll('[data-recur]').forEach(b=>{ b.addEventListener('click',()=>{ currentERecur=b.dataset.recur; body.querySelectorAll('[data-recur]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); }); });
+    body.querySelectorAll('[data-recur]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        currentERecur=b.dataset.recur;
+        body.querySelectorAll('[data-recur]').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        syncEGroups();
+      });
+    });
     mCtx._getEType = ()=>currentEType;
     mCtx._getERecur = ()=>currentERecur;
     setTimeout(()=>document.getElementById('fi-etitle').focus(),50);
@@ -1786,30 +1803,46 @@ function openModal(mode, ctx){
     if(!ev) return;
     title.textContent = 'Edit Event';
     const isRec = ev.type==='recurring';
+    const ERECURS=['harian','mingguan','bulanan','tahunan'];
     body.innerHTML = `
       <div class="form-group"><label class="form-label">Judul *</label><input class="form-input" id="fi-etitle" value="${esc(ev.title)}"/></div>
-      <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-edesc">${esc(ev.desc||'')}</textarea></div>
+      <div class="form-group"><label class="form-label">Deskripsi <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><textarea class="form-textarea" id="fi-edesc">${esc(ev.desc||'')}</textarea></div>
       <div class="form-group"><label class="form-label">Tipe</label>
-        <div style="display:flex;gap:8px;margin-top:4px">
-          <button class="recur-opt ${!isRec?'active-once':''}" data-etype="once" style="flex:1;padding:6px;border-radius:6px;border:1px solid ${!isRec?'var(--accent)':'var(--bd)'};background:var(--card);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">📌 Sekali</button>
-          <button class="recur-opt ${isRec?'active-recurring':''}" data-etype="recurring" style="flex:1;padding:6px;border-radius:6px;border:1px solid ${isRec?'var(--accent)':'var(--bd)'};background:var(--card);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">🔁 Berulang</button>
+        <div class="type-toggle">
+          <button type="button" class="type-btn${!isRec?' active-once':''}" data-etype="once">📌 Sekali</button>
+          <button type="button" class="type-btn${isRec?' active-recurring':''}" data-etype="recurring">🔁 Berulang</button>
         </div>
       </div>
       <div class="form-group" id="eDateGroup" style="${isRec?'display:none':''}"><label class="form-label">Tanggal</label><input class="form-input" id="fi-edate" type="date" value="${ev.date||''}"/></div>
-      <div class="form-group" id="eRecurGroup" style="${!isRec?'display:none':''}"><label class="form-label">Pengulangan</label><div class="recur-row" id="eRecurRow">${['harian','mingguan','bulanan'].map(r=>`<button class="recur-btn${r===(ev.recurrence||'mingguan')?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div></div>
+      <div class="form-group" id="eRecurGroup" style="${!isRec?'display:none':''}">
+        <label class="form-label">Pengulangan</label>
+        <div class="recur-row">${ERECURS.map(r=>`<button type="button" class="recur-opt${r===(ev.recurrence||'mingguan')?' active':''}" data-recur="${r}">${recurrenceLabel(r)}</button>`).join('')}</div>
+      </div>
+      <div class="form-group" id="eRecurDateGroup" style="${!isRec||(ev.recurrence||'mingguan')==='harian'?'display:none':''}"><label class="form-label">Tanggal acuan <span style="color:var(--dim);font-weight:400;text-transform:none">(menentukan hari notif)</span></label><input class="form-input" id="fi-erecurdate" type="date" value="${ev.recurDate||''}"/></div>
     `;
     let currentEType = ev.type||'once';
+    let currentERecur = ev.recurrence||'mingguan';
+    function syncEGroups(){
+      document.getElementById('eDateGroup').style.display=currentEType==='once'?'':'none';
+      document.getElementById('eRecurGroup').style.display=currentEType==='recurring'?'':'none';
+      document.getElementById('eRecurDateGroup').style.display=currentEType==='recurring'&&currentERecur!=='harian'?'':'none';
+    }
     body.querySelectorAll('[data-etype]').forEach(b=>{
       b.addEventListener('click',()=>{
         currentEType=b.dataset.etype;
-        body.querySelectorAll('[data-etype]').forEach(x=>{ x.classList.remove('active-once','active-recurring'); x.style.borderColor='var(--bd)'; });
-        b.classList.add('active-'+currentEType); b.style.borderColor='var(--accent)';
-        document.getElementById('eDateGroup').style.display=currentEType==='once'?'':'none';
-        document.getElementById('eRecurGroup').style.display=currentEType==='recurring'?'':'none';
+        body.querySelectorAll('[data-etype]').forEach(x=>x.classList.remove('active-once','active-recurring'));
+        b.classList.add('active-'+currentEType);
+        syncEGroups();
       });
     });
-    let currentERecur = ev.recurrence||'mingguan';
-    body.querySelectorAll('[data-recur]').forEach(b=>{ b.addEventListener('click',()=>{ currentERecur=b.dataset.recur; body.querySelectorAll('[data-recur]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); }); });
+    body.querySelectorAll('[data-recur]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        currentERecur=b.dataset.recur;
+        body.querySelectorAll('[data-recur]').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        syncEGroups();
+      });
+    });
     mCtx._getEType=()=>currentEType;
     mCtx._getERecur=()=>currentERecur;
   }
@@ -1863,15 +1896,18 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const title2=document.getElementById('fi-etitle').value.trim();
     if(!title2) return;
     const etype=mCtx._getEType();
+    const erecur=etype==='recurring'?mCtx._getERecur():null;
+    const recurDateEl=document.getElementById('fi-erecurdate');
     db.events.push({
       id:uid(), title:title2,
       desc:document.getElementById('fi-edesc').value.trim(),
       type:etype,
       date:etype==='once'?(document.getElementById('fi-edate').value||null):null,
-      recurrence:etype==='recurring'?mCtx._getERecur():null,
+      recurrence:erecur,
+      recurDate:erecur&&erecur!=='harian'?(recurDateEl?.value||null):null,
       createdAt:Date.now()
     });
-    save(); renderInfo(); closeModal(); return;
+    save(); renderInfo(); updateBellBadge(); closeModal(); return;
   }
 
   if(mMode==='event-edit'){
@@ -1880,12 +1916,16 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const title2=document.getElementById('fi-etitle').value.trim();
     if(!title2) return;
     const etype=mCtx._getEType();
+    const erecur=etype==='recurring'?mCtx._getERecur():null;
+    const recurDateEl=document.getElementById('fi-erecurdate');
     ev.title=title2;
     ev.desc=document.getElementById('fi-edesc').value.trim();
     ev.type=etype;
     ev.date=etype==='once'?(document.getElementById('fi-edate').value||null):null;
-    ev.recurrence=etype==='recurring'?mCtx._getERecur():null;
-    save(); renderInfo(); closeModal(); return;
+    ev.recurrence=erecur;
+    ev.recurDate=erecur&&erecur!=='harian'?(recurDateEl?.value||null):null;
+    ev.updatedAt=Date.now();
+    save(); renderInfo(); updateBellBadge(); closeModal(); return;
   }
 
   if(mMode==='div-add'){
@@ -2114,24 +2154,31 @@ function renderSettings(){
    NOTIFICATION HELPERS
 ══════════════════════════════════════════ */
 function getTodayEvents(){
-  const today = new Date().toISOString().slice(0,10);
-  const dayOfWeek = new Date().getDay();
+  const now = new Date();
+  const today = now.toISOString().slice(0,10);
   return (db.events||[]).filter(ev=>{
-    if(ev.type==='once') return ev.date && ev.date>=today;
+    if(ev.type==='once') return ev.date && ev.date>=today; /* tiap hari s.d. hari H */
     if(ev.type==='recurring'){
       if(ev.recurrence==='harian') return true;
-      if(ev.recurrence==='mingguan') return dayOfWeek===1;
-      if(ev.recurrence==='bulanan') return new Date().getDate()===1;
+      /* berulang: notif hanya PADA hari H sesuai recurDate */
+      const base = ev.recurDate ? new Date(ev.recurDate+'T00:00:00') : null;
+      if(ev.recurrence==='mingguan')
+        return base ? now.getDay()===base.getDay() : now.getDay()===1;
+      if(ev.recurrence==='bulanan')
+        return base ? now.getDate()===base.getDate() : now.getDate()===1;
+      if(ev.recurrence==='tahunan')
+        return base ? (now.getMonth()===base.getMonth()&&now.getDate()===base.getDate()) : false;
     }
     return false;
   });
 }
 
 function updateBellBadge(){
-  const count = getTodayEvents().length;
+  const lastRead = parseInt(localStorage.getItem('alteco_info_read_ts')||'0');
+  const unread = (db.events||[]).filter(ev=>Math.max(ev.createdAt||0, ev.updatedAt||0)>lastRead).length;
   const badge = document.getElementById('bellBadge');
   if(!badge) return;
-  if(count>0){ badge.textContent=count; badge.style.display='flex'; }
+  if(unread>0){ badge.textContent=unread; badge.style.display='flex'; }
   else badge.style.display='none';
 }
 

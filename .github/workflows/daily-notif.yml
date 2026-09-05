@@ -69,11 +69,17 @@ jobs:
             const dateOfMonth = now.getDate();
 
             const events = (db.events||[]).filter(ev => {
-              if(ev.type==='once') return ev.date && ev.date >= today;
+              if(ev.type==='once') return ev.date && ev.date >= today; // tiap hari s.d. hari H
               if(ev.type==='recurring'){
                 if(ev.recurrence==='harian') return true;
-                if(ev.recurrence==='mingguan') return dayOfWeek===1;
-                if(ev.recurrence==='bulanan') return dateOfMonth===1;
+                // berulang: hanya pada hari H sesuai recurDate
+                const base = ev.recurDate ? new Date(ev.recurDate+'T00:00:00') : null;
+                if(ev.recurrence==='mingguan')
+                  return base ? dayOfWeek===base.getDay() : dayOfWeek===1;
+                if(ev.recurrence==='bulanan')
+                  return base ? dateOfMonth===base.getDate() : dateOfMonth===1;
+                if(ev.recurrence==='tahunan')
+                  return base ? (now.getMonth()===base.getMonth()&&dateOfMonth===base.getDate()) : false;
               }
               return false;
             });
