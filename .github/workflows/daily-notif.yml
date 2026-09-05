@@ -134,10 +134,20 @@ jobs:
             // send_after only for scheduled daily run, not force
             if (!force) notifPayload.send_after = sendAfter;
 
-            await req('POST', 'https://onesignal.com/api/v1/notifications',
+            const osResult = await req('POST', 'https://onesignal.com/api/v1/notifications',
               { 'Authorization': `Key ${osKey}` },
               notifPayload
             );
+            console.log('OneSignal response:', JSON.stringify(osResult));
+            if (osResult.errors) {
+              console.error('OneSignal ERROR:', JSON.stringify(osResult.errors));
+              process.exit(1);
+            }
+            if (!osResult.id) {
+              console.error('OneSignal: no notification ID returned — possible auth or config issue');
+              process.exit(1);
+            }
+            console.log('OneSignal notification ID:', osResult.id, '| recipients:', osResult.recipients);
 
             // Mark sent — only for normal daily run
             if (!force) {
