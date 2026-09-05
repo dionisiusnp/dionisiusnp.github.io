@@ -492,6 +492,7 @@ let activeId     = null;   /* null | ALL | memberId */
 let expandedKelompoks = new Set(); /* kelompok IDs that are expanded */
 let assetSearch      = '';
 let assetCatFilter   = '';
+let infoSearch       = '';
 let activeFilter      = 'all';  /* 'all' | 'recurring' | 'once' */
 let filterMemberName  = null;   /* null | exact string — selected member, shows tasks */
 let memberSearchQuery = '';     /* partial query — filters member list in real-time */
@@ -2024,6 +2025,7 @@ function renderInfo(){
   area.innerHTML = '';
   const today = new Date().toISOString().slice(0,10);
 
+  // Toolbar
   const toolbar = document.createElement('div');
   toolbar.className = 'asset-toolbar';
   toolbar.innerHTML = `<span class="asset-toolbar-title">Pemberitahuan</span>`;
@@ -2036,30 +2038,54 @@ function renderInfo(){
   }
   area.appendChild(toolbar);
 
-  if(!db.events.length){
+  // Search bar
+  const searchWrap = document.createElement('div');
+  searchWrap.style.cssText = 'padding:8px 16px 4px';
+  searchWrap.innerHTML = `<input type="search" id="infoSearchInp" placeholder="Cari judul pemberitahuan..." value="${esc(infoSearch)}" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem;outline:none"/>`;
+  area.appendChild(searchWrap);
+  area.querySelector('#infoSearchInp').addEventListener('input', e=>{
+    infoSearch = e.target.value;
+    renderInfoList(area, today);
+  });
+
+  renderInfoList(area, today);
+}
+
+function renderInfoList(area, today){
+  // Remove old list sections
+  area.querySelectorAll('.info-section').forEach(el=>el.remove());
+
+  const q = infoSearch.toLowerCase();
+  const all = (db.events||[]).filter(ev=> !q || ev.title.toLowerCase().includes(q));
+
+  // Split: lampau = once && date < today; aktif = rest
+  const aktif = all.filter(ev=> ev.type==='recurring' || !ev.date || ev.date >= today)
+    .sort((a,b)=>{
+      const da = a.date||'9999', db2 = b.date||'9999';
+      return da.localeCompare(db2);
+    });
+  const lampau = all.filter(ev=> ev.type==='once' && ev.date && ev.date < today)
+    .sort((a,b)=> b.date.localeCompare(a.date)); // newest first
+
+  if(!all.length){
     const e = document.createElement('div');
-    e.className = 'asset-empty';
-    e.textContent = 'Belum ada pemberitahuan.';
+    e.className = 'asset-empty info-section';
+    e.textContent = infoSearch ? 'Tidak ditemukan.' : 'Belum ada pemberitahuan.';
     area.appendChild(e);
     return;
   }
 
-  const events = [...db.events].sort((a,b)=>{
-    const da = a.date||'9999', db2 = b.date||'9999';
-    return da.localeCompare(db2);
-  });
-
-  events.forEach(ev=>{
+  function buildCard(ev){
     const card = document.createElement('div');
     card.className = 'info-event-card';
 
     let badgeClass = 'info-recur', badgeText = '🔁 Berulang';
     let metaDate = '';
     if(ev.type === 'once'){
-      if(!ev.date) { badgeClass='info-recur'; badgeText='—'; }
+      if(!ev.date){ badgeClass='info-recur'; badgeText='—'; }
       else if(ev.date === today){ badgeClass='info-today'; badgeText='📌 Hari ini'; }
       else if(ev.date > today){
-        const diff = Math.round((new Date(ev.date)-new Date(today))/(86400000));
+        const diff = Math.round((new Date(ev.date)-new Date(today))/86400000);
         badgeClass='info-soon'; badgeText=`📅 ${diff} hari lagi`;
       } else { badgeClass='info-past'; badgeText='✓ Selesai'; }
       if(ev.date) metaDate = new Date(ev.date+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
@@ -2075,7 +2101,6 @@ function renderInfo(){
         ${ev.desc?`<span style="color:var(--muted)">${esc(ev.desc)}</span>`:''}
       </div>
     `;
-
     if(role === 'admin'){
       const actions = document.createElement('div');
       actions.style.cssText = 'display:flex;gap:6px;margin-top:8px';
@@ -2085,13 +2110,28 @@ function renderInfo(){
       `;
       card.appendChild(actions);
     }
-    area.appendChild(card);
-  });
+    return card;
+  }
+
+  function buildSection(label, items){
+    if(!items.length) return;
+    const sec = document.createElement('div');
+    sec.className = 'info-section';
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'padding:10px 16px 4px;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em';
+    hdr.textContent = label;
+    sec.appendChild(hdr);
+    items.forEach(ev=> sec.appendChild(buildCard(ev)));
+    area.appendChild(sec);
+  }
+
+  buildSection('Aktif / Akan Datang', aktif);
+  buildSection('Lampau', lampau);
 
   area.querySelectorAll('[data-ev-edit]').forEach(b=>b.addEventListener('click',()=>openModal('event-edit',{id:b.dataset.evEdit})));
   area.querySelectorAll('[data-ev-del]').forEach(b=>b.addEventListener('click',()=>{
     const ev = db.events.find(x=>x.id===b.dataset.evDel);
-    if(!ev||!confirm(`Hapus event "${ev.title}"?`)) return;
+    if(!ev||!confirm(`Hapus pemberitahuan "${ev.title}"?`)) return;
     db.events = db.events.filter(x=>x.id!==ev.id);
     save(); renderInfo();
   }));
