@@ -2004,11 +2004,8 @@ function openModal(mode, ctx){
       <div class="form-group"><label class="form-label">Nama Klien</label><input class="form-input" id="fi-pclient" value="${esc(p?.clientName||'')}" placeholder="Nama perusahaan/klien"/></div>
       <div class="form-group"><label class="form-label">Kode Klien *</label><input class="form-input" id="fi-pcode" value="${esc(p?.clientCode||'')}" placeholder="Kode unik untuk login anggota" style="font-family:var(--mono)"/></div>
       <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-pdesc">${esc(p?.description||'')}</textarea></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="form-group"><label class="form-label">Tanggal Mulai</label><input class="form-input" type="date" id="fi-pstart" value="${p?.startDate||''}"/></div>
-        <div class="form-group"><label class="form-label">🎯 Target Optimis</label><input class="form-input" type="date" id="fi-popt" value="${p?.endDateOptimistic||''}"/></div>
-      </div>
-      <div class="form-group"><label class="form-label">⚠ Target Pesimis</label><input class="form-input" type="date" id="fi-ppess" value="${p?.endDatePessimistic||''}"/></div>
+      <div class="form-group"><label class="form-label">Tanggal Mulai</label><input class="form-input" type="date" id="fi-pstart" value="${p?.startDate||''}"/></div>
+      <div style="font-size:.72rem;color:var(--muted);padding:2px 0 8px">🎯 Target optimis &amp; pesimis otomatis dihitung dari tanggal tugas anggota.</div>
     `;
     document.getElementById('fi-ptitle').focus();
   }
@@ -2257,8 +2254,6 @@ document.getElementById('modalSave').addEventListener('click',()=>{
         id:uid(), title, clientName, clientCode,
         description:document.getElementById('fi-pdesc').value.trim(),
         startDate:document.getElementById('fi-pstart').value||null,
-        endDateOptimistic:document.getElementById('fi-popt').value||null,
-        endDatePessimistic:document.getElementById('fi-ppess').value||null,
         members:[], createdAt:Date.now()
       });
     } else {
@@ -2267,8 +2262,6 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       p.title=title; p.clientName=clientName; p.clientCode=clientCode;
       p.description=document.getElementById('fi-pdesc').value.trim();
       p.startDate=document.getElementById('fi-pstart').value||null;
-      p.endDateOptimistic=document.getElementById('fi-popt').value||null;
-      p.endDatePessimistic=document.getElementById('fi-ppess').value||null;
     }
     save(); renderProject(); closeModal();
   }
@@ -2467,10 +2460,23 @@ function renderInfoList(area, today){
 ══════════════════════════════════════════ */
 function fmtDate(d){ return d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):''; }
 
+function computeProjectDates(proj){
+  const allDues=(proj.members||[]).flatMap(m=>(m.tasks||[]).filter(t=>t.dueDate).map(t=>t.dueDate));
+  if(!allDues.length) return {optimistic:null,pessimistic:null};
+  const pessimistic=allDues.reduce((a,b)=>a>b?a:b);
+  const perMember=(proj.members||[]).map(m=>{
+    const dues=(m.tasks||[]).filter(t=>t.dueDate).map(t=>t.dueDate);
+    return dues.length?dues.reduce((a,b)=>a>b?a:b):null;
+  }).filter(Boolean);
+  const optimistic=perMember.length?perMember.reduce((a,b)=>a<b?a:b):pessimistic;
+  return {optimistic,pessimistic};
+}
+
 function projectStatus(proj){
   const today=new Date().toISOString().slice(0,10);
-  if(!proj.endDatePessimistic) return 'active';
-  if(today>proj.endDatePessimistic) return 'late';
+  const {pessimistic}=computeProjectDates(proj);
+  if(!pessimistic) return 'active';
+  if(today>pessimistic) return 'late';
   return 'active';
 }
 
@@ -2577,8 +2583,9 @@ function renderProject(){
   allProjects.forEach(proj=>{
     const card=document.createElement('div');
     card.className='proj-card';
-    const pEnd=proj.endDatePessimistic||proj.endDateOptimistic||proj.startDate;
-    const optPct=timelinePercent(proj.startDate,pEnd,proj.endDateOptimistic);
+    const {optimistic:pOpt, pessimistic:pPess}=computeProjectDates(proj);
+    const pEnd=pPess||pOpt||proj.startDate;
+    const optPct=timelinePercent(proj.startDate,pEnd,pOpt);
     const status=projectStatus(proj);
     const pct=projectProgress(proj);
     const badgeCls=status==='late'?'proj-badge-late':'proj-badge-active';
@@ -2600,8 +2607,8 @@ function renderProject(){
         </div>
         <div class="proj-meta">
           ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
-          ${proj.endDateOptimistic?`<span>🎯 Optimis: ${fmtDate(proj.endDateOptimistic)}</span>`:''}
-          ${proj.endDatePessimistic?`<span>⚠ Pesimis: ${fmtDate(proj.endDatePessimistic)}</span>`:''}
+          ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
+          ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
           <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
         </div>
         ${proj.startDate&&pEnd?`
@@ -2616,7 +2623,7 @@ function renderProject(){
           </div>
           <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--dim);margin-top:2px">
             <span></span>
-            ${proj.endDateOptimistic?`<span>🎯 ${fmtDate(proj.endDateOptimistic)}</span>`:''}
+            ${pOpt?`<span>🎯 ${fmtDate(pOpt)}</span>`:''}
           </div>
         </div>`:''}
         <div class="proj-progress"><div class="proj-progress-bar" style="width:${pct}%"></div></div>
@@ -2713,8 +2720,8 @@ function renderProject(){
           </div>
           <div class="proj-meta">
             ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
-            ${proj.endDateOptimistic?`<span>🎯 Optimis: ${fmtDate(proj.endDateOptimistic)}</span>`:''}
-            ${proj.endDatePessimistic?`<span>⚠ Pesimis: ${fmtDate(proj.endDatePessimistic)}</span>`:''}
+            ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
+            ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
             <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
           </div>
           ${proj.startDate&&pEnd?`
