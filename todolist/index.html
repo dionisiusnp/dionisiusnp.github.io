@@ -343,7 +343,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 /* ── Project view ── */
 .proj-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px 18px;margin-bottom:10px;transition:border-color .15s}
 .proj-card:hover{border-color:var(--accent)}
-.proj-card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px}
+.proj-card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;cursor:pointer;user-select:none}
+.proj-chevron{flex-shrink:0;font-size:.65rem;color:var(--muted);margin-top:4px;transition:transform .2s}
+.proj-chevron.open{transform:rotate(90deg)}
+.proj-collapse{display:none}
+.proj-collapse.open{display:block}
 .proj-title{font-size:.9rem;font-weight:800;flex:1}
 .proj-client{font-size:.7rem;color:var(--muted);margin-bottom:4px}
 .proj-meta{display:flex;gap:10px;font-size:.68rem;color:var(--dim);flex-wrap:wrap;margin-bottom:10px}
@@ -592,6 +596,8 @@ let role         = null;   /* 'viewer' | 'admin' */
 let unlockedProjects = new Map(); /* projectId → {memberName, memberId} — unlocked via inline form */
 let activeId     = null;   /* null | ALL | memberId */
 let expandedKelompoks = new Set(); /* kelompok IDs that are expanded */
+let expandedProjects  = new Set(); /* project IDs that are expanded */
+let projectSearch     = '';
 let assetSearch      = '';
 let assetCatFilter   = '';
 let infoSearch       = '';
@@ -2567,7 +2573,10 @@ function renderProject(){
 
   const toolbar=document.createElement('div');
   toolbar.className='asset-toolbar';
-  toolbar.innerHTML=`<span class="asset-toolbar-title">Proyek</span>`;
+  toolbar.style.flexWrap='wrap';
+  toolbar.innerHTML=`<span class="asset-toolbar-title">Proyek</span>
+    <input id="projSearchInp" type="search" placeholder="Cari proyek…" value="${esc(projectSearch)}"
+      style="flex:1;min-width:120px;max-width:240px;padding:5px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--surface);color:var(--text);font-size:.78rem;outline:none"/>`;
   if(role==='admin'){
     const btn=document.createElement('button');
     btn.className='task-add-inline-btn';
@@ -2576,12 +2585,15 @@ function renderProject(){
     toolbar.appendChild(btn);
   }
   area.appendChild(toolbar);
+  area.querySelector('#projSearchInp').addEventListener('input',e=>{projectSearch=e.target.value;renderProject();});
 
   const allProjects=db.projects||[];
-  if(!allProjects.length){
+  const q=projectSearch.trim().toLowerCase();
+  const filtered=q?allProjects.filter(p=>(p.title||'').toLowerCase().includes(q)||(p.clientName||'').toLowerCase().includes(q)):allProjects;
+  if(!filtered.length){
     const e=document.createElement('div');
     e.className='asset-empty';
-    e.textContent='Belum ada proyek.';
+    e.textContent=q?'Tidak ada proyek yang cocok.':'Belum ada proyek.';
     area.appendChild(e); return;
   }
 
@@ -2597,9 +2609,10 @@ function renderProject(){
     if(changed) saveUnlocked();
   }
 
-  allProjects.forEach(proj=>{
+  filtered.forEach(proj=>{
     const card=document.createElement('div');
     card.className='proj-card';
+    const isExpanded=expandedProjects.has(proj.id);
     const {optimistic:pOpt, pessimistic:pPess}=computeProjectDates(proj);
     const pEnd=pPess||pOpt||proj.startDate;
     const optPct=timelinePercent(proj.startDate,pEnd,pOpt);
@@ -2611,7 +2624,8 @@ function renderProject(){
     if(role==='admin'){
       /* ── Admin: full view ── */
       card.innerHTML=`
-        <div class="proj-card-head">
+        <div class="proj-card-head" data-toggle-proj="${proj.id}">
+          <span class="proj-chevron${isExpanded?' open':''}">▶</span>
           <div style="flex:1">
             <div class="proj-title">${esc(proj.title)}</div>
             <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
@@ -2645,6 +2659,8 @@ function renderProject(){
         </div>`:''}
         <div class="proj-progress"><div class="proj-progress-bar" style="width:${pct}%"></div></div>
       `;
+      const collapse=document.createElement('div');
+      collapse.className='proj-collapse'+(isExpanded?' open':'');
       const memSec=document.createElement('div');
       memSec.className='proj-member-section';
       (proj.members||[]).forEach(mem=>memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,true)));
@@ -2654,7 +2670,14 @@ function renderProject(){
       addMemBtn.textContent='＋ Tambah Anggota';
       addMemBtn.dataset.addMem=proj.id;
       memSec.appendChild(addMemBtn);
-      card.appendChild(memSec);
+      collapse.appendChild(memSec);
+      card.appendChild(collapse);
+      card.querySelector('[data-toggle-proj]').addEventListener('click',e=>{
+        if(e.target.closest('.proj-actions')) return;
+        if(expandedProjects.has(proj.id)) expandedProjects.delete(proj.id); else expandedProjects.add(proj.id);
+        collapse.classList.toggle('open');
+        card.querySelector('.proj-chevron').classList.toggle('open');
+      });
 
     } else {
       /* ── Viewer: locked or unlocked per-project ── */
@@ -2726,14 +2749,15 @@ function renderProject(){
         /* Unlocked card — show this member's content */
         const mem=(proj.members||[]).find(m=>m.id===unlockInfo.memberId);
         card.innerHTML=`
-          <div class="proj-card-head">
+          <div class="proj-card-head" data-toggle-proj="${proj.id}">
+            <span class="proj-chevron${isExpanded?' open':''}">▶</span>
             <div style="flex:1">
               <div class="proj-title">${esc(proj.title)}</div>
               <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
             </div>
             <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
             <button class="proj-relock-btn" title="Kunci kembali"
-              style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:.82rem;padding:4px;margin-left:4px" title="Kunci kembali">🔓</button>
+              style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:.82rem;padding:4px;margin-left:4px">🔓</button>
           </div>
           <div class="proj-meta">
             ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
@@ -2758,10 +2782,19 @@ function renderProject(){
           unlockedProjects.delete(proj.id); saveUnlocked(); renderProject();
         });
         if(mem){
+          const collapse2=document.createElement('div');
+          collapse2.className='proj-collapse'+(isExpanded?' open':'');
           const memSec=document.createElement('div');
           memSec.className='proj-member-section';
           memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,false));
-          card.appendChild(memSec);
+          collapse2.appendChild(memSec);
+          card.appendChild(collapse2);
+          card.querySelector('[data-toggle-proj]').addEventListener('click',e=>{
+            if(e.target.closest('.proj-relock-btn')) return;
+            if(expandedProjects.has(proj.id)) expandedProjects.delete(proj.id); else expandedProjects.add(proj.id);
+            collapse2.classList.toggle('open');
+            card.querySelector('.proj-chevron').classList.toggle('open');
+          });
         }
       }
     }
