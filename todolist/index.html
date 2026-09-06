@@ -385,6 +385,19 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .proj-add-btn:hover{border-color:var(--accent);color:var(--accent)}
 .proj-progress{height:4px;border-radius:2px;background:var(--bd);margin-top:4px;overflow:hidden}
 .proj-progress-bar{height:100%;border-radius:2px;background:var(--accent);transition:width .3s}
+
+/* ── Culture view ── */
+.culture-type-header{display:flex;align-items:center;gap:8px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:14px 16px 6px;border-bottom:1px solid var(--bd);margin-bottom:8px}
+.culture-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;padding:0 16px 16px}
+.culture-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;transition:border-color .15s;position:relative}
+.culture-card:hover{border-color:var(--accent)}
+.culture-card-type{display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;margin-bottom:6px}
+.culture-card-type.softskill{background:rgba(52,211,153,.1);color:var(--green,#34d399);border:1px solid rgba(52,211,153,.25)}
+.culture-card-type.hardskill{background:rgba(108,111,245,.1);color:var(--accent);border:1px solid rgba(108,111,245,.25)}
+.culture-card-title{font-size:.88rem;font-weight:700;margin-bottom:4px}
+.culture-card-desc{font-size:.75rem;color:var(--muted);line-height:1.55;white-space:pre-wrap}
+.culture-card-acts{position:absolute;top:10px;right:10px;display:none;gap:4px}
+.culture-card:hover .culture-card-acts{display:flex}
 </style>
 </head>
 <body>
@@ -471,6 +484,10 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <span class="feature-nav-ico">🗂️</span>
         <span class="feature-nav-label">Proyek</span>
       </button>
+      <button class="feature-nav-item" id="btnCultureView">
+        <span class="feature-nav-ico">🌱</span>
+        <span class="feature-nav-label">Budaya</span>
+      </button>
       <button class="feature-nav-item admin-only" id="btnSettingsView">
         <span class="feature-nav-ico">⚙️</span>
         <span class="feature-nav-label">Pengaturan</span>
@@ -543,6 +560,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <div id="projectView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="projectArea"></div>
     </div>
+
+    <!-- Culture view -->
+    <div id="cultureView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="cultureArea"></div>
+    </div>
   </div>
 </div>
 
@@ -593,6 +615,7 @@ function migrate(d){
   if(!d.assets) d.assets=[];
   if(!d.events) d.events=[];
   if(!d.projects) d.projects=[];
+  if(!d.cultures) d.cultures=[];
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
@@ -977,6 +1000,7 @@ function select(id){
   document.getElementById('infoView').style.display='none';
   document.getElementById('settingsView').style.display='none';
   document.getElementById('projectView').style.display='none';
+  document.getElementById('cultureView').style.display='none';
   renderSidebar(); renderMain();
 }
 
@@ -993,10 +1017,12 @@ function renderMain(){
   document.getElementById('infoView').style.display='none';
   document.getElementById('settingsView').style.display='none';
   document.getElementById('projectView').style.display='none';
+  document.getElementById('cultureView').style.display='none';
   document.getElementById('btnAssetView').classList.remove('active');
   document.getElementById('btnInfoView').classList.remove('active');
   document.getElementById('btnSettingsView').classList.remove('active');
   document.getElementById('btnProjectView').classList.remove('active');
+  document.getElementById('btnCultureView').classList.remove('active');
   viewMode='tasks';
   document.getElementById('btnOrgView').classList.remove('active');
 
@@ -1356,115 +1382,84 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 /* ══════════════════════════════════════════
    ORG CHART TOGGLE
 ══════════════════════════════════════════ */
+/* helper: hide all feature views, deactivate all nav buttons */
+function hideAllViews(){
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView']
+    .forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById('emptyState').style.display='none';
+}
+
 document.getElementById('btnProjectView').addEventListener('click',()=>{
   const pv=document.getElementById('projectView');
   const tv=document.getElementById('taskView');
-  const ov=document.getElementById('orgView');
-  const av=document.getElementById('assetView');
-  const iv=document.getElementById('infoView');
-  const sv=document.getElementById('settingsView');
   const empty=document.getElementById('emptyState');
-  const isProject=pv.style.display!=='none';
-  if(isProject){
+  if(pv.style.display!=='none'){
     pv.style.display='none';
     document.getElementById('btnProjectView').classList.remove('active');
     if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
     else { empty.style.display='flex'; }
   } else {
     activeId=null; viewMode='tasks';
-    tv.style.display='none'; ov.style.display='none'; av.style.display='none';
-    iv.style.display='none'; sv.style.display='none'; empty.style.display='none';
+    hideAllViews();
     pv.style.display='flex';
     document.getElementById('btnProjectView').classList.add('active');
-    document.getElementById('btnOrgView').classList.remove('active');
-    document.getElementById('btnAssetView').classList.remove('active');
-    document.getElementById('btnInfoView').classList.remove('active');
-    document.getElementById('btnSettingsView').classList.remove('active');
-    renderSidebar();
-    renderProject();
+    renderSidebar(); renderProject();
   }
 });
 
 document.getElementById('btnOrgView').addEventListener('click',()=>{
   viewMode=viewMode==='org'?'tasks':'org';
   document.getElementById('btnOrgView').classList.toggle('active', viewMode==='org');
-  document.getElementById('btnAssetView').classList.remove('active');
-  document.getElementById('btnInfoView').classList.remove('active');
-  document.getElementById('btnSettingsView').classList.remove('active');
-  document.getElementById('btnProjectView').classList.remove('active');
   const tv=document.getElementById('taskView');
   const ov=document.getElementById('orgView');
-  const av=document.getElementById('assetView');
-  const iv=document.getElementById('infoView');
-  const sv=document.getElementById('settingsView');
   const empty=document.getElementById('emptyState');
-  av.style.display='none'; iv.style.display='none'; sv.style.display='none'; document.getElementById('projectView').style.display='none'; document.getElementById('btnProjectView').classList.remove('active');
+  ['assetView','infoView','settingsView','projectView','cultureView']
+    .forEach(id=>{ document.getElementById(id).style.display='none'; });
+  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView']
+    .forEach(id=>document.getElementById(id).classList.remove('active'));
   if(viewMode==='org'){
-    activeId=null;
-    tv.style.display='none';
-    empty.style.display='none';
-    ov.style.display='flex';
-    renderSidebar();
-    renderOrgChart();
+    activeId=null; tv.style.display='none'; empty.style.display='none';
+    ov.style.display='flex'; renderSidebar(); renderOrgChart();
   } else {
-    ov.style.display='none';
-    renderMain();
+    ov.style.display='none'; renderMain();
   }
 });
-
 
 document.getElementById('btnAssetView').addEventListener('click',()=>{
   const av=document.getElementById('assetView');
   const tv=document.getElementById('taskView');
-  const ov=document.getElementById('orgView');
-  const iv=document.getElementById('infoView');
-  const sv=document.getElementById('settingsView');
   const empty=document.getElementById('emptyState');
-  const isAsset=av.style.display!=='none';
-  if(isAsset){
+  if(av.style.display!=='none'){
     av.style.display='none';
     document.getElementById('btnAssetView').classList.remove('active');
     if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
     else { empty.style.display='flex'; }
   } else {
-    viewMode='tasks';
-    activeId=null;
-    tv.style.display='none'; ov.style.display='none'; iv.style.display='none'; sv.style.display='none'; document.getElementById('projectView').style.display='none'; empty.style.display='none';
+    activeId=null; viewMode='tasks';
+    hideAllViews();
     av.style.display='flex';
     document.getElementById('btnAssetView').classList.add('active');
-    document.getElementById('btnOrgView').classList.remove('active');
-    document.getElementById('btnInfoView').classList.remove('active');
-    document.getElementById('btnSettingsView').classList.remove('active');
-    document.getElementById('btnProjectView').classList.remove('active');
-    renderSidebar();
-    renderAssets();
+    renderSidebar(); renderAssets();
   }
 });
 
 document.getElementById('btnInfoView').addEventListener('click',()=>{
   const iv=document.getElementById('infoView');
   const tv=document.getElementById('taskView');
-  const ov=document.getElementById('orgView');
-  const av=document.getElementById('assetView');
-  const sv=document.getElementById('settingsView');
   const empty=document.getElementById('emptyState');
-  const isInfo=iv.style.display!=='none';
-  if(isInfo){
+  if(iv.style.display!=='none'){
     iv.style.display='none';
     document.getElementById('btnInfoView').classList.remove('active');
     if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
     else { empty.style.display='flex'; }
   } else {
-    activeId=null;
-    tv.style.display='none'; ov.style.display='none'; av.style.display='none'; sv.style.display='none'; document.getElementById('projectView').style.display='none'; empty.style.display='none';
+    activeId=null; viewMode='tasks';
+    hideAllViews();
     iv.style.display='flex';
     document.getElementById('btnInfoView').classList.add('active');
-    document.getElementById('btnOrgView').classList.remove('active');
-    document.getElementById('btnAssetView').classList.remove('active');
-    document.getElementById('btnSettingsView').classList.remove('active');
-    document.getElementById('btnProjectView').classList.remove('active');
-    renderSidebar();
-    renderInfo();
+    renderSidebar(); renderInfo();
     localStorage.setItem('alteco_info_read_ts', Date.now().toString());
     updateBellBadge();
   }
@@ -1473,27 +1468,36 @@ document.getElementById('btnInfoView').addEventListener('click',()=>{
 document.getElementById('btnSettingsView').addEventListener('click',()=>{
   const sv=document.getElementById('settingsView');
   const tv=document.getElementById('taskView');
-  const ov=document.getElementById('orgView');
-  const av=document.getElementById('assetView');
-  const iv=document.getElementById('infoView');
   const empty=document.getElementById('emptyState');
-  const isSettings=sv.style.display!=='none';
-  if(isSettings){
+  if(sv.style.display!=='none'){
     sv.style.display='none';
     document.getElementById('btnSettingsView').classList.remove('active');
     if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
     else { empty.style.display='flex'; }
   } else {
-    activeId=null;
-    tv.style.display='none'; ov.style.display='none'; av.style.display='none'; iv.style.display='none'; document.getElementById('projectView').style.display='none'; empty.style.display='none';
+    activeId=null; viewMode='tasks';
+    hideAllViews();
     sv.style.display='flex';
     document.getElementById('btnSettingsView').classList.add('active');
-    document.getElementById('btnOrgView').classList.remove('active');
-    document.getElementById('btnAssetView').classList.remove('active');
-    document.getElementById('btnInfoView').classList.remove('active');
-    document.getElementById('btnProjectView').classList.remove('active');
-    renderSidebar();
-    renderSettings();
+    renderSidebar(); renderSettings();
+  }
+});
+
+document.getElementById('btnCultureView').addEventListener('click',()=>{
+  const cv=document.getElementById('cultureView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(cv.style.display!=='none'){
+    cv.style.display='none';
+    document.getElementById('btnCultureView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    cv.style.display='flex';
+    document.getElementById('btnCultureView').classList.add('active');
+    renderSidebar(); renderCultures();
   }
 });
 
@@ -2060,6 +2064,29 @@ function openModal(mode, ctx){
     `;
     document.getElementById('fi-pt-text').focus();
   }
+
+  else if(mode==='culture-add'||mode==='culture-edit'){
+    const c=mode==='culture-edit'?db.cultures.find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='culture-add'?'Tambah Budaya':'Edit Budaya';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Tipe *</label>
+        <select class="form-select" id="fi-ctype">
+          <option value="softskill" ${(c?.type||'softskill')==='softskill'?'selected':''}>🤝 Softskill — karakter &amp; kebiasaan</option>
+          <option value="hardskill" ${c?.type==='hardskill'?'selected':''}>⚙️ Hardskill — kemampuan teknis</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama / Nilai *</label>
+        <input class="form-input" id="fi-ctitle" value="${esc(c?.title||'')}" placeholder="misal: Komunikasi Efektif, Git Flow, dst" maxlength="80"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Panduan / Deskripsi</label>
+        <textarea class="form-textarea" id="fi-cdesc" placeholder="Jelaskan kebiasaan atau cara penerapannya di komunitas…" rows="4">${esc(c?.description||'')}</textarea>
+      </div>
+    `;
+    document.getElementById('fi-ctitle').focus();
+  }
 }
 
 function closeModal(){
@@ -2290,6 +2317,23 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       task.text=text; task.startDate=startDate; task.dueDate=dueDate;
     }
     save(); renderProject(); closeModal();
+  }
+
+  /* ── Culture modal save ── */
+  else if(mMode==='culture-add'||mMode==='culture-edit'){
+    const title_v=document.getElementById('fi-ctitle').value.trim();
+    if(!title_v) return;
+    const type_v=document.getElementById('fi-ctype').value;
+    const desc_v=document.getElementById('fi-cdesc').value.trim();
+    if(mMode==='culture-add'){
+      db.cultures=(db.cultures||[]);
+      db.cultures.push({id:uid(),title:title_v,type:type_v,description:desc_v,createdAt:Date.now()});
+    } else {
+      const c=db.cultures.find(x=>x.id===mCtx.id);
+      if(!c) return;
+      c.title=title_v; c.type=type_v; c.description=desc_v;
+    }
+    save(); renderCultures(); closeModal();
   }
 });
 
@@ -2826,6 +2870,73 @@ function renderSettings(){
   sec2.appendChild(forceRow);
   area.appendChild(sec);
   area.appendChild(sec2);
+}
+
+/* ══════════════════════════════════════════
+   CULTURE VIEW
+══════════════════════════════════════════ */
+function renderCultures(){
+  const area=document.getElementById('cultureArea');
+  area.innerHTML='';
+
+  const toolbar=document.createElement('div');
+  toolbar.className='asset-toolbar';
+  toolbar.innerHTML=`<span class="asset-toolbar-title">Budaya Organisasi</span>`;
+  if(role==='admin'){
+    const btn=document.createElement('button');
+    btn.className='task-add-inline-btn';
+    btn.textContent='＋ Tambah Budaya';
+    btn.addEventListener('click',()=>openModal('culture-add',{}));
+    toolbar.appendChild(btn);
+  }
+  area.appendChild(toolbar);
+
+  const cultures=db.cultures||[];
+  if(!cultures.length){
+    const e=document.createElement('div');
+    e.className='asset-empty';
+    e.textContent='Belum ada budaya organisasi.';
+    area.appendChild(e); return;
+  }
+
+  const types=[
+    {key:'softskill', label:'🤝 Softskill', desc:'Karakter, kebiasaan, dan sikap'},
+    {key:'hardskill', label:'⚙️ Hardskill', desc:'Kemampuan teknis dan kompetensi'}
+  ];
+
+  types.forEach(t=>{
+    const items=cultures.filter(c=>c.type===t.key);
+    if(!items.length) return;
+
+    const header=document.createElement('div');
+    header.className='culture-type-header';
+    header.innerHTML=`<span>${t.label}</span><span style="font-weight:400;text-transform:none;letter-spacing:0">${t.desc}</span>`;
+    area.appendChild(header);
+
+    const grid=document.createElement('div');
+    grid.className='culture-grid';
+
+    items.forEach(c=>{
+      const card=document.createElement('div');
+      card.className='culture-card';
+      card.innerHTML=`
+        <div class="culture-card-type ${c.type}">${c.type==='softskill'?'Softskill':'Hardskill'}</div>
+        ${role==='admin'?`<div class="culture-card-acts">
+          <button class="asset-act-btn" data-culture-edit="${c.id}">✎</button>
+          <button class="asset-act-btn del" data-culture-del="${c.id}">✕</button>
+        </div>`:''}
+        <div class="culture-card-title">${esc(c.title)}</div>
+        <div class="culture-card-desc">${esc(c.description||'')}</div>
+      `;
+      card.querySelector('[data-culture-edit]')?.addEventListener('click',()=>openModal('culture-edit',{id:c.id}));
+      card.querySelector('[data-culture-del]')?.addEventListener('click',()=>{
+        if(!confirm(`Hapus "${c.title}"?`)) return;
+        db.cultures=db.cultures.filter(x=>x.id!==c.id); save(); renderCultures();
+      });
+      grid.appendChild(card);
+    });
+    area.appendChild(grid);
+  });
 }
 
 /* ══════════════════════════════════════════
