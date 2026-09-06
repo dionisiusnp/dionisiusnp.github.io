@@ -2062,10 +2062,10 @@ function openModal(mode, ctx){
     title.textContent=mode==='proj-task-add'?`Tambah Tugas — ${esc(mem?.name||'')}`:' Edit Tugas';
     body.innerHTML=`
       <div class="form-group"><label class="form-label">Deskripsi Tugas *</label><input class="form-input" id="fi-pt-text" value="${esc(task?.text||'')}" placeholder="Tugas yang perlu diselesaikan"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <div class="form-group"><label class="form-label">Tanggal Mulai</label><input class="form-input" type="date" id="fi-pt-start" value="${task?.startDate||''}"/></div>
-        <div class="form-group"><label class="form-label">🎯 Target Optimis</label><input class="form-input" type="date" id="fi-pt-due" value="${task?.dueDate||''}"/></div>
-        <div class="form-group"><label class="form-label">⚠ Target Pesimis</label><input class="form-input" type="date" id="fi-pt-pess" value="${task?.datePessimistic||''}"/></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <div class="form-group"><label class="form-label" style="font-size:.65rem">Tgl Mulai</label><input class="form-input" type="date" id="fi-pt-start" value="${task?.startDate||''}"/></div>
+        <div class="form-group"><label class="form-label" style="font-size:.65rem">🎯 Optimis</label><input class="form-input" type="date" id="fi-pt-due" value="${task?.dueDate||''}"/></div>
+        <div class="form-group"><label class="form-label" style="font-size:.65rem">⚠ Pesimis</label><input class="form-input" type="date" id="fi-pt-pess" value="${task?.datePessimistic||''}"/></div>
       </div>
       <div style="font-size:.68rem;color:var(--muted);margin-top:-4px">Pesimis diisi jika target optimis tidak tercapai.</div>
     `;
@@ -2623,7 +2623,7 @@ function renderProject(){
           ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
           <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
         </div>
-        ${proj.startDate&&pEnd?`
+        ${proj.startDate&&pEnd&&pEnd!==proj.startDate?`
         <div class="proj-timeline-wrap">
           <div class="proj-timeline-label">
             <span>${fmtDate(proj.startDate)}</span>
@@ -2736,7 +2736,7 @@ function renderProject(){
             ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
             <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
           </div>
-          ${proj.startDate&&pEnd?`
+          ${proj.startDate&&pEnd&&pEnd!==proj.startDate?`
           <div class="proj-timeline-wrap">
             <div class="proj-timeline-label">
               <span>${fmtDate(proj.startDate)}</span>
