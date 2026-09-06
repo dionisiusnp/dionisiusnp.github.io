@@ -666,7 +666,7 @@ function save(){
   if(stored==='admin'||stored==='viewer'){
     role=stored;
     try{
-      const up=sessionStorage.getItem('alteco_unlocked_projects');
+      const up=localStorage.getItem('alteco_unlocked_projects');
       if(up) unlockedProjects=new Map(JSON.parse(up));
     }catch{}
     gate.classList.add('hidden'); applyRole(); return;
@@ -710,7 +710,7 @@ function syncOrgName(){
 }
 
 function saveUnlocked(){
-  sessionStorage.setItem('alteco_unlocked_projects', JSON.stringify([...unlockedProjects.entries()]));
+  localStorage.setItem('alteco_unlocked_projects', JSON.stringify([...unlockedProjects.entries()]));
 }
 
 function applyRole(){
@@ -914,7 +914,7 @@ function renderSidebar(){
     db.kelompoks=db.kelompoks.filter(d=>d.id!==k.id);
     db.members.forEach(m=>{if(m.kelompokId===k.id)m.kelompokId=null});
     if(activeId===k.id) activeId=null;
-    save(); renderSidebar(); renderMain();
+    save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain();
   }));
   scroll.querySelectorAll('[data-grp-add-mem]').forEach(b=>b.addEventListener('click',e=>{
     e.stopPropagation();
@@ -953,7 +953,7 @@ function makeMemberItem(m){
       db.members=db.members.filter(x=>x.id!==m.id);
       db.tasks=db.tasks.filter(t=>t.memberId!==m.id);
       if(activeId===m.id) activeId=null;
-      save(); renderSidebar(); renderMain();
+      save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain();
     });
   }
   return div;
@@ -2189,7 +2189,8 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       lastMember=m;
     });
     if(!lastMember) return;
-    save(); renderSidebar(); closeModal(); select(lastMember.id);
+    save(); renderSidebar(); closeModal();
+    if(viewMode==='org') renderOrgChart(); else select(lastMember.id);
   }
   else if(mMode==='mem-edit'){
     const name=document.getElementById('fi-name').value.trim();
