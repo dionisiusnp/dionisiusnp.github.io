@@ -322,6 +322,71 @@ body.is-admin .viewer-only{display:none!important}
   .app{flex-direction:column}
   .main{order:1}
 }
+
+/* ── Project Access visibility ── */
+.project-access{display:none!important}
+body.is-admin .project-access{display:flex!important}
+body.is-project-member .project-access{display:flex!important}
+.nav-role-badge.project{background:rgba(45,212,191,.1);border-color:rgba(45,212,191,.35);color:var(--teal)}
+
+/* ── Gate password toggle ── */
+.pw-wrap{position:relative;width:100%;margin-bottom:10px}
+.pw-wrap .gate-input{margin-bottom:0;padding-right:38px}
+.pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:2px 4px;transition:color .15s}
+.pw-toggle:hover{color:var(--text)}
+
+/* ── Gate mode tabs ── */
+.gate-mode-tabs{display:flex;gap:4px;margin-bottom:18px;background:var(--card);border-radius:8px;padding:3px}
+.gate-mode-tab{flex:1;padding:6px;border:none;border-radius:6px;background:transparent;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s}
+.gate-mode-tab.active{background:var(--accent);color:#fff}
+.gate-name-input{width:100%;padding:8px 14px;border-radius:7px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.88rem;text-align:center;outline:none;transition:border-color .15s;margin-bottom:8px}
+.gate-name-input:focus{border-color:var(--accent)}
+
+/* ── Project view ── */
+.proj-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px 18px;margin-bottom:10px;transition:border-color .15s}
+.proj-card:hover{border-color:var(--accent)}
+.proj-card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px}
+.proj-title{font-size:.9rem;font-weight:800;flex:1}
+.proj-client{font-size:.7rem;color:var(--muted);margin-bottom:4px}
+.proj-meta{display:flex;gap:10px;font-size:.68rem;color:var(--dim);flex-wrap:wrap;margin-bottom:10px}
+.proj-badge{padding:2px 8px;border-radius:4px;font-size:.62rem;font-weight:700;border:1px solid}
+.proj-badge-active{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:var(--green)}
+.proj-badge-done{background:rgba(148,148,184,.08);border-color:var(--bd);color:var(--dim)}
+.proj-badge-late{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:var(--red)}
+.proj-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── Project timeline ── */
+.proj-timeline-wrap{margin:10px 0 4px}
+.proj-timeline-label{display:flex;justify-content:space-between;font-size:.6rem;color:var(--dim);margin-bottom:4px}
+.proj-timeline-bar{height:8px;border-radius:4px;background:var(--bd);overflow:hidden;display:flex;position:relative}
+.proj-tl-optimistic{height:100%;background:var(--green);border-radius:4px 0 0 4px}
+.proj-tl-buffer{height:100%;background:var(--gold);border-radius:0 4px 4px 0}
+
+/* ── Project member rows ── */
+.proj-member-section{margin-top:12px;border-top:1px solid var(--bd);padding-top:12px}
+.proj-member-row{margin-bottom:14px}
+.proj-member-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.proj-member-avatar{width:26px;height:26px;border-radius:50%;background:rgba(108,111,245,.15);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--accent);flex-shrink:0}
+.proj-member-name{font-size:.78rem;font-weight:600;flex:1}
+.proj-member-role{font-size:.62rem;color:var(--muted)}
+.proj-member-tl{height:6px;border-radius:3px;background:rgba(108,111,245,.25);margin:5px 0 8px;position:relative}
+.proj-member-tl-bar{height:100%;border-radius:3px;background:var(--accent);position:absolute}
+.proj-task-list{display:flex;flex-direction:column;gap:4px;padding-left:34px}
+.proj-task-item{display:flex;align-items:center;gap:8px;font-size:.75rem;padding:4px 8px;border-radius:5px;background:var(--surface);border:1px solid transparent;transition:border-color .15s}
+.proj-task-item:hover{border-color:var(--bd)}
+.proj-task-item.done{opacity:.55}
+.proj-task-cb{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--bd);background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.6rem;transition:all .15s}
+.proj-task-cb.checked{background:var(--green);border-color:var(--green);color:#fff}
+.proj-task-text{flex:1;line-height:1.4}
+.proj-task-item.done .proj-task-text{text-decoration:line-through;color:var(--dim)}
+.proj-task-due{font-size:.6rem;color:var(--dim);white-space:nowrap;font-family:var(--mono)}
+.proj-task-acts{display:none;gap:3px}
+.proj-task-item:hover .proj-task-acts{display:flex}
+.proj-task-item:hover .proj-task-due{display:none}
+.proj-add-btn{font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:5px;border:1px dashed var(--bd);background:transparent;color:var(--muted);cursor:pointer;margin-left:34px;margin-top:4px;transition:all .15s;display:block}
+.proj-add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.proj-progress{height:4px;border-radius:2px;background:var(--bd);margin-top:4px;overflow:hidden}
+.proj-progress-bar{height:100%;border-radius:2px;background:var(--accent);transition:width .3s}
 </style>
 </head>
 <body>
@@ -335,10 +400,33 @@ body.is-admin .viewer-only{display:none!important}
 <div id="gate">
   <div class="gate-box">
     <div class="gate-ico">🏢</div>
-    <div class="gate-org">Alteco</div>
-    <div class="gate-sub">Masukkan kode akses untuk melanjutkan</div>
-    <input type="password" id="gateInput" class="gate-input" placeholder="••••••••" maxlength="20" autocomplete="off" inputmode="numeric"/>
-    <button class="gate-btn" id="gateBtn">Masuk</button>
+    <div class="gate-org" id="gateOrg">—</div>
+    <div class="gate-mode-tabs">
+      <button class="gate-mode-tab active" id="gateTabStaff">Staff / Admin</button>
+      <button class="gate-mode-tab" id="gateTabProject">Akses Proyek</button>
+    </div>
+
+    <!-- Staff mode -->
+    <div id="gateStaffSection">
+      <div class="gate-sub">Masukkan kode akses untuk melanjutkan</div>
+      <div class="pw-wrap">
+        <input type="password" id="gateInput" class="gate-input" placeholder="••••••••" maxlength="20" autocomplete="off" inputmode="numeric"/>
+        <button class="pw-toggle" id="gatePwToggle" tabindex="-1">👁</button>
+      </div>
+      <button class="gate-btn" id="gateBtn">Masuk</button>
+    </div>
+
+    <!-- Project member mode -->
+    <div id="gateProjectSection" style="display:none">
+      <div class="gate-sub">Masukkan nama dan kode klien Anda</div>
+      <input type="text" id="gateProjName" class="gate-name-input" placeholder="Nama lengkap" autocomplete="off"/>
+      <div class="pw-wrap">
+        <input type="password" id="gateProjCode" class="gate-input" placeholder="Kode klien" maxlength="20" autocomplete="off"/>
+        <button class="pw-toggle" id="gateProjPwToggle" tabindex="-1">👁</button>
+      </div>
+      <button class="gate-btn" id="gateProjBtn">Masuk sebagai Anggota</button>
+    </div>
+
     <div class="gate-err" id="gateErr"></div>
   </div>
 </div>
@@ -396,6 +484,10 @@ body.is-admin .viewer-only{display:none!important}
       <button class="feature-nav-item" id="btnInfoView">
         <span class="feature-nav-ico">🔔</span>
         <span class="feature-nav-label">Pemberitahuan</span>
+      </button>
+      <button class="feature-nav-item project-access" id="btnProjectView">
+        <span class="feature-nav-ico">🗂️</span>
+        <span class="feature-nav-label">Proyek</span>
       </button>
       <button class="feature-nav-item admin-only" id="btnSettingsView">
         <span class="feature-nav-ico">⚙️</span>
@@ -464,6 +556,11 @@ body.is-admin .viewer-only{display:none!important}
     <div id="settingsView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="settingsArea"></div>
     </div>
+
+    <!-- Project view -->
+    <div id="projectView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="projectArea"></div>
+    </div>
   </div>
 </div>
 
@@ -487,7 +584,8 @@ const GIST_FILE= 'alteco-data.json';
    STATE
 ══════════════════════════════════════════ */
 let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
-let role         = null;   /* 'viewer' | 'admin' */
+let role         = null;   /* 'viewer' | 'admin' | 'project_member' */
+let projectMember = null;  /* null | {projectId, memberId, memberName} */
 let activeId     = null;   /* null | ALL | memberId */
 let expandedKelompoks = new Set(); /* kelompok IDs that are expanded */
 let assetSearch      = '';
@@ -512,6 +610,7 @@ function migrate(d){
   if(!d.orgName) d.orgName='Alteco';
   if(!d.assets) d.assets=[];
   if(!d.events) d.events=[];
+  if(!d.projects) d.projects=[];
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
@@ -563,7 +662,7 @@ function save(){
   /* Load data: Gist first, fallback to localStorage */
   const overlay=document.getElementById('loadingOverlay');
   try{
-    const remote=await gistLoad(); /* read Gist — no PAT needed */
+    const remote=await gistLoad();
     db=remote||localLoad();
   }catch(e){
     console.warn('Gist load failed, using local',e);
@@ -572,31 +671,68 @@ function save(){
   overlay.style.opacity='0';
   setTimeout(()=>overlay.style.display='none',300);
 
+  /* Update gate org name */
+  document.getElementById('gateOrg').textContent=db.orgName||'Alteco';
+
   const gate=document.getElementById('gate');
   const inp=document.getElementById('gateInput');
   const btn=document.getElementById('gateBtn');
   const err=document.getElementById('gateErr');
 
+  /* Restore session */
   const stored=sessionStorage.getItem('rak_alteco_role');
   if(stored==='admin'||stored==='viewer'){
-    role=stored;
-    gate.classList.add('hidden');
-    applyRole();
-    return;
+    role=stored; gate.classList.add('hidden'); applyRole(); return;
+  }
+  const storedPM=sessionStorage.getItem('alteco_project_member');
+  if(storedPM){
+    try{
+      projectMember=JSON.parse(storedPM);
+      role='project_member'; gate.classList.add('hidden'); applyRole(); return;
+    }catch{}
   }
 
+  /* Password toggle — staff */
+  document.getElementById('gatePwToggle').addEventListener('click',()=>{
+    inp.type=inp.type==='password'?'text':'password';
+  });
+  /* Password toggle — project */
+  const projCodeInp=document.getElementById('gateProjCode');
+  document.getElementById('gateProjPwToggle').addEventListener('click',()=>{
+    projCodeInp.type=projCodeInp.type==='password'?'text':'password';
+  });
+
+  /* Mode tabs */
+  const staffSec=document.getElementById('gateStaffSection');
+  const projSec=document.getElementById('gateProjectSection');
+  document.getElementById('gateTabStaff').addEventListener('click',()=>{
+    staffSec.style.display=''; projSec.style.display='none';
+    document.getElementById('gateTabStaff').classList.add('active');
+    document.getElementById('gateTabProject').classList.remove('active');
+    err.textContent=''; inp.focus();
+  });
+  document.getElementById('gateTabProject').addEventListener('click',()=>{
+    staffSec.style.display='none'; projSec.style.display='';
+    document.getElementById('gateTabProject').classList.add('active');
+    document.getElementById('gateTabStaff').classList.remove('active');
+    err.textContent=''; document.getElementById('gateProjName').focus();
+  });
+
+  /* Staff login */
   function attempt(){
     const val=inp.value.trim();
     if(val===PASS_ADMIN){
       role='admin'; sessionStorage.setItem('rak_alteco_role','admin');
-      /* PAT prompt for admin if not yet stored */
       if(!GIST_PAT){
         const pat=(prompt('Masukkan GitHub PAT untuk sinkronisasi data:')||'').trim();
         if(pat){ GIST_PAT=pat; localStorage.setItem(GIST_PAT_KEY,pat); }
       }
       gate.classList.add('hidden'); applyRole();
     }
-    else if(val===PASS_VIEW){ role='viewer'; sessionStorage.setItem('rak_alteco_role','viewer'); gate.classList.add('hidden'); applyRole(); }
+    else if(val===PASS_VIEW){
+      role='viewer'; sessionStorage.setItem('rak_alteco_role','viewer');
+      gate.classList.add('hidden'); applyRole();
+    }
     else {
       inp.classList.add('error'); err.textContent='Kode akses tidak valid.'; inp.value='';
       setTimeout(()=>{inp.classList.remove('error');err.textContent=''},1500);
@@ -604,6 +740,33 @@ function save(){
   }
   btn.addEventListener('click',attempt);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')attempt()});
+
+  /* Project member login */
+  function attemptProject(){
+    const name=(document.getElementById('gateProjName').value||'').trim();
+    const code=(document.getElementById('gateProjCode').value||'').trim();
+    if(!name||!code){ err.textContent='Isi nama dan kode klien.'; return; }
+    let found=null;
+    for(const proj of (db.projects||[])){
+      if(proj.clientCode===code){
+        const mem=(proj.members||[]).find(m=>m.name.toLowerCase()===name.toLowerCase());
+        if(mem){ found={projectId:proj.id,memberId:mem.id,memberName:mem.name}; break; }
+      }
+    }
+    if(found){
+      projectMember=found; role='project_member';
+      sessionStorage.setItem('alteco_project_member',JSON.stringify(found));
+      gate.classList.add('hidden'); applyRole();
+    } else {
+      document.getElementById('gateProjCode').classList.add('error');
+      err.textContent='Nama atau kode klien tidak sesuai.';
+      setTimeout(()=>{document.getElementById('gateProjCode').classList.remove('error');err.textContent=''},1800);
+    }
+  }
+  document.getElementById('gateProjBtn').addEventListener('click',attemptProject);
+  document.getElementById('gateProjCode').addEventListener('keydown',e=>{if(e.key==='Enter')attemptProject()});
+  document.getElementById('gateProjName').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('gateProjCode').focus()});
+
   inp.focus();
 })();
 
@@ -615,9 +778,11 @@ function syncOrgName(){
 
 function applyRole(){
   document.body.classList.toggle('is-admin', role==='admin');
+  document.body.classList.toggle('is-project-member', role==='project_member');
   const badge=document.getElementById('roleBadge');
-  badge.textContent=role==='admin'?'Superadmin':'Viewer';
-  badge.className='nav-role-badge '+(role==='admin'?'admin':'viewer');
+  if(role==='admin'){ badge.textContent='Superadmin'; badge.className='nav-role-badge admin'; }
+  else if(role==='project_member'){ badge.textContent=projectMember?.memberName||'Anggota'; badge.className='nav-role-badge project'; }
+  else { badge.textContent='Viewer'; badge.className='nav-role-badge viewer'; }
   syncOrgName();
   renderSidebar();
   renderMain();
@@ -869,11 +1034,13 @@ function select(id){
   document.getElementById('btnAssetView').classList.remove('active');
   document.getElementById('btnInfoView').classList.remove('active');
   document.getElementById('btnSettingsView').classList.remove('active');
+  document.getElementById('btnProjectView').classList.remove('active');
   viewMode='tasks';
   document.getElementById('orgView').style.display='none';
   document.getElementById('assetView').style.display='none';
   document.getElementById('infoView').style.display='none';
   document.getElementById('settingsView').style.display='none';
+  document.getElementById('projectView').style.display='none';
   renderSidebar(); renderMain();
 }
 
@@ -889,9 +1056,11 @@ function renderMain(){
   document.getElementById('assetView').style.display='none';
   document.getElementById('infoView').style.display='none';
   document.getElementById('settingsView').style.display='none';
+  document.getElementById('projectView').style.display='none';
   document.getElementById('btnAssetView').classList.remove('active');
   document.getElementById('btnInfoView').classList.remove('active');
   document.getElementById('btnSettingsView').classList.remove('active');
+  document.getElementById('btnProjectView').classList.remove('active');
   viewMode='tasks';
   document.getElementById('btnOrgView').classList.remove('active');
 
@@ -1251,19 +1420,49 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 /* ══════════════════════════════════════════
    ORG CHART TOGGLE
 ══════════════════════════════════════════ */
-document.getElementById('btnOrgView').addEventListener('click',()=>{
-  viewMode=viewMode==='org'?'tasks':'org';
-  document.getElementById('btnOrgView').classList.toggle('active', viewMode==='org');
-  document.getElementById('btnAssetView').classList.remove('active');
-  document.getElementById('btnInfoView').classList.remove('active');
-  document.getElementById('btnSettingsView').classList.remove('active');
+document.getElementById('btnProjectView').addEventListener('click',()=>{
+  const pv=document.getElementById('projectView');
   const tv=document.getElementById('taskView');
   const ov=document.getElementById('orgView');
   const av=document.getElementById('assetView');
   const iv=document.getElementById('infoView');
   const sv=document.getElementById('settingsView');
   const empty=document.getElementById('emptyState');
-  av.style.display='none'; iv.style.display='none'; sv.style.display='none';
+  const isProject=pv.style.display!=='none';
+  if(isProject){
+    pv.style.display='none';
+    document.getElementById('btnProjectView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    tv.style.display='none'; ov.style.display='none'; av.style.display='none';
+    iv.style.display='none'; sv.style.display='none'; empty.style.display='none';
+    pv.style.display='flex';
+    document.getElementById('btnProjectView').classList.add('active');
+    document.getElementById('btnOrgView').classList.remove('active');
+    document.getElementById('btnAssetView').classList.remove('active');
+    document.getElementById('btnInfoView').classList.remove('active');
+    document.getElementById('btnSettingsView').classList.remove('active');
+    renderSidebar();
+    renderProject();
+  }
+});
+
+document.getElementById('btnOrgView').addEventListener('click',()=>{
+  viewMode=viewMode==='org'?'tasks':'org';
+  document.getElementById('btnOrgView').classList.toggle('active', viewMode==='org');
+  document.getElementById('btnAssetView').classList.remove('active');
+  document.getElementById('btnInfoView').classList.remove('active');
+  document.getElementById('btnSettingsView').classList.remove('active');
+  document.getElementById('btnProjectView').classList.remove('active');
+  const tv=document.getElementById('taskView');
+  const ov=document.getElementById('orgView');
+  const av=document.getElementById('assetView');
+  const iv=document.getElementById('infoView');
+  const sv=document.getElementById('settingsView');
+  const empty=document.getElementById('emptyState');
+  av.style.display='none'; iv.style.display='none'; sv.style.display='none'; document.getElementById('projectView').style.display='none'; document.getElementById('btnProjectView').classList.remove('active');
   if(viewMode==='org'){
     activeId=null;
     tv.style.display='none';
@@ -1294,12 +1493,13 @@ document.getElementById('btnAssetView').addEventListener('click',()=>{
   } else {
     viewMode='tasks';
     activeId=null;
-    tv.style.display='none'; ov.style.display='none'; iv.style.display='none'; sv.style.display='none'; empty.style.display='none';
+    tv.style.display='none'; ov.style.display='none'; iv.style.display='none'; sv.style.display='none'; document.getElementById('projectView').style.display='none'; empty.style.display='none';
     av.style.display='flex';
     document.getElementById('btnAssetView').classList.add('active');
     document.getElementById('btnOrgView').classList.remove('active');
     document.getElementById('btnInfoView').classList.remove('active');
     document.getElementById('btnSettingsView').classList.remove('active');
+    document.getElementById('btnProjectView').classList.remove('active');
     renderSidebar();
     renderAssets();
   }
@@ -1320,12 +1520,13 @@ document.getElementById('btnInfoView').addEventListener('click',()=>{
     else { empty.style.display='flex'; }
   } else {
     activeId=null;
-    tv.style.display='none'; ov.style.display='none'; av.style.display='none'; sv.style.display='none'; empty.style.display='none';
+    tv.style.display='none'; ov.style.display='none'; av.style.display='none'; sv.style.display='none'; document.getElementById('projectView').style.display='none'; empty.style.display='none';
     iv.style.display='flex';
     document.getElementById('btnInfoView').classList.add('active');
     document.getElementById('btnOrgView').classList.remove('active');
     document.getElementById('btnAssetView').classList.remove('active');
     document.getElementById('btnSettingsView').classList.remove('active');
+    document.getElementById('btnProjectView').classList.remove('active');
     renderSidebar();
     renderInfo();
     localStorage.setItem('alteco_info_read_ts', Date.now().toString());
@@ -1348,12 +1549,13 @@ document.getElementById('btnSettingsView').addEventListener('click',()=>{
     else { empty.style.display='flex'; }
   } else {
     activeId=null;
-    tv.style.display='none'; ov.style.display='none'; av.style.display='none'; iv.style.display='none'; empty.style.display='none';
+    tv.style.display='none'; ov.style.display='none'; av.style.display='none'; iv.style.display='none'; document.getElementById('projectView').style.display='none'; empty.style.display='none';
     sv.style.display='flex';
     document.getElementById('btnSettingsView').classList.add('active');
     document.getElementById('btnOrgView').classList.remove('active');
     document.getElementById('btnAssetView').classList.remove('active');
     document.getElementById('btnInfoView').classList.remove('active');
+    document.getElementById('btnProjectView').classList.remove('active');
     renderSidebar();
     renderSettings();
   }
@@ -1852,6 +2054,76 @@ function openModal(mode, ctx){
     mCtx._getEType=()=>currentEType;
     mCtx._getERecur=()=>currentERecur;
   }
+
+  /* ── Project modals ── */
+  else if(mode==='proj-add'||mode==='proj-edit'){
+    const p=mode==='proj-edit'?db.projects.find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='proj-add'?'Tambah Proyek':'Edit Proyek';
+    body.innerHTML=`
+      <div class="form-group"><label class="form-label">Judul Proyek *</label><input class="form-input" id="fi-ptitle" value="${esc(p?.title||'')}" placeholder="Nama proyek"/></div>
+      <div class="form-group"><label class="form-label">Nama Klien</label><input class="form-input" id="fi-pclient" value="${esc(p?.clientName||'')}" placeholder="Nama perusahaan/klien"/></div>
+      <div class="form-group"><label class="form-label">Kode Klien *</label><input class="form-input" id="fi-pcode" value="${esc(p?.clientCode||'')}" placeholder="Kode unik untuk login anggota" style="font-family:var(--mono)"/></div>
+      <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-pdesc">${esc(p?.description||'')}</textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label class="form-label">Tanggal Mulai</label><input class="form-input" type="date" id="fi-pstart" value="${p?.startDate||''}"/></div>
+        <div class="form-group"><label class="form-label">🎯 Target Optimis</label><input class="form-input" type="date" id="fi-popt" value="${p?.endDateOptimistic||''}"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">⚠ Target Pesimis</label><input class="form-input" type="date" id="fi-ppess" value="${p?.endDatePessimistic||''}"/></div>
+    `;
+    document.getElementById('fi-ptitle').focus();
+  }
+
+  else if(mode==='proj-mem-add'||mode==='proj-mem-edit'){
+    const proj=db.projects.find(x=>x.id===ctx.projId);
+    const mem=mode==='proj-mem-edit'?proj?.members?.find(m=>m.id===ctx.memberId):null;
+    title.textContent=mode==='proj-mem-add'?'Tambah Anggota Proyek':'Edit Anggota Proyek';
+    const internalOpts=db.members.map(m=>`<option value="${m.id}"${mem?.internalMemberId===m.id?' selected':''}>${esc(m.name)}</option>`).join('');
+    const isExt=mem?.type==='external';
+    body.innerHTML=`
+      <div class="form-group"><label class="form-label">Tipe Anggota</label>
+        <div class="type-toggle">
+          <button type="button" class="type-btn${!isExt?' active-once':''}" data-mtype="internal">👤 Internal</button>
+          <button type="button" class="type-btn${isExt?' active-recurring':''}" data-mtype="external">🌐 Eksternal</button>
+        </div>
+      </div>
+      <div class="form-group" id="pm-int-group" style="${isExt?'display:none':''}">
+        <label class="form-label">Pilih Anggota</label>
+        <select class="form-select" id="fi-pm-internal"><option value="">— pilih —</option>${internalOpts}</select>
+      </div>
+      <div class="form-group" id="pm-ext-group" style="${!isExt?'display:none':''}">
+        <label class="form-label">Nama Lengkap *</label>
+        <input class="form-input" id="fi-pm-extname" value="${esc(mem?.type==='external'?mem.name:'')}" placeholder="Nama anggota eksternal"/>
+      </div>
+      <div class="form-group"><label class="form-label">Peran / Jabatan</label><input class="form-input" id="fi-pm-role" value="${esc(mem?.role||'')}" placeholder="Contoh: Frontend Dev"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label class="form-label">Timeline Mulai</label><input class="form-input" type="date" id="fi-pm-tstart" value="${mem?.timelineStart||''}"/></div>
+        <div class="form-group"><label class="form-label">Timeline Selesai</label><input class="form-input" type="date" id="fi-pm-tend" value="${mem?.timelineEnd||''}"/></div>
+      </div>
+    `;
+    let currentMType=isExt?'external':'internal';
+    mCtx._getMemberType=()=>currentMType;
+    body.querySelectorAll('[data-mtype]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        currentMType=b.dataset.mtype;
+        body.querySelectorAll('[data-mtype]').forEach(x=>x.classList.remove('active-once','active-recurring'));
+        b.classList.add(currentMType==='internal'?'active-once':'active-recurring');
+        document.getElementById('pm-int-group').style.display=currentMType==='internal'?'':'none';
+        document.getElementById('pm-ext-group').style.display=currentMType==='external'?'':'none';
+      });
+    });
+  }
+
+  else if(mode==='proj-task-add'||mode==='proj-task-edit'){
+    const proj=db.projects.find(x=>x.id===ctx.projId);
+    const mem=proj?.members?.find(m=>m.id===ctx.memberId);
+    const task=mode==='proj-task-edit'?mem?.tasks?.find(t=>t.id===ctx.taskId):null;
+    title.textContent=mode==='proj-task-add'?`Tambah Tugas — ${esc(mem?.name||'')}`:' Edit Tugas';
+    body.innerHTML=`
+      <div class="form-group"><label class="form-label">Deskripsi Tugas *</label><input class="form-input" id="fi-pt-text" value="${esc(task?.text||'')}" placeholder="Tugas yang perlu diselesaikan"/></div>
+      <div class="form-group"><label class="form-label">Batas Waktu</label><input class="form-input" type="date" id="fi-pt-due" value="${task?.dueDate||''}"/></div>
+    `;
+    document.getElementById('fi-pt-text').focus();
+  }
 }
 
 function closeModal(){
@@ -2009,6 +2281,81 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     }
     save(); renderSidebar(); renderTasks(); closeModal();
   }
+
+  /* ── Project modals ── */
+  else if(mMode==='proj-add'||mMode==='proj-edit'){
+    const title=document.getElementById('fi-ptitle').value.trim();
+    const clientName=document.getElementById('fi-pclient').value.trim();
+    const clientCode=document.getElementById('fi-pcode').value.trim();
+    if(!title||!clientCode) return;
+    if(mMode==='proj-add'){
+      db.projects.push({
+        id:uid(), title, clientName, clientCode,
+        description:document.getElementById('fi-pdesc').value.trim(),
+        startDate:document.getElementById('fi-pstart').value||null,
+        endDateOptimistic:document.getElementById('fi-popt').value||null,
+        endDatePessimistic:document.getElementById('fi-ppess').value||null,
+        members:[], createdAt:Date.now()
+      });
+    } else {
+      const p=db.projects.find(x=>x.id===mCtx.id);
+      if(!p) return;
+      p.title=title; p.clientName=clientName; p.clientCode=clientCode;
+      p.description=document.getElementById('fi-pdesc').value.trim();
+      p.startDate=document.getElementById('fi-pstart').value||null;
+      p.endDateOptimistic=document.getElementById('fi-popt').value||null;
+      p.endDatePessimistic=document.getElementById('fi-ppess').value||null;
+    }
+    save(); renderProject(); closeModal();
+  }
+
+  else if(mMode==='proj-mem-add'||mMode==='proj-mem-edit'){
+    const proj=db.projects.find(x=>x.id===mCtx.projId);
+    if(!proj) return;
+    const memType=mCtx._getMemberType();
+    let name='', internalMemberId=null;
+    if(memType==='internal'){
+      internalMemberId=document.getElementById('fi-pm-internal').value;
+      const m=db.members.find(x=>x.id===internalMemberId);
+      if(!m) return;
+      name=m.name;
+    } else {
+      name=document.getElementById('fi-pm-extname').value.trim();
+      if(!name) return;
+    }
+    const role_v=document.getElementById('fi-pm-role').value.trim();
+    const tStart=document.getElementById('fi-pm-tstart').value||null;
+    const tEnd=document.getElementById('fi-pm-tend').value||null;
+    if(mMode==='proj-mem-add'){
+      proj.members=(proj.members||[]);
+      proj.members.push({id:uid(),name,role:role_v,type:memType,internalMemberId,timelineStart:tStart,timelineEnd:tEnd,tasks:[]});
+    } else {
+      const mem=proj.members.find(m=>m.id===mCtx.memberId);
+      if(!mem) return;
+      mem.name=name; mem.role=role_v; mem.type=memType;
+      mem.internalMemberId=internalMemberId;
+      mem.timelineStart=tStart; mem.timelineEnd=tEnd;
+    }
+    save(); renderProject(); closeModal();
+  }
+
+  else if(mMode==='proj-task-add'||mMode==='proj-task-edit'){
+    const proj=db.projects.find(x=>x.id===mCtx.projId);
+    const mem=proj?.members?.find(m=>m.id===mCtx.memberId);
+    if(!mem) return;
+    const text=document.getElementById('fi-pt-text').value.trim();
+    if(!text) return;
+    const dueDate=document.getElementById('fi-pt-due').value||null;
+    if(mMode==='proj-task-add'){
+      mem.tasks=(mem.tasks||[]);
+      mem.tasks.push({id:uid(),text,dueDate,done:false});
+    } else {
+      const task=mem.tasks.find(t=>t.id===mCtx.taskId);
+      if(!task) return;
+      task.text=text; task.dueDate=dueDate;
+    }
+    save(); renderProject(); closeModal();
+  }
 });
 
 /* Enter key in modal inputs */
@@ -2134,6 +2481,215 @@ function renderInfoList(area, today){
     db.events = db.events.filter(x=>x.id!==ev.id);
     save(); renderInfo();
   }));
+}
+
+/* ══════════════════════════════════════════
+   PROJECT VIEW
+══════════════════════════════════════════ */
+function fmtDate(d){ return d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):''; }
+
+function projectStatus(proj){
+  const today=new Date().toISOString().slice(0,10);
+  if(!proj.endDatePessimistic) return 'active';
+  if(today>proj.endDatePessimistic) return 'late';
+  return 'active';
+}
+
+function projectProgress(proj){
+  const tasks=(proj.members||[]).flatMap(m=>m.tasks||[]);
+  if(!tasks.length) return 0;
+  return Math.round(tasks.filter(t=>t.done).length/tasks.length*100);
+}
+
+function timelinePercent(projStart,projEnd,date){
+  if(!projStart||!projEnd||!date) return 0;
+  const s=new Date(projStart).getTime(), e=new Date(projEnd).getTime(), d=new Date(date).getTime();
+  if(e<=s) return 100;
+  return Math.min(100,Math.max(0,Math.round((d-s)/(e-s)*100)));
+}
+
+function renderProject(){
+  const area=document.getElementById('projectArea');
+  area.innerHTML='';
+  const today=new Date().toISOString().slice(0,10);
+
+  const toolbar=document.createElement('div');
+  toolbar.className='asset-toolbar';
+  toolbar.innerHTML=`<span class="asset-toolbar-title">Proyek</span>`;
+  if(role==='admin'){
+    const btn=document.createElement('button');
+    btn.className='task-add-inline-btn';
+    btn.textContent='＋ Tambah Proyek';
+    btn.addEventListener('click',()=>openModal('proj-add',{}));
+    toolbar.appendChild(btn);
+  }
+  area.appendChild(toolbar);
+
+  /* Filter projects for project_member */
+  const projects = role==='admin'
+    ? (db.projects||[])
+    : (db.projects||[]).filter(p=>p.id===projectMember?.projectId);
+
+  if(!projects.length){
+    const e=document.createElement('div');
+    e.className='asset-empty';
+    e.textContent=role==='project_member'?'Tidak ada proyek yang ditugaskan.':'Belum ada proyek.';
+    area.appendChild(e); return;
+  }
+
+  projects.forEach(proj=>{
+    const card=document.createElement('div');
+    card.className='proj-card';
+    const status=projectStatus(proj);
+    const pct=projectProgress(proj);
+    const badgeCls=status==='late'?'proj-badge-late':'proj-badge-active';
+    const badgeTxt=status==='late'?'Terlambat':'Aktif';
+
+    /* Timeline calc */
+    const pEnd=proj.endDatePessimistic||proj.endDateOptimistic||proj.startDate;
+    const optPct=timelinePercent(proj.startDate,pEnd,proj.endDateOptimistic);
+
+    card.innerHTML=`
+      <div class="proj-card-head">
+        <div style="flex:1">
+          <div class="proj-title">${esc(proj.title)}</div>
+          <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
+        </div>
+        <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
+        ${role==='admin'?`<div class="proj-actions">
+          <button class="asset-act-btn" data-proj-edit="${proj.id}">✎</button>
+          <button class="asset-act-btn del" data-proj-del="${proj.id}">✕</button>
+        </div>`:''}
+      </div>
+      <div class="proj-meta">
+        ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
+        ${proj.endDateOptimistic?`<span>🎯 Optimis: ${fmtDate(proj.endDateOptimistic)}</span>`:''}
+        ${proj.endDatePessimistic?`<span>⚠ Pesimis: ${fmtDate(proj.endDatePessimistic)}</span>`:''}
+        <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
+      </div>
+      ${proj.startDate&&pEnd?`
+      <div class="proj-timeline-wrap">
+        <div class="proj-timeline-label">
+          <span>${fmtDate(proj.startDate)}</span>
+          <span>${fmtDate(pEnd)}</span>
+        </div>
+        <div class="proj-timeline-bar">
+          <div class="proj-tl-optimistic" style="width:${optPct}%"></div>
+          <div class="proj-tl-buffer" style="width:${100-optPct}%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--dim);margin-top:2px">
+          <span></span>
+          ${proj.endDateOptimistic?`<span style="position:relative;left:0">🎯 ${fmtDate(proj.endDateOptimistic)}</span>`:''}
+        </div>
+      </div>`:''}
+      <div class="proj-progress"><div class="proj-progress-bar" style="width:${pct}%"></div></div>
+    `;
+
+    /* Member section */
+    const memSec=document.createElement('div');
+    memSec.className='proj-member-section';
+
+    const visibleMembers=role==='admin'
+      ? (proj.members||[])
+      : (proj.members||[]).filter(m=>m.id===projectMember?.memberId);
+
+    visibleMembers.forEach(mem=>{
+      const memRow=document.createElement('div');
+      memRow.className='proj-member-row';
+      const memTasks=mem.tasks||[];
+      const memDone=memTasks.filter(t=>t.done).length;
+      const memPct=memTasks.length?Math.round(memDone/memTasks.length*100):0;
+
+      /* member timeline bar */
+      const mStart=mem.timelineStart||proj.startDate;
+      const mEnd=mem.timelineEnd||pEnd;
+      const mLeft=timelinePercent(proj.startDate,pEnd,mStart);
+      const mWidth=timelinePercent(proj.startDate,pEnd,mEnd)-mLeft;
+
+      const canEditMember=role==='admin';
+      const canEditTask=role==='admin'||(projectMember?.memberId===mem.id);
+
+      memRow.innerHTML=`
+        <div class="proj-member-head">
+          <div class="proj-member-avatar">${initials(mem.name)}</div>
+          <div style="flex:1">
+            <div class="proj-member-name">${esc(mem.name)}</div>
+            <div class="proj-member-role">${esc(mem.role||'')}${mem.type==='external'?' · Eksternal':''}</div>
+          </div>
+          <div style="font-size:.62rem;color:var(--dim)">${memDone}/${memTasks.length} tugas</div>
+          ${canEditMember?`<div style="display:flex;gap:4px;margin-left:8px">
+            <button class="asset-act-btn" data-mem-edit="${mem.id}" data-proj="${proj.id}">✎</button>
+            <button class="asset-act-btn del" data-mem-del="${mem.id}" data-proj="${proj.id}">✕</button>
+          </div>`:''}
+        </div>
+        ${proj.startDate&&pEnd?`<div class="proj-member-tl">
+          <div class="proj-member-tl-bar" style="left:${mLeft}%;width:${Math.max(4,mWidth)}%"></div>
+        </div>`:''}
+        <div class="proj-task-list" id="tasklist-${proj.id}-${mem.id}"></div>
+        ${canEditTask?`<button class="proj-add-btn" data-task-add="${mem.id}" data-proj="${proj.id}">＋ Tambah tugas</button>`:''}
+      `;
+
+      /* Render tasks */
+      const taskList=memRow.querySelector(`#tasklist-${proj.id}-${mem.id}`);
+      memTasks.forEach(task=>{
+        const ti=document.createElement('div');
+        ti.className='proj-task-item'+(task.done?' done':'');
+        ti.innerHTML=`
+          <div class="proj-task-cb${task.done?' checked':''}" data-task-toggle="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">${task.done?'✓':''}</div>
+          <span class="proj-task-text">${esc(task.text)}</span>
+          <span class="proj-task-due">${task.dueDate?fmtDate(task.dueDate):''}</span>
+          ${canEditTask?`<div class="proj-task-acts">
+            <button class="asset-act-btn" style="font-size:.58rem;padding:2px 5px" data-task-edit="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✎</button>
+            <button class="asset-act-btn del" style="font-size:.58rem;padding:2px 5px" data-task-del="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✕</button>
+          </div>`:''}
+        `;
+        taskList.appendChild(ti);
+      });
+      memSec.appendChild(memRow);
+    });
+
+    if(role==='admin'){
+      const addMemBtn=document.createElement('button');
+      addMemBtn.className='proj-add-btn';
+      addMemBtn.style.cssText='margin-left:0;margin-top:8px';
+      addMemBtn.textContent='＋ Tambah Anggota';
+      addMemBtn.dataset.addMem=proj.id;
+      memSec.appendChild(addMemBtn);
+    }
+    card.appendChild(memSec);
+    area.appendChild(card);
+  });
+
+  /* Event delegation */
+  area.querySelectorAll('[data-proj-edit]').forEach(b=>b.addEventListener('click',()=>openModal('proj-edit',{id:b.dataset.projEdit})));
+  area.querySelectorAll('[data-proj-del]').forEach(b=>b.addEventListener('click',()=>{
+    const p=db.projects.find(x=>x.id===b.dataset.projDel);
+    if(!p||!confirm(`Hapus proyek "${p.title}"?`)) return;
+    db.projects=db.projects.filter(x=>x.id!==p.id); save(); renderProject();
+  }));
+  area.querySelectorAll('[data-task-toggle]').forEach(b=>b.addEventListener('click',()=>{
+    const proj=db.projects.find(x=>x.id===b.dataset.proj);
+    const mem=proj?.members?.find(m=>m.id===b.dataset.mem);
+    const task=mem?.tasks?.find(t=>t.id===b.dataset.taskToggle);
+    if(!task) return;
+    task.done=!task.done; save(); renderProject();
+  }));
+  area.querySelectorAll('[data-task-add]').forEach(b=>b.addEventListener('click',()=>openModal('proj-task-add',{projId:b.dataset.proj,memberId:b.dataset.taskAdd})));
+  area.querySelectorAll('[data-task-edit]').forEach(b=>b.addEventListener('click',()=>openModal('proj-task-edit',{projId:b.dataset.proj,memberId:b.dataset.mem,taskId:b.dataset.taskEdit})));
+  area.querySelectorAll('[data-task-del]').forEach(b=>b.addEventListener('click',()=>{
+    const proj=db.projects.find(x=>x.id===b.dataset.proj);
+    const mem=proj?.members?.find(m=>m.id===b.dataset.mem);
+    if(!mem||!confirm('Hapus tugas ini?')) return;
+    mem.tasks=(mem.tasks||[]).filter(t=>t.id!==b.dataset.taskDel); save(); renderProject();
+  }));
+  area.querySelectorAll('[data-mem-edit]').forEach(b=>b.addEventListener('click',()=>openModal('proj-mem-edit',{projId:b.dataset.proj,memberId:b.dataset.memEdit})));
+  area.querySelectorAll('[data-mem-del]').forEach(b=>b.addEventListener('click',()=>{
+    const proj=db.projects.find(x=>x.id===b.dataset.proj);
+    const mem=proj?.members?.find(m=>m.id===b.dataset.memDel);
+    if(!mem||!confirm(`Hapus anggota "${mem.name}" dari proyek ini?`)) return;
+    proj.members=proj.members.filter(m=>m.id!==mem.id); save(); renderProject();
+  }));
+  area.querySelectorAll('[data-add-mem]').forEach(b=>b.addEventListener('click',()=>openModal('proj-mem-add',{projId:b.dataset.addMem})));
 }
 
 /* ══════════════════════════════════════════
