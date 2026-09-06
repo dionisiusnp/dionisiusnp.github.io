@@ -585,7 +585,7 @@ const GIST_FILE= 'alteco-data.json';
 ══════════════════════════════════════════ */
 let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
 let role         = null;   /* 'viewer' | 'admin' | 'project_member' */
-let projectMember = null;  /* null | {projectId, memberId, memberName} */
+let projectMember = null;  /* null | {memberName, projects:[{projectId,memberId}]} */
 let activeId     = null;   /* null | ALL | memberId */
 let expandedKelompoks = new Set(); /* kelompok IDs that are expanded */
 let assetSearch      = '';
@@ -746,16 +746,24 @@ function save(){
     const name=(document.getElementById('gateProjName').value||'').trim();
     const code=(document.getElementById('gateProjCode').value||'').trim();
     if(!name||!code){ err.textContent='Isi nama dan kode klien.'; return; }
-    let found=null;
+    const nameLower=name.toLowerCase();
+    /* Step 1: verify code matches at least one project and name is a member */
+    let verified=false;
     for(const proj of (db.projects||[])){
       if(proj.clientCode===code){
-        const mem=(proj.members||[]).find(m=>m.name.toLowerCase()===name.toLowerCase());
-        if(mem){ found={projectId:proj.id,memberId:mem.id,memberName:mem.name}; break; }
+        const mem=(proj.members||[]).find(m=>m.name.toLowerCase()===nameLower);
+        if(mem){ verified=true; break; }
       }
     }
-    if(found){
-      projectMember=found; role='project_member';
-      sessionStorage.setItem('alteco_project_member',JSON.stringify(found));
+    if(verified){
+      /* Step 2: collect ALL projects this member belongs to (by name) */
+      const projects=(db.projects||[]).flatMap(proj=>{
+        const mem=(proj.members||[]).find(m=>m.name.toLowerCase()===nameLower);
+        return mem?[{projectId:proj.id,memberId:mem.id}]:[];
+      });
+      projectMember={memberName:name,projects};
+      role='project_member';
+      sessionStorage.setItem('alteco_project_member',JSON.stringify(projectMember));
       gate.classList.add('hidden'); applyRole();
     } else {
       document.getElementById('gateProjCode').classList.add('error');
@@ -781,7 +789,7 @@ function applyRole(){
   document.body.classList.toggle('is-project-member', role==='project_member');
   const badge=document.getElementById('roleBadge');
   if(role==='admin'){ badge.textContent='Superadmin'; badge.className='nav-role-badge admin'; }
-  else if(role==='project_member'){ badge.textContent=projectMember?.memberName||'Anggota'; badge.className='nav-role-badge project'; }
+  else if(role==='project_member'){ badge.textContent=projectMember?.memberName||'Anggota'; badge.className='nav-role-badge project'; badge.title=(projectMember?.projects?.length||0)+' proyek'; }
   else { badge.textContent='Viewer'; badge.className='nav-role-badge viewer'; }
   syncOrgName();
   renderSidebar();
@@ -2095,10 +2103,7 @@ function openModal(mode, ctx){
         <input class="form-input" id="fi-pm-extname" value="${esc(mem?.type==='external'?mem.name:'')}" placeholder="Nama anggota eksternal"/>
       </div>
       <div class="form-group"><label class="form-label">Peran / Jabatan</label><input class="form-input" id="fi-pm-role" value="${esc(mem?.role||'')}" placeholder="Contoh: Frontend Dev"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="form-group"><label class="form-label">Timeline Mulai</label><input class="form-input" type="date" id="fi-pm-tstart" value="${mem?.timelineStart||''}"/></div>
-        <div class="form-group"><label class="form-label">Timeline Selesai</label><input class="form-input" type="date" id="fi-pm-tend" value="${mem?.timelineEnd||''}"/></div>
-      </div>
+      <div class="form-group" style="font-size:.7rem;color:var(--muted);padding:4px 0">ℹ Timeline anggota dihitung otomatis dari tanggal mulai & selesai tugas.</div>
     `;
     let currentMType=isExt?'external':'internal';
     mCtx._getMemberType=()=>currentMType;
@@ -2120,7 +2125,10 @@ function openModal(mode, ctx){
     title.textContent=mode==='proj-task-add'?`Tambah Tugas — ${esc(mem?.name||'')}`:' Edit Tugas';
     body.innerHTML=`
       <div class="form-group"><label class="form-label">Deskripsi Tugas *</label><input class="form-input" id="fi-pt-text" value="${esc(task?.text||'')}" placeholder="Tugas yang perlu diselesaikan"/></div>
-      <div class="form-group"><label class="form-label">Batas Waktu</label><input class="form-input" type="date" id="fi-pt-due" value="${task?.dueDate||''}"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label class="form-label">Tanggal Mulai</label><input class="form-input" type="date" id="fi-pt-start" value="${task?.startDate||''}"/></div>
+        <div class="form-group"><label class="form-label">Batas Selesai</label><input class="form-input" type="date" id="fi-pt-due" value="${task?.dueDate||''}"/></div>
+      </div>
     `;
     document.getElementById('fi-pt-text').focus();
   }
@@ -2324,17 +2332,14 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       if(!name) return;
     }
     const role_v=document.getElementById('fi-pm-role').value.trim();
-    const tStart=document.getElementById('fi-pm-tstart').value||null;
-    const tEnd=document.getElementById('fi-pm-tend').value||null;
     if(mMode==='proj-mem-add'){
       proj.members=(proj.members||[]);
-      proj.members.push({id:uid(),name,role:role_v,type:memType,internalMemberId,timelineStart:tStart,timelineEnd:tEnd,tasks:[]});
+      proj.members.push({id:uid(),name,role:role_v,type:memType,internalMemberId,tasks:[]});
     } else {
       const mem=proj.members.find(m=>m.id===mCtx.memberId);
       if(!mem) return;
       mem.name=name; mem.role=role_v; mem.type=memType;
       mem.internalMemberId=internalMemberId;
-      mem.timelineStart=tStart; mem.timelineEnd=tEnd;
     }
     save(); renderProject(); closeModal();
   }
@@ -2345,14 +2350,15 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     if(!mem) return;
     const text=document.getElementById('fi-pt-text').value.trim();
     if(!text) return;
+    const startDate=document.getElementById('fi-pt-start').value||null;
     const dueDate=document.getElementById('fi-pt-due').value||null;
     if(mMode==='proj-task-add'){
       mem.tasks=(mem.tasks||[]);
-      mem.tasks.push({id:uid(),text,dueDate,done:false});
+      mem.tasks.push({id:uid(),text,startDate,dueDate,done:false});
     } else {
       const task=mem.tasks.find(t=>t.id===mCtx.taskId);
       if(!task) return;
-      task.text=text; task.dueDate=dueDate;
+      task.text=text; task.startDate=startDate; task.dueDate=dueDate;
     }
     save(); renderProject(); closeModal();
   }
@@ -2526,9 +2532,10 @@ function renderProject(){
   area.appendChild(toolbar);
 
   /* Filter projects for project_member */
+  const memberProjectIds=new Set((projectMember?.projects||[]).map(p=>p.projectId));
   const projects = role==='admin'
     ? (db.projects||[])
-    : (db.projects||[]).filter(p=>p.id===projectMember?.projectId);
+    : (db.projects||[]).filter(p=>memberProjectIds.has(p.id));
 
   if(!projects.length){
     const e=document.createElement('div');
@@ -2589,9 +2596,10 @@ function renderProject(){
     const memSec=document.createElement('div');
     memSec.className='proj-member-section';
 
+    const myMemberId=(projectMember?.projects||[]).find(p=>p.projectId===proj.id)?.memberId;
     const visibleMembers=role==='admin'
       ? (proj.members||[])
-      : (proj.members||[]).filter(m=>m.id===projectMember?.memberId);
+      : (proj.members||[]).filter(m=>m.id===myMemberId);
 
     visibleMembers.forEach(mem=>{
       const memRow=document.createElement('div');
@@ -2600,14 +2608,16 @@ function renderProject(){
       const memDone=memTasks.filter(t=>t.done).length;
       const memPct=memTasks.length?Math.round(memDone/memTasks.length*100):0;
 
-      /* member timeline bar */
-      const mStart=mem.timelineStart||proj.startDate;
-      const mEnd=mem.timelineEnd||pEnd;
+      /* member timeline derived from tasks */
+      const taskStarts=memTasks.filter(t=>t.startDate).map(t=>t.startDate);
+      const taskEnds=memTasks.filter(t=>t.dueDate).map(t=>t.dueDate);
+      const mStart=taskStarts.length?taskStarts.reduce((a,b)=>a<b?a:b):proj.startDate;
+      const mEnd=taskEnds.length?taskEnds.reduce((a,b)=>a>b?a:b):pEnd;
       const mLeft=timelinePercent(proj.startDate,pEnd,mStart);
-      const mWidth=timelinePercent(proj.startDate,pEnd,mEnd)-mLeft;
+      const mWidth=Math.max(2,timelinePercent(proj.startDate,pEnd,mEnd)-mLeft);
 
       const canEditMember=role==='admin';
-      const canEditTask=role==='admin'||(projectMember?.memberId===mem.id);
+      const canEditTask=role==='admin'||(myMemberId===mem.id);
 
       memRow.innerHTML=`
         <div class="proj-member-head">
@@ -2637,7 +2647,7 @@ function renderProject(){
         ti.innerHTML=`
           <div class="proj-task-cb${task.done?' checked':''}" data-task-toggle="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">${task.done?'✓':''}</div>
           <span class="proj-task-text">${esc(task.text)}</span>
-          <span class="proj-task-due">${task.dueDate?fmtDate(task.dueDate):''}</span>
+          <span class="proj-task-due">${task.startDate?fmtDate(task.startDate)+' → ':''} ${task.dueDate?fmtDate(task.dueDate):''}</span>
           ${canEditTask?`<div class="proj-task-acts">
             <button class="asset-act-btn" style="font-size:.58rem;padding:2px 5px" data-task-edit="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✎</button>
             <button class="asset-act-btn del" style="font-size:.58rem;padding:2px 5px" data-task-del="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✕</button>
