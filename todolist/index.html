@@ -2018,7 +2018,9 @@ function openModal(mode, ctx){
     const mem=mode==='proj-mem-edit'?proj?.members?.find(m=>m.id===ctx.memberId):null;
     title.textContent=mode==='proj-mem-add'?'Tambah Anggota Proyek':'Edit Anggota Proyek';
     const usedIds=new Set((proj?.members||[]).filter(m=>m.type==='internal'&&m.internalMemberId&&m.id!==ctx.memberId).map(m=>m.internalMemberId));
-    const internalOpts=db.members.filter(m=>!usedIds.has(m.id)).map(m=>`<option value="${m.id}"${mem?.internalMemberId===m.id?' selected':''}>${esc(m.name)}</option>`).join('');
+    const internalOpts=db.members.filter(m=>!usedIds.has(m.id))
+      .sort((a,b)=>a.name.localeCompare(b.name))
+      .map(m=>{const grp=kelompokName(m.kelompokId);return`<option value="${m.id}"${mem?.internalMemberId===m.id?' selected':''}>${esc(m.name)}${grp?' — '+esc(grp):''}</option>`;}).join('');
     const isExt=mem?.type==='external';
     body.innerHTML=`
       <div class="form-group"><label class="form-label">Tipe Anggota</label>
