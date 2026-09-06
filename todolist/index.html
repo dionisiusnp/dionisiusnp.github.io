@@ -931,12 +931,16 @@ function renderSidebar(){
     e.stopPropagation();
     const k=db.kelompoks.find(d=>d.id===b.dataset.grpDel);
     if(!k) return;
-    if(!confirm(`Hapus kelompok "${k.name}"? Anggota & sub-kelompoknya akan jadi tanpa kelompok.`)) return;
-    /* detach children */
+    const memberCount=db.members.filter(m=>m.kelompokId===k.id).length;
+    if(!confirm(`Hapus kelompok "${k.name}"?${memberCount?` ${memberCount} anggota di kelompok ini ikut terhapus.`:''} Sub-kelompok tidak ikut terhapus.`)) return;
+    /* delete members and their tasks */
+    const memberIds=db.members.filter(m=>m.kelompokId===k.id).map(m=>m.id);
+    db.tasks=db.tasks.filter(t=>!memberIds.includes(t.memberId));
+    db.members=db.members.filter(m=>m.kelompokId!==k.id);
+    /* detach sub-kelompoks to root */
     db.kelompoks.forEach(c=>{if(c.parentId===k.id)c.parentId=null;});
     db.kelompoks=db.kelompoks.filter(d=>d.id!==k.id);
-    db.members.forEach(m=>{if(m.kelompokId===k.id)m.kelompokId=null});
-    if(activeId===k.id) activeId=null;
+    if(memberIds.includes(activeId)) activeId=null;
     save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain();
   }));
   scroll.querySelectorAll('[data-grp-add-mem]').forEach(b=>b.addEventListener('click',e=>{
