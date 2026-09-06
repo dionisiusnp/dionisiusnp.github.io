@@ -788,6 +788,7 @@ function initials(n){ return n.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUppe
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 function memberTasks(mid){ return db.tasks.filter(t=>t.memberId===mid) }
 function kelompokName(did){ const d=db.kelompoks.find(x=>x.id===did); return d?d.name:'' }
+function kelompokAllIds(id){ const ch=db.kelompoks.filter(k=>k.parentId===id); return [id,...ch.flatMap(c=>kelompokAllIds(c.id))]; }
 function recurrenceLabel(r){
   const map={harian:'Harian',mingguan:'Mingguan',bulanan:'Bulanan',tahunan:'Tahunan'};
   return map[r]||r||'';
@@ -931,15 +932,13 @@ function renderSidebar(){
     e.stopPropagation();
     const k=db.kelompoks.find(d=>d.id===b.dataset.grpDel);
     if(!k) return;
-    const memberCount=db.members.filter(m=>m.kelompokId===k.id).length;
-    if(!confirm(`Hapus kelompok "${k.name}"?${memberCount?` ${memberCount} anggota di kelompok ini ikut terhapus.`:''} Sub-kelompok tidak ikut terhapus.`)) return;
-    /* delete members and their tasks */
-    const memberIds=db.members.filter(m=>m.kelompokId===k.id).map(m=>m.id);
+    const allIds=kelompokAllIds(k.id);
+    const memberIds=db.members.filter(m=>allIds.includes(m.kelompokId)).map(m=>m.id);
+    const subCount=allIds.length-1;
+    if(!confirm(`Hapus kelompok "${k.name}"? ${subCount?`${subCount} sub-kelompok dan `:''} ${memberIds.length} anggota beserta tugasnya ikut terhapus.`)) return;
     db.tasks=db.tasks.filter(t=>!memberIds.includes(t.memberId));
-    db.members=db.members.filter(m=>m.kelompokId!==k.id);
-    /* detach sub-kelompoks to root */
-    db.kelompoks.forEach(c=>{if(c.parentId===k.id)c.parentId=null;});
-    db.kelompoks=db.kelompoks.filter(d=>d.id!==k.id);
+    db.members=db.members.filter(m=>!allIds.includes(m.kelompokId));
+    db.kelompoks=db.kelompoks.filter(d=>!allIds.includes(d.id));
     if(memberIds.includes(activeId)) activeId=null;
     save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain();
   }));
