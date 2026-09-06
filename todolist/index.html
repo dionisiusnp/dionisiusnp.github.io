@@ -325,9 +325,7 @@ body.is-admin .viewer-only{display:none!important}
 
 /* ── Project Access visibility ── */
 .project-access{display:none!important}
-body.is-admin .project-access{display:flex!important}
-body.is-project-member .project-access{display:flex!important}
-.nav-role-badge.project{background:rgba(45,212,191,.1);border-color:rgba(45,212,191,.35);color:var(--teal)}
+body.is-admin .project-access, body.is-viewer .project-access{display:flex!important}
 
 /* ── Gate password toggle ── */
 .pw-wrap{position:relative;width:100%;margin-bottom:10px}
@@ -401,11 +399,6 @@ body.is-project-member .project-access{display:flex!important}
   <div class="gate-box">
     <div class="gate-ico">🏢</div>
     <div class="gate-org" id="gateOrg">—</div>
-    <div class="gate-mode-tabs">
-      <button class="gate-mode-tab active" id="gateTabStaff">Staff / Admin</button>
-      <button class="gate-mode-tab" id="gateTabProject">Akses Proyek</button>
-    </div>
-
     <!-- Staff mode -->
     <div id="gateStaffSection">
       <div class="gate-sub">Masukkan kode akses untuk melanjutkan</div>
@@ -414,17 +407,6 @@ body.is-project-member .project-access{display:flex!important}
         <button class="pw-toggle" id="gatePwToggle" tabindex="-1">👁</button>
       </div>
       <button class="gate-btn" id="gateBtn">Masuk</button>
-    </div>
-
-    <!-- Project member mode -->
-    <div id="gateProjectSection" style="display:none">
-      <div class="gate-sub">Masukkan nama dan kode klien Anda</div>
-      <input type="text" id="gateProjName" class="gate-name-input" placeholder="Nama lengkap" autocomplete="off"/>
-      <div class="pw-wrap">
-        <input type="password" id="gateProjCode" class="gate-input" placeholder="Kode klien" maxlength="20" autocomplete="off"/>
-        <button class="pw-toggle" id="gateProjPwToggle" tabindex="-1">👁</button>
-      </div>
-      <button class="gate-btn" id="gateProjBtn">Masuk sebagai Anggota</button>
     </div>
 
     <div class="gate-err" id="gateErr"></div>
@@ -584,8 +566,8 @@ const GIST_FILE= 'alteco-data.json';
    STATE
 ══════════════════════════════════════════ */
 let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
-let role         = null;   /* 'viewer' | 'admin' | 'project_member' */
-let projectMember = null;  /* null | {memberName, projects:[{projectId,memberId}]} */
+let role         = null;   /* 'viewer' | 'admin' */
+let unlockedProjects = new Map(); /* projectId → {memberName, memberId} — unlocked via inline form */
 let activeId     = null;   /* null | ALL | memberId */
 let expandedKelompoks = new Set(); /* kelompok IDs that are expanded */
 let assetSearch      = '';
@@ -682,40 +664,17 @@ function save(){
   /* Restore session */
   const stored=sessionStorage.getItem('rak_alteco_role');
   if(stored==='admin'||stored==='viewer'){
-    role=stored; gate.classList.add('hidden'); applyRole(); return;
-  }
-  const storedPM=sessionStorage.getItem('alteco_project_member');
-  if(storedPM){
+    role=stored;
     try{
-      projectMember=JSON.parse(storedPM);
-      role='project_member'; gate.classList.add('hidden'); applyRole(); return;
+      const up=sessionStorage.getItem('alteco_unlocked_projects');
+      if(up) unlockedProjects=new Map(JSON.parse(up));
     }catch{}
+    gate.classList.add('hidden'); applyRole(); return;
   }
 
   /* Password toggle — staff */
   document.getElementById('gatePwToggle').addEventListener('click',()=>{
     inp.type=inp.type==='password'?'text':'password';
-  });
-  /* Password toggle — project */
-  const projCodeInp=document.getElementById('gateProjCode');
-  document.getElementById('gateProjPwToggle').addEventListener('click',()=>{
-    projCodeInp.type=projCodeInp.type==='password'?'text':'password';
-  });
-
-  /* Mode tabs */
-  const staffSec=document.getElementById('gateStaffSection');
-  const projSec=document.getElementById('gateProjectSection');
-  document.getElementById('gateTabStaff').addEventListener('click',()=>{
-    staffSec.style.display=''; projSec.style.display='none';
-    document.getElementById('gateTabStaff').classList.add('active');
-    document.getElementById('gateTabProject').classList.remove('active');
-    err.textContent=''; inp.focus();
-  });
-  document.getElementById('gateTabProject').addEventListener('click',()=>{
-    staffSec.style.display='none'; projSec.style.display='';
-    document.getElementById('gateTabProject').classList.add('active');
-    document.getElementById('gateTabStaff').classList.remove('active');
-    err.textContent=''; document.getElementById('gateProjName').focus();
   });
 
   /* Staff login */
@@ -741,40 +700,6 @@ function save(){
   btn.addEventListener('click',attempt);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')attempt()});
 
-  /* Project member login */
-  function attemptProject(){
-    const name=(document.getElementById('gateProjName').value||'').trim();
-    const code=(document.getElementById('gateProjCode').value||'').trim();
-    if(!name||!code){ err.textContent='Isi nama dan kode klien.'; return; }
-    const nameLower=name.toLowerCase();
-    /* Step 1: verify code matches at least one project and name is a member */
-    let verified=false;
-    for(const proj of (db.projects||[])){
-      if(proj.clientCode===code){
-        const mem=(proj.members||[]).find(m=>m.name.toLowerCase()===nameLower);
-        if(mem){ verified=true; break; }
-      }
-    }
-    if(verified){
-      /* Step 2: collect ALL projects this member belongs to (by name) */
-      const projects=(db.projects||[]).flatMap(proj=>{
-        const mem=(proj.members||[]).find(m=>m.name.toLowerCase()===nameLower);
-        return mem?[{projectId:proj.id,memberId:mem.id}]:[];
-      });
-      projectMember={memberName:name,projects};
-      role='project_member';
-      sessionStorage.setItem('alteco_project_member',JSON.stringify(projectMember));
-      gate.classList.add('hidden'); applyRole();
-    } else {
-      document.getElementById('gateProjCode').classList.add('error');
-      err.textContent='Nama atau kode klien tidak sesuai.';
-      setTimeout(()=>{document.getElementById('gateProjCode').classList.remove('error');err.textContent=''},1800);
-    }
-  }
-  document.getElementById('gateProjBtn').addEventListener('click',attemptProject);
-  document.getElementById('gateProjCode').addEventListener('keydown',e=>{if(e.key==='Enter')attemptProject()});
-  document.getElementById('gateProjName').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('gateProjCode').focus()});
-
   inp.focus();
 })();
 
@@ -784,12 +709,15 @@ function syncOrgName(){
   document.getElementById('navOrgNameView').textContent=name;
 }
 
+function saveUnlocked(){
+  sessionStorage.setItem('alteco_unlocked_projects', JSON.stringify([...unlockedProjects.entries()]));
+}
+
 function applyRole(){
   document.body.classList.toggle('is-admin', role==='admin');
-  document.body.classList.toggle('is-project-member', role==='project_member');
+  document.body.classList.toggle('is-viewer', role==='viewer');
   const badge=document.getElementById('roleBadge');
   if(role==='admin'){ badge.textContent='Superadmin'; badge.className='nav-role-badge admin'; }
-  else if(role==='project_member'){ badge.textContent=projectMember?.memberName||'Anggota'; badge.className='nav-role-badge project'; badge.title=(projectMember?.projects?.length||0)+' proyek'; }
   else { badge.textContent='Viewer'; badge.className='nav-role-badge viewer'; }
   syncOrgName();
   renderSidebar();
@@ -2271,7 +2199,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     {
       const m=db.members.find(x=>x.id===mCtx.id);
       if(m){m.name=name;m.role=role_v;m.kelompokId=kelompokId;}
-      save(); renderSidebar(); renderMain(); closeModal();
+      save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain(); closeModal();
     }
   }
   else if(mMode==='task-add'||mMode==='task-edit'){
@@ -2514,10 +2442,60 @@ function timelinePercent(projStart,projEnd,date){
   return Math.min(100,Math.max(0,Math.round((d-s)/(e-s)*100)));
 }
 
+function buildMemberRow(proj, mem, pEnd, canEditTask, canEditMember){
+  const memRow=document.createElement('div');
+  memRow.className='proj-member-row';
+  const memTasks=mem.tasks||[];
+  const memDone=memTasks.filter(t=>t.done).length;
+
+  const taskStarts=memTasks.filter(t=>t.startDate).map(t=>t.startDate);
+  const taskEnds=memTasks.filter(t=>t.dueDate).map(t=>t.dueDate);
+  const mStart=taskStarts.length?taskStarts.reduce((a,b)=>a<b?a:b):proj.startDate;
+  const mEnd=taskEnds.length?taskEnds.reduce((a,b)=>a>b?a:b):pEnd;
+  const mLeft=timelinePercent(proj.startDate,pEnd,mStart);
+  const mWidth=Math.max(2,timelinePercent(proj.startDate,pEnd,mEnd)-mLeft);
+
+  memRow.innerHTML=`
+    <div class="proj-member-head">
+      <div class="proj-member-avatar">${initials(mem.name)}</div>
+      <div style="flex:1">
+        <div class="proj-member-name">${esc(mem.name)}</div>
+        <div class="proj-member-role">${esc(mem.role||'')}${mem.type==='external'?' · Eksternal':''}</div>
+      </div>
+      <div style="font-size:.62rem;color:var(--dim)">${memDone}/${memTasks.length} tugas</div>
+      ${canEditMember?`<div style="display:flex;gap:4px;margin-left:8px">
+        <button class="asset-act-btn" data-mem-edit="${mem.id}" data-proj="${proj.id}">✎</button>
+        <button class="asset-act-btn del" data-mem-del="${mem.id}" data-proj="${proj.id}">✕</button>
+      </div>`:''}
+    </div>
+    ${proj.startDate&&pEnd?`<div class="proj-member-tl">
+      <div class="proj-member-tl-bar" style="left:${mLeft}%;width:${Math.max(4,mWidth)}%"></div>
+    </div>`:''}
+    <div class="proj-task-list" id="tasklist-${proj.id}-${mem.id}"></div>
+    ${canEditTask?`<button class="proj-add-btn" data-task-add="${mem.id}" data-proj="${proj.id}">＋ Tambah tugas</button>`:''}
+  `;
+
+  const taskList=memRow.querySelector(`#tasklist-${proj.id}-${mem.id}`);
+  memTasks.forEach(task=>{
+    const ti=document.createElement('div');
+    ti.className='proj-task-item'+(task.done?' done':'');
+    ti.innerHTML=`
+      <div class="proj-task-cb${task.done?' checked':''}" data-task-toggle="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">${task.done?'✓':''}</div>
+      <span class="proj-task-text">${esc(task.text)}</span>
+      <span class="proj-task-due">${task.startDate?fmtDate(task.startDate)+' → ':''} ${task.dueDate?fmtDate(task.dueDate):''}</span>
+      ${canEditTask?`<div class="proj-task-acts">
+        <button class="asset-act-btn" style="font-size:.58rem;padding:2px 5px" data-task-edit="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✎</button>
+        <button class="asset-act-btn del" style="font-size:.58rem;padding:2px 5px" data-task-del="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✕</button>
+      </div>`:''}
+    `;
+    taskList.appendChild(ti);
+  });
+  return memRow;
+}
+
 function renderProject(){
   const area=document.getElementById('projectArea');
   area.innerHTML='';
-  const today=new Date().toISOString().slice(0,10);
 
   const toolbar=document.createElement('div');
   toolbar.className='asset-toolbar';
@@ -2531,146 +2509,198 @@ function renderProject(){
   }
   area.appendChild(toolbar);
 
-  /* Filter projects for project_member */
-  const memberProjectIds=new Set((projectMember?.projects||[]).map(p=>p.projectId));
-  const projects = role==='admin'
-    ? (db.projects||[])
-    : (db.projects||[]).filter(p=>memberProjectIds.has(p.id));
-
-  if(!projects.length){
+  const allProjects=db.projects||[];
+  if(!allProjects.length){
     const e=document.createElement('div');
     e.className='asset-empty';
-    e.textContent=role==='project_member'?'Tidak ada proyek yang ditugaskan.':'Belum ada proyek.';
+    e.textContent='Belum ada proyek.';
     area.appendChild(e); return;
   }
 
-  projects.forEach(proj=>{
+  /* For viewer: validate unlocked members still exist, re-lock if removed */
+  if(role!=='admin'){
+    let changed=false;
+    for(const [projId,info] of unlockedProjects){
+      const proj=allProjects.find(p=>p.id===projId);
+      if(!proj||!proj.members?.find(m=>m.id===info.memberId)){
+        unlockedProjects.delete(projId); changed=true;
+      }
+    }
+    if(changed) saveUnlocked();
+  }
+
+  allProjects.forEach(proj=>{
     const card=document.createElement('div');
     card.className='proj-card';
+    const pEnd=proj.endDatePessimistic||proj.endDateOptimistic||proj.startDate;
+    const optPct=timelinePercent(proj.startDate,pEnd,proj.endDateOptimistic);
     const status=projectStatus(proj);
     const pct=projectProgress(proj);
     const badgeCls=status==='late'?'proj-badge-late':'proj-badge-active';
     const badgeTxt=status==='late'?'Terlambat':'Aktif';
 
-    /* Timeline calc */
-    const pEnd=proj.endDatePessimistic||proj.endDateOptimistic||proj.startDate;
-    const optPct=timelinePercent(proj.startDate,pEnd,proj.endDateOptimistic);
-
-    card.innerHTML=`
-      <div class="proj-card-head">
-        <div style="flex:1">
-          <div class="proj-title">${esc(proj.title)}</div>
-          <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
-        </div>
-        <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
-        ${role==='admin'?`<div class="proj-actions">
-          <button class="asset-act-btn" data-proj-edit="${proj.id}">✎</button>
-          <button class="asset-act-btn del" data-proj-del="${proj.id}">✕</button>
-        </div>`:''}
-      </div>
-      <div class="proj-meta">
-        ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
-        ${proj.endDateOptimistic?`<span>🎯 Optimis: ${fmtDate(proj.endDateOptimistic)}</span>`:''}
-        ${proj.endDatePessimistic?`<span>⚠ Pesimis: ${fmtDate(proj.endDatePessimistic)}</span>`:''}
-        <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
-      </div>
-      ${proj.startDate&&pEnd?`
-      <div class="proj-timeline-wrap">
-        <div class="proj-timeline-label">
-          <span>${fmtDate(proj.startDate)}</span>
-          <span>${fmtDate(pEnd)}</span>
-        </div>
-        <div class="proj-timeline-bar">
-          <div class="proj-tl-optimistic" style="width:${optPct}%"></div>
-          <div class="proj-tl-buffer" style="width:${100-optPct}%"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--dim);margin-top:2px">
-          <span></span>
-          ${proj.endDateOptimistic?`<span style="position:relative;left:0">🎯 ${fmtDate(proj.endDateOptimistic)}</span>`:''}
-        </div>
-      </div>`:''}
-      <div class="proj-progress"><div class="proj-progress-bar" style="width:${pct}%"></div></div>
-    `;
-
-    /* Member section */
-    const memSec=document.createElement('div');
-    memSec.className='proj-member-section';
-
-    const myMemberId=(projectMember?.projects||[]).find(p=>p.projectId===proj.id)?.memberId;
-    const visibleMembers=role==='admin'
-      ? (proj.members||[])
-      : (proj.members||[]).filter(m=>m.id===myMemberId);
-
-    visibleMembers.forEach(mem=>{
-      const memRow=document.createElement('div');
-      memRow.className='proj-member-row';
-      const memTasks=mem.tasks||[];
-      const memDone=memTasks.filter(t=>t.done).length;
-      const memPct=memTasks.length?Math.round(memDone/memTasks.length*100):0;
-
-      /* member timeline derived from tasks */
-      const taskStarts=memTasks.filter(t=>t.startDate).map(t=>t.startDate);
-      const taskEnds=memTasks.filter(t=>t.dueDate).map(t=>t.dueDate);
-      const mStart=taskStarts.length?taskStarts.reduce((a,b)=>a<b?a:b):proj.startDate;
-      const mEnd=taskEnds.length?taskEnds.reduce((a,b)=>a>b?a:b):pEnd;
-      const mLeft=timelinePercent(proj.startDate,pEnd,mStart);
-      const mWidth=Math.max(2,timelinePercent(proj.startDate,pEnd,mEnd)-mLeft);
-
-      const canEditMember=role==='admin';
-      const canEditTask=role==='admin'||(myMemberId===mem.id);
-
-      memRow.innerHTML=`
-        <div class="proj-member-head">
-          <div class="proj-member-avatar">${initials(mem.name)}</div>
-          <div style="flex:1">
-            <div class="proj-member-name">${esc(mem.name)}</div>
-            <div class="proj-member-role">${esc(mem.role||'')}${mem.type==='external'?' · Eksternal':''}</div>
-          </div>
-          <div style="font-size:.62rem;color:var(--dim)">${memDone}/${memTasks.length} tugas</div>
-          ${canEditMember?`<div style="display:flex;gap:4px;margin-left:8px">
-            <button class="asset-act-btn" data-mem-edit="${mem.id}" data-proj="${proj.id}">✎</button>
-            <button class="asset-act-btn del" data-mem-del="${mem.id}" data-proj="${proj.id}">✕</button>
-          </div>`:''}
-        </div>
-        ${proj.startDate&&pEnd?`<div class="proj-member-tl">
-          <div class="proj-member-tl-bar" style="left:${mLeft}%;width:${Math.max(4,mWidth)}%"></div>
-        </div>`:''}
-        <div class="proj-task-list" id="tasklist-${proj.id}-${mem.id}"></div>
-        ${canEditTask?`<button class="proj-add-btn" data-task-add="${mem.id}" data-proj="${proj.id}">＋ Tambah tugas</button>`:''}
-      `;
-
-      /* Render tasks */
-      const taskList=memRow.querySelector(`#tasklist-${proj.id}-${mem.id}`);
-      memTasks.forEach(task=>{
-        const ti=document.createElement('div');
-        ti.className='proj-task-item'+(task.done?' done':'');
-        ti.innerHTML=`
-          <div class="proj-task-cb${task.done?' checked':''}" data-task-toggle="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">${task.done?'✓':''}</div>
-          <span class="proj-task-text">${esc(task.text)}</span>
-          <span class="proj-task-due">${task.startDate?fmtDate(task.startDate)+' → ':''} ${task.dueDate?fmtDate(task.dueDate):''}</span>
-          ${canEditTask?`<div class="proj-task-acts">
-            <button class="asset-act-btn" style="font-size:.58rem;padding:2px 5px" data-task-edit="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✎</button>
-            <button class="asset-act-btn del" style="font-size:.58rem;padding:2px 5px" data-task-del="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✕</button>
-          </div>`:''}
-        `;
-        taskList.appendChild(ti);
-      });
-      memSec.appendChild(memRow);
-    });
-
     if(role==='admin'){
+      /* ── Admin: full view ── */
+      card.innerHTML=`
+        <div class="proj-card-head">
+          <div style="flex:1">
+            <div class="proj-title">${esc(proj.title)}</div>
+            <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
+          </div>
+          <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
+          <div class="proj-actions">
+            <button class="asset-act-btn" data-proj-edit="${proj.id}">✎</button>
+            <button class="asset-act-btn del" data-proj-del="${proj.id}">✕</button>
+          </div>
+        </div>
+        <div class="proj-meta">
+          ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
+          ${proj.endDateOptimistic?`<span>🎯 Optimis: ${fmtDate(proj.endDateOptimistic)}</span>`:''}
+          ${proj.endDatePessimistic?`<span>⚠ Pesimis: ${fmtDate(proj.endDatePessimistic)}</span>`:''}
+          <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
+        </div>
+        ${proj.startDate&&pEnd?`
+        <div class="proj-timeline-wrap">
+          <div class="proj-timeline-label">
+            <span>${fmtDate(proj.startDate)}</span>
+            <span>${fmtDate(pEnd)}</span>
+          </div>
+          <div class="proj-timeline-bar">
+            <div class="proj-tl-optimistic" style="width:${optPct}%"></div>
+            <div class="proj-tl-buffer" style="width:${100-optPct}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--dim);margin-top:2px">
+            <span></span>
+            ${proj.endDateOptimistic?`<span>🎯 ${fmtDate(proj.endDateOptimistic)}</span>`:''}
+          </div>
+        </div>`:''}
+        <div class="proj-progress"><div class="proj-progress-bar" style="width:${pct}%"></div></div>
+      `;
+      const memSec=document.createElement('div');
+      memSec.className='proj-member-section';
+      (proj.members||[]).forEach(mem=>memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,true)));
       const addMemBtn=document.createElement('button');
       addMemBtn.className='proj-add-btn';
       addMemBtn.style.cssText='margin-left:0;margin-top:8px';
       addMemBtn.textContent='＋ Tambah Anggota';
       addMemBtn.dataset.addMem=proj.id;
       memSec.appendChild(addMemBtn);
+      card.appendChild(memSec);
+
+    } else {
+      /* ── Viewer: locked or unlocked per-project ── */
+      const unlockInfo=unlockedProjects.get(proj.id);
+
+      if(!unlockInfo){
+        /* Locked card */
+        card.innerHTML=`
+          <div class="proj-card-head" style="align-items:center">
+            <div style="flex:1">
+              <div class="proj-title" style="color:var(--muted)">🔒 ${esc(proj.title)}</div>
+              <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
+            </div>
+          </div>
+          <div class="proj-lock-form" style="display:none;margin-top:8px">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
+              <input class="proj-lock-name" type="text" placeholder="Nama lengkap" autocomplete="off"
+                style="flex:1;min-width:120px;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--surface);color:var(--text);font-size:.78rem;outline:none"/>
+              <div style="flex:1;min-width:100px;position:relative">
+                <input class="proj-lock-code" type="password" placeholder="Kode klien" maxlength="20"
+                  style="width:100%;padding:6px 32px 6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--surface);color:var(--text);font-size:.78rem;outline:none"/>
+                <button class="proj-lock-eye" tabindex="-1"
+                  style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.72rem;padding:2px">👁</button>
+              </div>
+              <button class="proj-lock-btn"
+                style="padding:6px 14px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.78rem;font-weight:600;white-space:nowrap">Masuk</button>
+            </div>
+            <div class="proj-lock-err" style="font-size:.7rem;color:var(--red,#f87171);margin-top:4px;min-height:14px"></div>
+          </div>
+          <button class="proj-lihat-btn"
+            style="margin-top:8px;padding:5px 14px;border-radius:6px;background:transparent;color:var(--accent);border:1px solid var(--accent);cursor:pointer;font-size:.75rem;font-weight:600">Lihat</button>
+        `;
+
+        const form=card.querySelector('.proj-lock-form');
+        const lihatBtn=card.querySelector('.proj-lihat-btn');
+        const nameInp=card.querySelector('.proj-lock-name');
+        const codeInp=card.querySelector('.proj-lock-code');
+        const eyeBtn=card.querySelector('.proj-lock-eye');
+        const lockBtn=card.querySelector('.proj-lock-btn');
+        const errEl=card.querySelector('.proj-lock-err');
+
+        lihatBtn.addEventListener('click',()=>{
+          form.style.display=''; lihatBtn.style.display='none'; nameInp.focus();
+        });
+        eyeBtn.addEventListener('click',()=>{
+          codeInp.type=codeInp.type==='password'?'text':'password';
+        });
+
+        function tryUnlock(){
+          const name=(nameInp.value||'').trim();
+          const code=(codeInp.value||'').trim();
+          if(!name||!code){ errEl.textContent='Isi nama dan kode klien.'; return; }
+          if(proj.clientCode===code){
+            const mem=(proj.members||[]).find(m=>m.name.toLowerCase()===name.toLowerCase());
+            if(mem){
+              unlockedProjects.set(proj.id,{memberName:name,memberId:mem.id});
+              saveUnlocked(); renderProject(); return;
+            }
+          }
+          errEl.textContent='Nama atau kode tidak sesuai.';
+          codeInp.classList.add('error');
+          setTimeout(()=>{codeInp.classList.remove('error');errEl.textContent=''},1800);
+        }
+        lockBtn.addEventListener('click',tryUnlock);
+        codeInp.addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock()});
+        nameInp.addEventListener('keydown',e=>{if(e.key==='Enter')codeInp.focus()});
+
+      } else {
+        /* Unlocked card — show this member's content */
+        const mem=(proj.members||[]).find(m=>m.id===unlockInfo.memberId);
+        card.innerHTML=`
+          <div class="proj-card-head">
+            <div style="flex:1">
+              <div class="proj-title">${esc(proj.title)}</div>
+              <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
+            </div>
+            <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
+            <button class="proj-relock-btn" title="Kunci kembali"
+              style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:.82rem;padding:4px;margin-left:4px" title="Kunci kembali">🔓</button>
+          </div>
+          <div class="proj-meta">
+            ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
+            ${proj.endDateOptimistic?`<span>🎯 Optimis: ${fmtDate(proj.endDateOptimistic)}</span>`:''}
+            ${proj.endDatePessimistic?`<span>⚠ Pesimis: ${fmtDate(proj.endDatePessimistic)}</span>`:''}
+            <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
+          </div>
+          ${proj.startDate&&pEnd?`
+          <div class="proj-timeline-wrap">
+            <div class="proj-timeline-label">
+              <span>${fmtDate(proj.startDate)}</span>
+              <span>${fmtDate(pEnd)}</span>
+            </div>
+            <div class="proj-timeline-bar">
+              <div class="proj-tl-optimistic" style="width:${optPct}%"></div>
+              <div class="proj-tl-buffer" style="width:${100-optPct}%"></div>
+            </div>
+          </div>`:''}
+          <div class="proj-progress"><div class="proj-progress-bar" style="width:${pct}%"></div></div>
+        `;
+        card.querySelector('.proj-relock-btn').addEventListener('click',()=>{
+          unlockedProjects.delete(proj.id); saveUnlocked(); renderProject();
+        });
+        if(mem){
+          const memSec=document.createElement('div');
+          memSec.className='proj-member-section';
+          memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,false));
+          card.appendChild(memSec);
+        }
+      }
     }
-    card.appendChild(memSec);
+
     area.appendChild(card);
   });
 
-  /* Event delegation */
+  /* Event delegation for all dynamically rendered buttons */
   area.querySelectorAll('[data-proj-edit]').forEach(b=>b.addEventListener('click',()=>openModal('proj-edit',{id:b.dataset.projEdit})));
   area.querySelectorAll('[data-proj-del]').forEach(b=>b.addEventListener('click',()=>{
     const p=db.projects.find(x=>x.id===b.dataset.projDel);
