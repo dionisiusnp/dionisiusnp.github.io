@@ -112,27 +112,29 @@ jobs:
             const MONTH_NAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
             const REC_LABELS  = { harian:'setiap hari', mingguan:'setiap minggu', bulanan:'setiap bulan', tahunan:'setiap tahun' };
 
-            const lines = qualifying.map(ev => {
-              let timeLabel;
-              if (ev.type === 'recurring') {
-                timeLabel = REC_LABELS[ev.recurrence] || 'berulang';
-              } else if (ev.date === today) {
-                timeLabel = 'hari ini';
-              } else {
-                const diff = Math.round((new Date(ev.date) - new Date(today)) / 86400000);
-                const d = new Date(ev.date + 'T00:00:00');
-                timeLabel = `${diff} hari lagi (${DAY_NAMES[d.getDay()]}, ${d.getDate()} ${MONTH_NAMES[d.getMonth()]})`;
-              }
-              let line = `• ${ev.title} — ${timeLabel}`;
-              if (ev.description && ev.description.trim()) line += `\n  ${ev.description.trim()}`;
-              return line;
-            });
+            const orgName = db.orgName || 'Alteco';
 
-            const heading = qualifying.length === 1
-              ? `📌 Aliria Info — ${qualifying[0].title}`
-              : `📌 Aliria Info — ${qualifying.length} Pengumuman`;
+            function timeLabel(ev) {
+              if (ev.type === 'recurring') return REC_LABELS[ev.recurrence] || 'berulang';
+              if (ev.date === today) return 'Hari ini';
+              const diff = Math.round((new Date(ev.date) - new Date(today)) / 86400000);
+              const d = new Date(ev.date + 'T00:00:00');
+              return `${diff} hari lagi · ${DAY_NAMES[d.getDay()]}, ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+            }
 
-            const bodyText = lines.join('\n');
+            let heading, bodyText;
+            if (qualifying.length === 1) {
+              const ev = qualifying[0];
+              heading = `📌 ${orgName} — ${ev.title}`;
+              bodyText = `📅 ${timeLabel(ev)}` + (ev.description?.trim() ? `\n${ev.description.trim()}` : '');
+            } else {
+              heading = `📌 ${orgName} — ${qualifying.length} Pengumuman`;
+              bodyText = qualifying.map(ev => {
+                let line = `• ${ev.title} — ${timeLabel(ev)}`;
+                if (ev.description?.trim()) line += `\n  ${ev.description.trim()}`;
+                return line;
+              }).join('\n');
+            }
 
             console.log('Sending:', heading);
             console.log(bodyText);
