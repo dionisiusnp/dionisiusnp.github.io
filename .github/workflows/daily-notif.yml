@@ -129,8 +129,8 @@ jobs:
             });
 
             const heading = qualifying.length === 1
-              ? `📌 Alteco — ${qualifying[0].title}`
-              : `📌 Alteco — ${qualifying.length} Pengumuman`;
+              ? `📌 Aliria Info — ${qualifying[0].title}`
+              : `📌 Aliria Info — ${qualifying.length} Pengumuman`;
 
             const bodyText = lines.join('\n');
 

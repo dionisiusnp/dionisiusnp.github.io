@@ -486,14 +486,6 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <span class="feature-nav-ico">🏢</span>
         <span class="feature-nav-label">Bagan Organisasi</span>
       </button>
-      <button class="feature-nav-item" id="btnAssetView">
-        <span class="feature-nav-ico">📦</span>
-        <span class="feature-nav-label">Inventaris</span>
-      </button>
-      <button class="feature-nav-item" id="btnInfoView">
-        <span class="feature-nav-ico">🔔</span>
-        <span class="feature-nav-label">Pemberitahuan</span>
-      </button>
       <button class="feature-nav-item project-access" id="btnProjectView">
         <span class="feature-nav-ico">🗂️</span>
         <span class="feature-nav-label">Proyek</span>
@@ -501,6 +493,14 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <button class="feature-nav-item" id="btnCultureView">
         <span class="feature-nav-ico">🌱</span>
         <span class="feature-nav-label">Sejarah</span>
+      </button>
+      <button class="feature-nav-item" id="btnAssetView">
+        <span class="feature-nav-ico">📦</span>
+        <span class="feature-nav-label">Inventaris</span>
+      </button>
+      <button class="feature-nav-item" id="btnInfoView">
+        <span class="feature-nav-ico">🔔</span>
+        <span class="feature-nav-label">Pemberitahuan</span>
       </button>
       <button class="feature-nav-item admin-only" id="btnSettingsView">
         <span class="feature-nav-ico">⚙️</span>
@@ -746,6 +746,7 @@ function syncOrgName(){
   const name=db.orgName||'Alteco';
   document.getElementById('navOrgName').textContent=name;
   document.getElementById('navOrgNameView').textContent=name;
+  document.title='Kelola '+name;
 }
 
 function saveUnlocked(){
