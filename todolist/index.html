@@ -405,8 +405,9 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .culture-tl-title{font-size:.87rem;font-weight:700;margin-bottom:3px;color:var(--text)}
 .culture-tl-desc{font-size:.73rem;color:var(--muted);line-height:1.5;white-space:pre-wrap;margin-top:4px}
 .culture-tl-badge{display:inline-flex;align-items:center;font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;margin-bottom:5px}
-.culture-tl-badge.softskill{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25)}
-.culture-tl-badge.hardskill{background:rgba(108,111,245,.1);color:var(--accent);border:1px solid rgba(108,111,245,.25)}
+.culture-tl-badge.internal{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25)}
+.culture-tl-badge.eksternal{background:rgba(251,191,36,.12);color:var(--gold,#fbbf24);border:1px solid rgba(251,191,36,.3)}
+.culture-tl-badge.kolaborasi{background:rgba(108,111,245,.1);color:var(--accent);border:1px solid rgba(108,111,245,.25)}
 .culture-tl-acts{display:none;gap:4px;margin-top:7px}
 .culture-timeline-item.tl-left .culture-tl-acts{justify-content:flex-end}
 .culture-timeline-item.tl-right .culture-tl-acts{justify-content:flex-start}
@@ -499,7 +500,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       </button>
       <button class="feature-nav-item" id="btnCultureView">
         <span class="feature-nav-ico">🌱</span>
-        <span class="feature-nav-label">Budaya</span>
+        <span class="feature-nav-label">Sejarah</span>
       </button>
       <button class="feature-nav-item admin-only" id="btnSettingsView">
         <span class="feature-nav-ico">⚙️</span>
@@ -2089,7 +2090,7 @@ function openModal(mode, ctx){
 
   else if(mode==='culture-add'||mode==='culture-edit'){
     const c=mode==='culture-edit'?db.cultures.find(x=>x.id===ctx.id):null;
-    title.textContent=mode==='culture-add'?'Tambah Jejak Budaya':'Edit Jejak Budaya';
+    title.textContent=mode==='culture-add'?'Tambah Sejarah':'Edit Sejarah';
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Judul / Nama Milestone *</label>
@@ -2103,8 +2104,9 @@ function openModal(mode, ctx){
         <label class="form-label">Kategori <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
         <select class="form-select" id="fi-ctype">
           <option value="" ${!c?.type?'selected':''}>— Tanpa kategori</option>
-          <option value="softskill" ${c?.type==='softskill'?'selected':''}>🤝 Softskill — karakter &amp; kebiasaan</option>
-          <option value="hardskill" ${c?.type==='hardskill'?'selected':''}>⚙️ Hardskill — kemampuan teknis</option>
+          <option value="internal" ${c?.type==='internal'?'selected':''}>🏠 Internal — kegiatan dalam organisasi</option>
+          <option value="eksternal" ${c?.type==='eksternal'?'selected':''}>🌐 Eksternal — publikasi / representasi keluar</option>
+          <option value="kolaborasi" ${c?.type==='kolaborasi'?'selected':''}>🤝 Kolaborasi — kerjasama dengan pihak lain</option>
         </select>
       </div>
       <div class="form-group">
@@ -2953,11 +2955,11 @@ function renderCultures(){
 
   const toolbar=document.createElement('div');
   toolbar.className='asset-toolbar';
-  toolbar.innerHTML=`<span class="asset-toolbar-title">Jejak Budaya Organisasi</span>`;
+  toolbar.innerHTML=`<span class="asset-toolbar-title">Sejarah Organisasi</span>`;
   if(role==='admin'){
     const btn=document.createElement('button');
     btn.className='task-add-inline-btn';
-    btn.textContent='＋ Tambah Jejak';
+    btn.textContent='＋ Tambah Sejarah';
     btn.addEventListener('click',()=>openModal('culture-add',{}));
     toolbar.appendChild(btn);
   }
@@ -2967,7 +2969,7 @@ function renderCultures(){
   if(!cultures.length){
     const e=document.createElement('div');
     e.className='asset-empty';
-    e.textContent='Belum ada jejak budaya organisasi.';
+    e.textContent='Belum ada catatan sejarah organisasi.';
     area.appendChild(e); return;
   }
 
@@ -2985,7 +2987,7 @@ function renderCultures(){
     return `${parseInt(dd)} ${MONTH[parseInt(m)-1]} ${y}`;
   }
 
-  const BADGE_LABEL={softskill:'🤝 Softskill',hardskill:'⚙️ Hardskill'};
+  const BADGE_LABEL={internal:'🏠 Internal',eksternal:'🌐 Eksternal',kolaborasi:'🤝 Kolaborasi'};
 
   const tl=document.createElement('div');
   tl.className='culture-timeline';
