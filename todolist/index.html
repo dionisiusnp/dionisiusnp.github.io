@@ -390,18 +390,27 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .proj-progress{height:4px;border-radius:2px;background:var(--bd);margin-top:4px;overflow:hidden}
 .proj-progress-bar{height:100%;border-radius:2px;background:var(--accent);transition:width .3s}
 
-/* ── Culture view ── */
-.culture-type-header{display:flex;align-items:center;gap:8px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:14px 16px 6px;border-bottom:1px solid var(--bd);margin-bottom:8px}
-.culture-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;padding:0 16px 16px}
-.culture-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;transition:border-color .15s;position:relative}
-.culture-card:hover{border-color:var(--accent)}
-.culture-card-type{display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;margin-bottom:6px}
-.culture-card-type.softskill{background:rgba(52,211,153,.1);color:var(--green,#34d399);border:1px solid rgba(52,211,153,.25)}
-.culture-card-type.hardskill{background:rgba(108,111,245,.1);color:var(--accent);border:1px solid rgba(108,111,245,.25)}
-.culture-card-title{font-size:.88rem;font-weight:700;margin-bottom:4px}
-.culture-card-desc{font-size:.75rem;color:var(--muted);line-height:1.55;white-space:pre-wrap}
-.culture-card-acts{position:absolute;top:10px;right:10px;display:none;gap:4px}
-.culture-card:hover .culture-card-acts{display:flex}
+/* ── Culture timeline ── */
+.culture-timeline{position:relative;padding:24px 40px 48px;max-width:680px;margin:0 auto}
+.culture-timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--bd);transform:translateX(-50%)}
+.culture-timeline-item{position:relative;display:flex;align-items:flex-start;margin-bottom:24px}
+.culture-timeline-item.tl-left{flex-direction:row}
+.culture-timeline-item.tl-right{flex-direction:row-reverse}
+.culture-tl-card{width:calc(50% - 26px);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;transition:border-color .15s}
+.culture-tl-card:hover{border-color:var(--accent)}
+.culture-timeline-item.tl-left .culture-tl-card{text-align:right;margin-right:auto}
+.culture-timeline-item.tl-right .culture-tl-card{text-align:left;margin-left:auto}
+.culture-tl-dot{position:absolute;left:50%;transform:translateX(-50%);top:14px;width:11px;height:11px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);z-index:1}
+.culture-tl-date{font-size:.6rem;color:var(--muted);font-weight:600;letter-spacing:.04em;margin-bottom:3px}
+.culture-tl-title{font-size:.87rem;font-weight:700;margin-bottom:3px;color:var(--text)}
+.culture-tl-desc{font-size:.73rem;color:var(--muted);line-height:1.5;white-space:pre-wrap;margin-top:4px}
+.culture-tl-badge{display:inline-flex;align-items:center;font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;margin-bottom:5px}
+.culture-tl-badge.softskill{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25)}
+.culture-tl-badge.hardskill{background:rgba(108,111,245,.1);color:var(--accent);border:1px solid rgba(108,111,245,.25)}
+.culture-tl-acts{display:none;gap:4px;margin-top:7px}
+.culture-timeline-item.tl-left .culture-tl-acts{justify-content:flex-end}
+.culture-timeline-item.tl-right .culture-tl-acts{justify-content:flex-start}
+.culture-tl-card:hover .culture-tl-acts{display:flex}
 </style>
 </head>
 <body>
@@ -2080,22 +2089,27 @@ function openModal(mode, ctx){
 
   else if(mode==='culture-add'||mode==='culture-edit'){
     const c=mode==='culture-edit'?db.cultures.find(x=>x.id===ctx.id):null;
-    title.textContent=mode==='culture-add'?'Tambah Budaya':'Edit Budaya';
+    title.textContent=mode==='culture-add'?'Tambah Jejak Budaya':'Edit Jejak Budaya';
     body.innerHTML=`
       <div class="form-group">
-        <label class="form-label">Tipe *</label>
+        <label class="form-label">Judul / Nama Milestone *</label>
+        <input class="form-input" id="fi-ctitle" value="${esc(c?.title||'')}" placeholder="misal: Mulai rutin standup harian, Lahirnya SOP Git Flow…" maxlength="80"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional — untuk urutan timeline)</span></label>
+        <input class="form-input" type="date" id="fi-cdate" value="${c?.date||''}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
         <select class="form-select" id="fi-ctype">
-          <option value="softskill" ${(c?.type||'softskill')==='softskill'?'selected':''}>🤝 Softskill — karakter &amp; kebiasaan</option>
+          <option value="" ${!c?.type?'selected':''}>— Tanpa kategori</option>
+          <option value="softskill" ${c?.type==='softskill'?'selected':''}>🤝 Softskill — karakter &amp; kebiasaan</option>
           <option value="hardskill" ${c?.type==='hardskill'?'selected':''}>⚙️ Hardskill — kemampuan teknis</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Nama / Nilai *</label>
-        <input class="form-input" id="fi-ctitle" value="${esc(c?.title||'')}" placeholder="misal: Komunikasi Efektif, Git Flow, dst" maxlength="80"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Panduan / Deskripsi</label>
-        <textarea class="form-textarea" id="fi-cdesc" placeholder="Jelaskan kebiasaan atau cara penerapannya di komunitas…" rows="4">${esc(c?.description||'')}</textarea>
+        <label class="form-label">Deskripsi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-cdesc" placeholder="Ceritakan konteks atau makna dari momen ini…" rows="4">${esc(c?.description||'')}</textarea>
       </div>
     `;
     document.getElementById('fi-ctitle').focus();
@@ -2338,15 +2352,16 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='culture-add'||mMode==='culture-edit'){
     const title_v=document.getElementById('fi-ctitle').value.trim();
     if(!title_v) return;
-    const type_v=document.getElementById('fi-ctype').value;
-    const desc_v=document.getElementById('fi-cdesc').value.trim();
+    const date_v=document.getElementById('fi-cdate').value||null;
+    const type_v=document.getElementById('fi-ctype').value||null;
+    const desc_v=document.getElementById('fi-cdesc').value.trim()||null;
     if(mMode==='culture-add'){
       db.cultures=(db.cultures||[]);
-      db.cultures.push({id:uid(),title:title_v,type:type_v,description:desc_v,createdAt:Date.now()});
+      db.cultures.push({id:uid(),title:title_v,date:date_v,type:type_v,description:desc_v,createdAt:Date.now()});
     } else {
       const c=db.cultures.find(x=>x.id===mCtx.id);
       if(!c) return;
-      c.title=title_v; c.type=type_v; c.description=desc_v;
+      c.title=title_v; c.date=date_v; c.type=type_v; c.description=desc_v;
     }
     save(); renderCultures(); closeModal();
   }
@@ -2938,11 +2953,11 @@ function renderCultures(){
 
   const toolbar=document.createElement('div');
   toolbar.className='asset-toolbar';
-  toolbar.innerHTML=`<span class="asset-toolbar-title">Budaya Organisasi</span>`;
-  if(role==='admin'){
+  toolbar.innerHTML=`<span class="asset-toolbar-title">Jejak Budaya Organisasi</span>`;
+  if(role==='superadmin'){
     const btn=document.createElement('button');
     btn.className='task-add-inline-btn';
-    btn.textContent='＋ Tambah Budaya';
+    btn.textContent='＋ Tambah Jejak';
     btn.addEventListener('click',()=>openModal('culture-add',{}));
     toolbar.appendChild(btn);
   }
@@ -2952,48 +2967,71 @@ function renderCultures(){
   if(!cultures.length){
     const e=document.createElement('div');
     e.className='asset-empty';
-    e.textContent='Belum ada budaya organisasi.';
+    e.textContent='Belum ada jejak budaya organisasi.';
     area.appendChild(e); return;
   }
 
-  const types=[
-    {key:'softskill', label:'🤝 Softskill', desc:'Karakter, kebiasaan, dan sikap'},
-    {key:'hardskill', label:'⚙️ Hardskill', desc:'Kemampuan teknis dan kompetensi'}
-  ];
-
-  types.forEach(t=>{
-    const items=cultures.filter(c=>c.type===t.key);
-    if(!items.length) return;
-
-    const header=document.createElement('div');
-    header.className='culture-type-header';
-    header.innerHTML=`<span>${t.label}</span><span style="font-weight:400;text-transform:none;letter-spacing:0">${t.desc}</span>`;
-    area.appendChild(header);
-
-    const grid=document.createElement('div');
-    grid.className='culture-grid';
-
-    items.forEach(c=>{
-      const card=document.createElement('div');
-      card.className='culture-card';
-      card.innerHTML=`
-        <div class="culture-card-type ${c.type}">${c.type==='softskill'?'Softskill':'Hardskill'}</div>
-        ${role==='admin'?`<div class="culture-card-acts">
-          <button class="asset-act-btn" data-culture-edit="${c.id}">✎</button>
-          <button class="asset-act-btn del" data-culture-del="${c.id}">✕</button>
-        </div>`:''}
-        <div class="culture-card-title">${esc(c.title)}</div>
-        <div class="culture-card-desc">${esc(c.description||'')}</div>
-      `;
-      card.querySelector('[data-culture-edit]')?.addEventListener('click',()=>openModal('culture-edit',{id:c.id}));
-      card.querySelector('[data-culture-del]')?.addEventListener('click',()=>{
-        if(!confirm(`Hapus "${c.title}"?`)) return;
-        db.cultures=db.cultures.filter(x=>x.id!==c.id); save(); renderCultures();
-      });
-      grid.appendChild(card);
-    });
-    area.appendChild(grid);
+  /* Sort: has date → by date asc; no date → by createdAt asc. Newest at top = reverse. */
+  const sorted=[...cultures].sort((a,b)=>{
+    const ka=a.date||new Date(a.createdAt).toISOString().slice(0,10);
+    const kb=b.date||new Date(b.createdAt).toISOString().slice(0,10);
+    return ka<kb?-1:ka>kb?1:0;
   });
+
+  const MONTH=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+  function fmtDate(d){
+    if(!d) return null;
+    const [y,m,dd]=d.split('-');
+    return `${parseInt(dd)} ${MONTH[parseInt(m)-1]} ${y}`;
+  }
+
+  const BADGE_LABEL={softskill:'🤝 Softskill',hardskill:'⚙️ Hardskill'};
+
+  const tl=document.createElement('div');
+  tl.className='culture-timeline';
+
+  /* Rendered bottom-to-top visually: oldest at bottom → render reversed in DOM, then CSS flex-col-reverse */
+  tl.style.display='flex';
+  tl.style.flexDirection='column-reverse';
+
+  sorted.forEach((c,i)=>{
+    const side=i%2===0?'tl-left':'tl-right';
+    const item=document.createElement('div');
+    item.className=`culture-timeline-item ${side}`;
+
+    const dot=document.createElement('div');
+    dot.className='culture-tl-dot';
+
+    const card=document.createElement('div');
+    card.className='culture-tl-card';
+
+    const dateStr=fmtDate(c.date);
+    const badgeHtml=c.type&&BADGE_LABEL[c.type]?`<div class="culture-tl-badge ${c.type}">${BADGE_LABEL[c.type]}</div>`:'';
+    const descHtml=c.description?`<div class="culture-tl-desc">${esc(c.description)}</div>`:'';
+    const actsHtml=role==='superadmin'?`<div class="culture-tl-acts">
+      <button class="asset-act-btn" data-culture-edit="${c.id}">✎</button>
+      <button class="asset-act-btn del" data-culture-del="${c.id}">✕</button>
+    </div>`:'';
+
+    card.innerHTML=`
+      ${badgeHtml}
+      ${dateStr?`<div class="culture-tl-date">${dateStr}</div>`:''}
+      <div class="culture-tl-title">${esc(c.title)}</div>
+      ${descHtml}
+      ${actsHtml}
+    `;
+    card.querySelector('[data-culture-edit]')?.addEventListener('click',()=>openModal('culture-edit',{id:c.id}));
+    card.querySelector('[data-culture-del]')?.addEventListener('click',()=>{
+      if(!confirm(`Hapus "${c.title}"?`)) return;
+      db.cultures=db.cultures.filter(x=>x.id!==c.id); save(); renderCultures();
+    });
+
+    item.appendChild(card);
+    item.appendChild(dot);
+    tl.appendChild(item);
+  });
+
+  area.appendChild(tl);
 }
 
 /* ══════════════════════════════════════════

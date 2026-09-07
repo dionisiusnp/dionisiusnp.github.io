@@ -108,11 +108,24 @@ jobs:
             if (!qualifying.length) { console.log('No qualifying events today'); process.exit(0); }
 
             // Build bundled notification content
+            const DAY_NAMES   = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+            const MONTH_NAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+            const REC_LABELS  = { harian:'setiap hari', mingguan:'setiap minggu', bulanan:'setiap bulan', tahunan:'setiap tahun' };
+
             const lines = qualifying.map(ev => {
-              if (ev.type === 'recurring') return `• ${ev.title} — hari ini (berulang)`;
-              if (ev.date === today) return `• ${ev.title} — hari ini`;
-              const diff = Math.round((new Date(ev.date) - new Date(today)) / 86400000);
-              return `• ${ev.title} — ${diff} hari lagi`;
+              let timeLabel;
+              if (ev.type === 'recurring') {
+                timeLabel = REC_LABELS[ev.recurrence] || 'berulang';
+              } else if (ev.date === today) {
+                timeLabel = 'hari ini';
+              } else {
+                const diff = Math.round((new Date(ev.date) - new Date(today)) / 86400000);
+                const d = new Date(ev.date + 'T00:00:00');
+                timeLabel = `${diff} hari lagi (${DAY_NAMES[d.getDay()]}, ${d.getDate()} ${MONTH_NAMES[d.getMonth()]})`;
+              }
+              let line = `• ${ev.title} — ${timeLabel}`;
+              if (ev.description && ev.description.trim()) line += `\n  ${ev.description.trim()}`;
+              return line;
             });
 
             const heading = qualifying.length === 1
