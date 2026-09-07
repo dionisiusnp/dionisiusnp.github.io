@@ -2954,7 +2954,7 @@ function renderCultures(){
   const toolbar=document.createElement('div');
   toolbar.className='asset-toolbar';
   toolbar.innerHTML=`<span class="asset-toolbar-title">Jejak Budaya Organisasi</span>`;
-  if(role==='superadmin'){
+  if(role==='admin'){
     const btn=document.createElement('button');
     btn.className='task-add-inline-btn';
     btn.textContent='＋ Tambah Jejak';
@@ -3008,7 +3008,7 @@ function renderCultures(){
     const dateStr=fmtDate(c.date);
     const badgeHtml=c.type&&BADGE_LABEL[c.type]?`<div class="culture-tl-badge ${c.type}">${BADGE_LABEL[c.type]}</div>`:'';
     const descHtml=c.description?`<div class="culture-tl-desc">${esc(c.description)}</div>`:'';
-    const actsHtml=role==='superadmin'?`<div class="culture-tl-acts">
+    const actsHtml=role==='admin'?`<div class="culture-tl-acts">
       <button class="asset-act-btn" data-culture-edit="${c.id}">✎</button>
       <button class="asset-act-btn del" data-culture-del="${c.id}">✕</button>
     </div>`:'';
