@@ -125,8 +125,8 @@ jobs:
             let heading, bodyText;
             if (qualifying.length === 1) {
               const ev = qualifying[0];
-              heading = `📌 ${orgName} — ${ev.title}`;
-              bodyText = `📅 ${timeLabel(ev)}` + (ev.description?.trim() ? `\n${ev.description.trim()}` : '');
+              heading = `📌 ${orgName}`;
+              bodyText = `${ev.title}\n📅 ${timeLabel(ev)}` + (ev.description?.trim() ? `\n${ev.description.trim()}` : '');
             } else {
               heading = `📌 ${orgName} — ${qualifying.length} Pengumuman`;
               bodyText = qualifying.map(ev => {
