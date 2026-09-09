@@ -2611,9 +2611,11 @@ function renderProject(){
     toolbar.appendChild(btn);
   }
   area.appendChild(toolbar);
-  area.querySelector('#projSearchInp').addEventListener('input',e=>{projectSearch=e.target.value;renderProject();});
+  const searchInp=area.querySelector('#projSearchInp');
+  searchInp.addEventListener('input',e=>{projectSearch=e.target.value;renderProject();});
+  if(projectSearch){searchInp.focus();searchInp.setSelectionRange(searchInp.value.length,searchInp.value.length);}
 
-  const allProjects=db.projects||[];
+  const allProjects=(db.projects||[]).slice().sort((a,b)=>(a.title||'').localeCompare(b.title||'','id'));
   const q=projectSearch.trim().toLowerCase();
   const filtered=q?allProjects.filter(p=>(p.title||'').toLowerCase().includes(q)||(p.clientName||'').toLowerCase().includes(q)):allProjects;
   if(!filtered.length){
