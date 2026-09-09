@@ -371,7 +371,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .proj-member-avatar{width:26px;height:26px;border-radius:50%;background:rgba(108,111,245,.15);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--accent);flex-shrink:0}
 .proj-member-name{font-size:.78rem;font-weight:600;flex:1}
 .proj-member-role{font-size:.62rem;color:var(--muted)}
-.proj-member-tl{height:6px;border-radius:3px;background:rgba(108,111,245,.25);margin:5px 0 8px;position:relative}
+.proj-member-tl{height:6px;border-radius:3px;background:rgba(108,111,245,.25);margin:5px 0 8px;position:relative;overflow:hidden}
 .proj-member-tl-bar{height:100%;border-radius:3px;background:var(--accent);position:absolute}
 .proj-task-list{display:flex;flex-direction:column;gap:4px;padding-left:34px}
 .proj-task-item{display:flex;align-items:center;gap:8px;font-size:.75rem;padding:4px 8px;border-radius:5px;background:var(--surface);border:1px solid transparent;transition:border-color .15s}
@@ -2691,7 +2691,7 @@ function renderProject(){
       collapse.className='proj-collapse'+(isExpanded?' open':'');
       const memSec=document.createElement('div');
       memSec.className='proj-member-section';
-      (proj.members||[]).forEach(mem=>memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,true)));
+      (proj.members||[]).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'','id')).forEach(mem=>memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,true)));
       const addMemBtn=document.createElement('button');
       addMemBtn.className='proj-add-btn';
       addMemBtn.style.cssText='margin-left:0;margin-top:8px';
