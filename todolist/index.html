@@ -2282,6 +2282,14 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const clientName=document.getElementById('fi-pclient').value.trim();
     const clientCode=document.getElementById('fi-pcode').value.trim();
     if(!title||!clientCode) return;
+    const codeConflict=(db.projects||[]).find(p=>p.clientCode===clientCode&&p.id!==(mCtx.id||''));
+    if(codeConflict){
+      const inp=document.getElementById('fi-pcode');
+      inp.style.borderColor='var(--red,#f87171)';
+      setTimeout(()=>inp.style.borderColor='',1800);
+      alert(`Kode "${clientCode}" sudah dipakai proyek "${codeConflict.title}". Gunakan kode berbeda.`);
+      return;
+    }
     if(mMode==='proj-add'){
       db.projects.push({
         id:uid(), title, clientName, clientCode,
