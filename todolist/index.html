@@ -2459,8 +2459,8 @@ function renderInfoList(area, today){
       <div class="info-event-meta">
         <span class="info-event-badge ${badgeClass}">${badgeText}</span>
         ${metaDate?`<span>${metaDate}</span>`:''}
-        ${ev.desc?`<span style="color:var(--muted)">${esc(ev.desc)}</span>`:''}
       </div>
+      ${ev.desc?`<div style="font-size:.78rem;color:var(--muted);margin-top:6px;white-space:pre-wrap;line-height:1.55">${esc(ev.desc)}</div>`:''}
     `;
     if(role === 'admin'){
       const actions = document.createElement('div');
