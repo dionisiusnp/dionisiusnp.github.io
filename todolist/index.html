@@ -303,9 +303,10 @@ body.is-admin .viewer-only{display:none!important}
 .info-recur{background:rgba(108,111,245,.12);border-color:rgba(108,111,245,.3);color:var(--accent)}
 .info-past{background:rgba(92,92,122,.12);border-color:rgba(92,92,122,.3);color:var(--dim)}
 
-.settings-section{margin-bottom:20px}
-.settings-section-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
-.settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd)}
+.settings-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:6px 18px 18px;margin-bottom:14px;max-width:640px}
+.settings-section{margin-bottom:0}
+.settings-section-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:14px 0 2px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bd)}
 .settings-row:last-child{border-bottom:none}
 .settings-row-label{font-size:.82rem;font-weight:600}
 .settings-row-desc{font-size:.7rem;color:var(--muted);margin-top:2px}
@@ -2871,81 +2872,52 @@ function renderSettings(){
   toolbar.innerHTML = `<span class="asset-toolbar-title">Pengaturan</span>`;
   area.appendChild(toolbar);
 
-  const sec = document.createElement('div');
-  sec.className = 'settings-section';
-  sec.innerHTML = `<div class="settings-section-title">Notifikasi</div>`;
-
-  const row1 = document.createElement('div');
-  row1.className = 'settings-row';
-  row1.innerHTML = `
-    <div>
-      <div class="settings-row-label">Push Notification</div>
-      <div class="settings-row-desc">Notif muncul walau browser tutup (via OneSignal). Aktifkan hanya jika OneSignal sudah dikonfigurasi.</div>
+  /* ── Card 1: Notifikasi + Akses Tulis Viewer ── */
+  const card1 = document.createElement('div');
+  card1.className = 'settings-card';
+  card1.innerHTML = `
+    <div class="settings-section-title">Notifikasi</div>
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">Push Notification</div>
+        <div class="settings-row-desc">Notif muncul walau browser tutup (via OneSignal). Aktifkan hanya jika OneSignal sudah dikonfigurasi.</div>
+      </div>
+      <label class="toggle-wrap">
+        <input class="toggle-inp" type="checkbox" id="togglePush" ${s.pushNotifEnabled?'checked':''}>
+        <span class="toggle-track"></span>
+      </label>
     </div>
-    <label class="toggle-wrap">
-      <input class="toggle-inp" type="checkbox" id="togglePush" ${s.pushNotifEnabled?'checked':''}>
-      <span class="toggle-track"></span>
-    </label>
-  `;
-  sec.appendChild(row1);
-
-  const row2 = document.createElement('div');
-  row2.className = 'settings-row';
-  row2.innerHTML = `
-    <div>
-      <div class="settings-row-label">Waktu Notifikasi</div>
-      <div class="settings-row-desc">Jam pengiriman notif harian (WIB / Asia/Jakarta)</div>
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">Waktu Notifikasi</div>
+        <div class="settings-row-desc">Jam pengiriman notif harian (WIB / Asia/Jakarta)</div>
+      </div>
+      <input type="time" id="notifTimeInp" value="${s.notifTime||'07:00'}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:.82rem;outline:none;width:90px"/>
     </div>
-    <input type="time" id="notifTimeInp" value="${s.notifTime||'07:00'}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem;outline:none;width:90px"/>
-  `;
-  sec.appendChild(row2);
-
-  const row3 = document.createElement('div');
-  row3.className = 'settings-row';
-  row3.innerHTML = `
-    <div>
-      <div class="settings-row-label">Notif Mulai H-</div>
-      <div class="settings-row-desc">Berapa hari sebelum hari H event sekali mulai dinotif. 0 = hanya hari H.</div>
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">Notif Mulai H-</div>
+        <div class="settings-row-desc">Berapa hari sebelum hari H event sekali mulai dinotif. 0 = hanya hari H.</div>
+      </div>
+      <input type="number" id="notifDaysInp" min="0" max="30" value="${s.notifDaysBefore??1}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:.82rem;outline:none;width:70px;text-align:center"/>
     </div>
-    <input type="number" id="notifDaysInp" min="0" max="30" value="${s.notifDaysBefore??1}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.82rem;outline:none;width:70px;text-align:center"/>
-  `;
-  sec.appendChild(row3);
-
-  // Write PAT section (for viewer Gist write access)
-  const secPat = document.createElement('div');
-  secPat.className = 'settings-section';
-  secPat.innerHTML = `<div class="settings-section-title">Akses Tulis Viewer</div>`;
-
-  const patRow = document.createElement('div');
-  patRow.className = 'settings-row';
-  patRow.style.cssText = 'flex-direction:column;align-items:flex-start;gap:8px';
-  patRow.innerHTML = `
-    <div>
-      <div class="settings-row-label">Write PAT</div>
-      <div class="settings-row-desc">GitHub Personal Access Token (scope: <b>gist</b>) yang digunakan viewer untuk menyimpan perubahan task ke Gist. Disimpan di data organisasi — bukan di browser. Kosongkan jika tidak ingin viewer bisa menulis ke Gist.</div>
-    </div>
-    <div style="display:flex;gap:6px;width:100%">
-      <input type="password" id="fi-wpat" value="${(s.writePat||'').replace(/"/g,'&quot;')}" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"
-        style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:.82rem;outline:none;font-family:monospace"/>
-      <button id="btnToggleWpat" type="button" style="padding:5px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--text);cursor:pointer;font-size:.78rem;white-space:nowrap">Lihat</button>
+    <div class="settings-section-title">Akses Tulis Viewer</div>
+    <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+      <div>
+        <div class="settings-row-label">Write PAT</div>
+        <div class="settings-row-desc">GitHub Personal Access Token (scope: <b>gist</b>) yang digunakan viewer untuk menyimpan perubahan task ke Gist. Disimpan di data organisasi — bukan di browser. Kosongkan jika tidak ingin viewer bisa menulis ke Gist.</div>
+      </div>
+      <div style="display:flex;gap:6px;width:100%">
+        <input type="password" id="fi-wpat" value="${(s.writePat||'').replace(/"/g,'&quot;')}" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"
+          style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:.82rem;outline:none;font-family:monospace"/>
+        <button id="btnToggleWpat" type="button" style="padding:5px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--text);cursor:pointer;font-size:.78rem;white-space:nowrap">Lihat</button>
+      </div>
     </div>
   `;
-  secPat.appendChild(patRow);
 
-  // toggle show/hide PAT
-  setTimeout(()=>{
-    const inp=document.getElementById('fi-wpat');
-    const btn=document.getElementById('btnToggleWpat');
-    if(inp&&btn) btn.addEventListener('click',()=>{
-      inp.type=inp.type==='password'?'text':'password';
-      btn.textContent=inp.type==='password'?'Lihat':'Sembunyikan';
-    });
-  },0);
-
-  // Single save button for all settings
   const saveBtn = document.createElement('button');
   saveBtn.className = 'btn-save';
-  saveBtn.style.cssText = 'margin-top:4px;align-self:flex-start';
+  saveBtn.style.cssText = 'margin-top:16px';
   saveBtn.textContent = 'Simpan Pengaturan';
   saveBtn.addEventListener('click', ()=>{
     db.settings.pushNotifEnabled = document.getElementById('togglePush').checked;
@@ -2960,15 +2932,28 @@ function renderSettings(){
     saveBtn.parentNode.insertBefore(ok, saveBtn.nextSibling);
     setTimeout(()=>ok.remove(), 2000);
   });
+  card1.appendChild(saveBtn);
+  area.appendChild(card1);
 
-  // Force send section
-  const sec2 = document.createElement('div');
-  sec2.className = 'settings-section';
-  sec2.innerHTML = `<div class="settings-section-title">Kirim Manual</div>`;
+  // toggle show/hide PAT
+  setTimeout(()=>{
+    const inp=document.getElementById('fi-wpat');
+    const btn=document.getElementById('btnToggleWpat');
+    if(inp&&btn) btn.addEventListener('click',()=>{
+      inp.type=inp.type==='password'?'text':'password';
+      btn.textContent=inp.type==='password'?'Lihat':'Sembunyikan';
+    });
+  },0);
+
+  /* ── Card 2: Kirim Manual ── */
+  const card2 = document.createElement('div');
+  card2.className = 'settings-card';
 
   const forceRow = document.createElement('div');
-  forceRow.className = 'settings-row';
-  forceRow.innerHTML = `
+  forceRow.innerHTML = `<div class="settings-section-title">Kirim Manual</div>`;
+  const forceInner = document.createElement('div');
+  forceInner.className = 'settings-row';
+  forceInner.innerHTML = `
     <div>
       <div class="settings-row-label">Kirim Rangkuman Sekarang</div>
       <div class="settings-row-desc">Picu GitHub Actions untuk kirim push notif semua pemberitahuan aktif ke seluruh subscriber sekarang. Tidak mengubah status notif harian. PAT harus punya scope <b>workflow</b>.</div>
@@ -2976,15 +2961,13 @@ function renderSettings(){
   `;
   const forceBtn = document.createElement('button');
   forceBtn.className = 'btn-save';
-  forceBtn.style.cssText = 'white-space:nowrap;flex-shrink:0';
+  forceBtn.style.cssText = 'white-space:nowrap;flex-shrink:0;margin-left:16px';
   forceBtn.textContent = 'Kirim Sekarang';
   forceBtn.addEventListener('click', ()=>forceSendNotif(forceBtn));
-  forceRow.appendChild(forceBtn);
-  sec2.appendChild(forceRow);
-  area.appendChild(sec);
-  area.appendChild(secPat);
-  area.appendChild(saveBtn);
-  area.appendChild(sec2);
+  forceInner.appendChild(forceBtn);
+  forceRow.appendChild(forceInner);
+  card2.appendChild(forceRow);
+  area.appendChild(card2);
 }
 
 /* ══════════════════════════════════════════
