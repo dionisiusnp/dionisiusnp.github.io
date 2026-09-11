@@ -2911,24 +2911,6 @@ function renderSettings(){
   `;
   sec.appendChild(row3);
 
-  const saveBtn = document.createElement('button');
-  saveBtn.className = 'btn-save';
-  saveBtn.style.cssText = 'margin-top:14px;align-self:flex-start';
-  saveBtn.textContent = 'Simpan Pengaturan';
-  saveBtn.addEventListener('click', ()=>{
-    db.settings.pushNotifEnabled = document.getElementById('togglePush').checked;
-    db.settings.notifTime = document.getElementById('notifTimeInp').value || '07:00';
-    db.settings.notifDaysBefore = Math.max(0, parseInt(document.getElementById('notifDaysInp').value)||0);
-    save();
-    if(db.settings.pushNotifEnabled) initOneSignal();
-    const ok = document.createElement('span');
-    ok.textContent = ' ✓ Tersimpan';
-    ok.style.cssText = 'color:var(--green);font-size:.78rem;margin-left:8px';
-    saveBtn.parentNode.insertBefore(ok, saveBtn.nextSibling);
-    setTimeout(()=>ok.remove(), 2000);
-  });
-  sec.appendChild(saveBtn);
-
   // Write PAT section (for viewer Gist write access)
   const secPat = document.createElement('div');
   secPat.className = 'settings-section';
@@ -2948,22 +2930,7 @@ function renderSettings(){
       <button id="btnToggleWpat" type="button" style="padding:5px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--text);cursor:pointer;font-size:.78rem;white-space:nowrap">Lihat</button>
     </div>
   `;
-  const patSaveBtn = document.createElement('button');
-  patSaveBtn.className = 'btn-save';
-  patSaveBtn.style.cssText = 'align-self:flex-start';
-  patSaveBtn.textContent = 'Simpan Write PAT';
-  patSaveBtn.addEventListener('click', ()=>{
-    db.settings.writePat = document.getElementById('fi-wpat').value.trim();
-    save();
-    const ok = document.createElement('span');
-    ok.textContent = ' ✓ Tersimpan';
-    ok.style.cssText = 'color:var(--green);font-size:.78rem;margin-left:8px';
-    patSaveBtn.parentNode.insertBefore(ok, patSaveBtn.nextSibling);
-    setTimeout(()=>ok.remove(), 2000);
-  });
-  patRow.appendChild(patSaveBtn);
   secPat.appendChild(patRow);
-  area.appendChild(secPat);
 
   // toggle show/hide PAT
   setTimeout(()=>{
@@ -2974,6 +2941,25 @@ function renderSettings(){
       btn.textContent=inp.type==='password'?'Lihat':'Sembunyikan';
     });
   },0);
+
+  // Single save button for all settings
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn-save';
+  saveBtn.style.cssText = 'margin-top:4px;align-self:flex-start';
+  saveBtn.textContent = 'Simpan Pengaturan';
+  saveBtn.addEventListener('click', ()=>{
+    db.settings.pushNotifEnabled = document.getElementById('togglePush').checked;
+    db.settings.notifTime = document.getElementById('notifTimeInp').value || '07:00';
+    db.settings.notifDaysBefore = Math.max(0, parseInt(document.getElementById('notifDaysInp').value)||0);
+    db.settings.writePat = document.getElementById('fi-wpat').value.trim();
+    save();
+    if(db.settings.pushNotifEnabled) initOneSignal();
+    const ok = document.createElement('span');
+    ok.textContent = ' ✓ Tersimpan';
+    ok.style.cssText = 'color:var(--green);font-size:.78rem;margin-left:8px';
+    saveBtn.parentNode.insertBefore(ok, saveBtn.nextSibling);
+    setTimeout(()=>ok.remove(), 2000);
+  });
 
   // Force send section
   const sec2 = document.createElement('div');
@@ -2996,6 +2982,8 @@ function renderSettings(){
   forceRow.appendChild(forceBtn);
   sec2.appendChild(forceRow);
   area.appendChild(sec);
+  area.appendChild(secPat);
+  area.appendChild(saveBtn);
   area.appendChild(sec2);
 }
 
