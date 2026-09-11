@@ -598,6 +598,7 @@ const ONESIGNAL_APP_ID = 'b03c4a75-c2b0-4de5-ab9c-cb5aa2f58cd2';
 /* ── Gist config (isi setelah buat Gist + PAT) ── */
 const GIST_ID  = '6bf5ebb0397393324168d3dd14c018c8';
 const GIST_PAT_KEY = 'rak_alteco_pat';
+const GIST_WPAT_KEY= 'alteco_write_pat';
 let GIST_PAT   = localStorage.getItem(GIST_PAT_KEY)||'';
 const GIST_FILE= 'alteco-data.json';
 
@@ -653,7 +654,8 @@ function localLoad(){
 
 async function gistLoad(){
   const headers={'Accept':'application/vnd.github+json'};
-  if(GIST_PAT) headers['Authorization']=`Bearer ${GIST_PAT}`;
+  const loadPat=GIST_PAT||localStorage.getItem(GIST_WPAT_KEY)||'';
+  if(loadPat) headers['Authorization']=`Bearer ${loadPat}`;
   const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{headers});
   if(!r.ok) throw new Error('gist fetch '+r.status);
   const gist=await r.json();
@@ -667,7 +669,7 @@ async function gistLoad(){
 let _saveTimer=null;
 function save(){
   localStorage.setItem(LS_KEY,JSON.stringify(db)); /* immediate local backup */
-  const pat=GIST_PAT||db.settings?.writePat||'';
+  const pat=GIST_PAT||db.settings?.writePat||localStorage.getItem(GIST_WPAT_KEY)||'';
   if(!GIST_ID||!pat) return;
   clearTimeout(_saveTimer);
   _saveTimer=setTimeout(async()=>{
@@ -694,6 +696,9 @@ function save(){
     console.warn('Gist load failed, using local',e);
     db=localLoad();
   }
+  /* Cache writePat locally so viewer can auth future gistLoad + save without re-fetching */
+  if(db.settings?.writePat) localStorage.setItem(GIST_WPAT_KEY, db.settings.writePat);
+  else if(!GIST_PAT) localStorage.removeItem(GIST_WPAT_KEY);
   overlay.style.opacity='0';
   setTimeout(()=>overlay.style.display='none',300);
 
@@ -2911,6 +2916,7 @@ function renderSettings(){
         <input type="password" id="fi-wpat" value="${(s.writePat||'').replace(/"/g,'&quot;')}" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"
           style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:.82rem;outline:none;font-family:monospace"/>
         <button id="btnToggleWpat" type="button" style="padding:5px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--text);cursor:pointer;font-size:.78rem;white-space:nowrap">Lihat</button>
+        ${GIST_PAT ? `<button id="btnCopyMyPat" type="button" style="padding:5px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--accent);cursor:pointer;font-size:.78rem;white-space:nowrap">Gunakan PAT saya</button>` : ''}
       </div>
     </div>
   `;
@@ -2935,13 +2941,21 @@ function renderSettings(){
   card1.appendChild(saveBtn);
   area.appendChild(card1);
 
-  // toggle show/hide PAT
+  // toggle show/hide PAT + copy-from-my-PAT
   setTimeout(()=>{
     const inp=document.getElementById('fi-wpat');
     const btn=document.getElementById('btnToggleWpat');
+    const copyBtn=document.getElementById('btnCopyMyPat');
     if(inp&&btn) btn.addEventListener('click',()=>{
       inp.type=inp.type==='password'?'text':'password';
       btn.textContent=inp.type==='password'?'Lihat':'Sembunyikan';
+    });
+    if(inp&&copyBtn) copyBtn.addEventListener('click',()=>{
+      inp.value=GIST_PAT;
+      inp.type='text';
+      if(btn) btn.textContent='Sembunyikan';
+      copyBtn.textContent='✓ Terisi';
+      setTimeout(()=>{ copyBtn.textContent='Gunakan PAT saya'; },2000);
     });
   },0);
 
