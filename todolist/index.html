@@ -2893,19 +2893,6 @@ function renderSettings(){
       </div>
       <input type="number" id="notifDaysInp" min="0" max="30" value="${s.notifDaysBefore??1}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:.82rem;outline:none;width:70px;text-align:center"/>
     </div>
-    <div class="settings-section-title">Akses Tulis Viewer</div>
-    <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px">
-      <div>
-        <div class="settings-row-label">Write PAT</div>
-        <div class="settings-row-desc">GitHub Personal Access Token (scope: <b>gist</b>) yang digunakan viewer untuk menyimpan perubahan task ke Gist. Disimpan di data organisasi — bukan di browser. Kosongkan jika tidak ingin viewer bisa menulis ke Gist.</div>
-      </div>
-      <div style="display:flex;gap:6px;width:100%">
-        <input type="password" id="fi-wpat" value="${(s.writePat||'').replace(/"/g,'&quot;')}" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"
-          style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:.82rem;outline:none;font-family:monospace"/>
-        <button id="btnToggleWpat" type="button" style="padding:5px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--text);cursor:pointer;font-size:.78rem;white-space:nowrap">Lihat</button>
-        ${GIST_PAT ? `<button id="btnCopyMyPat" type="button" style="padding:5px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--accent);cursor:pointer;font-size:.78rem;white-space:nowrap">Gunakan PAT saya</button>` : ''}
-      </div>
-    </div>
   `;
 
   const saveBtn = document.createElement('button');
@@ -2916,7 +2903,6 @@ function renderSettings(){
     db.settings.pushNotifEnabled = document.getElementById('togglePush').checked;
     db.settings.notifTime = document.getElementById('notifTimeInp').value || '07:00';
     db.settings.notifDaysBefore = Math.max(0, parseInt(document.getElementById('notifDaysInp').value)||0);
-    db.settings.writePat = document.getElementById('fi-wpat').value.trim();
     save();
     if(db.settings.pushNotifEnabled) initOneSignal();
     const ok = document.createElement('span');
@@ -2928,23 +2914,6 @@ function renderSettings(){
   card1.appendChild(saveBtn);
   area.appendChild(card1);
 
-  // toggle show/hide PAT + copy-from-my-PAT
-  setTimeout(()=>{
-    const inp=document.getElementById('fi-wpat');
-    const btn=document.getElementById('btnToggleWpat');
-    const copyBtn=document.getElementById('btnCopyMyPat');
-    if(inp&&btn) btn.addEventListener('click',()=>{
-      inp.type=inp.type==='password'?'text':'password';
-      btn.textContent=inp.type==='password'?'Lihat':'Sembunyikan';
-    });
-    if(inp&&copyBtn) copyBtn.addEventListener('click',()=>{
-      inp.value=GIST_PAT;
-      inp.type='text';
-      if(btn) btn.textContent='Sembunyikan';
-      copyBtn.textContent='✓ Terisi';
-      setTimeout(()=>{ copyBtn.textContent='Gunakan PAT saya'; },2000);
-    });
-  },0);
 
   /* ── Card 2: Kirim Manual ── */
   const card2 = document.createElement('div');
