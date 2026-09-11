@@ -58,7 +58,7 @@ Data organisasi disimpan di Gist agar semua device dapat data terbaru tanpa back
    - **Filename**: `alteco-data.json`
    - **Content**:
      ```json
-     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"orgName":"Nama Organisasi"}
+     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"orgName":"Nama Organisasi","settings":{"pushNotifEnabled":false,"notifTime":"07:00","notifDaysBefore":1,"writePat":""}}
      ```
 3. Klik **Create secret gist**
 4. Salin **Gist ID** dari URL:
@@ -215,11 +215,13 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 
 ### D2. Aktifkan Push Notification di App
 
-1. Buka app → login superadmin
+1. Buka app → login admin
 2. **Pengaturan** → aktifkan **Push Notification**
 3. Set **Waktu Kirim** (default 07:00 WIB)
 4. Set **Notif Mulai H-** (berapa hari sebelum acara mulai notif dikirim)
 5. Simpan
+
+> **Write PAT (opsional)**: Agar viewer bisa menyimpan perubahan task ke Gist, isi field **Write PAT** di Pengaturan → *Akses Tulis Viewer* dengan GitHub PAT scope `gist`. PAT ini disimpan di Gist dan otomatis digunakan semua viewer — admin tidak perlu membagikan PAT secara manual.
 
 ### D3. Trigger Manual
 
@@ -262,10 +264,11 @@ localStorage.removeItem('rak_alteco_pat');
 ## Ringkasan Checklist Deploy
 
 - [ ] Fork repo & aktifkan GitHub Pages (atau setup Firebase Hosting)
-- [ ] Buat GitHub Gist → salin Gist ID
-- [ ] Buat GitHub PAT (scope: `gist`)
+- [ ] Buat GitHub Gist dengan content awal lengkap (lihat A1) → salin Gist ID
+- [ ] Buat GitHub PAT (scope: `gist`) → untuk admin login
 - [ ] Pasang `GIST_ID` ke `todolist/index.html`
 - [ ] Daftar OneSignal → pasang `ONESIGNAL_APP_ID` ke `todolist/index.html`
 - [ ] Commit & push
 - [ ] Pasang 4 secrets ke GitHub Actions
 - [ ] Buka app → login admin → input PAT → aktifkan push notif
+- [ ] (Opsional) Pengaturan → *Akses Tulis Viewer* → isi Write PAT agar viewer bisa simpan task

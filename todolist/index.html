@@ -625,7 +625,7 @@ let mCtx  = null;   /* context object */
 /* ══════════════════════════════════════════
    PERSISTENCE
 ══════════════════════════════════════════ */
-function gistOk(){ return !!GIST_ID && !!GIST_PAT; }
+function gistOk(){ return !!GIST_ID && !!(GIST_PAT || db.settings?.writePat); }
 
 function migrate(d){
   d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i},k));
@@ -637,6 +637,7 @@ function migrate(d){
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
+  if(!d.settings.writePat) d.settings.writePat='';
   if(d.events) d.events=d.events.map(ev=>Object.assign({notifSentDate:null},ev));
   return d;
 }
@@ -665,13 +666,14 @@ async function gistLoad(){
 let _saveTimer=null;
 function save(){
   localStorage.setItem(LS_KEY,JSON.stringify(db)); /* immediate local backup */
-  if(!gistOk()) return;
+  const pat=GIST_PAT||db.settings?.writePat||'';
+  if(!GIST_ID||!pat) return;
   clearTimeout(_saveTimer);
   _saveTimer=setTimeout(async()=>{
     try{
       await fetch(`https://api.github.com/gists/${GIST_ID}`,{
         method:'PATCH',
-        headers:{'Authorization':`Bearer ${GIST_PAT}`,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
+        headers:{'Authorization':`Bearer ${pat}`,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
         body:JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify(db)}}})
       });
     }catch(e){ console.warn('Gist save failed',e); }
@@ -2926,6 +2928,52 @@ function renderSettings(){
     setTimeout(()=>ok.remove(), 2000);
   });
   sec.appendChild(saveBtn);
+
+  // Write PAT section (for viewer Gist write access)
+  const secPat = document.createElement('div');
+  secPat.className = 'settings-section';
+  secPat.innerHTML = `<div class="settings-section-title">Akses Tulis Viewer</div>`;
+
+  const patRow = document.createElement('div');
+  patRow.className = 'settings-row';
+  patRow.style.cssText = 'flex-direction:column;align-items:flex-start;gap:8px';
+  patRow.innerHTML = `
+    <div>
+      <div class="settings-row-label">Write PAT</div>
+      <div class="settings-row-desc">GitHub Personal Access Token (scope: <b>gist</b>) yang digunakan viewer untuk menyimpan perubahan task ke Gist. Disimpan di data organisasi — bukan di browser. Kosongkan jika tidak ingin viewer bisa menulis ke Gist.</div>
+    </div>
+    <div style="display:flex;gap:6px;width:100%">
+      <input type="password" id="fi-wpat" value="${(s.writePat||'').replace(/"/g,'&quot;')}" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"
+        style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--text);font-size:.82rem;outline:none;font-family:monospace"/>
+      <button id="btnToggleWpat" type="button" style="padding:5px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--text);cursor:pointer;font-size:.78rem;white-space:nowrap">Lihat</button>
+    </div>
+  `;
+  const patSaveBtn = document.createElement('button');
+  patSaveBtn.className = 'btn-save';
+  patSaveBtn.style.cssText = 'align-self:flex-start';
+  patSaveBtn.textContent = 'Simpan Write PAT';
+  patSaveBtn.addEventListener('click', ()=>{
+    db.settings.writePat = document.getElementById('fi-wpat').value.trim();
+    save();
+    const ok = document.createElement('span');
+    ok.textContent = ' ✓ Tersimpan';
+    ok.style.cssText = 'color:var(--green);font-size:.78rem;margin-left:8px';
+    patSaveBtn.parentNode.insertBefore(ok, patSaveBtn.nextSibling);
+    setTimeout(()=>ok.remove(), 2000);
+  });
+  patRow.appendChild(patSaveBtn);
+  secPat.appendChild(patRow);
+  area.appendChild(secPat);
+
+  // toggle show/hide PAT
+  setTimeout(()=>{
+    const inp=document.getElementById('fi-wpat');
+    const btn=document.getElementById('btnToggleWpat');
+    if(inp&&btn) btn.addEventListener('click',()=>{
+      inp.type=inp.type==='password'?'text':'password';
+      btn.textContent=inp.type==='password'?'Lihat':'Sembunyikan';
+    });
+  },0);
 
   // Force send section
   const sec2 = document.createElement('div');

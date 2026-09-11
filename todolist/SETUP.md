@@ -22,7 +22,7 @@ Superadmin perlu melakukan setup sekali berikut ini.
    - **Filename**: `alteco-data.json`
    - **Content**:
      ```json
-     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"orgName":"Alteco"}
+     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"orgName":"Nama Organisasi","settings":{"pushNotifEnabled":false,"notifTime":"07:00","notifDaysBefore":1,"writePat":""}}
      ```
 3. Klik **"Create secret gist"**
 4. Salin **Gist ID** dari URL browser:
@@ -201,6 +201,7 @@ Tersedia di sidebar menu **Pengaturan ⚙️** — hanya terlihat oleh superadmi
 | **Waktu Kirim** | Jam pengiriman push notification dalam WIB (contoh: `07:00`). |
 | **Notif Mulai H-** | Berapa hari sebelum acara *sekali* notifikasi mulai dikirim. Default: 1 hari. Berlaku global untuk semua acara. |
 | **OneSignal REST Key** | REST API Key dari OneSignal (dari Langkah 5b). Disimpan di Gist. Diperlukan untuk tombol Kirim Sekarang. |
+| **Write PAT** | GitHub PAT (scope: `gist`) yang disimpan di Gist agar viewer bisa menyimpan perubahan task. Admin set sekali — berlaku otomatis untuk semua viewer tanpa konfigurasi tambahan. |
 
 ### Kirim Rangkuman Manual
 
