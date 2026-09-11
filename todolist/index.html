@@ -669,7 +669,7 @@ async function gistLoad(){
 let _saveTimer=null;
 function save(){
   localStorage.setItem(LS_KEY,JSON.stringify(db)); /* immediate local backup */
-  const pat=localStorage.getItem(GIST_PAT_KEY)||GIST_PAT||db.settings?.writePat||localStorage.getItem(GIST_WPAT_KEY)||'';
+  const pat=localStorage.getItem(GIST_PAT_KEY)||GIST_PAT||localStorage.getItem(GIST_WPAT_KEY)||db.settings?.writePat||'';
   if(!GIST_ID||!pat) return;
   clearTimeout(_saveTimer);
   _saveTimer=setTimeout(async()=>{
