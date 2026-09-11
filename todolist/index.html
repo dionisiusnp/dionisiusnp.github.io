@@ -595,12 +595,10 @@ const LS_KEY     = 'rakperpus_alteco_v2';
 const ALL        = '__all__';
 const ONESIGNAL_APP_ID = 'b03c4a75-c2b0-4de5-ab9c-cb5aa2f58cd2';
 
-/* ── Gist config (isi setelah buat Gist + PAT) ── */
-const GIST_ID  = '6bf5ebb0397393324168d3dd14c018c8';
-const GIST_PAT_KEY = 'rak_alteco_pat';
-const GIST_WPAT_KEY= 'alteco_write_pat';
-let GIST_PAT   = localStorage.getItem(GIST_PAT_KEY)||'';
-const GIST_FILE= 'alteco-data.json';
+/* ── Gist config ── */
+const GIST_ID   = '6bf5ebb0397393324168d3dd14c018c8';
+const GIST_FILE = 'alteco-data.json';
+const WORKER_URL= 'https://alteco-writer.dionisiusn1.workers.dev';
 
 /* ══════════════════════════════════════════
    STATE
@@ -627,7 +625,7 @@ let mCtx  = null;   /* context object */
 /* ══════════════════════════════════════════
    PERSISTENCE
 ══════════════════════════════════════════ */
-function gistOk(){ return !!GIST_ID && !!(GIST_PAT || db.settings?.writePat); }
+function gistOk(){ return !!WORKER_URL; }
 
 function migrate(d){
   d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i},k));
@@ -653,10 +651,7 @@ function localLoad(){
 }
 
 async function gistLoad(){
-  const headers={'Accept':'application/vnd.github+json'};
-  const loadPat=localStorage.getItem(GIST_PAT_KEY)||GIST_PAT||localStorage.getItem(GIST_WPAT_KEY)||'';
-  if(loadPat) headers['Authorization']=`Bearer ${loadPat}`;
-  const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{headers});
+  const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{headers:{'Accept':'application/vnd.github+json'}});
   if(!r.ok) throw new Error('gist fetch '+r.status);
   const gist=await r.json();
   const content=gist.files[GIST_FILE]?.content;
@@ -669,17 +664,16 @@ async function gistLoad(){
 let _saveTimer=null;
 function save(){
   localStorage.setItem(LS_KEY,JSON.stringify(db)); /* immediate local backup */
-  const pat=localStorage.getItem(GIST_PAT_KEY)||GIST_PAT||localStorage.getItem(GIST_WPAT_KEY)||db.settings?.writePat||'';
-  if(!GIST_ID||!pat) return;
+  if(!WORKER_URL) return;
   clearTimeout(_saveTimer);
   _saveTimer=setTimeout(async()=>{
     try{
-      await fetch(`https://api.github.com/gists/${GIST_ID}`,{
-        method:'PATCH',
-        headers:{'Authorization':`Bearer ${pat}`,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
-        body:JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify(db)}}})
+      await fetch(WORKER_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(db)
       });
-    }catch(e){ console.warn('Gist save failed',e); }
+    }catch(e){ console.warn('Save failed',e); }
   },600);
 }
 
@@ -696,9 +690,6 @@ function save(){
     console.warn('Gist load failed, using local',e);
     db=localLoad();
   }
-  /* Cache writePat locally so viewer can auth future gistLoad + save without re-fetching */
-  if(db.settings?.writePat) localStorage.setItem(GIST_WPAT_KEY, db.settings.writePat);
-  else if(!GIST_PAT) localStorage.removeItem(GIST_WPAT_KEY);
   overlay.style.opacity='0';
   setTimeout(()=>overlay.style.display='none',300);
 
@@ -731,10 +722,6 @@ function save(){
     const val=inp.value.trim();
     if(val===PASS_ADMIN){
       role='admin'; sessionStorage.setItem('rak_alteco_role','admin');
-      if(!GIST_PAT){
-        const pat=(prompt('Masukkan GitHub PAT untuk sinkronisasi data:')||'').trim();
-        if(pat){ GIST_PAT=pat; localStorage.setItem(GIST_PAT_KEY,pat); }
-      }
       gate.classList.add('hidden'); applyRole();
     }
     else if(val===PASS_VIEW){
