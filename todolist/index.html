@@ -654,7 +654,7 @@ function localLoad(){
 
 async function gistLoad(){
   const headers={'Accept':'application/vnd.github+json'};
-  const loadPat=GIST_PAT||localStorage.getItem(GIST_WPAT_KEY)||'';
+  const loadPat=localStorage.getItem(GIST_PAT_KEY)||GIST_PAT||localStorage.getItem(GIST_WPAT_KEY)||'';
   if(loadPat) headers['Authorization']=`Bearer ${loadPat}`;
   const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{headers});
   if(!r.ok) throw new Error('gist fetch '+r.status);
@@ -669,7 +669,7 @@ async function gistLoad(){
 let _saveTimer=null;
 function save(){
   localStorage.setItem(LS_KEY,JSON.stringify(db)); /* immediate local backup */
-  const pat=GIST_PAT||db.settings?.writePat||localStorage.getItem(GIST_WPAT_KEY)||'';
+  const pat=localStorage.getItem(GIST_PAT_KEY)||GIST_PAT||db.settings?.writePat||localStorage.getItem(GIST_WPAT_KEY)||'';
   if(!GIST_ID||!pat) return;
   clearTimeout(_saveTimer);
   _saveTimer=setTimeout(async()=>{
