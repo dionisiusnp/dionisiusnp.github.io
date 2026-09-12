@@ -627,8 +627,10 @@ let mCtx  = null;   /* context object */
 ══════════════════════════════════════════ */
 function gistOk(){ return !!WORKER_URL; }
 
+function touch(item){ item.updatedAt=Date.now(); return item; }
+
 function migrate(d){
-  d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i},k));
+  d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i,updatedAt:0},k));
   if(!d.orgName) d.orgName='Alteco';
   if(!d.assets) d.assets=[];
   if(!d.events) d.events=[];
@@ -638,7 +640,16 @@ function migrate(d){
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
   if(!d.settings.writePat) d.settings.writePat='';
-  if(d.events) d.events=d.events.map(ev=>Object.assign({notifSentDate:null},ev));
+  if(d.tasks) d.tasks=d.tasks.map(t=>Object.assign({updatedAt:0},t));
+  if(d.members) d.members=d.members.map(m=>Object.assign({updatedAt:0},m));
+  if(d.assets) d.assets=d.assets.map(a=>Object.assign({updatedAt:0},a));
+  if(d.cultures) d.cultures=d.cultures.map(c=>Object.assign({updatedAt:0},c));
+  if(d.events) d.events=d.events.map(ev=>Object.assign({notifSentDate:null,updatedAt:0},ev));
+  if(d.projects) d.projects=d.projects.map(p=>Object.assign({updatedAt:0},p,{
+    members:(p.members||[]).map(m=>Object.assign({updatedAt:0},m,{
+      tasks:(m.tasks||[]).map(t=>Object.assign({updatedAt:0},t))
+    }))
+  }));
   return d;
 }
 
@@ -2129,7 +2140,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   if(mMode==='asset-add'){
     const name=document.getElementById('fi-aname').value.trim();
     if(!name) return;
-    db.assets.push({
+    db.assets.push(touch({
       id:uid(),
       name,
       category:document.getElementById('fi-acat').value.trim(),
@@ -2139,7 +2150,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       acquiredAt:document.getElementById('fi-adate').value||null,
       notes:document.getElementById('fi-anotes').value.trim(),
       createdAt:Date.now()
-    });
+    }));
     save(); renderAssets(); closeModal(); return;
   }
 
@@ -2155,7 +2166,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     a.url=document.getElementById('fi-aurl').value.trim()||null;
     a.acquiredAt=document.getElementById('fi-adate').value||null;
     a.notes=document.getElementById('fi-anotes').value.trim();
-    save(); renderAssets(); closeModal(); return;
+    touch(a); save(); renderAssets(); closeModal(); return;
   }
 
   if(mMode==='event-add'){
@@ -2164,7 +2175,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const etype=mCtx._getEType();
     const erecur=etype==='recurring'?mCtx._getERecur():null;
     const recurDateEl=document.getElementById('fi-erecurdate');
-    db.events.push({
+    db.events.push(touch({
       id:uid(), title:title2,
       desc:document.getElementById('fi-edesc').value.trim(),
       type:etype,
@@ -2173,7 +2184,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       recurDate:erecur&&erecur!=='harian'?(recurDateEl?.value||null):null,
       notifSentDate:null,
       createdAt:Date.now()
-    });
+    }));
     save(); renderInfo(); updateBellBadge(); closeModal(); return;
   }
 
@@ -2205,7 +2216,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       const parentId=row.querySelector('select').value||null;
       const siblings=kelompokChildren(parentId);
       const order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
-      db.kelompoks.push({id:uid(),name,parentId,order});
+      db.kelompoks.push(touch({id:uid(),name,parentId,order}));
       added++;
     });
     if(!added) return;
@@ -2222,7 +2233,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
         const siblings=kelompokChildren(parentId).filter(s=>s.id!==k.id);
         k.order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
       }
-      k.name=name; k.parentId=parentId;
+      k.name=name; k.parentId=parentId; touch(k);
       save(); renderSidebar(); if(viewMode==='org') renderOrgChart();
     }
     closeModal();
@@ -2236,7 +2247,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       if(!name) return;
       const role_v=inputs[1].value.trim();
       const kelompokId=row.querySelector('select').value||null;
-      const m={id:uid(),name,role:role_v,kelompokId,createdAt:Date.now()};
+      const m=touch({id:uid(),name,role:role_v,kelompokId,createdAt:Date.now()});
       db.members.push(m);
       lastMember=m;
     });
@@ -2251,7 +2262,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const kelompokId=document.getElementById('fi-div').value||null;
     {
       const m=db.members.find(x=>x.id===mCtx.id);
-      if(m){m.name=name;m.role=role_v;m.kelompokId=kelompokId;}
+      if(m){m.name=name;m.role=role_v;m.kelompokId=kelompokId;touch(m);}
       save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain(); closeModal();
     }
   }
@@ -2263,10 +2274,10 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const dueDate=type==='once'?mCtx._getDueDate():'';
     const notes=document.getElementById('fi-notes').value.trim();
     if(mMode==='task-add'){
-      db.tasks.push({id:uid(),memberId:mCtx.memberId,title,type,recurrence,dueDate,notes,createdAt:Date.now()});
+      db.tasks.push(touch({id:uid(),memberId:mCtx.memberId,title,type,recurrence,dueDate,notes,createdAt:Date.now()}));
     } else {
       const t=db.tasks.find(x=>x.id===mCtx.id);
-      if(t){t.title=title;t.type=type;t.recurrence=recurrence;t.dueDate=dueDate;t.notes=notes;}
+      if(t){t.title=title;t.type=type;t.recurrence=recurrence;t.dueDate=dueDate;t.notes=notes;touch(t);}
     }
     save(); renderSidebar(); renderTasks(); closeModal();
   }
@@ -2286,18 +2297,19 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       return;
     }
     if(mMode==='proj-add'){
-      db.projects.push({
+      db.projects.push(touch({
         id:uid(), title, clientName, clientCode,
         description:document.getElementById('fi-pdesc').value.trim(),
         startDate:document.getElementById('fi-pstart').value||null,
         members:[], createdAt:Date.now()
-      });
+      }));
     } else {
       const p=db.projects.find(x=>x.id===mCtx.id);
       if(!p) return;
       p.title=title; p.clientName=clientName; p.clientCode=clientCode;
       p.description=document.getElementById('fi-pdesc').value.trim();
       p.startDate=document.getElementById('fi-pstart').value||null;
+      touch(p);
     }
     save(); renderProject(); closeModal();
   }
@@ -2319,12 +2331,14 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const role_v=document.getElementById('fi-pm-role').value.trim();
     if(mMode==='proj-mem-add'){
       proj.members=(proj.members||[]);
-      proj.members.push({id:uid(),name,role:role_v,type:memType,internalMemberId,tasks:[]});
+      proj.members.push(touch({id:uid(),name,role:role_v,type:memType,internalMemberId,tasks:[]}));
+      touch(proj);
     } else {
       const mem=proj.members.find(m=>m.id===mCtx.memberId);
       if(!mem) return;
       mem.name=name; mem.role=role_v; mem.type=memType;
       mem.internalMemberId=internalMemberId;
+      touch(mem); touch(proj);
     }
     save(); renderProject(); closeModal();
   }
@@ -2345,11 +2359,13 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     }
     if(mMode==='proj-task-add'){
       mem.tasks=(mem.tasks||[]);
-      mem.tasks.push({id:uid(),text,startDate,dueDate,datePessimistic,done:false});
+      mem.tasks.push(touch({id:uid(),text,startDate,dueDate,datePessimistic,done:false}));
+      touch(mem);
     } else {
       const task=mem.tasks.find(t=>t.id===mCtx.taskId);
       if(!task) return;
       task.text=text; task.startDate=startDate; task.dueDate=dueDate; task.datePessimistic=datePessimistic;
+      touch(task); touch(mem);
     }
     save(); renderProject(); closeModal();
   }
@@ -2363,11 +2379,11 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const desc_v=document.getElementById('fi-cdesc').value.trim()||null;
     if(mMode==='culture-add'){
       db.cultures=(db.cultures||[]);
-      db.cultures.push({id:uid(),title:title_v,date:date_v,type:type_v,description:desc_v,createdAt:Date.now()});
+      db.cultures.push(touch({id:uid(),title:title_v,date:date_v,type:type_v,description:desc_v,createdAt:Date.now()}));
     } else {
       const c=db.cultures.find(x=>x.id===mCtx.id);
       if(!c) return;
-      c.title=title_v; c.date=date_v; c.type=type_v; c.description=desc_v;
+      c.title=title_v; c.date=date_v; c.type=type_v; c.description=desc_v; touch(c);
     }
     save(); renderCultures(); closeModal();
   }
@@ -2831,7 +2847,7 @@ function renderProject(){
     const mem=proj?.members?.find(m=>m.id===b.dataset.mem);
     const task=mem?.tasks?.find(t=>t.id===b.dataset.taskToggle);
     if(!task) return;
-    task.done=!task.done; save(); renderProject();
+    task.done=!task.done; touch(task); save(); renderProject();
   }));
   area.querySelectorAll('[data-task-add]').forEach(b=>b.addEventListener('click',()=>openModal('proj-task-add',{projId:b.dataset.proj,memberId:b.dataset.taskAdd})));
   area.querySelectorAll('[data-task-edit]').forEach(b=>b.addEventListener('click',()=>openModal('proj-task-edit',{projId:b.dataset.proj,memberId:b.dataset.mem,taskId:b.dataset.taskEdit})));
