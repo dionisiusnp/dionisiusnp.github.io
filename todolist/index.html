@@ -3084,7 +3084,7 @@ async function forceSendNotif(btn){
       })
     });
     const result = await resp.json();
-    if(!resp.ok) throw new Error(result.error || `HTTP ${resp.status}`);
+    if(!resp.ok) throw new Error(typeof result.error === 'object' ? JSON.stringify(result.error) : (result.error || `HTTP ${resp.status}`));
     btn.textContent = '✓ Terkirim';
     setTimeout(()=>{ btn.textContent=origText; btn.disabled=false; }, 3000);
   } catch(e){
