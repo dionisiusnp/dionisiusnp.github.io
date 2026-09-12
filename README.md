@@ -42,7 +42,7 @@ Situs live di: `https://<username>.github.io`
 
 ## Setup Layanan Eksternal
 
-Kelola Alteco butuh 3 layanan eksternal: **GitHub Gist** (data), **OneSignal** (push notif), dan **GitHub Actions** (cron). Firebase Hosting opsional sebagai alternatif GitHub Pages.
+Kelola Alteco butuh 4 layanan eksternal: **GitHub Gist** (data), **Cloudflare Workers** (write proxy), **OneSignal** (push notif), dan **GitHub Actions** (cron). Firebase Hosting opsional sebagai alternatif GitHub Pages.
 
 ---
 
@@ -69,6 +69,8 @@ Data organisasi disimpan di Gist agar semua device dapat data terbaru tanpa back
 
 ### A2. Buat GitHub Personal Access Token (PAT)
 
+PAT dibutuhkan untuk dua keperluan: Cloudflare Worker secret (agar app bisa tulis ke Gist) dan GitHub Actions secret (agar cron harian bisa baca/tulis Gist).
+
 1. Buka [github.com/settings/tokens](https://github.com/settings/tokens)
 2. **Generate new token (classic)**
 3. Isi:
@@ -77,17 +79,18 @@ Data organisasi disimpan di Gist agar semua device dapat data terbaru tanpa back
    - **Scope**: centang `gist` saja
 4. Generate → **salin token sekarang** (hanya tampil sekali)
 
+> PAT **jangan** ditaruh di kode atau browser. Disimpan di Cloudflare Worker secret dan GitHub Actions secret saja (lihat E dan D).
+
 ### A3. Pasang Gist ID ke Kode
 
 Buka `todolist/index.html`, baris ~596:
 
 ```javascript
-const GIST_ID = 'GIST_ID_DISINI';
+const GIST_ID   = 'GIST_ID_DISINI';
+const WORKER_URL= 'WORKER_URL_DISINI';
 ```
 
-Ganti dengan Gist ID dari A1. Commit & push.
-
-> PAT **jangan** ditaruh di kode. Diinput manual saat login pertama — tersimpan di `localStorage` browser.
+Ganti `GIST_ID` dengan Gist ID dari A1. `WORKER_URL` diisi setelah setup Cloudflare Worker (langkah E). Commit & push.
 
 ---
 
@@ -221,8 +224,6 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 4. Set **Notif Mulai H-** (berapa hari sebelum acara mulai notif dikirim)
 5. Simpan
 
-> **Write PAT (opsional)**: Agar viewer bisa menyimpan perubahan task ke Gist, isi field **Write PAT** di Pengaturan → *Akses Tulis Viewer* dengan GitHub PAT scope `gist`. PAT ini disimpan di Gist dan otomatis digunakan semua viewer — admin tidak perlu membagikan PAT secara manual.
-
 ### D3. Trigger Manual
 
 GitHub → **Actions → Daily Notification → Run workflow**
@@ -231,9 +232,79 @@ Centang `Force send` untuk kirim ulang semua acara aktif tanpa update `notifSent
 
 ---
 
-## E — Konfigurasi Kode Akses
+## E — Cloudflare Workers (Write Proxy)
 
-Password login ada di `todolist/index.html` baris ~589:
+Semua perubahan data (admin maupun viewer) dikirim ke Cloudflare Worker. Worker yang PATCH ke Gist menggunakan PAT tersimpan sebagai secret — tidak ada token di browser.
+
+### E1. Buat Worker
+
+1. Buka [workers.cloudflare.com](https://workers.cloudflare.com) → daftar akun gratis
+2. Dashboard → **Workers & Pages → Create application → Create Worker**
+3. Beri nama worker (contoh: `alteco-writer`) → **Deploy**
+4. Klik **Edit code** → hapus isi default → paste kode berikut:
+
+```javascript
+export default {
+  async fetch(request, env) {
+    const cors = {
+      'Access-Control-Allow-Origin': 'https://<username>.github.io',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+    if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+    try {
+      const db = await request.json();
+      const r = await fetch(`https://api.github.com/gists/${env.GIST_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${env.GIST_PAT}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'alteco-worker',
+        },
+        body: JSON.stringify({ files: { 'alteco-data.json': { content: JSON.stringify(db) } } })
+      });
+      const result = await r.json();
+      if (!r.ok) return new Response(JSON.stringify({ error: result.message }), { status: r.status, headers: { ...cors, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
+    }
+  }
+};
+```
+
+Ganti `<username>` dengan username GitHub-mu. Klik **Deploy**.
+
+### E2. Tambah Secrets ke Worker
+
+Worker settings → **Settings → Variables and Secrets → Add**:
+
+| Secret | Nilai |
+|--------|-------|
+| `GIST_ID` | Gist ID dari A1 |
+| `GIST_PAT` | PAT dari A2 |
+
+Klik **Encrypt** lalu **Save** untuk tiap secret.
+
+### E3. Salin URL Worker & Pasang ke Kode
+
+URL worker tampil di halaman Worker (format: `https://<name>.<subdomain>.workers.dev`).
+
+Buka `todolist/index.html`, baris ~597:
+
+```javascript
+const WORKER_URL= 'https://<name>.<subdomain>.workers.dev';
+```
+
+Ganti dengan URL dari E3. Commit & push.
+
+---
+
+## F — Konfigurasi Kode Akses
+
+Password login ada di `todolist/index.html`, baris ~589:
 
 ```javascript
 const PASS_VIEW  = 'GANTI_KODE_VIEWER';   // akses baca semua data
@@ -246,29 +317,15 @@ Ganti sesuai kebutuhan, commit & push.
 
 ---
 
-## F — Login Pertama (Input PAT)
-
-1. Buka situs → masukkan kode admin
-2. Muncul prompt: *"Masukkan GitHub PAT untuk sinkronisasi data"*
-3. Paste PAT dari A2 → OK
-4. PAT tersimpan di `localStorage` — tidak perlu input ulang di browser yang sama
-
-Reset PAT jika perlu ganti:
-```javascript
-// Di browser console
-localStorage.removeItem('rak_alteco_pat');
-```
-
----
-
 ## Ringkasan Checklist Deploy
 
 - [ ] Fork repo & aktifkan GitHub Pages (atau setup Firebase Hosting)
-- [ ] Buat GitHub Gist dengan content awal lengkap (lihat A1) → salin Gist ID
-- [ ] Buat GitHub PAT (scope: `gist`) → untuk admin login
+- [ ] Buat GitHub Gist dengan content awal (lihat A1) → salin Gist ID
+- [ ] Buat GitHub PAT classic (scope: `gist`) → simpan, hanya tampil sekali
 - [ ] Pasang `GIST_ID` ke `todolist/index.html`
+- [ ] Daftar Cloudflare → buat Worker → paste kode → set secrets `GIST_ID` + `GIST_PAT`
+- [ ] Salin URL Worker → pasang ke `WORKER_URL` di `todolist/index.html`
 - [ ] Daftar OneSignal → pasang `ONESIGNAL_APP_ID` ke `todolist/index.html`
 - [ ] Commit & push
-- [ ] Pasang 4 secrets ke GitHub Actions
-- [ ] Buka app → login admin → input PAT → aktifkan push notif
-- [ ] (Opsional) Pengaturan → *Akses Tulis Viewer* → isi Write PAT agar viewer bisa simpan task
+- [ ] Pasang 4 secrets ke GitHub Actions (`GIST_ID`, `GIST_PAT`, `ONESIGNAL_APP_ID`, `ONESIGNAL_REST_KEY`)
+- [ ] Buka app → login admin → aktifkan push notif di Pengaturan

@@ -10,6 +10,7 @@ Superadmin perlu melakukan setup sekali berikut ini.
 ## Prasyarat
 
 - Akun GitHub (pemilik repo `dionisiusnp.github.io`)
+- Akun Cloudflare (gratis) — untuk write proxy
 - Akun OneSignal (gratis) — untuk push notification
 
 ---
@@ -36,6 +37,8 @@ Superadmin perlu melakukan setup sekali berikut ini.
 
 ## Langkah 2 — Buat Personal Access Token (PAT)
 
+PAT digunakan sebagai Cloudflare Worker secret (agar app bisa tulis ke Gist) dan GitHub Actions secret (agar cron harian bisa baca/tulis Gist). PAT tidak disimpan di browser.
+
 1. Buka [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Klik **"Generate new token (classic)"**
 3. Isi:
@@ -55,31 +58,83 @@ Superadmin perlu melakukan setup sekali berikut ini.
 Buka file `todolist/index.html`, cari baris:
 
 ```javascript
-const GIST_ID  = 'GIST_ID_DISINI';
+const GIST_ID   = 'GIST_ID_DISINI';
+const WORKER_URL= 'WORKER_URL_DISINI';
 ```
 
-Ganti dengan Gist ID dari Langkah 1:
-
-```javascript
-const GIST_ID  = '6bf5ebb0397393324168d3dd14c018c8'; // contoh
-```
+Ganti `GIST_ID` dengan Gist ID dari Langkah 1. `WORKER_URL` diisi setelah Langkah 4.
 
 Commit dan push ke GitHub.
 
-> **Catatan**: Jangan taruh PAT di kode — PAT diinput manual saat login (lihat Langkah 4).
-
 ---
 
-## Langkah 4 — Input PAT Saat Login Pertama
+## Langkah 4 — Setup Cloudflare Worker (Write Proxy)
 
-1. Buka halaman Kelola Alteco
-2. Login dengan kode **superadmin**
-3. Muncul prompt:
-   ```
-   Masukkan GitHub PAT untuk sinkronisasi data:
-   ```
-4. Paste PAT dari Langkah 2 → klik OK
-5. PAT tersimpan di `localStorage` browser — tidak perlu input lagi di browser yang sama
+Semua perubahan data dikirim ke Cloudflare Worker. Worker yang PATCH ke Gist menggunakan PAT tersimpan sebagai secret — tidak ada token di browser.
+
+### 4a. Buat Worker
+
+1. Buka [workers.cloudflare.com](https://workers.cloudflare.com) → daftar akun gratis
+2. Dashboard → **Workers & Pages → Create application → Create Worker**
+3. Beri nama worker (contoh: `alteco-writer`) → **Deploy**
+4. Klik **Edit code** → hapus isi default → paste kode berikut:
+
+```javascript
+export default {
+  async fetch(request, env) {
+    const cors = {
+      'Access-Control-Allow-Origin': 'https://dionisiusnp.github.io',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+    if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+    try {
+      const db = await request.json();
+      const r = await fetch(`https://api.github.com/gists/${env.GIST_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${env.GIST_PAT}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'alteco-worker',
+        },
+        body: JSON.stringify({ files: { 'alteco-data.json': { content: JSON.stringify(db) } } })
+      });
+      const result = await r.json();
+      if (!r.ok) return new Response(JSON.stringify({ error: result.message }), { status: r.status, headers: { ...cors, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
+    }
+  }
+};
+```
+
+Klik **Deploy**.
+
+### 4b. Tambah Secrets ke Worker
+
+Worker settings → **Settings → Variables and Secrets → Add**:
+
+| Secret | Nilai |
+|--------|-------|
+| `GIST_ID` | Gist ID dari Langkah 1 |
+| `GIST_PAT` | PAT dari Langkah 2 |
+
+Klik **Encrypt** lalu **Save** untuk tiap secret.
+
+### 4c. Pasang URL Worker ke Kode
+
+URL worker tampil di halaman Worker (format: `https://<name>.<subdomain>.workers.dev`).
+
+Buka `todolist/index.html`, ganti:
+
+```javascript
+const WORKER_URL= 'https://<name>.<subdomain>.workers.dev';
+```
+
+Commit dan push.
 
 ---
 
@@ -157,10 +212,10 @@ GitHub Actions butuh 4 secrets untuk mengirim notifikasi harian.
 
 | Aksi | Penjelasan |
 |------|-----------|
-| Buka halaman | Data dimuat dari Gist (semua device dapat data terbaru) |
-| Tambah/edit data (admin) | Tersimpan ke Gist dalam ~600ms setelah perubahan |
-| Viewer buka halaman | Baca Gist tanpa PAT — tidak perlu konfigurasi |
+| Buka halaman | Data dimuat dari Gist publik — semua device dapat data terbaru |
+| Tambah/edit data (admin/viewer) | POST ke Cloudflare Worker → Worker PATCH Gist. ~600ms setelah perubahan |
 | Gist tidak terjangkau | Fallback ke data lokal browser |
+| PAT | Disimpan di Cloudflare Worker secret + GitHub Actions secret. Tidak ada token di browser |
 
 ---
 
@@ -200,16 +255,15 @@ Tersedia di sidebar menu **Pengaturan ⚙️** — hanya terlihat oleh superadmi
 | **Push Notification** | Toggle aktif/nonaktif push notification. Jika nonaktif, notifikasi web biasa saja yang berjalan (browser harus terbuka). |
 | **Waktu Kirim** | Jam pengiriman push notification dalam WIB (contoh: `07:00`). |
 | **Notif Mulai H-** | Berapa hari sebelum acara *sekali* notifikasi mulai dikirim. Default: 1 hari. Berlaku global untuk semua acara. |
-| **OneSignal REST Key** | REST API Key dari OneSignal (dari Langkah 5b). Disimpan di Gist. Diperlukan untuk tombol Kirim Sekarang. |
-| **Write PAT** | GitHub PAT (scope: `gist`) yang disimpan di Gist agar viewer bisa menyimpan perubahan task. Admin set sekali — berlaku otomatis untuk semua viewer tanpa konfigurasi tambahan. |
+| **OneSignal REST Key** | REST API Key dari OneSignal (dari Langkah 5b). Disimpan di Gist. Diperlukan untuk tombol **Kirim Sekarang** — isi sekali, berlaku untuk semua browser admin. |
 
 ### Kirim Rangkuman Manual
 
-Tombol **Kirim Sekarang** di bagian *Kirim Manual* mengirim push notification berisi semua informasi yang tanggalnya belum terlewat (`date >= hari ini`) ke seluruh subscriber OneSignal.
+Tombol **Kirim Sekarang** di bagian *Kirim Manual* mengirim push notification langsung ke OneSignal API dari browser — tidak melalui GitHub Actions.
 
+- Berisi semua pemberitahuan aktif (`date >= hari ini` untuk sekali; semua untuk berulang)
 - Tidak mengubah `notifSentDate` — status notif harian tidak terganggu
-- Acara berulang selalu ikut dirangkum (tidak ada tanggal kadaluarsa)
-- Membutuhkan OneSignal REST Key sudah diisi dan disimpan
+- Membutuhkan **OneSignal REST Key** sudah diisi di Pengaturan dan disimpan
 
 ---
 
@@ -254,21 +308,13 @@ Workflow bisa dijalankan manual: **GitHub → Actions → Daily Notification →
 
 ## Reset & Maintenance
 
-### Reset PAT (jika perlu ganti)
-
-```javascript
-// Jalankan di browser console
-localStorage.removeItem('rak_alteco_pat');
-```
-
-Refresh → login ulang sebagai superadmin → input PAT baru.
-
-### Revoke PAT (jika bocor)
+### Ganti PAT (jika perlu rotate token)
 
 1. Buka [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Klik **Delete** pada token `alteco-gist`
 3. Buat PAT baru (ulangi Langkah 2)
-4. Reset PAT di browser (lihat Reset PAT di atas)
+4. Update secret di Cloudflare Worker (Settings → Variables and Secrets → edit `GIST_PAT`)
+5. Update secret `GIST_PAT` di GitHub Actions (repo Settings → Secrets → edit)
 
 ### Reset status notifikasi (force kirim ulang)
 
