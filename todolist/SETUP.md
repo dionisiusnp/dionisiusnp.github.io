@@ -186,9 +186,9 @@ Badge hilang setelah membuka halaman Informasi. Badge muncul kembali jika ada pe
 
 ---
 
-## Fitur Komunitas (Superadmin)
+## Fitur Regulasi (Superadmin)
 
-Tersedia di sidebar **📋 Komunitas** — admin CRUD, viewer hanya baca.
+Tersedia di sidebar **📋 Regulasi** — admin CRUD, viewer hanya baca.
 
 ### Visi & Misi
 
