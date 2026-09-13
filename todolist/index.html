@@ -1451,9 +1451,9 @@ document.getElementById('btnOrgView').addEventListener('click',()=>{
   const tv=document.getElementById('taskView');
   const ov=document.getElementById('orgView');
   const empty=document.getElementById('emptyState');
-  ['assetView','infoView','settingsView','projectView','cultureView']
+  ['assetView','infoView','settingsView','projectView','cultureView','komunitasView']
     .forEach(id=>{ document.getElementById(id).style.display='none'; });
-  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView']
+  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   if(viewMode==='org'){
     activeId=null; tv.style.display='none'; empty.style.display='none';
@@ -2181,6 +2181,14 @@ function openModal(mode, ctx){
         <input class="form-input" id="fi-sy-nama" type="text" value="${esc(s?.nama||'')}" placeholder="Contoh: Aktif di grup komunikasi" maxlength="100"/>
       </div>
       <div class="form-group">
+        <label class="form-label">Tipe</label>
+        <select class="form-select" id="fi-sy-tipe">
+          <option value="umum" ${(!s?.tipe||s?.tipe==='umum')?'selected':''}>Umum</option>
+          <option value="it" ${s?.tipe==='it'?'selected':''}>IT</option>
+          <option value="non-it" ${s?.tipe==='non-it'?'selected':''}>Non-IT</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Keterangan <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
         <textarea class="form-textarea" id="fi-sy-ket" rows="3" placeholder="Penjelasan lebih lanjut…">${esc(s?.keterangan||'')}</textarea>
       </div>
@@ -2202,8 +2210,11 @@ function openModal(mode, ctx){
         <input class="form-input" id="fi-sk-name" type="text" value="${esc(s?.name||'')}" placeholder="Nama member" maxlength="80"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Kelompok / Divisi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
-        <input class="form-input" id="fi-sk-kel" type="text" value="${esc(s?.kelompok||'')}" placeholder="Nama kelompok" maxlength="60"/>
+        <label class="form-label">Kelompok <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <select class="form-select" id="fi-sk-kel">
+          <option value="">— Tidak ada —</option>
+          ${(db.kelompoks||[]).map(k=>`<option value="${esc(k.name)}" ${(s?.kelompok===k.name)?'selected':''}>${esc(k.name)}</option>`).join('')}
+        </select>
       </div>
       <div class="form-group">
         <label class="form-label">Level Sanksi</label>
@@ -2480,15 +2491,16 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='syarat-add'||mMode==='syarat-edit'){
     const nama=document.getElementById('fi-sy-nama').value.trim();
     if(!nama) return;
+    const tipe=document.getElementById('fi-sy-tipe').value;
     const keterangan=document.getElementById('fi-sy-ket').value.trim();
     const url=document.getElementById('fi-sy-url').value.trim();
     if(mMode==='syarat-add'){
       db.komunitas.syaratMember=(db.komunitas.syaratMember||[]);
-      db.komunitas.syaratMember.push(touch({id:uid(),nama,keterangan,url}));
+      db.komunitas.syaratMember.push(touch({id:uid(),nama,tipe,keterangan,url}));
     } else {
       const s=(db.komunitas.syaratMember||[]).find(x=>x.id===mCtx.id);
       if(!s) return;
-      s.nama=nama; s.keterangan=keterangan; s.url=url; touch(s);
+      s.nama=nama; s.tipe=tipe; s.keterangan=keterangan; s.url=url; touch(s);
     }
     save(); renderKomunitas(); closeModal();
   }
@@ -3240,6 +3252,8 @@ function renderKomunitas(){
       const row=document.createElement('div');
       row.className='settings-row';
       row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;padding:14px 0';
+      const TIPE_CFG={it:{label:'IT',color:'#2563eb',bg:'#dbeafe'},['non-it']:{label:'Non-IT',color:'#7c3aed',bg:'#ede9fe'},umum:{label:'Umum',color:'#64748b',bg:'#f1f5f9'}};
+      const tCfg=TIPE_CFG[s.tipe||'umum']||TIPE_CFG.umum;
       const urlHtml=s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--accent);word-break:break-all">${esc(s.url)}</a>`:'';
       const actsHtml=isAdmin?`<div style="display:flex;gap:6px;margin-top:4px">
         <button class="asset-act-btn" data-sy-edit="${s.id}">✎</button>
@@ -3249,7 +3263,10 @@ function renderKomunitas(){
         <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
           <span style="min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${idx+1}</span>
           <div style="flex:1">
-            <div style="font-weight:600;font-size:.9rem;color:var(--text)">${esc(s.nama)}</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span style="font-weight:600;font-size:.9rem;color:var(--text)">${esc(s.nama)}</span>
+              <span style="font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:99px;background:${tCfg.bg};color:${tCfg.color}">${tCfg.label}</span>
+            </div>
             ${s.keterangan?`<div style="font-size:.82rem;color:var(--dim);margin-top:2px;line-height:1.5">${esc(s.keterangan)}</div>`:''}
             ${urlHtml}
             ${actsHtml}
