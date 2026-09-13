@@ -206,7 +206,7 @@ body.is-admin .viewer-only{display:none!important}
 .asset-table tr:last-child td{border-bottom:none}
 .asset-table tr:hover td{background:var(--card)}
 .asset-cond{font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid transparent}
-.asset-cond.baik{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.3);color:#34d399}
+.asset-cond.baik{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.3);color:var(--green)}
 .asset-cond.ringan{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3);color:var(--gold)}
 .asset-cond.berat{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:var(--red)}
 .asset-act-btn{width:22px;height:22px;border-radius:4px;border:1px solid var(--bd);background:transparent;color:var(--dim);font-size:.7rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
@@ -405,7 +405,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .culture-tl-title{font-size:.87rem;font-weight:700;margin-bottom:3px;color:var(--text)}
 .culture-tl-desc{font-size:.73rem;color:var(--muted);line-height:1.5;white-space:pre-wrap;margin-top:4px}
 .culture-tl-badge{display:inline-flex;align-items:center;font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px;margin-bottom:5px}
-.culture-tl-badge.internal{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25)}
+.culture-tl-badge.internal{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.25)}
 .culture-tl-badge.eksternal{background:rgba(251,191,36,.12);color:var(--gold,#fbbf24);border:1px solid rgba(251,191,36,.3)}
 .culture-tl-badge.kolaborasi{background:rgba(108,111,245,.1);color:var(--accent);border:1px solid rgba(108,111,245,.25)}
 .culture-tl-acts{display:none;gap:4px;margin-top:7px}
@@ -525,7 +525,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <div class="admin-only" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
       <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
       <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
-      <button class="task-add-inline-btn" id="btnResetData" style="font-size:.68rem;margin-top:4px;border-color:#e05252;color:#e05252">⚠ Reset Semua Data</button>
+      <button class="task-add-inline-btn" id="btnResetData" style="font-size:.68rem;margin-top:4px;border-color:var(--red);color:var(--red)">⚠ Reset Semua Data</button>
     </div>
   </div>
 
@@ -2339,7 +2339,7 @@ function openModal(mode, ctx){
     title.textContent=mode==='keuntungan-add'?'Tambah Keuntungan':'Edit Keuntungan';
     const kelPills=(db.kelompoks||[]).filter(k=>!k.deleted).map(k=>{
       const checked=selKels.includes(k.name);
-      return `<label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid ${checked?'var(--accent)':'var(--border,#d1d5db)'};background:${checked?'var(--accent)':'transparent'};color:${checked?'#fff':'var(--dim)'};transition:.15s" class="kt-kel-pill">
+      return `<label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid ${checked?'var(--accent)':'var(--bd)'};background:${checked?'var(--accent)':'transparent'};color:${checked?'#fff':'var(--dim)'};transition:.15s" class="kt-kel-pill">
         <input type="checkbox" name="kt-kel" value="${esc(k.name)}" ${checked?'checked':''} style="display:none"/>
         ${esc(k.name)}
       </label>`;
@@ -2369,7 +2369,7 @@ function openModal(mode, ctx){
         cb.checked=!cb.checked;
         lbl.style.background=cb.checked?'var(--accent)':'transparent';
         lbl.style.color=cb.checked?'#fff':'var(--dim)';
-        lbl.style.borderColor=cb.checked?'var(--accent)':'var(--border,#d1d5db)';
+        lbl.style.borderColor=cb.checked?'var(--accent)':'var(--bd)';
       });
     });
     document.getElementById('fi-kt-nama').focus();
@@ -2904,7 +2904,7 @@ function buildMemberRow(proj, mem, pEnd, canEditTask, canEditMember){
     ti.innerHTML=`
       <div class="proj-task-cb${task.done?' checked':''}" data-task-toggle="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">${task.done?'✓':''}</div>
       <span class="proj-task-text">${esc(task.text)}</span>
-      <span class="proj-task-due">${task.startDate?fmtDate(task.startDate)+' → ':''}${task.dueDate?`<span style="color:var(--green,#34d399)">${fmtDate(task.dueDate)}</span>`:''}${task.datePessimistic?` <span style="color:var(--red,#f87171)">→ ${fmtDate(task.datePessimistic)}</span>`:''}</span>
+      <span class="proj-task-due">${task.startDate?fmtDate(task.startDate)+' → ':''}${task.dueDate?`<span style="color:var(--green)">${fmtDate(task.dueDate)}</span>`:''}${task.datePessimistic?` <span style="color:var(--red)">→ ${fmtDate(task.datePessimistic)}</span>`:''}</span>
       ${canEditTask?`<div class="proj-task-acts">
         <button class="asset-act-btn" style="font-size:.58rem;padding:2px 5px" data-task-edit="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✎</button>
         <button class="asset-act-btn del" style="font-size:.58rem;padding:2px 5px" data-task-del="${task.id}" data-proj="${proj.id}" data-mem="${mem.id}">✕</button>
@@ -3397,7 +3397,7 @@ function renderKomunitas(){
     const btn=document.createElement('button');
     btn.dataset.tab=t.id;
     btn.textContent=t.label;
-    btn.style.cssText=`padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;${t.id===activeTab?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--text);'}`;
+    btn.style.cssText=`padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;${t.id===activeTab?'background:var(--accent);color:#fff;':'background:var(--card);color:var(--text);'}`;
     btn.addEventListener('click',()=>{ area._kmTab=t.id; renderKomunitas(); });
     tabBar.appendChild(btn);
   });
@@ -3410,7 +3410,7 @@ function renderKomunitas(){
 
   /* ── Tab: Visi & Misi ── */
   if(activeTab==='vismis'){
-    const vm_acts=isAdmin?`<button id="btnEditVismis" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border,#d1d5db);background:var(--surface2,#f3f4f6);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">✎ Edit</button>`:'';
+    const vm_acts=isAdmin?`<button id="btnEditVismis" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--surface2,#f3f4f6);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">✎ Edit</button>`:'';
     card.innerHTML=`
       <div class="settings-section-title" style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
         Visi &amp; Misi ${vm_acts}
@@ -3452,7 +3452,7 @@ function renderKomunitas(){
       fb.dataset.syf=val;
       const active=card[_filterKey]===val||(card[_filterKey]==null&&val==='non-it');
       fb.textContent=val==='it'?'IT':'Non-IT';
-      fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--dim);'}`;
+      fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--card);color:var(--dim);'}`;
       fb.addEventListener('click',()=>{ card[_filterKey]=val; renderSyContent(); refreshFilterBtns(); });
       filterRow.appendChild(fb);
     });
@@ -3461,7 +3461,7 @@ function renderKomunitas(){
     function refreshFilterBtns(){
       filterRow.querySelectorAll('[data-syf]').forEach(b=>{
         const active=b.dataset.syf===(card[_filterKey]||'non-it');
-        b.style.background=active?'var(--accent)':'var(--surface2,#e5e7eb)';
+        b.style.background=active?'var(--accent)':'var(--card)';
         b.style.color=active?'#fff':'var(--dim)';
       });
     }
@@ -3556,7 +3556,7 @@ function renderKomunitas(){
     allOpt.dataset.ktf='';
     allOpt.textContent='Semua';
     const allActive=!card[_fk];
-    allOpt.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${allActive?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--dim);'}`;
+    allOpt.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${allActive?'background:var(--accent);color:#fff;':'background:var(--card);color:var(--dim);'}`;
     allOpt.addEventListener('click',()=>{ card[_fk]=''; renderKtContent(); refreshKtBtns(); });
     filterRow.appendChild(allOpt);
     kelList.forEach(k=>{
@@ -3564,7 +3564,7 @@ function renderKomunitas(){
       fb.dataset.ktf=k.name;
       const active=card[_fk]===k.name;
       fb.textContent=k.name;
-      fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--dim);'}`;
+      fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--card);color:var(--dim);'}`;
       fb.addEventListener('click',()=>{ card[_fk]=k.name; renderKtContent(); refreshKtBtns(); });
       filterRow.appendChild(fb);
     });
@@ -3573,7 +3573,7 @@ function renderKomunitas(){
     function refreshKtBtns(){
       filterRow.querySelectorAll('[data-ktf]').forEach(b=>{
         const active=b.dataset.ktf===(card[_fk]||'');
-        b.style.background=active?'var(--accent)':'var(--surface2,#e5e7eb)';
+        b.style.background=active?'var(--accent)':'var(--card)';
         b.style.color=active?'#fff':'var(--dim)';
       });
     }
@@ -3616,7 +3616,7 @@ function renderKomunitas(){
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
               <span style="font-weight:600;font-size:.9rem;color:var(--text)">${esc(s.nama)}</span>
-              ${(s.kelompoks&&s.kelompoks.length)?s.kelompoks.map(kn=>`<span style="font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--surface2,#e5e7eb);color:var(--dim)">${esc(kn)}</span>`).join(''):''}
+              ${(s.kelompoks&&s.kelompoks.length)?s.kelompoks.map(kn=>`<span style="font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--card);color:var(--dim)">${esc(kn)}</span>`).join(''):''}
             </div>
             ${s.keterangan?`<div style="font-size:.82rem;color:var(--dim);margin-top:3px;line-height:1.5">${esc(s.keterangan)}</div>`:''}
             ${urlHtml}
