@@ -234,57 +234,29 @@ Centang `Force send` untuk kirim ulang semua acara aktif tanpa update `notifSent
 
 ## E — Cloudflare Workers (Write Proxy)
 
-Semua perubahan data (admin maupun viewer) dikirim ke Cloudflare Worker. Worker yang PATCH ke Gist menggunakan PAT tersimpan sebagai secret — tidak ada token di browser.
+Semua perubahan data (admin maupun viewer) dikirim ke Cloudflare Worker. Worker melakukan **read-merge-write** ke Gist — mencegah data hilang saat dua user edit bersamaan. Worker juga proxy push notification OneSignal.
+
+> **Kode lengkap Worker ada di [`todolist/WORKER.md`](todolist/WORKER.md)**
 
 ### E1. Buat Worker
 
 1. Buka [workers.cloudflare.com](https://workers.cloudflare.com) → daftar akun gratis
 2. Dashboard → **Workers & Pages → Create application → Create Worker**
 3. Beri nama worker (contoh: `alteco-writer`) → **Deploy**
-4. Klik **Edit code** → hapus isi default → paste kode berikut:
-
-```javascript
-export default {
-  async fetch(request, env) {
-    const cors = {
-      'Access-Control-Allow-Origin': 'https://<username>.github.io',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
-    if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-    try {
-      const db = await request.json();
-      const r = await fetch(`https://api.github.com/gists/${env.GIST_ID}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${env.GIST_PAT}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/vnd.github+json',
-          'User-Agent': 'alteco-worker',
-        },
-        body: JSON.stringify({ files: { 'alteco-data.json': { content: JSON.stringify(db) } } })
-      });
-      const result = await r.json();
-      if (!r.ok) return new Response(JSON.stringify({ error: result.message }), { status: r.status, headers: { ...cors, 'Content-Type': 'application/json' } });
-      return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
-    } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
-    }
-  }
-};
-```
-
-Ganti `<username>` dengan username GitHub-mu. Klik **Deploy**.
+4. Klik **Edit code** → hapus isi default → paste kode dari `todolist/WORKER.md` (bagian **Kode Worker**)
+5. Ganti `https://dionisiusnp.github.io` di baris `Access-Control-Allow-Origin` dengan domain GitHub Pages-mu
+6. Klik **Deploy**
 
 ### E2. Tambah Secrets ke Worker
 
 Worker settings → **Settings → Variables and Secrets → Add**:
 
-| Secret | Nilai |
-|--------|-------|
-| `GIST_ID` | Gist ID dari A1 |
-| `GIST_PAT` | PAT dari A2 |
+| Secret | Nilai | Dari |
+|--------|-------|------|
+| `GIST_ID` | Gist ID | Langkah A1 |
+| `GIST_PAT` | PAT | Langkah A2 |
+| `ONESIGNAL_APP_ID` | OneSignal App ID | Langkah B2 |
+| `ONESIGNAL_REST_KEY` | OneSignal REST API Key | Langkah B2 |
 
 Klik **Encrypt** lalu **Save** untuk tiap secret.
 
@@ -292,13 +264,13 @@ Klik **Encrypt** lalu **Save** untuk tiap secret.
 
 URL worker tampil di halaman Worker (format: `https://<name>.<subdomain>.workers.dev`).
 
-Buka `todolist/index.html`, baris ~597:
+Buka `todolist/index.html`, baris ~598:
 
 ```javascript
 const WORKER_URL= 'https://<name>.<subdomain>.workers.dev';
 ```
 
-Ganti dengan URL dari E3. Commit & push.
+Ganti dengan URL Worker-mu. Commit & push.
 
 ---
 
@@ -323,7 +295,7 @@ Ganti sesuai kebutuhan, commit & push.
 - [ ] Buat GitHub Gist dengan content awal (lihat A1) → salin Gist ID
 - [ ] Buat GitHub PAT classic (scope: `gist`) → simpan, hanya tampil sekali
 - [ ] Pasang `GIST_ID` ke `todolist/index.html`
-- [ ] Daftar Cloudflare → buat Worker → paste kode → set secrets `GIST_ID` + `GIST_PAT`
+- [ ] Daftar Cloudflare → buat Worker → paste kode dari `todolist/WORKER.md` → set 4 secrets
 - [ ] Salin URL Worker → pasang ke `WORKER_URL` di `todolist/index.html`
 - [ ] Daftar OneSignal → pasang `ONESIGNAL_APP_ID` ke `todolist/index.html`
 - [ ] Commit & push

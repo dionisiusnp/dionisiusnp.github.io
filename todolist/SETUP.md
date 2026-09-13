@@ -70,48 +70,18 @@ Commit dan push ke GitHub.
 
 ## Langkah 4 — Setup Cloudflare Worker (Write Proxy)
 
-Semua perubahan data dikirim ke Cloudflare Worker. Worker yang PATCH ke Gist menggunakan PAT tersimpan sebagai secret — tidak ada token di browser.
+Semua perubahan data dikirim ke Cloudflare Worker. Worker melakukan **read-merge-write** ke Gist — mencegah data hilang saat dua user edit bersamaan. Worker juga menjadi proxy push notification OneSignal.
+
+> **Kode lengkap Worker ada di [`todolist/WORKER.md`](WORKER.md)**
 
 ### 4a. Buat Worker
 
 1. Buka [workers.cloudflare.com](https://workers.cloudflare.com) → daftar akun gratis
 2. Dashboard → **Workers & Pages → Create application → Create Worker**
 3. Beri nama worker (contoh: `alteco-writer`) → **Deploy**
-4. Klik **Edit code** → hapus isi default → paste kode berikut:
-
-```javascript
-export default {
-  async fetch(request, env) {
-    const cors = {
-      'Access-Control-Allow-Origin': 'https://dionisiusnp.github.io',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
-    if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-    try {
-      const db = await request.json();
-      const r = await fetch(`https://api.github.com/gists/${env.GIST_ID}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${env.GIST_PAT}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/vnd.github+json',
-          'User-Agent': 'alteco-worker',
-        },
-        body: JSON.stringify({ files: { 'alteco-data.json': { content: JSON.stringify(db) } } })
-      });
-      const result = await r.json();
-      if (!r.ok) return new Response(JSON.stringify({ error: result.message }), { status: r.status, headers: { ...cors, 'Content-Type': 'application/json' } });
-      return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
-    } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
-    }
-  }
-};
-```
-
-Klik **Deploy**.
+4. Klik **Edit code** → hapus isi default → paste kode dari `WORKER.md` (bagian **Kode Worker**)
+5. Ganti `https://dionisiusnp.github.io` di baris `Access-Control-Allow-Origin` dengan domain GitHub Pages-mu
+6. Klik **Deploy**
 
 ### 4b. Tambah Secrets ke Worker
 
@@ -121,6 +91,8 @@ Worker settings → **Settings → Variables and Secrets → Add**:
 |--------|-------|
 | `GIST_ID` | Gist ID dari Langkah 1 |
 | `GIST_PAT` | PAT dari Langkah 2 |
+| `ONESIGNAL_APP_ID` | App ID dari Langkah 5b |
+| `ONESIGNAL_REST_KEY` | REST API Key dari Langkah 5b |
 
 Klik **Encrypt** lalu **Save** untuk tiap secret.
 
