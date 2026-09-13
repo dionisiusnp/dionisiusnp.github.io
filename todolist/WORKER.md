@@ -90,7 +90,12 @@ export default {
           const ex = map.get(item.id);
           if (!ex || (item.updatedAt || 0) >= (ex.updatedAt || 0)) map.set(item.id, item);
         }
-        return [...map.values()];
+        // Prefer browser order (preserves reordering); gist-only items appended at end
+        const bIds = new Set(browserArr.map(x => x.id));
+        return [
+          ...browserArr.map(x => map.get(x.id)).filter(Boolean),
+          ...[...map.values()].filter(x => !bIds.has(x.id)),
+        ];
       }
 
       function mergeTasks(gt = [], bt = []) {

@@ -687,7 +687,8 @@ function localLoad(){
   return null;
 }
 
-/* client-side merge: newer updatedAt wins per item, same logic as Worker */
+/* client-side merge: newer updatedAt wins per item; ORDER follows local (b) so
+   user reordering persists after refresh. Gist-only items appended at end. */
 function mergeArrClient(a=[],b=[]){
   const map=new Map();
   for(const item of a) map.set(item.id,item);
@@ -695,7 +696,11 @@ function mergeArrClient(a=[],b=[]){
     const ex=map.get(item.id);
     if(!ex||(item.updatedAt||0)>=(ex.updatedAt||0)) map.set(item.id,item);
   }
-  return [...map.values()];
+  const bIds=new Set(b.map(x=>x.id));
+  return [
+    ...b.map(x=>map.get(x.id)).filter(Boolean),
+    ...[...map.values()].filter(x=>!bIds.has(x.id)),
+  ];
 }
 function mergeRegulasisClient(gr={},br={}){
   const base={visi:'',misi:'',syaratAnggota:[],syaratTim:[],keuntungan:[],sanksi:[]};
