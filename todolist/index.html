@@ -3466,7 +3466,7 @@ function renderKomunitas(){
     function renderSyContent(){
       listWrap.innerHTML='';
       const filterVal=card[_filterKey]||'non-it';
-      const allList=km[listKey]||[];
+      const allList=(km[listKey]||[]).filter(s=>!s.deleted);
       const syList=allList.filter(s=>s.tipe==='keduanya'||(filterVal==='it'?s.tipe==='it':s.tipe!=='it'));
       if(!syList.length){
         const e=document.createElement('div');
@@ -3517,7 +3517,8 @@ function renderKomunitas(){
         row.querySelector('[data-sy-edit]')?.addEventListener('click',()=>openModal('syarat-edit',{id:s.id,listKey}));
         row.querySelector('[data-sy-del]')?.addEventListener('click',()=>{
           if(!confirm(`Hapus syarat "${s.nama}"?`)) return;
-          db.regulasi[listKey]=db.regulasi[listKey].filter(x=>x.id!==s.id);
+          const t=db.regulasi[listKey].find(x=>x.id===s.id);
+          if(t) touch(Object.assign(t,{deleted:true}));
           save(); renderKomunitas();
         });
         listWrap.appendChild(row);
@@ -3577,7 +3578,7 @@ function renderKomunitas(){
     function renderKtContent(){
       listWrap.innerHTML='';
       const filterVal=card[_fk]||'';
-      const allList=km.keuntungan||[];
+      const allList=(km.keuntungan||[]).filter(s=>!s.deleted);
       const ktList=filterVal?allList.filter(x=>(x.kelompoks||[]).includes(filterVal)||(x.kelompoks||[]).length===0):allList;
       if(!ktList.length){
         const e=document.createElement('div');
@@ -3627,7 +3628,8 @@ function renderKomunitas(){
         row.querySelector('[data-kt-edit]')?.addEventListener('click',()=>openModal('keuntungan-edit',{id:s.id}));
         row.querySelector('[data-kt-del]')?.addEventListener('click',()=>{
           if(!confirm(`Hapus keuntungan "${s.nama}"?`)) return;
-          db.regulasi.keuntungan=db.regulasi.keuntungan.filter(x=>x.id!==s.id);
+          const t=db.regulasi.keuntungan.find(x=>x.id===s.id);
+          if(t) touch(Object.assign(t,{deleted:true}));
           save(); renderKomunitas();
         });
         listWrap.appendChild(row);
@@ -3650,7 +3652,7 @@ function renderKomunitas(){
     }
     card.appendChild(skHdr);
 
-    const sanksiList=km.sanksi||[];
+    const sanksiList=(km.sanksi||[]).filter(s=>!s.deleted);
     if(!sanksiList.length){
       const e=document.createElement('div');
       e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
@@ -3683,7 +3685,8 @@ function renderKomunitas(){
         row.querySelector('[data-sk-edit]')?.addEventListener('click',()=>openModal('sanksi-edit',{id:s.id}));
         row.querySelector('[data-sk-del]')?.addEventListener('click',()=>{
           if(!confirm(`Hapus sanksi "${s.name}"?`)) return;
-          db.regulasi.sanksi=db.regulasi.sanksi.filter(x=>x.id!==s.id);
+          const t=db.regulasi.sanksi.find(x=>x.id===s.id);
+          if(t) touch(Object.assign(t,{deleted:true}));
           save(); renderKomunitas();
         });
         card.appendChild(row);
