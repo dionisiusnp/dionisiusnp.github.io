@@ -426,20 +426,56 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .sidebar-overlay.open{display:block}
 /* ── Mobile responsive ── */
 @media(max-width:768px){
+  /* Nav sits above sidebar drawer */
+  .nav{position:relative;z-index:51;padding:8px 12px;gap:8px}
   .hamburger-btn{display:flex}
   .nav-back{display:none}
+  .nav-title{font-size:.78rem}
+
+  /* Sidebar drawer */
   .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;width:260px}
   .sidebar.mobile-open{transform:translateX(0)}
-  .asset-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Touch: always show hover-only actions */
+  .grp-actions{opacity:1}
+  .member-actions{display:flex!important}
+  .member-task-count{display:none}
+
+  /* Asset table horizontal scroll — id selector */
+  #assetTableWrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .asset-table{min-width:480px}
-  .org-view{padding:16px 8px}
-  .settings-card{border-radius:8px}
+  .asset-view{padding:10px 10px 80px}
+
+  /* Task area */
+  .task-area{padding-bottom:80px}
+  .member-header{padding:10px 12px}
+  .filter-row{gap:4px;padding:6px 8px}
+  .member-search-wrap{min-width:0;max-width:none;flex:1}
+
+  /* Org chart */
+  .org-view{padding:16px 8px;overflow-x:auto}
+
+  /* Project view */
+  .project-list{padding:10px}
+  .proj-card{padding:10px 12px}
+
+  /* Regulasi / kultur tab rows */
+  .km-tab-row,.regulasi-tab-row{flex-wrap:wrap;gap:4px}
+
+  /* Settings */
+  .settings-card{border-radius:8px;padding:14px 12px}
+
+  /* Culture timeline → single column */
   .culture-timeline::before{left:16px}
   .culture-timeline-item{flex-direction:column!important;padding-left:32px}
   .culture-tl-card{width:100%!important;text-align:left!important;margin:0!important}
   .culture-tl-dot{left:16px}
-  .modal-box{max-width:calc(100vw - 24px)}
-  .main{padding:12px 12px 80px}
+  .asset-view.culture-wrap{padding-bottom:80px}
+
+  /* Modal */
+  .modal-box{max-width:calc(100vw - 20px);padding:16px 14px 0}
+  .modal-foot{padding:10px 14px 14px}
+  .modal-head{padding:0 0 10px}
 }
 </style>
 </head>
