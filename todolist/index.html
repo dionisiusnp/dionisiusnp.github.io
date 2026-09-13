@@ -2183,9 +2183,8 @@ function openModal(mode, ctx){
       <div class="form-group">
         <label class="form-label">Tipe</label>
         <select class="form-select" id="fi-sy-tipe">
-          <option value="umum" ${(!s?.tipe||s?.tipe==='umum')?'selected':''}>Umum</option>
+          <option value="non-it" ${(!s?.tipe||s?.tipe==='non-it'||s?.tipe==='umum')?'selected':''}>Non-IT</option>
           <option value="it" ${s?.tipe==='it'?'selected':''}>IT</option>
-          <option value="non-it" ${s?.tipe==='non-it'?'selected':''}>Non-IT</option>
         </select>
       </div>
       <div class="form-group">
@@ -3252,8 +3251,8 @@ function renderKomunitas(){
       const row=document.createElement('div');
       row.className='settings-row';
       row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;padding:14px 0';
-      const TIPE_CFG={it:{label:'IT',color:'#2563eb',bg:'#dbeafe'},['non-it']:{label:'Non-IT',color:'#7c3aed',bg:'#ede9fe'},umum:{label:'Umum',color:'#64748b',bg:'#f1f5f9'}};
-      const tCfg=TIPE_CFG[s.tipe||'umum']||TIPE_CFG.umum;
+      const TIPE_CFG={it:{label:'IT',color:'#2563eb',bg:'#dbeafe'},['non-it']:{label:'Non-IT',color:'#7c3aed',bg:'#ede9fe'}};
+      const tCfg=s.tipe==='it'?TIPE_CFG.it:TIPE_CFG['non-it'];
       const urlHtml=s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--accent);word-break:break-all">${esc(s.url)}</a>`:'';
       const actsHtml=isAdmin?`<div style="display:flex;gap:6px;margin-top:4px">
         <button class="asset-act-btn" data-sy-edit="${s.id}">✎</button>
