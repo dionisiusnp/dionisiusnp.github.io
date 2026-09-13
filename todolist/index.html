@@ -496,6 +496,10 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <span class="feature-nav-ico">🌱</span>
         <span class="feature-nav-label">Sejarah</span>
       </button>
+      <button class="feature-nav-item" id="btnKomunitasView">
+        <span class="feature-nav-ico">📋</span>
+        <span class="feature-nav-label">Komunitas</span>
+      </button>
       <button class="feature-nav-item" id="btnAssetView">
         <span class="feature-nav-ico">📦</span>
         <span class="feature-nav-label">Inventaris</span>
@@ -581,6 +585,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <div id="cultureView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="cultureArea"></div>
     </div>
+
+    <!-- Komunitas view -->
+    <div id="komunitasView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="komunitasArea"></div>
+    </div>
   </div>
 </div>
 <button class="fab-culture" id="fabCulture" title="Tambah Sejarah">＋</button>
@@ -640,6 +649,11 @@ function migrate(d){
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
   if(!d.settings.writePat) d.settings.writePat='';
+  if(!d.komunitas) d.komunitas={visi:'',misi:'',syaratMember:[],sanksi:[]};
+  if(!d.komunitas.syaratMember) d.komunitas.syaratMember=[];
+  if(!d.komunitas.sanksi) d.komunitas.sanksi=[];
+  if(d.komunitas.syaratMember) d.komunitas.syaratMember=d.komunitas.syaratMember.map(s=>Object.assign({updatedAt:0},s));
+  if(d.komunitas.sanksi) d.komunitas.sanksi=d.komunitas.sanksi.map(s=>Object.assign({updatedAt:0},s));
   if(d.tasks) d.tasks=d.tasks.map(t=>Object.assign({updatedAt:0},t));
   if(d.members) d.members=d.members.map(m=>Object.assign({updatedAt:0},m));
   if(d.assets) d.assets=d.assets.map(a=>Object.assign({updatedAt:0},a));
@@ -1405,9 +1419,9 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 ══════════════════════════════════════════ */
 /* helper: hide all feature views, deactivate all nav buttons */
 function hideAllViews(){
-  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView']
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   document.getElementById('emptyState').style.display='none';
   document.getElementById('fabCulture').style.display='none';
@@ -1526,6 +1540,24 @@ document.getElementById('btnCultureView').addEventListener('click',()=>{
   }
 });
 document.getElementById('fabCulture').addEventListener('click',()=>openModal('culture-add',{}));
+
+document.getElementById('btnKomunitasView').addEventListener('click',()=>{
+  const kv=document.getElementById('komunitasView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(kv.style.display!=='none'){
+    kv.style.display='none';
+    document.getElementById('btnKomunitasView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    kv.style.display='flex';
+    document.getElementById('btnKomunitasView').classList.add('active');
+    renderSidebar(); renderKomunitas();
+  }
+});
 
 document.getElementById('bellBtn').addEventListener('click',()=>{
   document.getElementById('btnInfoView').click();
@@ -2123,6 +2155,75 @@ function openModal(mode, ctx){
     `;
     document.getElementById('fi-ctitle').focus();
   }
+
+  else if(mode==='vismis-edit'){
+    const km=db.komunitas;
+    title.textContent='Edit Visi & Misi';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Visi</label>
+        <textarea class="form-textarea" id="fi-visi" rows="3" placeholder="Visi organisasi…">${esc(km.visi||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Misi</label>
+        <textarea class="form-textarea" id="fi-misi" rows="5" placeholder="Misi organisasi… (satu misi per baris)">${esc(km.misi||'')}</textarea>
+      </div>
+    `;
+    document.getElementById('fi-visi').focus();
+  }
+
+  else if(mode==='syarat-add'||mode==='syarat-edit'){
+    const s=mode==='syarat-edit'?(db.komunitas.syaratMember||[]).find(x=>x.id===mCtx.id):null;
+    title.textContent=mode==='syarat-add'?'Tambah Syarat Member':'Edit Syarat Member';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Syarat</label>
+        <input class="form-input" id="fi-sy-nama" type="text" value="${esc(s?.nama||'')}" placeholder="Contoh: Aktif di grup komunikasi" maxlength="100"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keterangan <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-sy-ket" rows="3" placeholder="Penjelasan lebih lanjut…">${esc(s?.keterangan||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL Referensi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-sy-url" type="url" value="${esc(s?.url||'')}" placeholder="https://…"/>
+      </div>
+    `;
+    document.getElementById('fi-sy-nama').focus();
+  }
+
+  else if(mode==='sanksi-add'||mode==='sanksi-edit'){
+    const s=mode==='sanksi-edit'?(db.komunitas.sanksi||[]).find(x=>x.id===mCtx.id):null;
+    title.textContent=mode==='sanksi-add'?'Tambah Sanksi':'Edit Sanksi';
+    const today=new Date().toISOString().slice(0,10);
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Member</label>
+        <input class="form-input" id="fi-sk-name" type="text" value="${esc(s?.name||'')}" placeholder="Nama member" maxlength="80"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kelompok / Divisi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-sk-kel" type="text" value="${esc(s?.kelompok||'')}" placeholder="Nama kelompok" maxlength="60"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Level Sanksi</label>
+        <select class="form-select" id="fi-sk-level">
+          <option value="1" ${(s?.level||1)===1?'selected':''}>🟡 Warning 1</option>
+          <option value="2" ${s?.level===2?'selected':''}>🟠 Warning 2</option>
+          <option value="3" ${s?.level===3?'selected':''}>🔴 Blacklist</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Alasan <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-sk-alasan" rows="3" placeholder="Pelanggaran yang dilakukan…">${esc(s?.alasan||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal</label>
+        <input class="form-input" id="fi-sk-date" type="date" value="${s?.date||today}"/>
+      </div>
+    `;
+    document.getElementById('fi-sk-name').focus();
+  }
 }
 
 function closeModal(){
@@ -2368,6 +2469,45 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       touch(task); touch(mem);
     }
     save(); renderProject(); closeModal();
+  }
+
+  /* ── Komunitas modal save ── */
+  else if(mMode==='vismis-edit'){
+    db.komunitas.visi=document.getElementById('fi-visi').value.trim();
+    db.komunitas.misi=document.getElementById('fi-misi').value.trim();
+    save(); renderKomunitas(); closeModal();
+  }
+  else if(mMode==='syarat-add'||mMode==='syarat-edit'){
+    const nama=document.getElementById('fi-sy-nama').value.trim();
+    if(!nama) return;
+    const keterangan=document.getElementById('fi-sy-ket').value.trim();
+    const url=document.getElementById('fi-sy-url').value.trim();
+    if(mMode==='syarat-add'){
+      db.komunitas.syaratMember=(db.komunitas.syaratMember||[]);
+      db.komunitas.syaratMember.push(touch({id:uid(),nama,keterangan,url}));
+    } else {
+      const s=(db.komunitas.syaratMember||[]).find(x=>x.id===mCtx.id);
+      if(!s) return;
+      s.nama=nama; s.keterangan=keterangan; s.url=url; touch(s);
+    }
+    save(); renderKomunitas(); closeModal();
+  }
+  else if(mMode==='sanksi-add'||mMode==='sanksi-edit'){
+    const name=document.getElementById('fi-sk-name').value.trim();
+    if(!name) return;
+    const kelompok=document.getElementById('fi-sk-kel').value.trim();
+    const level=parseInt(document.getElementById('fi-sk-level').value);
+    const alasan=document.getElementById('fi-sk-alasan').value.trim();
+    const date=document.getElementById('fi-sk-date').value||null;
+    if(mMode==='sanksi-add'){
+      db.komunitas.sanksi=(db.komunitas.sanksi||[]);
+      db.komunitas.sanksi.push(touch({id:uid(),name,kelompok,level,alasan,date}));
+    } else {
+      const s=(db.komunitas.sanksi||[]).find(x=>x.id===mCtx.id);
+      if(!s) return;
+      s.name=name; s.kelompok=kelompok; s.level=level; s.alasan=alasan; s.date=date; touch(s);
+    }
+    save(); renderKomunitas(); closeModal();
   }
 
   /* ── Culture modal save ── */
@@ -3038,6 +3178,156 @@ function renderCultures(){
   });
 
   area.appendChild(tl);
+}
+
+/* ══════════════════════════════════════════
+   KOMUNITAS VIEW
+══════════════════════════════════════════ */
+function renderKomunitas(){
+  const area=document.getElementById('komunitasArea');
+  area.innerHTML='';
+  const km=db.komunitas;
+  const isAdmin=role==='admin';
+
+  const toolbar=document.createElement('div');
+  toolbar.className='asset-toolbar';
+  toolbar.innerHTML=`<span class="asset-toolbar-title">Komunitas</span>`;
+  area.appendChild(toolbar);
+
+  /* ── Card 1: Visi & Misi ── */
+  const card1=document.createElement('div');
+  card1.className='settings-card';
+  const vm_acts=isAdmin?`<button class="asset-act-btn" id="btnEditVismis" style="margin-left:auto">✎ Edit</button>`:'';
+  card1.innerHTML=`
+    <div class="settings-section-title" style="display:flex;align-items:center;gap:8px">
+      Visi &amp; Misi ${vm_acts}
+    </div>
+    <div style="margin-top:12px">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:4px">Visi</div>
+      <div id="km-visi" style="font-size:.9rem;line-height:1.6;white-space:pre-wrap;color:var(--text)">${km.visi?esc(km.visi):'<span style="color:var(--dim);font-style:italic">Belum diisi</span>'}</div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:4px">Misi</div>
+      <div id="km-misi" style="font-size:.9rem;line-height:1.6;white-space:pre-wrap;color:var(--text)">${km.misi?esc(km.misi):'<span style="color:var(--dim);font-style:italic">Belum diisi</span>'}</div>
+    </div>
+  `;
+  if(isAdmin) card1.querySelector('#btnEditVismis').addEventListener('click',()=>openModal('vismis-edit',{}));
+  area.appendChild(card1);
+
+  /* ── Card 2: Syarat Member ── */
+  const card2=document.createElement('div');
+  card2.className='settings-card';
+  const syHdr=document.createElement('div');
+  syHdr.style.cssText='display:flex;align-items:center;justify-content:space-between';
+  syHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">Syarat Member</div>`;
+  if(isAdmin){
+    const addBtn2=document.createElement('button');
+    addBtn2.className='task-add-inline-btn';
+    addBtn2.textContent='＋ Tambah';
+    addBtn2.addEventListener('click',()=>openModal('syarat-add',{}));
+    syHdr.appendChild(addBtn2);
+  }
+  card2.appendChild(syHdr);
+
+  const syList=km.syaratMember||[];
+  if(!syList.length){
+    const e=document.createElement('div');
+    e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
+    e.textContent='Belum ada syarat member.';
+    card2.appendChild(e);
+  } else {
+    syList.forEach((s,idx)=>{
+      const row=document.createElement('div');
+      row.className='settings-row';
+      row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;padding:14px 0';
+      const urlHtml=s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--accent);word-break:break-all">${esc(s.url)}</a>`:'';
+      const actsHtml=isAdmin?`<div style="display:flex;gap:6px;margin-top:4px">
+        <button class="asset-act-btn" data-sy-edit="${s.id}">✎</button>
+        <button class="asset-act-btn del" data-sy-del="${s.id}">✕</button>
+      </div>`:'';
+      row.innerHTML=`
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <span style="min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${idx+1}</span>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:.9rem;color:var(--text)">${esc(s.nama)}</div>
+            ${s.keterangan?`<div style="font-size:.82rem;color:var(--dim);margin-top:2px;line-height:1.5">${esc(s.keterangan)}</div>`:''}
+            ${urlHtml}
+            ${actsHtml}
+          </div>
+        </div>
+      `;
+      row.querySelector('[data-sy-edit]')?.addEventListener('click',()=>openModal('syarat-edit',{id:s.id}));
+      row.querySelector('[data-sy-del]')?.addEventListener('click',()=>{
+        if(!confirm(`Hapus syarat "${s.nama}"?`)) return;
+        db.komunitas.syaratMember=db.komunitas.syaratMember.filter(x=>x.id!==s.id);
+        save(); renderKomunitas();
+      });
+      card2.appendChild(row);
+    });
+  }
+  area.appendChild(card2);
+
+  /* ── Card 3: Sanksi ── */
+  const card3=document.createElement('div');
+  card3.className='settings-card';
+  const skHdr=document.createElement('div');
+  skHdr.style.cssText='display:flex;align-items:center;justify-content:space-between';
+  skHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">Sanksi Member</div>`;
+  if(isAdmin){
+    const addBtn3=document.createElement('button');
+    addBtn3.className='task-add-inline-btn';
+    addBtn3.textContent='＋ Tambah';
+    addBtn3.addEventListener('click',()=>openModal('sanksi-add',{}));
+    skHdr.appendChild(addBtn3);
+  }
+  card3.appendChild(skHdr);
+
+  const SANKSI_CFG={
+    1:{label:'Warning 1',color:'#d97706',bg:'#fef3c7'},
+    2:{label:'Warning 2',color:'#ea580c',bg:'#ffedd5'},
+    3:{label:'Blacklist',color:'#dc2626',bg:'#fee2e2'},
+  };
+
+  const sanksiList=km.sanksi||[];
+  if(!sanksiList.length){
+    const e=document.createElement('div');
+    e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
+    e.textContent='Tidak ada catatan sanksi.';
+    card3.appendChild(e);
+  } else {
+    const sorted=[...sanksiList].sort((a,b)=>b.level-a.level||(b.date||'').localeCompare(a.date||''));
+    sorted.forEach(s=>{
+      const cfg=SANKSI_CFG[s.level]||SANKSI_CFG[1];
+      const row=document.createElement('div');
+      row.className='settings-row';
+      row.style.cssText='gap:10px;padding:12px 0;align-items:flex-start';
+      const dateStr=s.date?new Date(s.date+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):'';
+      const actsHtml=isAdmin?`<div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="asset-act-btn" data-sk-edit="${s.id}">✎</button>
+        <button class="asset-act-btn del" data-sk-del="${s.id}">✕</button>
+      </div>`:'';
+      row.innerHTML=`
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-weight:600;font-size:.9rem">${esc(s.name)}</span>
+            ${s.kelompok?`<span style="font-size:.72rem;color:var(--dim)">${esc(s.kelompok)}</span>`:''}
+            <span style="font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>
+          </div>
+          ${s.alasan?`<div style="font-size:.82rem;color:var(--dim);margin-top:3px;line-height:1.5">${esc(s.alasan)}</div>`:''}
+          ${dateStr?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px">${dateStr}</div>`:''}
+        </div>
+        ${actsHtml}
+      `;
+      row.querySelector('[data-sk-edit]')?.addEventListener('click',()=>openModal('sanksi-edit',{id:s.id}));
+      row.querySelector('[data-sk-del]')?.addEventListener('click',()=>{
+        if(!confirm(`Hapus sanksi "${s.name}"?`)) return;
+        db.komunitas.sanksi=db.komunitas.sanksi.filter(x=>x.id!==s.id);
+        save(); renderKomunitas();
+      });
+      card3.appendChild(row);
+    });
+  }
+  area.appendChild(card3);
 }
 
 /* ══════════════════════════════════════════
