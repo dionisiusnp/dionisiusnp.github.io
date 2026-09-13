@@ -68,45 +68,13 @@ Commit dan push ke GitHub.
 
 ---
 
-## Langkah 4 — Setup Cloudflare Worker (Write Proxy)
+## Langkah 4 — Setup Cloudflare Worker
 
-Semua perubahan data dikirim ke Cloudflare Worker. Worker melakukan **read-merge-write** ke Gist — mencegah data hilang saat dua user edit bersamaan. Worker juga menjadi proxy push notification OneSignal.
+Ikuti panduan lengkap di **[WORKER.md](WORKER.md)**.
 
-> **Kode lengkap Worker ada di [`todolist/WORKER.md`](WORKER.md)**
-
-### 4a. Buat Worker
-
-1. Buka [workers.cloudflare.com](https://workers.cloudflare.com) → daftar akun gratis
-2. Dashboard → **Workers & Pages → Create application → Create Worker**
-3. Beri nama worker (contoh: `alteco-writer`) → **Deploy**
-4. Klik **Edit code** → hapus isi default → paste kode dari `WORKER.md` (bagian **Kode Worker**)
-5. Ganti `https://dionisiusnp.github.io` di baris `Access-Control-Allow-Origin` dengan domain GitHub Pages-mu
-6. Klik **Deploy**
-
-### 4b. Tambah Secrets ke Worker
-
-Worker settings → **Settings → Variables and Secrets → Add**:
-
-| Secret | Nilai |
-|--------|-------|
-| `GIST_ID` | Gist ID dari Langkah 1 |
-| `GIST_PAT` | PAT dari Langkah 2 |
-| `ONESIGNAL_APP_ID` | App ID dari Langkah 5b |
-| `ONESIGNAL_REST_KEY` | REST API Key dari Langkah 5b |
-
-Klik **Encrypt** lalu **Save** untuk tiap secret.
-
-### 4c. Pasang URL Worker ke Kode
-
-URL worker tampil di halaman Worker (format: `https://<name>.<subdomain>.workers.dev`).
-
-Buka `todolist/index.html`, ganti:
-
-```javascript
-const WORKER_URL= 'https://<name>.<subdomain>.workers.dev';
-```
-
-Commit dan push.
+Pastikan setelah selesai:
+- 4 secrets sudah diset di Cloudflare (`GIST_ID`, `GIST_PAT`, `ONESIGNAL_APP_ID`, `ONESIGNAL_REST_KEY`)
+- URL Worker sudah diisi ke `WORKER_URL` di `todolist/index.html` baris ~598
 
 ---
 
