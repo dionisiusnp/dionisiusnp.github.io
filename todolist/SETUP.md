@@ -23,7 +23,7 @@ Superadmin perlu melakukan setup sekali berikut ini.
    - **Filename**: `alteco-data.json`
    - **Content**:
      ```json
-     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"komunitas":{"visi":"","misi":"","syaratMember":[],"sanksi":[]},"orgName":"Nama Organisasi","settings":{"pushNotifEnabled":false,"notifTime":"07:00","notifDaysBefore":1,"writePat":""}}
+     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"regulasi":{"visi":"","misi":"","syaratAnggota":[],"syaratTim":[],"sanksi":[]},"orgName":"Nama Organisasi","settings":{"pushNotifEnabled":false,"notifTime":"07:00","notifDaysBefore":1,"writePat":""}}
      ```
 3. Klik **"Create secret gist"**
 4. Salin **Gist ID** dari URL browser:
@@ -194,16 +194,18 @@ Tersedia di sidebar **📋 Regulasi** — admin CRUD, viewer hanya baca.
 
 Teks bebas. Admin klik ikon edit di kartu, simpan → tersimpan ke Gist.
 
-### Syarat Member
+### Syarat Anggota & Syarat Tim
 
-Daftar syarat bergabung ke komunitas. Tiap entri punya:
+Dua tab terpisah, masing-masing berisi daftar syarat dengan filter Non-IT / IT.
 
 | Field | Keterangan |
 |-------|-----------|
 | Nama | Nama syarat |
-| Tipe | `Non-IT` (default, termasuk umum) atau `IT` |
+| Tipe | `Non-IT` (default), `IT`, atau `Keduanya` (muncul di kedua filter) |
 | Keterangan | Deskripsi syarat |
 | URL | Link referensi (opsional) |
+
+Urutan dapat diatur dengan tombol ▲ ▼ (admin).
 
 ### Sanksi
 

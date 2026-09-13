@@ -58,7 +58,7 @@ Data organisasi disimpan di Gist agar semua device dapat data terbaru tanpa back
    - **Filename**: `alteco-data.json`
    - **Content**:
      ```json
-     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"komunitas":{"visi":"","misi":"","syaratMember":[],"sanksi":[]},"orgName":"Nama Organisasi","settings":{"pushNotifEnabled":false,"notifTime":"07:00","notifDaysBefore":1,"writePat":""}}
+     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"regulasi":{"visi":"","misi":"","syaratAnggota":[],"syaratTim":[],"sanksi":[]},"orgName":"Nama Organisasi","settings":{"pushNotifEnabled":false,"notifTime":"07:00","notifDaysBefore":1,"writePat":""}}
      ```
 3. Klik **Create secret gist**
 4. Salin **Gist ID** dari URL:

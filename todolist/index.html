@@ -649,11 +649,16 @@ function migrate(d){
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
   if(!d.settings.writePat) d.settings.writePat='';
-  if(!d.komunitas) d.komunitas={visi:'',misi:'',syaratMember:[],sanksi:[]};
-  if(!d.komunitas.syaratMember) d.komunitas.syaratMember=[];
-  if(!d.komunitas.sanksi) d.komunitas.sanksi=[];
-  if(d.komunitas.syaratMember) d.komunitas.syaratMember=d.komunitas.syaratMember.map(s=>Object.assign({updatedAt:0},s));
-  if(d.komunitas.sanksi) d.komunitas.sanksi=d.komunitas.sanksi.map(s=>Object.assign({updatedAt:0},s));
+  /* migrate komunitas → regulasi */
+  if(d.komunitas&&!d.regulasi) d.regulasi=d.komunitas;
+  if(!d.regulasi) d.regulasi={visi:'',misi:'',syaratAnggota:[],syaratTim:[],sanksi:[]};
+  if(!d.regulasi.syaratAnggota) d.regulasi.syaratAnggota=d.regulasi.syaratMember||[];
+  if(!d.regulasi.syaratTim) d.regulasi.syaratTim=[];
+  if(!d.regulasi.sanksi) d.regulasi.sanksi=[];
+  delete d.regulasi.syaratMember;
+  if(d.regulasi.syaratAnggota) d.regulasi.syaratAnggota=d.regulasi.syaratAnggota.map(s=>Object.assign({updatedAt:0},s));
+  if(d.regulasi.syaratTim) d.regulasi.syaratTim=d.regulasi.syaratTim.map(s=>Object.assign({updatedAt:0},s));
+  if(d.regulasi.sanksi) d.regulasi.sanksi=d.regulasi.sanksi.map(s=>Object.assign({updatedAt:0},s));
   if(d.tasks) d.tasks=d.tasks.map(t=>Object.assign({updatedAt:0},t));
   if(d.members) d.members=d.members.map(m=>Object.assign({updatedAt:0},m));
   if(d.assets) d.assets=d.assets.map(a=>Object.assign({updatedAt:0},a));
@@ -2157,7 +2162,7 @@ function openModal(mode, ctx){
   }
 
   else if(mode==='vismis-edit'){
-    const km=db.komunitas;
+    const km=db.regulasi;
     title.textContent='Edit Visi & Misi';
     body.innerHTML=`
       <div class="form-group">
@@ -2173,8 +2178,10 @@ function openModal(mode, ctx){
   }
 
   else if(mode==='syarat-add'||mode==='syarat-edit'){
-    const s=mode==='syarat-edit'?(db.komunitas.syaratMember||[]).find(x=>x.id===mCtx.id):null;
-    title.textContent=mode==='syarat-add'?'Tambah Syarat Member':'Edit Syarat Member';
+    const listKey=mCtx.listKey||'syaratAnggota';
+    const listLabel=listKey==='syaratTim'?'Syarat Tim':'Syarat Anggota';
+    const s=mode==='syarat-edit'?(db.regulasi[listKey]||[]).find(x=>x.id===mCtx.id):null;
+    title.textContent=mode==='syarat-add'?`Tambah ${listLabel}`:`Edit ${listLabel}`;
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Nama Syarat</label>
@@ -2201,7 +2208,7 @@ function openModal(mode, ctx){
   }
 
   else if(mode==='sanksi-add'||mode==='sanksi-edit'){
-    const s=mode==='sanksi-edit'?(db.komunitas.sanksi||[]).find(x=>x.id===mCtx.id):null;
+    const s=mode==='sanksi-edit'?(db.regulasi.sanksi||[]).find(x=>x.id===mCtx.id):null;
     title.textContent=mode==='sanksi-add'?'Tambah Sanksi':'Edit Sanksi';
     const today=new Date().toISOString().slice(0,10);
     body.innerHTML=`
@@ -2482,10 +2489,10 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     save(); renderProject(); closeModal();
   }
 
-  /* ── Komunitas modal save ── */
+  /* ── Regulasi modal save ── */
   else if(mMode==='vismis-edit'){
-    db.komunitas.visi=document.getElementById('fi-visi').value.trim();
-    db.komunitas.misi=document.getElementById('fi-misi').value.trim();
+    db.regulasi.visi=document.getElementById('fi-visi').value.trim();
+    db.regulasi.misi=document.getElementById('fi-misi').value.trim();
     save(); renderKomunitas(); closeModal();
   }
   else if(mMode==='syarat-add'||mMode==='syarat-edit'){
@@ -2494,11 +2501,12 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const tipe=document.getElementById('fi-sy-tipe').value;
     const keterangan=document.getElementById('fi-sy-ket').value.trim();
     const url=document.getElementById('fi-sy-url').value.trim();
+    const listKey=mCtx.listKey||'syaratAnggota';
     if(mMode==='syarat-add'){
-      db.komunitas.syaratMember=(db.komunitas.syaratMember||[]);
-      db.komunitas.syaratMember.push(touch({id:uid(),nama,tipe,keterangan,url}));
+      db.regulasi[listKey]=(db.regulasi[listKey]||[]);
+      db.regulasi[listKey].push(touch({id:uid(),nama,tipe,keterangan,url}));
     } else {
-      const s=(db.komunitas.syaratMember||[]).find(x=>x.id===mCtx.id);
+      const s=(db.regulasi[listKey]||[]).find(x=>x.id===mCtx.id);
       if(!s) return;
       s.nama=nama; s.tipe=tipe; s.keterangan=keterangan; s.url=url; touch(s);
     }
@@ -2512,10 +2520,10 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const alasan=document.getElementById('fi-sk-alasan').value.trim();
     const date=document.getElementById('fi-sk-date').value||null;
     if(mMode==='sanksi-add'){
-      db.komunitas.sanksi=(db.komunitas.sanksi||[]);
-      db.komunitas.sanksi.push(touch({id:uid(),name,kelompok,level,alasan,date}));
+      db.regulasi.sanksi=(db.regulasi.sanksi||[]);
+      db.regulasi.sanksi.push(touch({id:uid(),name,kelompok,level,alasan,date}));
     } else {
-      const s=(db.komunitas.sanksi||[]).find(x=>x.id===mCtx.id);
+      const s=(db.regulasi.sanksi||[]).find(x=>x.id===mCtx.id);
       if(!s) return;
       s.name=name; s.kelompok=kelompok; s.level=level; s.alasan=alasan; s.date=date; touch(s);
     }
@@ -3198,7 +3206,7 @@ function renderCultures(){
 function renderKomunitas(){
   const area=document.getElementById('komunitasArea');
   area.innerHTML='';
-  const km=db.komunitas;
+  const km=db.regulasi;
   const isAdmin=role==='admin';
 
   const TIPE_CFG={
@@ -3219,8 +3227,13 @@ function renderKomunitas(){
   area.appendChild(toolbar);
 
   /* ── Tab bar ── */
-  const TABS=[{id:'vismis',label:'📜 Visi & Misi'},{id:'syarat',label:'✅ Syarat Member'},{id:'sanksi',label:'⚠️ Sanksi'}];
-  let activeTab=area._kmTab||'vismis';
+  const TABS=[
+    {id:'vismis',label:'📜 Visi & Misi'},
+    {id:'syarat-anggota',label:'👤 Syarat Anggota'},
+    {id:'syarat-tim',label:'👥 Syarat Tim'},
+    {id:'sanksi',label:'⚠️ Sanksi'},
+  ];
+  const activeTab=area._kmTab||'vismis';
   const tabBar=document.createElement('div');
   tabBar.style.cssText='display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap';
   TABS.forEach(t=>{
@@ -3228,10 +3241,7 @@ function renderKomunitas(){
     btn.dataset.tab=t.id;
     btn.textContent=t.label;
     btn.style.cssText=`padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;${t.id===activeTab?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--text);'}`;
-    btn.addEventListener('click',()=>{
-      area._kmTab=t.id;
-      renderKomunitas();
-    });
+    btn.addEventListener('click',()=>{ area._kmTab=t.id; renderKomunitas(); });
     tabBar.appendChild(btn);
   });
   area.appendChild(tabBar);
@@ -3259,39 +3269,40 @@ function renderKomunitas(){
     if(isAdmin) card.querySelector('#btnEditVismis').addEventListener('click',()=>openModal('vismis-edit',{}));
   }
 
-  /* ── Tab: Syarat Member ── */
-  else if(activeTab==='syarat'){
-    /* header */
+  /* ── Tab: Syarat (shared renderer) ── */
+  else if(activeTab==='syarat-anggota'||activeTab==='syarat-tim'){
+    const listKey=activeTab==='syarat-tim'?'syaratTim':'syaratAnggota';
+    const tabLabel=activeTab==='syarat-tim'?'Syarat Tim':'Syarat Anggota';
     const syHdr=document.createElement('div');
     syHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
-    syHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">Syarat Member</div>`;
+    syHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">${tabLabel}</div>`;
     if(isAdmin){
       const addBtn=document.createElement('button');
       addBtn.className='task-add-inline-btn';
       addBtn.textContent='＋ Tambah';
-      addBtn.addEventListener('click',()=>openModal('syarat-add',{}));
+      addBtn.addEventListener('click',()=>openModal('syarat-add',{listKey}));
       syHdr.appendChild(addBtn);
     }
     card.appendChild(syHdr);
 
-    /* filter */
+    /* filter IT/Non-IT */
     const filterRow=document.createElement('div');
     filterRow.style.cssText='display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap';
+    const _filterKey='_syFilter_'+listKey;
     ['non-it','it'].forEach(val=>{
       const fb=document.createElement('button');
       fb.dataset.syf=val;
-      const label=val==='it'?'IT':'Non-IT';
-      const active=card._syFilter===val||(card._syFilter==null&&val==='non-it');
-      fb.textContent=label;
+      const active=card[_filterKey]===val||(card[_filterKey]==null&&val==='non-it');
+      fb.textContent=val==='it'?'IT':'Non-IT';
       fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--dim);'}`;
-      fb.addEventListener('click',()=>{ card._syFilter=val; renderSyContent(); refreshFilterBtns(); });
+      fb.addEventListener('click',()=>{ card[_filterKey]=val; renderSyContent(); refreshFilterBtns(); });
       filterRow.appendChild(fb);
     });
     card.appendChild(filterRow);
 
     function refreshFilterBtns(){
       filterRow.querySelectorAll('[data-syf]').forEach(b=>{
-        const active=b.dataset.syf===(card._syFilter||'non-it');
+        const active=b.dataset.syf===(card[_filterKey]||'non-it');
         b.style.background=active?'var(--accent)':'var(--surface2,#e5e7eb)';
         b.style.color=active?'#fff':'var(--dim)';
       });
@@ -3302,9 +3313,8 @@ function renderKomunitas(){
 
     function renderSyContent(){
       listWrap.innerHTML='';
-      const filterVal=card._syFilter||'non-it';
-      const allList=km.syaratMember||[];
-      /* "keduanya" muncul di kedua filter */
+      const filterVal=card[_filterKey]||'non-it';
+      const allList=km[listKey]||[];
       const syList=allList.filter(s=>s.tipe==='keduanya'||(filterVal==='it'?s.tipe==='it':s.tipe!=='it'));
       if(!syList.length){
         const e=document.createElement('div');
@@ -3316,7 +3326,6 @@ function renderKomunitas(){
       syList.forEach((s,idx)=>{
         const tCfg=TIPE_CFG[s.tipe]||TIPE_CFG['non-it'];
         const urlHtml=s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--accent);word-break:break-all">${esc(s.url)}</a>`:'';
-        /* global index in full list for reorder */
         const gIdx=allList.findIndex(x=>x.id===s.id);
         const upDisabled=gIdx<=0;
         const dnDisabled=gIdx>=allList.length-1;
@@ -3346,17 +3355,17 @@ function renderKomunitas(){
           </div>
         `;
         row.querySelector('[data-sy-up]')?.addEventListener('click',()=>{
-          const arr=db.komunitas.syaratMember;
+          const arr=db.regulasi[listKey];
           if(gIdx>0){[arr[gIdx-1],arr[gIdx]]=[arr[gIdx],arr[gIdx-1]];touch(arr[gIdx-1]);touch(arr[gIdx]);save();renderKomunitas();}
         });
         row.querySelector('[data-sy-dn]')?.addEventListener('click',()=>{
-          const arr=db.komunitas.syaratMember;
+          const arr=db.regulasi[listKey];
           if(gIdx<arr.length-1){[arr[gIdx+1],arr[gIdx]]=[arr[gIdx],arr[gIdx+1]];touch(arr[gIdx+1]);touch(arr[gIdx]);save();renderKomunitas();}
         });
-        row.querySelector('[data-sy-edit]')?.addEventListener('click',()=>openModal('syarat-edit',{id:s.id}));
+        row.querySelector('[data-sy-edit]')?.addEventListener('click',()=>openModal('syarat-edit',{id:s.id,listKey}));
         row.querySelector('[data-sy-del]')?.addEventListener('click',()=>{
           if(!confirm(`Hapus syarat "${s.nama}"?`)) return;
-          db.komunitas.syaratMember=db.komunitas.syaratMember.filter(x=>x.id!==s.id);
+          db.regulasi[listKey]=db.regulasi[listKey].filter(x=>x.id!==s.id);
           save(); renderKomunitas();
         });
         listWrap.appendChild(row);
@@ -3412,7 +3421,7 @@ function renderKomunitas(){
         row.querySelector('[data-sk-edit]')?.addEventListener('click',()=>openModal('sanksi-edit',{id:s.id}));
         row.querySelector('[data-sk-del]')?.addEventListener('click',()=>{
           if(!confirm(`Hapus sanksi "${s.name}"?`)) return;
-          db.komunitas.sanksi=db.komunitas.sanksi.filter(x=>x.id!==s.id);
+          db.regulasi.sanksi=db.regulasi.sanksi.filter(x=>x.id!==s.id);
           save(); renderKomunitas();
         });
         card.appendChild(row);

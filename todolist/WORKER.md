@@ -127,15 +127,16 @@ export default {
         });
       }
 
-      function mergeKomunitas(gk, bk) {
-        const base = { visi: '', misi: '', syaratMember: [], sanksi: [] };
-        gk = { ...base, ...gk };
-        bk = { ...base, ...bk };
+      function mergeRegulasi(gr, br) {
+        const base = { visi: '', misi: '', syaratAnggota: [], syaratTim: [], sanksi: [] };
+        gr = { ...base, ...gr };
+        br = { ...base, ...br };
         return {
-          visi: bk.visi,
-          misi: bk.misi,
-          syaratMember: mergeArr(gk.syaratMember, bk.syaratMember),
-          sanksi: mergeArr(gk.sanksi, bk.sanksi),
+          visi: br.visi,
+          misi: br.misi,
+          syaratAnggota: mergeArr(gr.syaratAnggota, br.syaratAnggota),
+          syaratTim:     mergeArr(gr.syaratTim,     br.syaratTim),
+          sanksi:        mergeArr(gr.sanksi,         br.sanksi),
         };
       }
 
@@ -149,7 +150,7 @@ export default {
         events:    mergeArr(gistDb.events    || [], browserDb.events    || []),
         cultures:  mergeArr(gistDb.cultures  || [], browserDb.cultures  || []),
         projects:  mergeProjects(gistDb.projects || [], browserDb.projects || []),
-        komunitas: mergeKomunitas(gistDb.komunitas || {}, browserDb.komunitas || {}),
+        regulasi:  mergeRegulasi(gistDb.regulasi || gistDb.komunitas || {}, browserDb.regulasi || {}),
         settings:  browserDb.settings,
         orgName:   browserDb.orgName,
       };
@@ -179,7 +180,7 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 |-----------|---------------|
 | Array top-level (`tasks`, `members`, `assets`, dll) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
 | `projects[].members[].tasks[]` | Deep merge 3 level — per-task `updatedAt` menang |
-| `komunitas.syaratMember` / `komunitas.sanksi` | Merge by `id` + `updatedAt` |
+| `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.sanksi` | Merge by `id` + `updatedAt` |
 | `settings`, `orgName`, `visi`, `misi` | Browser always wins (last write) |
 
 Ini mencegah data hilang saat dua user edit data berbeda secara bersamaan (race condition).
