@@ -882,9 +882,9 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6) }
 function initials(n){ return n.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('') }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
-function memberTasks(mid){ return db.tasks.filter(t=>t.memberId===mid) }
-function kelompokName(did){ const d=db.kelompoks.find(x=>x.id===did); return d?d.name:'' }
-function kelompokAllIds(id){ const ch=db.kelompoks.filter(k=>k.parentId===id); return [id,...ch.flatMap(c=>kelompokAllIds(c.id))]; }
+function memberTasks(mid){ return db.tasks.filter(t=>t.memberId===mid&&!t.deleted) }
+function kelompokName(did){ const d=db.kelompoks.find(x=>x.id===did&&!x.deleted); return d?d.name:'' }
+function kelompokAllIds(id){ const ch=db.kelompoks.filter(k=>k.parentId===id&&!k.deleted); return [id,...ch.flatMap(c=>kelompokAllIds(c.id))]; }
 function recurrenceLabel(r){
   const map={harian:'Harian',mingguan:'Mingguan',bulanan:'Bulanan',tahunan:'Tahunan'};
   return map[r]||r||'';
@@ -899,14 +899,14 @@ function fmtDueDate(d){
 ══════════════════════════════════════════ */
 function kelompokChildren(parentId){
   return db.kelompoks
-    .filter(k=>(k.parentId||null)===parentId)
+    .filter(k=>(k.parentId||null)===parentId&&!k.deleted)
     .sort((a,b)=>a.order-b.order);
 }
 
 function renderSidebar(){
   const allItem=document.getElementById('allItem');
   allItem.className='all-item'+(activeId===ALL?' active':'');
-  document.getElementById('allCount').textContent=db.tasks.length||'';
+  document.getElementById('allCount').textContent=db.tasks.filter(t=>!t.deleted).length||'';
 
   const scroll=document.getElementById('peopleScroll');
   scroll.innerHTML='';
@@ -928,7 +928,7 @@ function renderSidebar(){
       const idx=siblings.findIndex(s=>s.id===k.id);
       const isJoinable=k.joinable!==false;
 
-      const memberCount=isJoinable?db.members.filter(m=>m.kelompokId===k.id).length:0;
+      const memberCount=isJoinable?db.members.filter(m=>m.kelompokId===k.id&&!m.deleted).length:0;
       const hdr=document.createElement('div');
       hdr.className='kelompok-label';
       hdr.innerHTML=`
@@ -948,7 +948,7 @@ function renderSidebar(){
       const membersBody=document.createElement('div');
       membersBody.className='kelompok-body';
       membersBody.style.display=expanded?'':'none';
-      if(isJoinable) db.members.filter(m=>m.kelompokId===k.id).sort((a,b)=>a.name.localeCompare(b.name,'id')).forEach(m=>membersBody.appendChild(makeMemberItem(m)));
+      if(isJoinable) db.members.filter(m=>m.kelompokId===k.id&&!m.deleted).sort((a,b)=>a.name.localeCompare(b.name,'id')).forEach(m=>membersBody.appendChild(makeMemberItem(m)));
 
       /* toggle on chevron click */
       hdr.querySelector('[data-toggle-grp]')?.addEventListener('click',e=>{
@@ -980,7 +980,7 @@ function renderSidebar(){
   renderKelompokGroup(null, scroll);
 
   /* No-kelompok members */
-  const noGrpMembers=db.members.filter(m=>!m.kelompokId||!db.kelompoks.find(d=>d.id===m.kelompokId));
+  const noGrpMembers=db.members.filter(m=>!m.deleted&&(!m.kelompokId||!db.kelompoks.find(d=>d.id===m.kelompokId&&!d.deleted)));
   if(noGrpMembers.length){
     const NO_GRP='__no_grp__';
     const expandedNG=expandedKelompoks.has(NO_GRP);
@@ -1031,12 +1031,12 @@ function renderSidebar(){
     const k=db.kelompoks.find(d=>d.id===b.dataset.grpDel);
     if(!k) return;
     const allIds=kelompokAllIds(k.id);
-    const memberIds=db.members.filter(m=>allIds.includes(m.kelompokId)).map(m=>m.id);
+    const memberIds=db.members.filter(m=>allIds.includes(m.kelompokId)&&!m.deleted).map(m=>m.id);
     const subCount=allIds.length-1;
     if(!confirm(`Hapus kelompok "${k.name}"? ${subCount?`${subCount} sub-kelompok dan `:''} ${memberIds.length} anggota beserta tugasnya ikut terhapus.`)) return;
-    db.tasks=db.tasks.filter(t=>!memberIds.includes(t.memberId));
-    db.members=db.members.filter(m=>!allIds.includes(m.kelompokId));
-    db.kelompoks=db.kelompoks.filter(d=>!allIds.includes(d.id));
+    db.tasks.filter(t=>memberIds.includes(t.memberId)).forEach(t=>touch(Object.assign(t,{deleted:true})));
+    db.members.filter(m=>allIds.includes(m.kelompokId)).forEach(m=>touch(Object.assign(m,{deleted:true})));
+    db.kelompoks.filter(d=>allIds.includes(d.id)).forEach(d=>touch(Object.assign(d,{deleted:true})));
     if(memberIds.includes(activeId)) activeId=null;
     save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain();
   }));
@@ -1074,8 +1074,8 @@ function makeMemberItem(m){
     div.querySelector(`[data-mem-del="${m.id}"]`).addEventListener('click',e=>{
       e.stopPropagation();
       if(!confirm(`Hapus "${m.name}" dan semua tugasnya?`)) return;
-      db.members=db.members.filter(x=>x.id!==m.id);
-      db.tasks=db.tasks.filter(t=>t.memberId!==m.id);
+      const dm=db.members.find(x=>x.id===m.id); if(dm) touch(Object.assign(dm,{deleted:true}));
+      db.tasks.filter(t=>t.memberId===m.id).forEach(t=>touch(Object.assign(t,{deleted:true})));
       if(activeId===m.id) activeId=null;
       save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain();
     });
@@ -1145,7 +1145,7 @@ function renderMain(){
       <div class="mh-avatar" style="font-size:.7rem">☰</div>
       <div>
         <div class="mh-name">Semua Anggota</div>
-        <div class="mh-sub">${db.members.length} anggota · ${db.tasks.length} tugas</div>
+        <div class="mh-sub">${db.members.filter(m=>!m.deleted).length} anggota · ${db.tasks.filter(t=>!t.deleted).length} tugas</div>
       </div>
     `;
     taskAddRow.style.display='none';
@@ -1202,7 +1202,7 @@ function renderTasks(){
   if(isAll){
     /* build name-groups: distinct name → array of member objects, sorted alpha */
     const nameMap=new Map();
-    db.members.forEach(m=>{
+    db.members.filter(m=>!m.deleted).forEach(m=>{
       if(!nameMap.has(m.name)) nameMap.set(m.name,[]);
       nameMap.get(m.name).push(m);
     });
@@ -1342,7 +1342,7 @@ function makeTaskCard(t, showActions){
     div.querySelector(`[data-task-edit="${t.id}"]`).addEventListener('click',()=>openModal('task-edit',{id:t.id}));
     div.querySelector(`[data-task-del="${t.id}"]`).addEventListener('click',()=>{
       if(!confirm('Hapus tugas ini?')) return;
-      db.tasks=db.tasks.filter(x=>x.id!==t.id);
+      const dt=db.tasks.find(x=>x.id===t.id); if(dt) touch(Object.assign(dt,{deleted:true}));
       save(); renderSidebar(); renderTasks();
     });
   }
@@ -1392,12 +1392,12 @@ function renderAssetTable(){
   /* update category options */
   const catSel=document.getElementById('assetCatSel');
   if(catSel){
-    const cats=[...new Set(db.assets.map(a=>a.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'id'));
+    const cats=[...new Set(db.assets.filter(a=>!a.deleted).map(a=>a.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'id'));
     catSel.innerHTML=`<option value="">Semua Kategori</option>`+cats.map(c=>`<option value="${esc(c)}"${assetCatFilter===c?' selected':''}>${esc(c)}</option>`).join('');
   }
 
   /* filter */
-  let assets=[...db.assets].sort((a,b)=>a.name.localeCompare(b.name,'id'));
+  let assets=db.assets.filter(a=>!a.deleted).sort((a,b)=>a.name.localeCompare(b.name,'id'));
   if(assetSearch) assets=assets.filter(a=>a.name.toLowerCase().includes(assetSearch));
   if(assetCatFilter) assets=assets.filter(a=>a.category===assetCatFilter);
 
@@ -1443,7 +1443,7 @@ function renderAssetTable(){
   wrap.querySelectorAll('[data-asset-del]').forEach(b=>b.addEventListener('click',()=>{
     const a=db.assets.find(x=>x.id===b.dataset.assetDel);
     if(!a||!confirm(`Hapus aset "${a.name}"?`)) return;
-    db.assets=db.assets.filter(x=>x.id!==a.id);
+    touch(Object.assign(a,{deleted:true}));
     save(); renderAssetTable();
   }));
   wrap.querySelectorAll('[data-copy-url]').forEach(b=>b.addEventListener('click',()=>{
@@ -1629,7 +1629,7 @@ function renderOrgChart(){
   const area=document.getElementById('orgArea');
   area.innerHTML='';
 
-  if(!db.kelompoks.length){
+  if(!db.kelompoks.filter(k=>!k.deleted).length){
     area.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:.78rem;padding:40px">Belum ada kelompok.</div>`;
     return;
   }
@@ -1678,13 +1678,13 @@ function renderOrgChart(){
   canvas.appendChild(rootEl);
 
   /* Kelompok nodes — absolutely positioned */
-  db.kelompoks.forEach(k=>{
+  db.kelompoks.filter(k=>!k.deleted).forEach(k=>{
     if(posX[k.id]===undefined) return;
     const d=nodeDepth(k.id);
     const y=PAD+RH+VG+d*(NH+VG);
     const isJoinable=k.joinable!==false;
-    const mc=isJoinable?db.members.filter(m=>m.kelompokId===k.id).length:(k.jumlah??0);
-    const tc=isJoinable?db.tasks.filter(t=>db.members.some(m=>m.id===t.memberId&&m.kelompokId===k.id)).length:0;
+    const mc=isJoinable?db.members.filter(m=>m.kelompokId===k.id&&!m.deleted).length:(k.jumlah??0);
+    const tc=isJoinable?db.tasks.filter(t=>!t.deleted&&db.members.some(m=>m.id===t.memberId&&m.kelompokId===k.id&&!m.deleted)).length:0;
     const el=document.createElement('div');
     el.className='org-kelompok-node'+(k.parentId?' depth-1':'');
     el.dataset.kid=k.id;
@@ -1737,7 +1737,7 @@ function renderOrgChart(){
     branch(rCX,rBot,topKids.map(k=>getEl(k.id)).filter(Boolean));
 
     /* each kelompok → its children */
-    db.kelompoks.forEach(k=>{
+    db.kelompoks.filter(k=>!k.deleted).forEach(k=>{
       const el=getEl(k.id);
       if(!el) return;
       const childEls=kelompokChildren(k.id).map(c=>getEl(c.id)).filter(Boolean);
@@ -1778,7 +1778,7 @@ function openModal(mode, ctx){
 
   if(mode==='div-add'){
     title.textContent='Tambah Kelompok';
-    const allParentOpts=()=>db.kelompoks.map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('');
+    const allParentOpts=()=>db.kelompoks.filter(k=>!k.deleted).map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('');
     function addKelompokRow(container){
       const row=document.createElement('div');
       row.className='repeater-row';
@@ -1821,10 +1821,10 @@ function openModal(mode, ctx){
   else if(mode==='grp-edit'){
     const div=db.kelompoks.find(d=>d.id===mCtx.id);
     title.textContent='Edit Kelompok';
-    function descendants(id){ const ch=db.kelompoks.filter(k=>k.parentId===id); return [id,...ch.flatMap(c=>descendants(c.id))]; }
+    function descendants(id){ const ch=db.kelompoks.filter(k=>k.parentId===id&&!k.deleted); return [id,...ch.flatMap(c=>descendants(c.id))]; }
     const excludeIds=div?descendants(div.id):[];
     const parentOpts=db.kelompoks
-      .filter(k=>!excludeIds.includes(k.id))
+      .filter(k=>!excludeIds.includes(k.id)&&!k.deleted)
       .map(k=>`<option value="${k.id}" ${(div?div.parentId:null)===k.id?'selected':''}>${esc(k.name)}</option>`)
       .join('');
     const isJoinable=div?.joinable!==false;
@@ -1897,15 +1897,15 @@ function openModal(mode, ctx){
     if(!k){ return; }
     title.textContent=k.name;
     document.getElementById('modalSave').style.display='none';
-    const members=db.members.filter(m=>m.kelompokId===k.id).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+    const members=db.members.filter(m=>m.kelompokId===k.id&&!m.deleted).sort((a,b)=>a.name.localeCompare(b.name,'id'));
     body.innerHTML=members.length
       ? `<div class="modal-member-list" id="mmList"></div>`
       : `<div style="text-align:center;color:var(--dim);font-size:.78rem;padding:20px 0">Belum ada anggota di kelompok ini.</div>`;
     if(members.length){
       const list=document.getElementById('mmList');
       members.forEach(m=>{
-        const rec=db.tasks.filter(t=>t.memberId===m.id&&t.type==='recurring').length;
-        const once=db.tasks.filter(t=>t.memberId===m.id&&t.type==='once').length;
+        const rec=db.tasks.filter(t=>t.memberId===m.id&&t.type==='recurring'&&!t.deleted).length;
+        const once=db.tasks.filter(t=>t.memberId===m.id&&t.type==='once'&&!t.deleted).length;
         const row=document.createElement('div');
         row.className='modal-member-row';
         row.innerHTML=`
@@ -1931,7 +1931,7 @@ function openModal(mode, ctx){
 
   else if(mode==='mem-add'){
     title.textContent='Tambah Anggota';
-    const kelompokOpts=()=>db.kelompoks.map(d=>`<option value="${d.id}"${mCtx.kelompokId===d.id?' selected':''}>${esc(d.name)}</option>`).join('');
+    const kelompokOpts=()=>db.kelompoks.filter(d=>!d.deleted).map(d=>`<option value="${d.id}"${mCtx.kelompokId===d.id?' selected':''}>${esc(d.name)}</option>`).join('');
     function addMemberRow(container){
       const row=document.createElement('div');
       row.className='repeater-row';
@@ -1961,7 +1961,7 @@ function openModal(mode, ctx){
   else if(mode==='mem-edit'){
     const mem=db.members.find(m=>m.id===mCtx.id);
     title.textContent='Edit Anggota';
-    const divOpts=db.kelompoks.map(d=>`<option value="${d.id}" ${mem&&mem.kelompokId===d.id?'selected':''}>${esc(d.name)}</option>`).join('');
+    const divOpts=db.kelompoks.filter(d=>!d.deleted).map(d=>`<option value="${d.id}" ${mem&&mem.kelompokId===d.id?'selected':''}>${esc(d.name)}</option>`).join('');
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Nama</label>
@@ -2164,6 +2164,7 @@ function openModal(mode, ctx){
     const usedNames=new Set((proj?.members||[]).filter(m=>m.type==='internal'&&m.id!==ctx.memberId).map(m=>m.name.toLowerCase()));
     const seenNames=new Set();
     const internalOpts=db.members
+      .filter(m=>!m.deleted)
       .sort((a,b)=>a.name.localeCompare(b.name))
       .filter(m=>{const nl=m.name.toLowerCase();if(usedNames.has(nl)||seenNames.has(nl))return false;seenNames.add(nl);return true;})
       .map(m=>`<option value="${m.id}"${mem?.internalMemberId===m.id?' selected':''}>${esc(m.name)}</option>`).join('');
@@ -2304,7 +2305,7 @@ function openModal(mode, ctx){
         <label class="form-label">Kelompok <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
         <select class="form-select" id="fi-sk-kel">
           <option value="">— Tidak ada —</option>
-          ${(db.kelompoks||[]).map(k=>`<option value="${esc(k.name)}" ${(s?.kelompok===k.name)?'selected':''}>${esc(k.name)}</option>`).join('')}
+          ${(db.kelompoks||[]).filter(k=>!k.deleted).map(k=>`<option value="${esc(k.name)}" ${(s?.kelompok===k.name)?'selected':''}>${esc(k.name)}</option>`).join('')}
         </select>
       </div>
       <div class="form-group">
@@ -2331,7 +2332,7 @@ function openModal(mode, ctx){
     const s=mode==='keuntungan-edit'?(db.regulasi.keuntungan||[]).find(x=>x.id===mCtx.id):null;
     const selKels=s?.kelompoks||[];
     title.textContent=mode==='keuntungan-add'?'Tambah Keuntungan':'Edit Keuntungan';
-    const kelPills=(db.kelompoks||[]).map(k=>{
+    const kelPills=(db.kelompoks||[]).filter(k=>!k.deleted).map(k=>{
       const checked=selKels.includes(k.name);
       return `<label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid ${checked?'var(--accent)':'var(--border,#d1d5db)'};background:${checked?'var(--accent)':'transparent'};color:${checked?'#fff':'var(--dim)'};transition:.15s" class="kt-kel-pill">
         <input type="checkbox" name="kt-kel" value="${esc(k.name)}" ${checked?'checked':''} style="display:none"/>
@@ -2479,7 +2480,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     if(k){
       /* block: joinable true→false when members exist */
       if(k.joinable!==false&&!joinable){
-        const mc=db.members.filter(m=>m.kelompokId===k.id).length;
+        const mc=db.members.filter(m=>m.kelompokId===k.id&&!m.deleted).length;
         if(mc>0){ alert(`Tidak bisa diubah ke non-joinable — masih ada ${mc} anggota. Pindahkan atau hapus anggota terlebih dahulu.`); return; }
       }
       if(k.parentId!==parentId){
@@ -2738,7 +2739,7 @@ function renderInfoList(area, today){
   area.querySelectorAll('.info-section').forEach(el=>el.remove());
 
   const q = infoSearch.toLowerCase();
-  const all = (db.events||[]).filter(ev=> !q || ev.title.toLowerCase().includes(q));
+  const all = (db.events||[]).filter(ev=> !ev.deleted && (!q || ev.title.toLowerCase().includes(q)));
 
   // Split: lampau = once && date < today; aktif = rest
   const aktif = all.filter(ev=> ev.type==='recurring' || !ev.date || ev.date >= today)
@@ -2814,7 +2815,7 @@ function renderInfoList(area, today){
   area.querySelectorAll('[data-ev-del]').forEach(b=>b.addEventListener('click',()=>{
     const ev = db.events.find(x=>x.id===b.dataset.evDel);
     if(!ev||!confirm(`Hapus pemberitahuan "${ev.title}"?`)) return;
-    db.events = db.events.filter(x=>x.id!==ev.id);
+    touch(Object.assign(ev,{deleted:true}));
     save(); renderInfo();
   }));
 }
@@ -3279,7 +3280,7 @@ function renderCultures(){
   toolbar.innerHTML=`<span class="asset-toolbar-title">Sejarah Organisasi</span>`;
   area.appendChild(toolbar);
 
-  const cultures=db.cultures||[];
+  const cultures=(db.cultures||[]).filter(c=>!c.deleted);
   if(!cultures.length){
     const e=document.createElement('div');
     e.className='asset-empty';
@@ -3339,7 +3340,7 @@ function renderCultures(){
     card.querySelector('[data-culture-edit]')?.addEventListener('click',()=>openModal('culture-edit',{id:c.id}));
     card.querySelector('[data-culture-del]')?.addEventListener('click',()=>{
       if(!confirm(`Hapus "${c.title}"?`)) return;
-      db.cultures=db.cultures.filter(x=>x.id!==c.id); save(); renderCultures();
+      touch(Object.assign(c,{deleted:true})); save(); renderCultures();
     });
 
     item.appendChild(card);
@@ -3542,7 +3543,7 @@ function renderKomunitas(){
     card.appendChild(ktHdr);
 
     /* filter kelompok */
-    const kelList=db.kelompoks||[];
+    const kelList=(db.kelompoks||[]).filter(k=>!k.deleted);
     const filterRow=document.createElement('div');
     filterRow.style.cssText='display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap';
     const _fk='_ktFilter';
@@ -3708,6 +3709,7 @@ async function forceSendNotif(btn){
   try {
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
     const qualifying = (db.events||[]).filter(ev => {
+      if(ev.deleted) return false;
       if(ev.type === 'once') return ev.date && ev.date >= today;
       if(ev.type === 'recurring') return true;
       return false;
@@ -3773,6 +3775,7 @@ function getTodayEvents(){
   const today = now.toISOString().slice(0,10);
   const globalDaysBefore = db.settings?.notifDaysBefore ?? 1;
   return (db.events||[]).filter(ev=>{
+    if(ev.deleted) return false;
     if(ev.type==='once'){
       if(!ev.date) return false;
       const start = new Date(ev.date+'T00:00:00');
@@ -3796,7 +3799,7 @@ function getTodayEvents(){
 
 function updateBellBadge(){
   const lastRead = parseInt(localStorage.getItem('alteco_info_read_ts')||'0');
-  const unread = (db.events||[]).filter(ev=>Math.max(ev.createdAt||0, ev.updatedAt||0)>lastRead).length;
+  const unread = (db.events||[]).filter(ev=>!ev.deleted&&Math.max(ev.createdAt||0, ev.updatedAt||0)>lastRead).length;
   const badge = document.getElementById('bellBadge');
   if(!badge) return;
   if(unread>0){ badge.textContent=unread; badge.style.display='flex'; }

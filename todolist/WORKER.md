@@ -179,12 +179,16 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 
 | Tipe data | Strategi merge |
 |-----------|---------------|
-| Array top-level (`tasks`, `members`, `assets`, dll) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
+| Array top-level (`tasks`, `members`, `kelompoks`, `assets`, `events`, `cultures`) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
 | `projects[].members[].tasks[]` | Deep merge 3 level — per-task `updatedAt` menang |
-| `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.sanksi` | Merge by `id` + `updatedAt` |
+| `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.keuntungan` / `regulasi.sanksi` | Merge by `id` + `updatedAt` |
 | `settings`, `orgName`, `visi`, `misi` | Browser always wins (last write) |
 
 Ini mencegah data hilang saat dua user edit data berbeda secara bersamaan (race condition).
+
+### Soft Delete (Tombstone)
+
+Semua operasi hapus di browser **tidak** membuang item dari array — melainkan menandai `deleted: true` + memperbarui `updatedAt`. Worker tidak perlu perubahan: item bertanda `deleted` dengan `updatedAt` lebih baru akan menang di `mergeArr` dan masuk ke Gist. Render di browser sudah memfilter item dengan `deleted: true`.
 
 ---
 
