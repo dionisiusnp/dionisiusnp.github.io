@@ -1010,7 +1010,7 @@ function renderSidebar(){
     if(!k) return;
     const siblings=kelompokChildren(k.parentId||null);
     const i=siblings.findIndex(s=>s.id===k.id);
-    if(i>0){ const tmp=siblings[i-1].order; siblings[i-1].order=k.order; k.order=tmp; }
+    if(i>0){ const tmp=siblings[i-1].order; siblings[i-1].order=k.order; k.order=tmp; touch(siblings[i-1]); touch(k); }
     save(); renderSidebar();
   }));
   scroll.querySelectorAll('[data-grp-dn]').forEach(b=>b.addEventListener('click',e=>{
@@ -1019,7 +1019,7 @@ function renderSidebar(){
     if(!k) return;
     const siblings=kelompokChildren(k.parentId||null);
     const i=siblings.findIndex(s=>s.id===k.id);
-    if(i<siblings.length-1){ const tmp=siblings[i+1].order; siblings[i+1].order=k.order; k.order=tmp; }
+    if(i<siblings.length-1){ const tmp=siblings[i+1].order; siblings[i+1].order=k.order; k.order=tmp; touch(siblings[i+1]); touch(k); }
     save(); renderSidebar();
   }));
   scroll.querySelectorAll('[data-grp-edit]').forEach(b=>b.addEventListener('click',e=>{
