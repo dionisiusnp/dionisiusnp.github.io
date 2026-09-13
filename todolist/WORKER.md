@@ -128,7 +128,7 @@ export default {
       }
 
       function mergeRegulasi(gr, br) {
-        const base = { visi: '', misi: '', syaratAnggota: [], syaratTim: [], sanksi: [] };
+        const base = { visi: '', misi: '', syaratAnggota: [], syaratTim: [], keuntungan: [], sanksi: [] };
         gr = { ...base, ...gr };
         br = { ...base, ...br };
         return {
@@ -136,6 +136,7 @@ export default {
           misi: br.misi,
           syaratAnggota: mergeArr(gr.syaratAnggota, br.syaratAnggota),
           syaratTim:     mergeArr(gr.syaratTim,     br.syaratTim),
+          keuntungan:    mergeArr(gr.keuntungan,    br.keuntungan),
           sanksi:        mergeArr(gr.sanksi,         br.sanksi),
         };
       }

@@ -655,10 +655,12 @@ function migrate(d){
   if(!d.regulasi.syaratAnggota) d.regulasi.syaratAnggota=d.regulasi.syaratMember||[];
   if(!d.regulasi.syaratTim) d.regulasi.syaratTim=[];
   if(!d.regulasi.sanksi) d.regulasi.sanksi=[];
+  if(!d.regulasi.keuntungan) d.regulasi.keuntungan=[];
   delete d.regulasi.syaratMember;
   if(d.regulasi.syaratAnggota) d.regulasi.syaratAnggota=d.regulasi.syaratAnggota.map(s=>Object.assign({updatedAt:0},s));
   if(d.regulasi.syaratTim) d.regulasi.syaratTim=d.regulasi.syaratTim.map(s=>Object.assign({updatedAt:0},s));
   if(d.regulasi.sanksi) d.regulasi.sanksi=d.regulasi.sanksi.map(s=>Object.assign({updatedAt:0},s));
+  if(d.regulasi.keuntungan) d.regulasi.keuntungan=d.regulasi.keuntungan.map(s=>Object.assign({updatedAt:0},s));
   if(d.tasks) d.tasks=d.tasks.map(t=>Object.assign({updatedAt:0},t));
   if(d.members) d.members=d.members.map(m=>Object.assign({updatedAt:0},m));
   if(d.assets) d.assets=d.assets.map(a=>Object.assign({updatedAt:0},a));
@@ -2242,6 +2244,33 @@ function openModal(mode, ctx){
     `;
     document.getElementById('fi-sk-name').focus();
   }
+
+  else if(mode==='keuntungan-add'||mode==='keuntungan-edit'){
+    const s=mode==='keuntungan-edit'?(db.regulasi.keuntungan||[]).find(x=>x.id===mCtx.id):null;
+    title.textContent=mode==='keuntungan-add'?'Tambah Keuntungan':'Edit Keuntungan';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Keuntungan</label>
+        <input class="form-input" id="fi-kt-nama" type="text" value="${esc(s?.nama||'')}" placeholder="Contoh: Akses mentoring eksklusif" maxlength="120"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kelompok <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <select class="form-select" id="fi-kt-kel">
+          <option value="">— Semua kelompok —</option>
+          ${(db.kelompoks||[]).map(k=>`<option value="${esc(k.name)}" ${(s?.kelompok===k.name)?'selected':''}>${esc(k.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keterangan <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-kt-ket" rows="3" placeholder="Penjelasan lebih lanjut…">${esc(s?.keterangan||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL Referensi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-kt-url" type="url" value="${esc(s?.url||'')}" placeholder="https://…"/>
+      </div>
+    `;
+    document.getElementById('fi-kt-nama').focus();
+  }
 }
 
 function closeModal(){
@@ -2526,6 +2555,22 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       const s=(db.regulasi.sanksi||[]).find(x=>x.id===mCtx.id);
       if(!s) return;
       s.name=name; s.kelompok=kelompok; s.level=level; s.alasan=alasan; s.date=date; touch(s);
+    }
+    save(); renderKomunitas(); closeModal();
+  }
+  else if(mMode==='keuntungan-add'||mMode==='keuntungan-edit'){
+    const nama=document.getElementById('fi-kt-nama').value.trim();
+    if(!nama) return;
+    const kelompok=document.getElementById('fi-kt-kel').value.trim();
+    const keterangan=document.getElementById('fi-kt-ket').value.trim();
+    const url=document.getElementById('fi-kt-url').value.trim();
+    if(mMode==='keuntungan-add'){
+      db.regulasi.keuntungan=(db.regulasi.keuntungan||[]);
+      db.regulasi.keuntungan.push(touch({id:uid(),nama,kelompok,keterangan,url}));
+    } else {
+      const s=(db.regulasi.keuntungan||[]).find(x=>x.id===mCtx.id);
+      if(!s) return;
+      s.nama=nama; s.kelompok=kelompok; s.keterangan=keterangan; s.url=url; touch(s);
     }
     save(); renderKomunitas(); closeModal();
   }
@@ -3231,6 +3276,7 @@ function renderKomunitas(){
     {id:'vismis',label:'📜 Visi & Misi'},
     {id:'syarat-anggota',label:'👤 Syarat Anggota'},
     {id:'syarat-tim',label:'👥 Syarat Tim'},
+    {id:'keuntungan',label:'🎁 Keuntungan'},
     {id:'sanksi',label:'⚠️ Sanksi'},
   ];
   const activeTab=area._kmTab||'vismis';
@@ -3248,6 +3294,7 @@ function renderKomunitas(){
 
   const card=document.createElement('div');
   card.className='settings-card';
+  card.style.cssText='overflow-y:auto;max-height:calc(100vh - 220px)';
   area.appendChild(card);
 
   /* ── Tab: Visi & Misi ── */
@@ -3372,6 +3419,116 @@ function renderKomunitas(){
       });
     }
     renderSyContent();
+  }
+
+  /* ── Tab: Keuntungan ── */
+  else if(activeTab==='keuntungan'){
+    const ktHdr=document.createElement('div');
+    ktHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
+    ktHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">Keuntungan Bergabung</div>`;
+    if(isAdmin){
+      const addBtn=document.createElement('button');
+      addBtn.className='task-add-inline-btn';
+      addBtn.textContent='＋ Tambah';
+      addBtn.addEventListener('click',()=>openModal('keuntungan-add',{}));
+      ktHdr.appendChild(addBtn);
+    }
+    card.appendChild(ktHdr);
+
+    /* filter kelompok */
+    const kelList=db.kelompoks||[];
+    const filterRow=document.createElement('div');
+    filterRow.style.cssText='display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap';
+    const _fk='_ktFilter';
+    const allOpt=document.createElement('button');
+    allOpt.dataset.ktf='';
+    allOpt.textContent='Semua';
+    const allActive=!card[_fk];
+    allOpt.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${allActive?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--dim);'}`;
+    allOpt.addEventListener('click',()=>{ card[_fk]=''; renderKtContent(); refreshKtBtns(); });
+    filterRow.appendChild(allOpt);
+    kelList.forEach(k=>{
+      const fb=document.createElement('button');
+      fb.dataset.ktf=k.name;
+      const active=card[_fk]===k.name;
+      fb.textContent=k.name;
+      fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--dim);'}`;
+      fb.addEventListener('click',()=>{ card[_fk]=k.name; renderKtContent(); refreshKtBtns(); });
+      filterRow.appendChild(fb);
+    });
+    card.appendChild(filterRow);
+
+    function refreshKtBtns(){
+      filterRow.querySelectorAll('[data-ktf]').forEach(b=>{
+        const active=b.dataset.ktf===(card[_fk]||'');
+        b.style.background=active?'var(--accent)':'var(--surface2,#e5e7eb)';
+        b.style.color=active?'#fff':'var(--dim)';
+      });
+    }
+
+    const listWrap=document.createElement('div');
+    card.appendChild(listWrap);
+
+    function renderKtContent(){
+      listWrap.innerHTML='';
+      const filterVal=card[_fk]||'';
+      const allList=km.keuntungan||[];
+      const ktList=filterVal?allList.filter(x=>x.kelompok===filterVal):allList;
+      if(!ktList.length){
+        const e=document.createElement('div');
+        e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
+        e.textContent='Belum ada keuntungan.';
+        listWrap.appendChild(e);
+        return;
+      }
+      ktList.forEach((s,idx)=>{
+        const urlHtml=s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--accent);word-break:break-all">${esc(s.url)}</a>`:'';
+        const gIdx=allList.findIndex(x=>x.id===s.id);
+        const upDisabled=gIdx<=0;
+        const dnDisabled=gIdx>=allList.length-1;
+        const reorderHtml=isAdmin?`
+          <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;margin-top:1px">
+            <button class="asset-act-btn" data-kt-up="${s.id}" ${upDisabled?'disabled':''} style="padding:1px 5px;font-size:.7rem;line-height:1.4${upDisabled?';opacity:.3':''}">▲</button>
+            <button class="asset-act-btn" data-kt-dn="${s.id}" ${dnDisabled?'disabled':''} style="padding:1px 5px;font-size:.7rem;line-height:1.4${dnDisabled?';opacity:.3':''}">▼</button>
+          </div>`:'';
+        const actsHtml=isAdmin?`<div style="display:flex;gap:5px;margin-top:6px">
+          <button class="asset-act-btn" data-kt-edit="${s.id}">✎</button>
+          <button class="asset-act-btn del" data-kt-del="${s.id}">✕</button>
+        </div>`:'';
+        const row=document.createElement('div');
+        row.className='settings-row';
+        row.style.cssText='align-items:flex-start;gap:8px;padding:12px 0';
+        row.innerHTML=`
+          ${reorderHtml}
+          <span style="min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${idx+1}</span>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span style="font-weight:600;font-size:.9rem;color:var(--text)">${esc(s.nama)}</span>
+              ${s.kelompok?`<span style="font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--surface2,#e5e7eb);color:var(--dim)">${esc(s.kelompok)}</span>`:''}
+            </div>
+            ${s.keterangan?`<div style="font-size:.82rem;color:var(--dim);margin-top:3px;line-height:1.5">${esc(s.keterangan)}</div>`:''}
+            ${urlHtml}
+            ${actsHtml}
+          </div>
+        `;
+        row.querySelector('[data-kt-up]')?.addEventListener('click',()=>{
+          const arr=db.regulasi.keuntungan;
+          if(gIdx>0){[arr[gIdx-1],arr[gIdx]]=[arr[gIdx],arr[gIdx-1]];touch(arr[gIdx-1]);touch(arr[gIdx]);save();renderKomunitas();}
+        });
+        row.querySelector('[data-kt-dn]')?.addEventListener('click',()=>{
+          const arr=db.regulasi.keuntungan;
+          if(gIdx<arr.length-1){[arr[gIdx+1],arr[gIdx]]=[arr[gIdx],arr[gIdx+1]];touch(arr[gIdx+1]);touch(arr[gIdx]);save();renderKomunitas();}
+        });
+        row.querySelector('[data-kt-edit]')?.addEventListener('click',()=>openModal('keuntungan-edit',{id:s.id}));
+        row.querySelector('[data-kt-del]')?.addEventListener('click',()=>{
+          if(!confirm(`Hapus keuntungan "${s.nama}"?`)) return;
+          db.regulasi.keuntungan=db.regulasi.keuntungan.filter(x=>x.id!==s.id);
+          save(); renderKomunitas();
+        });
+        listWrap.appendChild(row);
+      });
+    }
+    renderKtContent();
   }
 
   /* ── Tab: Sanksi ── */
