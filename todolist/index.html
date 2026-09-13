@@ -3240,14 +3240,31 @@ function renderKomunitas(){
   }
   card2.appendChild(syHdr);
 
-  const syList=km.syaratMember||[];
-  if(!syList.length){
-    const e=document.createElement('div');
-    e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
-    e.textContent='Belum ada syarat member.';
-    card2.appendChild(e);
-  } else {
-    syList.forEach((s,idx)=>{
+  /* filter tipe */
+  const syFilterWrap=document.createElement('div');
+  syFilterWrap.style.cssText='margin-top:10px';
+  const syFilter=document.createElement('select');
+  syFilter.className='form-select';
+  syFilter.style.cssText='font-size:.8rem;padding:4px 8px;width:auto;min-width:120px';
+  syFilter.innerHTML=`<option value="non-it">Non-IT</option><option value="it">IT</option><option value="all">Semua</option>`;
+  syFilter.value='non-it';
+  syFilterWrap.appendChild(syFilter);
+  card2.appendChild(syFilterWrap);
+
+  function renderSyList(){
+    card2.querySelectorAll('.sy-list-wrap').forEach(el=>el.remove());
+    const wrap=document.createElement('div');
+    wrap.className='sy-list-wrap';
+    const filterVal=syFilter.value;
+    const allList=km.syaratMember||[];
+    const syList=filterVal==='all'?allList:allList.filter(s=>filterVal==='it'?s.tipe==='it':(s.tipe!=='it'));
+    if(!syList.length){
+      const e=document.createElement('div');
+      e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
+      e.textContent='Belum ada syarat member.';
+      wrap.appendChild(e);
+    } else {
+      syList.forEach((s,idx)=>{
       const row=document.createElement('div');
       row.className='settings-row';
       row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;padding:14px 0';
@@ -3278,9 +3295,13 @@ function renderKomunitas(){
         db.komunitas.syaratMember=db.komunitas.syaratMember.filter(x=>x.id!==s.id);
         save(); renderKomunitas();
       });
-      card2.appendChild(row);
+      wrap.appendChild(row);
     });
+    }
+    card2.appendChild(wrap);
   }
+  syFilter.addEventListener('change',renderSyList);
+  renderSyList();
   area.appendChild(card2);
 
   /* ── Card 3: Sanksi ── */
