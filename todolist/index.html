@@ -3252,7 +3252,7 @@ function renderKomunitas(){
 
   /* ── Tab: Visi & Misi ── */
   if(activeTab==='vismis'){
-    const vm_acts=isAdmin?`<button class="asset-act-btn" id="btnEditVismis" style="margin-left:auto">✎ Edit</button>`:'';
+    const vm_acts=isAdmin?`<button id="btnEditVismis" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border,#d1d5db);background:var(--surface2,#f3f4f6);color:var(--text);font-size:.78rem;font-weight:600;cursor:pointer">✎ Edit</button>`:'';
     card.innerHTML=`
       <div class="settings-section-title" style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
         Visi &amp; Misi ${vm_acts}
