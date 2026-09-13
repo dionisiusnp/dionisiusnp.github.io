@@ -934,7 +934,7 @@ function renderSidebar(){
       hdr.innerHTML=`
         ${memberCount?`<span class="kelompok-chevron" style="transform:rotate(${expanded?90:0}deg);cursor:pointer" data-toggle-grp="${k.id}">▶</span>`:''}
         <span class="kelompok-name-text">${esc(k.name)}</span>
-        ${!isJoinable?`<span style="font-size:.68rem;color:var(--dim);margin-left:4px">👥 ${k.jumlah??0}</span>`:''}
+        ${!isJoinable?`<span style="font-size:.75rem;color:var(--dim);margin-left:4px">(${k.jumlah??0})</span>`:''}
         ${role==='admin'?`<span class="grp-actions">
           ${idx>0?`<button class="grp-order-btn" data-grp-up="${k.id}" title="Naik">▲</button>`:''}
           ${idx<siblings.length-1?`<button class="grp-order-btn" data-grp-dn="${k.id}" title="Turun">▼</button>`:''}
