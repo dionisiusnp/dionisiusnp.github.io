@@ -639,7 +639,7 @@ function gistOk(){ return !!WORKER_URL; }
 function touch(item){ item.updatedAt=Date.now(); return item; }
 
 function migrate(d){
-  d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i,updatedAt:0},k));
+  d.kelompoks=d.kelompoks.map((k,i)=>Object.assign({parentId:null,order:i,updatedAt:0,joinable:true,jumlah:null},k));
   if(!d.orgName) d.orgName='Alteco';
   if(!d.assets) d.assets=[];
   if(!d.events) d.events=[];
@@ -660,7 +660,12 @@ function migrate(d){
   if(d.regulasi.syaratAnggota) d.regulasi.syaratAnggota=d.regulasi.syaratAnggota.map(s=>Object.assign({updatedAt:0},s));
   if(d.regulasi.syaratTim) d.regulasi.syaratTim=d.regulasi.syaratTim.map(s=>Object.assign({updatedAt:0},s));
   if(d.regulasi.sanksi) d.regulasi.sanksi=d.regulasi.sanksi.map(s=>Object.assign({updatedAt:0},s));
-  if(d.regulasi.keuntungan) d.regulasi.keuntungan=d.regulasi.keuntungan.map(s=>Object.assign({updatedAt:0},s));
+  if(d.regulasi.keuntungan) d.regulasi.keuntungan=d.regulasi.keuntungan.map(s=>{
+    const base=Object.assign({updatedAt:0,kelompoks:[]},s);
+    if(base.kelompok&&!base.kelompoks.length) base.kelompoks=[base.kelompok];
+    delete base.kelompok;
+    return base;
+  });
   if(d.tasks) d.tasks=d.tasks.map(t=>Object.assign({updatedAt:0},t));
   if(d.members) d.members=d.members.map(m=>Object.assign({updatedAt:0},m));
   if(d.assets) d.assets=d.assets.map(a=>Object.assign({updatedAt:0},a));
@@ -876,27 +881,29 @@ function renderSidebar(){
       const expanded=expandedKelompoks.has(k.id);
       const siblings=kelompokChildren(k.parentId||null);
       const idx=siblings.findIndex(s=>s.id===k.id);
+      const isJoinable=k.joinable!==false;
 
-      const memberCount=db.members.filter(m=>m.kelompokId===k.id).length;
+      const memberCount=isJoinable?db.members.filter(m=>m.kelompokId===k.id).length:0;
       const hdr=document.createElement('div');
       hdr.className='kelompok-label';
       hdr.innerHTML=`
         ${memberCount?`<span class="kelompok-chevron" style="transform:rotate(${expanded?90:0}deg);cursor:pointer" data-toggle-grp="${k.id}">▶</span>`:''}
         <span class="kelompok-name-text">${esc(k.name)}</span>
+        ${!isJoinable?`<span style="font-size:.68rem;color:var(--dim);margin-left:4px">👥 ${k.jumlah??0}</span>`:''}
         ${role==='admin'?`<span class="grp-actions">
           ${idx>0?`<button class="grp-order-btn" data-grp-up="${k.id}" title="Naik">▲</button>`:''}
           ${idx<siblings.length-1?`<button class="grp-order-btn" data-grp-dn="${k.id}" title="Turun">▼</button>`:''}
           <button class="grp-act-btn" data-grp-edit="${k.id}" title="Edit">✎</button>
           <button class="grp-act-btn del" data-grp-del="${k.id}" title="Hapus">✕</button>
-          <button class="grp-act-btn" data-grp-add-mem="${k.id}" title="+ Anggota" style="color:var(--accent)">+</button>
+          ${isJoinable?`<button class="grp-act-btn" data-grp-add-mem="${k.id}" title="+ Anggota" style="color:var(--accent)">+</button>`:''}
         </span>`:''}
       `;
 
-      /* collapsible members only */
+      /* collapsible members only for joinable */
       const membersBody=document.createElement('div');
       membersBody.className='kelompok-body';
       membersBody.style.display=expanded?'':'none';
-      db.members.filter(m=>m.kelompokId===k.id).sort((a,b)=>a.name.localeCompare(b.name,'id')).forEach(m=>membersBody.appendChild(makeMemberItem(m)));
+      if(isJoinable) db.members.filter(m=>m.kelompokId===k.id).sort((a,b)=>a.name.localeCompare(b.name,'id')).forEach(m=>membersBody.appendChild(makeMemberItem(m)));
 
       /* toggle on chevron click */
       hdr.querySelector('[data-toggle-grp]')?.addEventListener('click',e=>{
@@ -1630,14 +1637,16 @@ function renderOrgChart(){
     if(posX[k.id]===undefined) return;
     const d=nodeDepth(k.id);
     const y=PAD+RH+VG+d*(NH+VG);
-    const mc=db.members.filter(m=>m.kelompokId===k.id).length;
-    const tc=db.tasks.filter(t=>db.members.some(m=>m.id===t.memberId&&m.kelompokId===k.id)).length;
+    const isJoinable=k.joinable!==false;
+    const mc=isJoinable?db.members.filter(m=>m.kelompokId===k.id).length:(k.jumlah??0);
+    const tc=isJoinable?db.tasks.filter(t=>db.members.some(m=>m.id===t.memberId&&m.kelompokId===k.id)).length:0;
     const el=document.createElement('div');
     el.className='org-kelompok-node'+(k.parentId?' depth-1':'');
     el.dataset.kid=k.id;
     el.style.cssText=`position:absolute;left:${posX[k.id]-NW/2}px;top:${y}px;width:${NW}px`;
     el.innerHTML=`<div class="org-k-name">${esc(k.name)}</div><div class="org-k-meta">${mc} anggota${tc?` · ${tc} tugas`:''}</div>`;
-    el.addEventListener('click',()=>openModal('kelompok-members',{kelompokId:k.id}));
+    if(isJoinable) el.addEventListener('click',()=>openModal('kelompok-members',{kelompokId:k.id}));
+    else el.style.cursor='default';
     canvas.appendChild(el);
   });
 
@@ -1728,21 +1737,35 @@ function openModal(mode, ctx){
     function addKelompokRow(container){
       const row=document.createElement('div');
       row.className='repeater-row';
+      row.style.cssText='flex-direction:column;align-items:stretch;gap:6px';
       row.innerHTML=`
         <div class="repeater-fields">
-          <input class="form-input" type="text" placeholder="Nama kelompok" maxlength="60"/>
-          <select class="form-select">
+          <input class="form-input rk-name" type="text" placeholder="Nama kelompok" maxlength="60"/>
+          <select class="form-select rk-parent">
             <option value="">— ${esc(db.orgName||'Alteco')} —</option>
             ${allParentOpts()}
           </select>
+          <button class="repeater-del" title="Hapus baris">✕</button>
         </div>
-        <button class="repeater-del" title="Hapus baris">✕</button>
+        <div style="display:flex;align-items:center;gap:10px;padding:0 2px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--dim);cursor:pointer">
+            <input type="checkbox" class="rk-joinable" checked style="accent-color:var(--accent)"/>
+            Joinable (tambah anggota individual)
+          </label>
+          <div class="rk-jumlah-wrap" style="display:none;align-items:center;gap:6px">
+            <span style="font-size:.8rem;color:var(--dim)">Jumlah anggota:</span>
+            <input class="form-input rk-jumlah" type="number" min="0" placeholder="0" style="width:80px;padding:4px 8px"/>
+          </div>
+        </div>
       `;
+      const cb=row.querySelector('.rk-joinable');
+      const jw=row.querySelector('.rk-jumlah-wrap');
+      cb.addEventListener('change',()=>{ jw.style.display=cb.checked?'none':'flex'; });
       row.querySelector('.repeater-del').addEventListener('click',()=>{
         if(container.querySelectorAll('.repeater-row').length>1) row.remove();
       });
       container.appendChild(row);
-      row.querySelector('input').focus();
+      row.querySelector('.rk-name').focus();
     }
     body.innerHTML=`<div class="repeater" id="rptr"></div><button class="repeater-add" id="rptr-add">＋ Tambah baris</button>`;
     const rptr=body.querySelector('#rptr');
@@ -1759,6 +1782,7 @@ function openModal(mode, ctx){
       .filter(k=>!excludeIds.includes(k.id))
       .map(k=>`<option value="${k.id}" ${(div?div.parentId:null)===k.id?'selected':''}>${esc(k.name)}</option>`)
       .join('');
+    const isJoinable=div?.joinable!==false;
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Nama Kelompok</label>
@@ -1771,7 +1795,20 @@ function openModal(mode, ctx){
           ${parentOpts}
         </select>
       </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer">
+          <input type="checkbox" id="fi-joinable" ${isJoinable?'checked':''} style="accent-color:var(--accent)"/>
+          Joinable (tambah anggota individual)
+        </label>
+      </div>
+      <div class="form-group" id="fi-jumlah-wrap" style="${isJoinable?'display:none':''}">
+        <label class="form-label">Jumlah Anggota</label>
+        <input class="form-input" id="fi-jumlah" type="number" min="0" value="${div?.jumlah??''}" placeholder="0"/>
+      </div>
     `;
+    document.getElementById('fi-joinable').addEventListener('change',function(){
+      document.getElementById('fi-jumlah-wrap').style.display=this.checked?'none':'';
+    });
     document.getElementById('fi-name').focus();
   }
 
@@ -2247,18 +2284,23 @@ function openModal(mode, ctx){
 
   else if(mode==='keuntungan-add'||mode==='keuntungan-edit'){
     const s=mode==='keuntungan-edit'?(db.regulasi.keuntungan||[]).find(x=>x.id===mCtx.id):null;
+    const selKels=s?.kelompoks||[];
     title.textContent=mode==='keuntungan-add'?'Tambah Keuntungan':'Edit Keuntungan';
+    const kelPills=(db.kelompoks||[]).map(k=>{
+      const checked=selKels.includes(k.name);
+      return `<label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid ${checked?'var(--accent)':'var(--border,#d1d5db)'};background:${checked?'var(--accent)':'transparent'};color:${checked?'#fff':'var(--dim)'};transition:.15s" class="kt-kel-pill">
+        <input type="checkbox" name="kt-kel" value="${esc(k.name)}" ${checked?'checked':''} style="display:none"/>
+        ${esc(k.name)}
+      </label>`;
+    }).join('');
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Nama Keuntungan</label>
         <input class="form-input" id="fi-kt-nama" type="text" value="${esc(s?.nama||'')}" placeholder="Contoh: Akses mentoring eksklusif" maxlength="120"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Kelompok <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
-        <select class="form-select" id="fi-kt-kel">
-          <option value="">— Semua kelompok —</option>
-          ${(db.kelompoks||[]).map(k=>`<option value="${esc(k.name)}" ${(s?.kelompok===k.name)?'selected':''}>${esc(k.name)}</option>`).join('')}
-        </select>
+        <label class="form-label">Berlaku untuk kelompok <span style="font-size:.65rem;color:var(--muted);font-weight:400">(kosong = semua)</span></label>
+        <div id="fi-kt-kel" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">${kelPills}</div>
       </div>
       <div class="form-group">
         <label class="form-label">Keterangan <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
@@ -2269,6 +2311,16 @@ function openModal(mode, ctx){
         <input class="form-input" id="fi-kt-url" type="url" value="${esc(s?.url||'')}" placeholder="https://…"/>
       </div>
     `;
+    /* pill toggle style */
+    body.querySelectorAll('.kt-kel-pill').forEach(lbl=>{
+      lbl.addEventListener('click',()=>{
+        const cb=lbl.querySelector('input');
+        cb.checked=!cb.checked;
+        lbl.style.background=cb.checked?'var(--accent)':'transparent';
+        lbl.style.color=cb.checked?'#fff':'var(--dim)';
+        lbl.style.borderColor=cb.checked?'var(--accent)':'var(--border,#d1d5db)';
+      });
+    });
     document.getElementById('fi-kt-nama').focus();
   }
 }
@@ -2359,12 +2411,14 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const rows=[...document.querySelectorAll('#rptr .repeater-row')];
     let added=0;
     rows.forEach(row=>{
-      const name=row.querySelector('input').value.trim();
+      const name=row.querySelector('.rk-name').value.trim();
       if(!name) return;
-      const parentId=row.querySelector('select').value||null;
+      const parentId=row.querySelector('.rk-parent').value||null;
+      const joinable=row.querySelector('.rk-joinable').checked;
+      const jumlah=joinable?null:(parseInt(row.querySelector('.rk-jumlah').value)||0);
       const siblings=kelompokChildren(parentId);
       const order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
-      db.kelompoks.push(touch({id:uid(),name,parentId,order}));
+      db.kelompoks.push(touch({id:uid(),name,parentId,order,joinable,jumlah}));
       added++;
     });
     if(!added) return;
@@ -2374,14 +2428,20 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const name=document.getElementById('fi-name').value.trim();
     if(!name) return;
     const parentId=document.getElementById('fi-parent').value||null;
+    const joinable=document.getElementById('fi-joinable').checked;
+    const jumlah=joinable?null:(parseInt(document.getElementById('fi-jumlah').value)||0);
     const k=db.kelompoks.find(d=>d.id===mCtx.id);
     if(k){
+      /* block: joinable true→false when members exist */
+      if(k.joinable!==false&&!joinable){
+        const mc=db.members.filter(m=>m.kelompokId===k.id).length;
+        if(mc>0){ alert(`Tidak bisa diubah ke non-joinable — masih ada ${mc} anggota. Pindahkan atau hapus anggota terlebih dahulu.`); return; }
+      }
       if(k.parentId!==parentId){
-        /* moved to different parent — reset order to last */
         const siblings=kelompokChildren(parentId).filter(s=>s.id!==k.id);
         k.order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
       }
-      k.name=name; k.parentId=parentId; touch(k);
+      k.name=name; k.parentId=parentId; k.joinable=joinable; k.jumlah=jumlah; touch(k);
       save(); renderSidebar(); if(viewMode==='org') renderOrgChart();
     }
     closeModal();
@@ -2561,16 +2621,16 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='keuntungan-add'||mMode==='keuntungan-edit'){
     const nama=document.getElementById('fi-kt-nama').value.trim();
     if(!nama) return;
-    const kelompok=document.getElementById('fi-kt-kel').value.trim();
+    const kelompoks=[...document.querySelectorAll('#fi-kt-kel input[name="kt-kel"]:checked')].map(cb=>cb.value);
     const keterangan=document.getElementById('fi-kt-ket').value.trim();
     const url=document.getElementById('fi-kt-url').value.trim();
     if(mMode==='keuntungan-add'){
       db.regulasi.keuntungan=(db.regulasi.keuntungan||[]);
-      db.regulasi.keuntungan.push(touch({id:uid(),nama,kelompok,keterangan,url}));
+      db.regulasi.keuntungan.push(touch({id:uid(),nama,kelompoks,keterangan,url}));
     } else {
       const s=(db.regulasi.keuntungan||[]).find(x=>x.id===mCtx.id);
       if(!s) return;
-      s.nama=nama; s.kelompok=kelompok; s.keterangan=keterangan; s.url=url; touch(s);
+      s.nama=nama; s.kelompoks=kelompoks; s.keterangan=keterangan; s.url=url; touch(s);
     }
     save(); renderKomunitas(); closeModal();
   }
@@ -3473,7 +3533,7 @@ function renderKomunitas(){
       listWrap.innerHTML='';
       const filterVal=card[_fk]||'';
       const allList=km.keuntungan||[];
-      const ktList=filterVal?allList.filter(x=>x.kelompok===filterVal):allList;
+      const ktList=filterVal?allList.filter(x=>(x.kelompoks||[]).includes(filterVal)||(x.kelompoks||[]).length===0):allList;
       if(!ktList.length){
         const e=document.createElement('div');
         e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
@@ -3504,7 +3564,7 @@ function renderKomunitas(){
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
               <span style="font-weight:600;font-size:.9rem;color:var(--text)">${esc(s.nama)}</span>
-              ${s.kelompok?`<span style="font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--surface2,#e5e7eb);color:var(--dim)">${esc(s.kelompok)}</span>`:''}
+              ${(s.kelompoks&&s.kelompoks.length)?s.kelompoks.map(kn=>`<span style="font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--surface2,#e5e7eb);color:var(--dim)">${esc(kn)}</span>`).join(''):''}
             </div>
             ${s.keterangan?`<div style="font-size:.82rem;color:var(--dim);margin-top:3px;line-height:1.5">${esc(s.keterangan)}</div>`:''}
             ${urlHtml}
