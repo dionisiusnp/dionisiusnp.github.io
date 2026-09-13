@@ -23,7 +23,7 @@ Superadmin perlu melakukan setup sekali berikut ini.
    - **Filename**: `alteco-data.json`
    - **Content**:
      ```json
-     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"orgName":"Nama Organisasi","settings":{"pushNotifEnabled":false,"notifTime":"07:00","notifDaysBefore":1,"writePat":""}}
+     {"kelompoks":[],"members":[],"tasks":[],"assets":[],"events":[],"projects":[],"cultures":[],"komunitas":{"visi":"","misi":"","syaratMember":[],"sanksi":[]},"orgName":"Nama Organisasi","settings":{"pushNotifEnabled":false,"notifTime":"07:00","notifDaysBefore":1,"writePat":""}}
      ```
 3. Klik **"Create secret gist"**
 4. Salin **Gist ID** dari URL browser:
@@ -183,6 +183,41 @@ Superadmin dapat membuat **pengumuman/acara** di menu **Informasi 🔔**.
 
 Ikon lonceng di navbar menampilkan jumlah pengumuman baru/diperbarui yang belum dibaca.
 Badge hilang setelah membuka halaman Informasi. Badge muncul kembali jika ada pengumuman baru atau yang diedit.
+
+---
+
+## Fitur Komunitas (Superadmin)
+
+Tersedia di sidebar **📋 Komunitas** — admin CRUD, viewer hanya baca.
+
+### Visi & Misi
+
+Teks bebas. Admin klik ikon edit di kartu, simpan → tersimpan ke Gist.
+
+### Syarat Member
+
+Daftar syarat bergabung ke komunitas. Tiap entri punya:
+
+| Field | Keterangan |
+|-------|-----------|
+| Nama | Nama syarat |
+| Tipe | `Non-IT` (default, termasuk umum) atau `IT` |
+| Keterangan | Deskripsi syarat |
+| URL | Link referensi (opsional) |
+
+### Sanksi
+
+Daftar sanksi per kelompok. Tiap entri punya:
+
+| Field | Keterangan |
+|-------|-----------|
+| Nama | Nama/judul sanksi |
+| Kelompok | Pilih dari daftar kelompok di bagan organisasi |
+| Level | Warning 1 → Warning 2 → Blacklist |
+| Alasan | Penjelasan sanksi |
+| Tanggal | Tanggal sanksi diberikan |
+
+Sanksi ditampilkan urut per level (Warning 1, Warning 2, Blacklist) dengan badge warna.
 
 ---
 
