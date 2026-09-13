@@ -2185,6 +2185,7 @@ function openModal(mode, ctx){
         <select class="form-select" id="fi-sy-tipe">
           <option value="non-it" ${(!s?.tipe||s?.tipe==='non-it'||s?.tipe==='umum')?'selected':''}>Non-IT</option>
           <option value="it" ${s?.tipe==='it'?'selected':''}>IT</option>
+          <option value="keduanya" ${s?.tipe==='keduanya'?'selected':''}>Keduanya (IT &amp; Non-IT)</option>
         </select>
       </div>
       <div class="form-group">
@@ -3200,171 +3201,224 @@ function renderKomunitas(){
   const km=db.komunitas;
   const isAdmin=role==='admin';
 
-  const toolbar=document.createElement('div');
-  toolbar.className='asset-toolbar';
-  toolbar.innerHTML=`<span class="asset-toolbar-title">Komunitas</span>`;
-  area.appendChild(toolbar);
-
-  /* ── Card 1: Visi & Misi ── */
-  const card1=document.createElement('div');
-  card1.className='settings-card';
-  const vm_acts=isAdmin?`<button class="asset-act-btn" id="btnEditVismis" style="margin-left:auto">✎ Edit</button>`:'';
-  card1.innerHTML=`
-    <div class="settings-section-title" style="display:flex;align-items:center;gap:8px">
-      Visi &amp; Misi ${vm_acts}
-    </div>
-    <div style="margin-top:12px">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:4px">Visi</div>
-      <div id="km-visi" style="font-size:.9rem;line-height:1.6;white-space:pre-wrap;color:var(--text)">${km.visi?esc(km.visi):'<span style="color:var(--dim);font-style:italic">Belum diisi</span>'}</div>
-    </div>
-    <div style="margin-top:14px">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:4px">Misi</div>
-      <div id="km-misi" style="font-size:.9rem;line-height:1.6;white-space:pre-wrap;color:var(--text)">${km.misi?esc(km.misi):'<span style="color:var(--dim);font-style:italic">Belum diisi</span>'}</div>
-    </div>
-  `;
-  if(isAdmin) card1.querySelector('#btnEditVismis').addEventListener('click',()=>openModal('vismis-edit',{}));
-  area.appendChild(card1);
-
-  /* ── Card 2: Syarat Member ── */
-  const card2=document.createElement('div');
-  card2.className='settings-card';
-  const syHdr=document.createElement('div');
-  syHdr.style.cssText='display:flex;align-items:center;justify-content:space-between';
-  syHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">Syarat Member</div>`;
-  if(isAdmin){
-    const addBtn2=document.createElement('button');
-    addBtn2.className='task-add-inline-btn';
-    addBtn2.textContent='＋ Tambah';
-    addBtn2.addEventListener('click',()=>openModal('syarat-add',{}));
-    syHdr.appendChild(addBtn2);
-  }
-  card2.appendChild(syHdr);
-
-  /* filter tipe */
-  const syFilterWrap=document.createElement('div');
-  syFilterWrap.style.cssText='margin-top:10px';
-  const syFilter=document.createElement('select');
-  syFilter.className='form-select';
-  syFilter.style.cssText='font-size:.8rem;padding:4px 8px;width:auto;min-width:120px';
-  syFilter.innerHTML=`<option value="non-it">Non-IT</option><option value="it">IT</option><option value="all">Semua</option>`;
-  syFilter.value='non-it';
-  syFilterWrap.appendChild(syFilter);
-  card2.appendChild(syFilterWrap);
-
-  function renderSyList(){
-    card2.querySelectorAll('.sy-list-wrap').forEach(el=>el.remove());
-    const wrap=document.createElement('div');
-    wrap.className='sy-list-wrap';
-    const filterVal=syFilter.value;
-    const allList=km.syaratMember||[];
-    const syList=filterVal==='all'?allList:allList.filter(s=>filterVal==='it'?s.tipe==='it':(s.tipe!=='it'));
-    if(!syList.length){
-      const e=document.createElement('div');
-      e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
-      e.textContent='Belum ada syarat member.';
-      wrap.appendChild(e);
-    } else {
-      syList.forEach((s,idx)=>{
-      const row=document.createElement('div');
-      row.className='settings-row';
-      row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;padding:14px 0';
-      const TIPE_CFG={it:{label:'IT',color:'#2563eb',bg:'#dbeafe'},['non-it']:{label:'Non-IT',color:'#7c3aed',bg:'#ede9fe'}};
-      const tCfg=s.tipe==='it'?TIPE_CFG.it:TIPE_CFG['non-it'];
-      const urlHtml=s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--accent);word-break:break-all">${esc(s.url)}</a>`:'';
-      const actsHtml=isAdmin?`<div style="display:flex;gap:6px;margin-top:4px">
-        <button class="asset-act-btn" data-sy-edit="${s.id}">✎</button>
-        <button class="asset-act-btn del" data-sy-del="${s.id}">✕</button>
-      </div>`:'';
-      row.innerHTML=`
-        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
-          <span style="min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${idx+1}</span>
-          <div style="flex:1">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-weight:600;font-size:.9rem;color:var(--text)">${esc(s.nama)}</span>
-              <span style="font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:99px;background:${tCfg.bg};color:${tCfg.color}">${tCfg.label}</span>
-            </div>
-            ${s.keterangan?`<div style="font-size:.82rem;color:var(--dim);margin-top:2px;line-height:1.5">${esc(s.keterangan)}</div>`:''}
-            ${urlHtml}
-            ${actsHtml}
-          </div>
-        </div>
-      `;
-      row.querySelector('[data-sy-edit]')?.addEventListener('click',()=>openModal('syarat-edit',{id:s.id}));
-      row.querySelector('[data-sy-del]')?.addEventListener('click',()=>{
-        if(!confirm(`Hapus syarat "${s.nama}"?`)) return;
-        db.komunitas.syaratMember=db.komunitas.syaratMember.filter(x=>x.id!==s.id);
-        save(); renderKomunitas();
-      });
-      wrap.appendChild(row);
-    });
-    }
-    card2.appendChild(wrap);
-  }
-  syFilter.addEventListener('change',renderSyList);
-  renderSyList();
-  area.appendChild(card2);
-
-  /* ── Card 3: Sanksi ── */
-  const card3=document.createElement('div');
-  card3.className='settings-card';
-  const skHdr=document.createElement('div');
-  skHdr.style.cssText='display:flex;align-items:center;justify-content:space-between';
-  skHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">Sanksi Member</div>`;
-  if(isAdmin){
-    const addBtn3=document.createElement('button');
-    addBtn3.className='task-add-inline-btn';
-    addBtn3.textContent='＋ Tambah';
-    addBtn3.addEventListener('click',()=>openModal('sanksi-add',{}));
-    skHdr.appendChild(addBtn3);
-  }
-  card3.appendChild(skHdr);
-
+  const TIPE_CFG={
+    it:{label:'IT',color:'#2563eb',bg:'#dbeafe'},
+    'non-it':{label:'Non-IT',color:'#7c3aed',bg:'#ede9fe'},
+    keduanya:{label:'IT & Non-IT',color:'#059669',bg:'#d1fae5'},
+  };
   const SANKSI_CFG={
     1:{label:'Warning 1',color:'#d97706',bg:'#fef3c7'},
     2:{label:'Warning 2',color:'#ea580c',bg:'#ffedd5'},
     3:{label:'Blacklist',color:'#dc2626',bg:'#fee2e2'},
   };
 
-  const sanksiList=km.sanksi||[];
-  if(!sanksiList.length){
-    const e=document.createElement('div');
-    e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
-    e.textContent='Tidak ada catatan sanksi.';
-    card3.appendChild(e);
-  } else {
-    const sorted=[...sanksiList].sort((a,b)=>b.level-a.level||(b.date||'').localeCompare(a.date||''));
-    sorted.forEach(s=>{
-      const cfg=SANKSI_CFG[s.level]||SANKSI_CFG[1];
-      const row=document.createElement('div');
-      row.className='settings-row';
-      row.style.cssText='gap:10px;padding:12px 0;align-items:flex-start';
-      const dateStr=s.date?new Date(s.date+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):'';
-      const actsHtml=isAdmin?`<div style="display:flex;gap:6px;flex-shrink:0">
-        <button class="asset-act-btn" data-sk-edit="${s.id}">✎</button>
-        <button class="asset-act-btn del" data-sk-del="${s.id}">✕</button>
-      </div>`:'';
-      row.innerHTML=`
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <span style="font-weight:600;font-size:.9rem">${esc(s.name)}</span>
-            ${s.kelompok?`<span style="font-size:.72rem;color:var(--dim)">${esc(s.kelompok)}</span>`:''}
-            <span style="font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>
-          </div>
-          ${s.alasan?`<div style="font-size:.82rem;color:var(--dim);margin-top:3px;line-height:1.5">${esc(s.alasan)}</div>`:''}
-          ${dateStr?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px">${dateStr}</div>`:''}
-        </div>
-        ${actsHtml}
-      `;
-      row.querySelector('[data-sk-edit]')?.addEventListener('click',()=>openModal('sanksi-edit',{id:s.id}));
-      row.querySelector('[data-sk-del]')?.addEventListener('click',()=>{
-        if(!confirm(`Hapus sanksi "${s.name}"?`)) return;
-        db.komunitas.sanksi=db.komunitas.sanksi.filter(x=>x.id!==s.id);
-        save(); renderKomunitas();
-      });
-      card3.appendChild(row);
+  /* ── Toolbar ── */
+  const toolbar=document.createElement('div');
+  toolbar.className='asset-toolbar';
+  toolbar.innerHTML=`<span class="asset-toolbar-title">Komunitas</span>`;
+  area.appendChild(toolbar);
+
+  /* ── Tab bar ── */
+  const TABS=[{id:'vismis',label:'📜 Visi & Misi'},{id:'syarat',label:'✅ Syarat Member'},{id:'sanksi',label:'⚠️ Sanksi'}];
+  let activeTab=area._kmTab||'vismis';
+  const tabBar=document.createElement('div');
+  tabBar.style.cssText='display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap';
+  TABS.forEach(t=>{
+    const btn=document.createElement('button');
+    btn.dataset.tab=t.id;
+    btn.textContent=t.label;
+    btn.style.cssText=`padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;${t.id===activeTab?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--text);'}`;
+    btn.addEventListener('click',()=>{
+      area._kmTab=t.id;
+      renderKomunitas();
     });
+    tabBar.appendChild(btn);
+  });
+  area.appendChild(tabBar);
+
+  const card=document.createElement('div');
+  card.className='settings-card';
+  area.appendChild(card);
+
+  /* ── Tab: Visi & Misi ── */
+  if(activeTab==='vismis'){
+    const vm_acts=isAdmin?`<button class="asset-act-btn" id="btnEditVismis" style="margin-left:auto">✎ Edit</button>`:'';
+    card.innerHTML=`
+      <div class="settings-section-title" style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        Visi &amp; Misi ${vm_acts}
+      </div>
+      <div style="margin-bottom:18px">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:6px">Visi</div>
+        <div style="font-size:.9rem;line-height:1.7;white-space:pre-wrap;color:var(--text)">${km.visi?esc(km.visi):'<span style="color:var(--dim);font-style:italic">Belum diisi.</span>'}</div>
+      </div>
+      <div>
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:6px">Misi</div>
+        <div style="font-size:.9rem;line-height:1.7;white-space:pre-wrap;color:var(--text)">${km.misi?esc(km.misi):'<span style="color:var(--dim);font-style:italic">Belum diisi.</span>'}</div>
+      </div>
+    `;
+    if(isAdmin) card.querySelector('#btnEditVismis').addEventListener('click',()=>openModal('vismis-edit',{}));
   }
-  area.appendChild(card3);
+
+  /* ── Tab: Syarat Member ── */
+  else if(activeTab==='syarat'){
+    /* header */
+    const syHdr=document.createElement('div');
+    syHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
+    syHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">Syarat Member</div>`;
+    if(isAdmin){
+      const addBtn=document.createElement('button');
+      addBtn.className='task-add-inline-btn';
+      addBtn.textContent='＋ Tambah';
+      addBtn.addEventListener('click',()=>openModal('syarat-add',{}));
+      syHdr.appendChild(addBtn);
+    }
+    card.appendChild(syHdr);
+
+    /* filter */
+    const filterRow=document.createElement('div');
+    filterRow.style.cssText='display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap';
+    ['non-it','it'].forEach(val=>{
+      const fb=document.createElement('button');
+      fb.dataset.syf=val;
+      const label=val==='it'?'IT':'Non-IT';
+      const active=card._syFilter===val||(card._syFilter==null&&val==='non-it');
+      fb.textContent=label;
+      fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--surface2,#e5e7eb);color:var(--dim);'}`;
+      fb.addEventListener('click',()=>{ card._syFilter=val; renderSyContent(); refreshFilterBtns(); });
+      filterRow.appendChild(fb);
+    });
+    card.appendChild(filterRow);
+
+    function refreshFilterBtns(){
+      filterRow.querySelectorAll('[data-syf]').forEach(b=>{
+        const active=b.dataset.syf===(card._syFilter||'non-it');
+        b.style.background=active?'var(--accent)':'var(--surface2,#e5e7eb)';
+        b.style.color=active?'#fff':'var(--dim)';
+      });
+    }
+
+    const listWrap=document.createElement('div');
+    card.appendChild(listWrap);
+
+    function renderSyContent(){
+      listWrap.innerHTML='';
+      const filterVal=card._syFilter||'non-it';
+      const allList=km.syaratMember||[];
+      /* "keduanya" muncul di kedua filter */
+      const syList=allList.filter(s=>s.tipe==='keduanya'||(filterVal==='it'?s.tipe==='it':s.tipe!=='it'));
+      if(!syList.length){
+        const e=document.createElement('div');
+        e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
+        e.textContent='Belum ada syarat untuk tipe ini.';
+        listWrap.appendChild(e);
+        return;
+      }
+      syList.forEach((s,idx)=>{
+        const tCfg=TIPE_CFG[s.tipe]||TIPE_CFG['non-it'];
+        const urlHtml=s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--accent);word-break:break-all">${esc(s.url)}</a>`:'';
+        /* global index in full list for reorder */
+        const gIdx=allList.findIndex(x=>x.id===s.id);
+        const upDisabled=gIdx<=0;
+        const dnDisabled=gIdx>=allList.length-1;
+        const reorderHtml=isAdmin?`
+          <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;margin-top:1px">
+            <button class="asset-act-btn" data-sy-up="${s.id}" ${upDisabled?'disabled':''} style="padding:1px 5px;font-size:.7rem;line-height:1.4${upDisabled?';opacity:.3':''}">▲</button>
+            <button class="asset-act-btn" data-sy-dn="${s.id}" ${dnDisabled?'disabled':''} style="padding:1px 5px;font-size:.7rem;line-height:1.4${dnDisabled?';opacity:.3':''}">▼</button>
+          </div>`:'';
+        const actsHtml=isAdmin?`<div style="display:flex;gap:5px;margin-top:6px">
+          <button class="asset-act-btn" data-sy-edit="${s.id}">✎</button>
+          <button class="asset-act-btn del" data-sy-del="${s.id}">✕</button>
+        </div>`:'';
+        const row=document.createElement('div');
+        row.className='settings-row';
+        row.style.cssText='align-items:flex-start;gap:8px;padding:12px 0';
+        row.innerHTML=`
+          ${reorderHtml}
+          <span style="min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${idx+1}</span>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span style="font-weight:600;font-size:.9rem;color:var(--text)">${esc(s.nama)}</span>
+              <span style="font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:99px;background:${tCfg.bg};color:${tCfg.color}">${tCfg.label}</span>
+            </div>
+            ${s.keterangan?`<div style="font-size:.82rem;color:var(--dim);margin-top:3px;line-height:1.5">${esc(s.keterangan)}</div>`:''}
+            ${urlHtml}
+            ${actsHtml}
+          </div>
+        `;
+        row.querySelector('[data-sy-up]')?.addEventListener('click',()=>{
+          const arr=db.komunitas.syaratMember;
+          if(gIdx>0){[arr[gIdx-1],arr[gIdx]]=[arr[gIdx],arr[gIdx-1]];touch(arr[gIdx-1]);touch(arr[gIdx]);save();renderKomunitas();}
+        });
+        row.querySelector('[data-sy-dn]')?.addEventListener('click',()=>{
+          const arr=db.komunitas.syaratMember;
+          if(gIdx<arr.length-1){[arr[gIdx+1],arr[gIdx]]=[arr[gIdx],arr[gIdx+1]];touch(arr[gIdx+1]);touch(arr[gIdx]);save();renderKomunitas();}
+        });
+        row.querySelector('[data-sy-edit]')?.addEventListener('click',()=>openModal('syarat-edit',{id:s.id}));
+        row.querySelector('[data-sy-del]')?.addEventListener('click',()=>{
+          if(!confirm(`Hapus syarat "${s.nama}"?`)) return;
+          db.komunitas.syaratMember=db.komunitas.syaratMember.filter(x=>x.id!==s.id);
+          save(); renderKomunitas();
+        });
+        listWrap.appendChild(row);
+      });
+    }
+    renderSyContent();
+  }
+
+  /* ── Tab: Sanksi ── */
+  else if(activeTab==='sanksi'){
+    const skHdr=document.createElement('div');
+    skHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
+    skHdr.innerHTML=`<div class="settings-section-title" style="margin:0;padding-bottom:0;border:none">Sanksi Member</div>`;
+    if(isAdmin){
+      const addBtn=document.createElement('button');
+      addBtn.className='task-add-inline-btn';
+      addBtn.textContent='＋ Tambah';
+      addBtn.addEventListener('click',()=>openModal('sanksi-add',{}));
+      skHdr.appendChild(addBtn);
+    }
+    card.appendChild(skHdr);
+
+    const sanksiList=km.sanksi||[];
+    if(!sanksiList.length){
+      const e=document.createElement('div');
+      e.style.cssText='color:var(--dim);font-style:italic;font-size:.82rem;padding:12px 0';
+      e.textContent='Tidak ada catatan sanksi.';
+      card.appendChild(e);
+    } else {
+      const sorted=[...sanksiList].sort((a,b)=>b.level-a.level||(b.date||'').localeCompare(a.date||''));
+      sorted.forEach(s=>{
+        const cfg=SANKSI_CFG[s.level]||SANKSI_CFG[1];
+        const row=document.createElement('div');
+        row.className='settings-row';
+        row.style.cssText='gap:10px;padding:12px 0;align-items:flex-start';
+        const dateStr=s.date?new Date(s.date+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):'';
+        const actsHtml=isAdmin?`<div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="asset-act-btn" data-sk-edit="${s.id}">✎</button>
+          <button class="asset-act-btn del" data-sk-del="${s.id}">✕</button>
+        </div>`:'';
+        row.innerHTML=`
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-weight:600;font-size:.9rem">${esc(s.name)}</span>
+              ${s.kelompok?`<span style="font-size:.72rem;color:var(--dim)">${esc(s.kelompok)}</span>`:''}
+              <span style="font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>
+            </div>
+            ${s.alasan?`<div style="font-size:.82rem;color:var(--dim);margin-top:3px;line-height:1.5">${esc(s.alasan)}</div>`:''}
+            ${dateStr?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px">${dateStr}</div>`:''}
+          </div>
+          ${actsHtml}
+        `;
+        row.querySelector('[data-sk-edit]')?.addEventListener('click',()=>openModal('sanksi-edit',{id:s.id}));
+        row.querySelector('[data-sk-del]')?.addEventListener('click',()=>{
+          if(!confirm(`Hapus sanksi "${s.name}"?`)) return;
+          db.komunitas.sanksi=db.komunitas.sanksi.filter(x=>x.id!==s.id);
+          save(); renderKomunitas();
+        });
+        card.appendChild(row);
+      });
+    }
+  }
 }
 
 /* ══════════════════════════════════════════
