@@ -414,6 +414,33 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .culture-tl-card:hover .culture-tl-acts{display:flex}
 .fab-culture{position:fixed;bottom:24px;right:24px;z-index:200;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:1.4rem;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(108,111,245,.45);transition:transform .15s,box-shadow .15s}
 .fab-culture:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(108,111,245,.6)}
+/* ── Regulasi tab / filter pills ── */
+.km-tab-btn{padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;background:var(--card);color:var(--muted)}
+.km-tab-btn.active{background:var(--accent);color:#fff}
+.km-pill-btn{padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;background:var(--card);color:var(--dim);transition:background .15s,color .15s}
+.km-pill-btn.active{background:var(--accent);color:#fff}
+/* ── Hamburger ── */
+.hamburger-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;flex-shrink:0}
+/* ── Sidebar overlay (mobile) ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:49}
+.sidebar-overlay.open{display:block}
+/* ── Mobile responsive ── */
+@media(max-width:768px){
+  .hamburger-btn{display:flex}
+  .nav-back{display:none}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;width:260px}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .asset-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .asset-table{min-width:480px}
+  .org-view{padding:16px 8px}
+  .settings-card{border-radius:8px}
+  .culture-timeline::before{left:16px}
+  .culture-timeline-item{flex-direction:column!important;padding-left:32px}
+  .culture-tl-card{width:100%!important;text-align:left!important;margin:0!important}
+  .culture-tl-dot{left:16px}
+  .modal-box{max-width:calc(100vw - 24px)}
+  .main{padding:12px 12px 80px}
+}
 </style>
 </head>
 <body>
@@ -464,6 +491,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:3px"><path d="M15 18l-6-6 6-6"/></svg>
     Kembali
   </a>
+  <button class="hamburger-btn" id="sidebarToggle">☰</button>
   <span class="nav-title admin-only" id="navOrgName" style="margin-left:4px;cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s" title="Klik untuk edit nama organisasi">Alteco</span>
   <span class="nav-title viewer-only" id="navOrgNameView" style="margin-left:4px">Alteco</span>
   <span class="nav-spacer"></span>
@@ -479,6 +507,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 <div class="app">
 
   <!-- Sidebar -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <div class="sidebar">
     <div class="sidebar-head">
       <span class="sidebar-head-title">Fitur</span>
@@ -879,6 +908,23 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
     if(html.getAttribute('data-theme')==='light'){html.removeAttribute('data-theme');btn.textContent='🌙';localStorage.setItem('theme','dark')}
     else{html.setAttribute('data-theme','light');btn.textContent='☀️';localStorage.setItem('theme','light')}
   });
+})();
+
+/* ── Mobile sidebar toggle ── */
+(function(){
+  const toggle=document.getElementById('sidebarToggle');
+  const sidebar=document.querySelector('.sidebar');
+  const overlay=document.getElementById('sidebarOverlay');
+  if(!toggle||!sidebar||!overlay) return;
+  function openSidebar(){ sidebar.classList.add('mobile-open'); overlay.classList.add('open'); }
+  function closeSidebar(){ sidebar.classList.remove('mobile-open'); overlay.classList.remove('open'); }
+  toggle.addEventListener('click',openSidebar);
+  overlay.addEventListener('click',closeSidebar);
+  sidebar.querySelectorAll('.feature-nav-item,[data-grp-add-mem],#btnAddKelompokon,#btnAddMemberRoot').forEach(el=>{
+    el.addEventListener('click',()=>{ if(window.innerWidth<=768) closeSidebar(); });
+  });
+  const allItem=document.getElementById('allItem');
+  if(allItem) allItem.addEventListener('click',()=>{ if(window.innerWidth<=768) closeSidebar(); });
 })();
 
 /* ══════════════════════════════════════════
@@ -3397,7 +3443,7 @@ function renderKomunitas(){
     const btn=document.createElement('button');
     btn.dataset.tab=t.id;
     btn.textContent=t.label;
-    btn.style.cssText=`padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;${t.id===activeTab?'background:var(--accent);color:#fff;':'background:var(--card);color:var(--text);'}`;
+    btn.className='km-tab-btn'+(t.id===activeTab?' active':'');
     btn.addEventListener('click',()=>{ area._kmTab=t.id; renderKomunitas(); });
     tabBar.appendChild(btn);
   });
@@ -3452,7 +3498,7 @@ function renderKomunitas(){
       fb.dataset.syf=val;
       const active=card[_filterKey]===val||(card[_filterKey]==null&&val==='non-it');
       fb.textContent=val==='it'?'IT':'Non-IT';
-      fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--card);color:var(--dim);'}`;
+      fb.className='km-pill-btn'+(active?' active':'');
       fb.addEventListener('click',()=>{ card[_filterKey]=val; renderSyContent(); refreshFilterBtns(); });
       filterRow.appendChild(fb);
     });
@@ -3461,8 +3507,7 @@ function renderKomunitas(){
     function refreshFilterBtns(){
       filterRow.querySelectorAll('[data-syf]').forEach(b=>{
         const active=b.dataset.syf===(card[_filterKey]||'non-it');
-        b.style.background=active?'var(--accent)':'var(--card)';
-        b.style.color=active?'#fff':'var(--dim)';
+        b.className='km-pill-btn'+(active?' active':'');
       });
     }
 
@@ -3556,7 +3601,7 @@ function renderKomunitas(){
     allOpt.dataset.ktf='';
     allOpt.textContent='Semua';
     const allActive=!card[_fk];
-    allOpt.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${allActive?'background:var(--accent);color:#fff;':'background:var(--card);color:var(--dim);'}`;
+    allOpt.className='km-pill-btn'+(allActive?' active':'');
     allOpt.addEventListener('click',()=>{ card[_fk]=''; renderKtContent(); refreshKtBtns(); });
     filterRow.appendChild(allOpt);
     kelList.forEach(k=>{
@@ -3564,7 +3609,7 @@ function renderKomunitas(){
       fb.dataset.ktf=k.name;
       const active=card[_fk]===k.name;
       fb.textContent=k.name;
-      fb.style.cssText=`padding:4px 14px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;${active?'background:var(--accent);color:#fff;':'background:var(--card);color:var(--dim);'}`;
+      fb.className='km-pill-btn'+(active?' active':'');
       fb.addEventListener('click',()=>{ card[_fk]=k.name; renderKtContent(); refreshKtBtns(); });
       filterRow.appendChild(fb);
     });
@@ -3573,8 +3618,7 @@ function renderKomunitas(){
     function refreshKtBtns(){
       filterRow.querySelectorAll('[data-ktf]').forEach(b=>{
         const active=b.dataset.ktf===(card[_fk]||'');
-        b.style.background=active?'var(--accent)':'var(--card)';
-        b.style.color=active?'#fff':'var(--dim)';
+        b.className='km-pill-btn'+(active?' active':'');
       });
     }
 
