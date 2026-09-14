@@ -161,6 +161,7 @@ code{font-family:var(--mono)}
     <button class="tab" data-tab="git">Git</button>
     <button class="tab" data-tab="ai">AI</button>
     <button class="tab" data-tab="cicd">CI/CD</button>
+    <button class="tab" data-tab="ngrok">ngrok</button>
   </div>
 
   <!-- Laravel -->
@@ -672,6 +673,73 @@ code{font-family:var(--mono)}
         <div class="tip"><h4><span class="tag tag-green">Seeder</span> Hanya data sistem</h4><p>Jangan seed data yang punya CRUD di UI (fakultas, prodi, master data). Hanya seed data yang wajib ada untuk app berjalan: roles sistem + superadmin. Gunakan firstOrCreate agar idempotent.</p></div>
         <div class="tip"><h4><span class="tag tag-gold">User</span> Jangan deploy sebagai root</h4><p>Buat user deploy terpisah (misal: ugaas). Beri ownership project ke user itu. Sudo hanya untuk command spesifik seperti systemctl reload php-fpm — bukan NOPASSWD ALL.</p></div>
         <div class="tip"><h4><span class="tag tag-blue">Firewall</span> CSF vs cloud firewall</h4><p>VPS punya dua lapis firewall: OS-level (CSF) dan cloud-level (Biznet/AWS Security Group). Port harus terbuka di keduanya. Kalau SSH bisa dari lokal tapi timeout dari GitHub — cek cloud firewall provider.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ngrok -->
+  <div class="panel" id="panel-ngrok">
+    <p class="stack-desc">Expose server lokal ke internet publik via tunnel aman. Berguna untuk demo client, webhook testing, OAuth callback, dan presentasi tanpa deploy.</p>
+
+    <div class="tips-section" style="margin-top:0;padding-top:0;border-top:none">
+      <div class="tips-title" style="margin-bottom:10px">1. Install & Auth</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>brew install ngrok/ngrok/ngrok</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Install ngrok via Homebrew (macOS)</div></div>
+      <div class="row"><div class="cmd"><code>snap install ngrok</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Install ngrok via Snap (Ubuntu/Linux)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok config add-authtoken YOUR_TOKEN</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Pasang authtoken dari dashboard ngrok — wajib sebelum pakai (token ada di ngrok.com/dashboard)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok version</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Cek versi ngrok yang terinstall</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">2. Tunnel Dasar</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>ngrok http 8000</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tunnel ke port 8000 (Laravel artisan serve default)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok http 3000</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tunnel ke port 3000 (React / Next.js dev server)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok http 8080</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tunnel ke port 8080 (Spring Boot default)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok http 80</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tunnel ke port 80 (Nginx/Apache lokal)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok tcp 22</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tunnel TCP ke port SSH — bisa SSH ke mesin dari luar jaringan</div></div>
+      <div class="row"><div class="cmd"><code>ngrok http 8000 --log=stdout</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan ngrok dengan log langsung di terminal (tanpa TUI)</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">3. Opsi Berguna</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>ngrok http 8000 --domain=namamu.ngrok-free.app</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Pakai domain statis (free 1 domain, ganti URL statis setiap sesi bukan random)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok http 8000 --basic-auth="user:pass"</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tambah HTTP basic auth di depan tunnel (lindungi dari akses random)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok http 8000 --host-header=rewrite</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Rewrite Host header — berguna jika app reject Host selain localhost</div></div>
+      <div class="row"><div class="cmd"><code>ngrok http https://localhost:8443</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tunnel ke local HTTPS server (misalnya HTTPS dev cert)</div></div>
+      <div class="row"><div class="cmd"><code>ngrok http 8000 --region=ap</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Pilih region Asia Pacific untuk latency lebih rendah</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">4. Inspeksi & Debug</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>http://localhost:4040</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Dashboard web ngrok — lihat semua request masuk, headers, body, replay request</div></div>
+      <div class="row"><div class="cmd"><code>curl http://localhost:4040/api/tunnels</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Dapatkan URL tunnel aktif via API (berguna untuk scripting)</div></div>
+      <div class="row"><div class="cmd"><code>curl http://localhost:4040/api/tunnels | python3 -m json.tool</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Pretty print JSON tunnel info</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">5. Config File (ngrok.yml)</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>ngrok config edit</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Buka ngrok.yml di editor default</div></div>
+      <div class="row"><div class="cmd"><code>ngrok config check</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Validasi ngrok.yml — cek syntax sebelum jalankan</div></div>
+      <div class="row"><div class="cmd"><code>ngrok start --all</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan semua tunnel yang didefinisikan di ngrok.yml sekaligus</div></div>
+      <div class="row"><div class="cmd"><code>ngrok start laravel webhook</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan tunnel bernama "laravel" dan "webhook" dari config (multi-tunnel)</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title">Tips Pakai ngrok</div>
+      <div class="tips-grid">
+        <div class="tip"><h4><span class="tag tag-accent">Laravel</span> Percayai Host ngrok</h4><p>Tambahkan URL ngrok ke <code>APP_URL</code> dan <code>config/cors.php</code>. Di Laravel 11+ tambah di <code>bootstrap/app.php</code> → <code>->withMiddleware</code> → <code>trustProxies</code> agar HTTPS tidak redirect loop.</p></div>
+        <div class="tip"><h4><span class="tag tag-green">Webhook</span> Testing webhook lokal</h4><p>Set webhook URL di Midtrans/Stripe/GitHub ke URL ngrok. Reload di dashboard ngrok (port 4040) untuk replay request yang gagal — tidak perlu trigger ulang dari provider.</p></div>
+        <div class="tip"><h4><span class="tag tag-gold">Static</span> Domain statis gratis</h4><p>Akun gratis dapat 1 domain statis di ngrok.com/dashboard → Domains. Pakai <code>--domain</code> agar URL tidak berubah setiap sesi — tidak perlu update webhook URL setiap restart.</p></div>
+        <div class="tip"><h4><span class="tag tag-blue">Config</span> Multi-tunnel di ngrok.yml</h4><p>Definisikan beberapa tunnel di ngrok.yml dengan nama berbeda. Jalankan sekaligus dengan <code>ngrok start --all</code>. Berguna saat develop frontend (3000) dan backend (8000) bersamaan.</p></div>
       </div>
     </div>
   </div>
