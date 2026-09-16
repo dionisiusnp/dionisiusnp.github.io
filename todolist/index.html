@@ -414,6 +414,24 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .culture-tl-card:hover .culture-tl-acts{display:flex}
 .fab-culture{position:fixed;bottom:24px;right:24px;z-index:200;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:1.4rem;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(108,111,245,.45);transition:transform .15s,box-shadow .15s}
 .fab-culture:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(108,111,245,.6)}
+/* ── Notulensi ── */
+.notul-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.notul-toolbar-title{font-size:.82rem;font-weight:800;flex:1}
+.notul-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .15s}
+.notul-card:hover{border-color:var(--accent)}
+.notul-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.notul-date-badge{font-size:.62rem;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--bd);border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
+.notul-title{flex:1;font-size:.88rem;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notul-chevron{font-size:.65rem;color:var(--dim);flex-shrink:0;transition:transform .2s;display:inline-block}
+.notul-card.open .notul-chevron{transform:rotate(180deg)}
+.notul-body{display:none;padding:0 14px 14px;border-top:1px solid var(--bd)}
+.notul-card.open .notul-body{display:block}
+.notul-meta{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 0 12px;font-size:.7rem;color:var(--muted)}
+.notul-meta-item{display:flex;align-items:center;gap:4px}
+.notul-section{margin-bottom:10px}
+.notul-section-label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:4px}
+.notul-section-text{font-size:.8rem;color:var(--text);line-height:1.65;white-space:pre-wrap}
+.notul-actions{display:flex;gap:6px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--bd);margin-top:8px}
 /* ── Regulasi tab / filter pills ── */
 .km-tab-btn{padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;background:var(--card);color:var(--muted)}
 .km-tab-btn.active{background:var(--accent);color:#fff}
@@ -573,6 +591,10 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <span class="feature-nav-ico">🔔</span>
         <span class="feature-nav-label">Pemberitahuan</span>
       </button>
+      <button class="feature-nav-item" id="btnNotulensiView">
+        <span class="feature-nav-ico">📝</span>
+        <span class="feature-nav-label">Notulensi</span>
+      </button>
       <button class="feature-nav-item admin-only" id="btnSettingsView">
         <span class="feature-nav-ico">⚙️</span>
         <span class="feature-nav-label">Pengaturan</span>
@@ -654,6 +676,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <!-- Komunitas view -->
     <div id="komunitasView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="komunitasArea"></div>
+    </div>
+
+    <!-- Notulensi view -->
+    <div id="notulensiView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="notulensiArea"></div>
     </div>
   </div>
 </div>
@@ -787,8 +814,9 @@ function mergeDbOnLoad(gist,local){
     tasks:     mergeArrClient(gist.tasks||[],    local.tasks||[]),
     assets:    mergeArrClient(gist.assets||[],   local.assets||[]),
     events:    mergeArrClient(gist.events||[],   local.events||[]),
-    cultures:  mergeArrClient(gist.cultures||[], local.cultures||[]),
-    regulasi:  mergeRegulasisClient(gist.regulasi||{},local.regulasi||{}),
+    cultures:   mergeArrClient(gist.cultures||[],   local.cultures||[]),
+    notulensi:  mergeArrClient(gist.notulensi||[],  local.notulensi||[]),
+    regulasi:   mergeRegulasisClient(gist.regulasi||{},local.regulasi||{}),
     settings:  local.settings||gist.settings,
     orgName:   local.orgName||gist.orgName,
   };
@@ -1565,9 +1593,9 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 ══════════════════════════════════════════ */
 /* helper: hide all feature views, deactivate all nav buttons */
 function hideAllViews(){
-  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView']
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   document.getElementById('emptyState').style.display='none';
   document.getElementById('fabCulture').style.display='none';
@@ -1597,9 +1625,9 @@ document.getElementById('btnOrgView').addEventListener('click',()=>{
   const tv=document.getElementById('taskView');
   const ov=document.getElementById('orgView');
   const empty=document.getElementById('emptyState');
-  ['assetView','infoView','settingsView','projectView','cultureView','komunitasView']
+  ['assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView']
     .forEach(id=>{ document.getElementById(id).style.display='none'; });
-  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView']
+  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   if(viewMode==='org'){
     activeId=null; tv.style.display='none'; empty.style.display='none';
@@ -1702,6 +1730,24 @@ document.getElementById('btnKomunitasView').addEventListener('click',()=>{
     kv.style.display='flex';
     document.getElementById('btnKomunitasView').classList.add('active');
     renderSidebar(); renderKomunitas();
+  }
+});
+
+document.getElementById('btnNotulensiView').addEventListener('click',()=>{
+  const nv=document.getElementById('notulensiView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(nv.style.display!=='none'){
+    nv.style.display='none';
+    document.getElementById('btnNotulensiView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    nv.style.display='flex';
+    document.getElementById('btnNotulensiView').classList.add('active');
+    renderSidebar(); renderNotulensi();
   }
 });
 
@@ -2333,6 +2379,49 @@ function openModal(mode, ctx){
     document.getElementById('fi-ctitle').focus();
   }
 
+  else if(mode==='notul-add'||mode==='notul-edit'){
+    const n=mode==='notul-edit'?(db.notulensi||[]).find(x=>x.id===ctx.id):null;
+    const today=new Date().toISOString().slice(0,10);
+    title.textContent=mode==='notul-add'?'Tambah Notulensi':'Edit Notulensi';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Judul Pertemuan *</label>
+        <input class="form-input" id="fi-ntitle" value="${esc(n?.title||'')}" placeholder="misal: Rapat Mingguan #1, Kick-off Project…" maxlength="100"/>
+      </div>
+      <div style="display:flex;gap:10px">
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Tanggal *</label>
+          <input class="form-input" type="date" id="fi-ndate" value="${n?.date||today}"/>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Waktu <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+          <input class="form-input" type="time" id="fi-ntime" value="${n?.time||''}"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lokasi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-nlocation" value="${esc(n?.location||'')}" placeholder="misal: Zoom, Aula Lantai 2, Google Meet…" maxlength="100"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Peserta <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-nattendees" value="${esc(n?.attendees||'')}" placeholder="misal: Dionisius, Andi, Rina — atau "Semua anggota"" maxlength="200"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Agenda <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-nagenda" rows="2" placeholder="Topik yang dibahas…">${esc(n?.agenda||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan / Isi Notulensi</label>
+        <textarea class="form-textarea" id="fi-nnotes" rows="6" placeholder="Poin-poin pembahasan, hasil diskusi, informasi penting…">${esc(n?.notes||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keputusan / Tindak Lanjut <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-ndecisions" rows="3" placeholder="Keputusan yang diambil, siapa mengerjakan apa…">${esc(n?.decisions||'')}</textarea>
+      </div>
+    `;
+    document.getElementById('fi-ntitle').focus();
+  }
+
   else if(mode==='vismis-edit'){
     const km=db.regulasi;
     title.textContent='Edit Visi & Misi';
@@ -2784,6 +2873,29 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       c.title=title_v; c.date=date_v; c.type=type_v; c.description=desc_v; touch(c);
     }
     save(); renderCultures(); closeModal();
+  }
+
+  /* ── Notulensi modal save ── */
+  else if(mMode==='notul-add'||mMode==='notul-edit'){
+    const title_v=document.getElementById('fi-ntitle').value.trim();
+    const date_v=document.getElementById('fi-ndate').value||null;
+    if(!title_v||!date_v) return;
+    const time_v=document.getElementById('fi-ntime').value||null;
+    const loc_v=document.getElementById('fi-nlocation').value.trim()||null;
+    const att_v=document.getElementById('fi-nattendees').value.trim()||null;
+    const agenda_v=document.getElementById('fi-nagenda').value.trim()||null;
+    const notes_v=document.getElementById('fi-nnotes').value.trim()||null;
+    const dec_v=document.getElementById('fi-ndecisions').value.trim()||null;
+    if(mMode==='notul-add'){
+      db.notulensi=(db.notulensi||[]);
+      db.notulensi.push(touch({id:uid(),title:title_v,date:date_v,time:time_v,location:loc_v,attendees:att_v,agenda:agenda_v,notes:notes_v,decisions:dec_v,createdAt:Date.now()}));
+    } else {
+      const n=(db.notulensi||[]).find(x=>x.id===mCtx.id);
+      if(!n) return;
+      n.title=title_v; n.date=date_v; n.time=time_v; n.location=loc_v; n.attendees=att_v;
+      n.agenda=agenda_v; n.notes=notes_v; n.decisions=dec_v; touch(n);
+    }
+    save(); renderNotulensi(); closeModal();
   }
 });
 
@@ -3779,6 +3891,92 @@ function renderKomunitas(){
       });
     }
   }
+}
+
+/* ══════════════════════════════════════════
+   NOTULENSI VIEW
+══════════════════════════════════════════ */
+function renderNotulensi(){
+  const area=document.getElementById('notulensiArea');
+  area.innerHTML='';
+  const isAdmin=role==='admin';
+  const MONTH=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+
+  function fmtDate(d){
+    if(!d) return null;
+    const [y,m,dd]=d.split('-');
+    return `${parseInt(dd)} ${MONTH[parseInt(m)-1]} ${y}`;
+  }
+
+  // Toolbar
+  const toolbar=document.createElement('div');
+  toolbar.className='notul-toolbar';
+  toolbar.innerHTML=`<span class="notul-toolbar-title">📝 Notulensi</span>`;
+  if(isAdmin){
+    const btn=document.createElement('button');
+    btn.className='task-add-inline-btn';
+    btn.textContent='＋ Tambah';
+    btn.addEventListener('click',()=>openModal('notul-add',{}));
+    toolbar.appendChild(btn);
+  }
+  area.appendChild(toolbar);
+
+  const items=(db.notulensi||[]).filter(n=>!n.deleted)
+    .sort((a,b)=>{
+      const ka=a.date||'0000-00-00'; const kb=b.date||'0000-00-00';
+      return ka<kb?1:ka>kb?-1:(b.createdAt||0)-(a.createdAt||0);
+    });
+
+  if(!items.length){
+    const e=document.createElement('div');
+    e.className='asset-empty';
+    e.textContent='Belum ada notulensi. Klik "+ Tambah" untuk mulai mencatat pertemuan.';
+    area.appendChild(e); return;
+  }
+
+  items.forEach(n=>{
+    const card=document.createElement('div');
+    card.className='notul-card';
+
+    const dateStr=fmtDate(n.date)||'Tanpa tanggal';
+    const timeStr=n.time?` · ${n.time}`:'';
+
+    card.innerHTML=`
+      <div class="notul-head">
+        <span class="notul-date-badge">${dateStr}${timeStr}</span>
+        <span class="notul-title">${esc(n.title)}</span>
+        <span class="notul-chevron">▼</span>
+      </div>
+      <div class="notul-body">
+        <div class="notul-meta">
+          ${n.location?`<span class="notul-meta-item">📍 ${esc(n.location)}</span>`:''}
+          ${n.attendees?`<span class="notul-meta-item">👥 ${esc(n.attendees)}</span>`:''}
+        </div>
+        ${n.agenda?`<div class="notul-section"><div class="notul-section-label">Agenda</div><div class="notul-section-text">${esc(n.agenda)}</div></div>`:''}
+        ${n.notes?`<div class="notul-section"><div class="notul-section-label">Catatan</div><div class="notul-section-text">${esc(n.notes)}</div></div>`:''}
+        ${n.decisions?`<div class="notul-section"><div class="notul-section-label">Keputusan / Tindak Lanjut</div><div class="notul-section-text">${esc(n.decisions)}</div></div>`:''}
+        ${isAdmin?`<div class="notul-actions">
+          <button class="asset-act-btn" data-notul-edit="${n.id}">✎ Edit</button>
+          <button class="asset-act-btn del" data-notul-del="${n.id}">✕ Hapus</button>
+        </div>`:''}
+      </div>
+    `;
+
+    card.querySelector('.notul-head').addEventListener('click',()=>{
+      card.classList.toggle('open');
+    });
+    card.querySelector('[data-notul-edit]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      openModal('notul-edit',{id:n.id});
+    });
+    card.querySelector('[data-notul-del]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm(`Hapus notulensi "${n.title}"?`)) return;
+      touch(Object.assign(n,{deleted:true})); save(); renderNotulensi();
+    });
+
+    area.appendChild(card);
+  });
 }
 
 /* ══════════════════════════════════════════
