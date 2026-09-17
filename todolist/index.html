@@ -4078,7 +4078,6 @@ function renderNotulensi(){
           <span class="notul-sesi-chevron">▼</span>
         </div>
         <div class="notul-sesi-body">
-          ${s.attendees?`<div class="notul-sesi-meta"><span>👥 ${esc(s.attendees)}</span>${s.location?`<span>📍 ${esc(s.location)}</span>`:''}</div>`:''}
           ${s.agenda?`<div class="notul-section"><div class="notul-section-label">Agenda</div><div class="notul-section-text">${esc(s.agenda)}</div></div>`:''}
           ${s.notes?`<div class="notul-section"><div class="notul-section-label">Catatan</div><div class="notul-section-text">${esc(s.notes)}</div></div>`:''}
           ${s.decisions?`<div class="notul-section"><div class="notul-section-label">Keputusan / Tindak Lanjut</div><div class="notul-section-text">${esc(s.decisions)}</div></div>`:''}
