@@ -741,6 +741,11 @@ let projectSearch     = '';
 let assetSearch      = '';
 let assetCatFilter   = '';
 let infoSearch       = '';
+let notulSearch      = '';
+const NOTUL_KEYS_LS  = 'alteco_notul_keys_v1';
+function getNotulKeys(){ try{ return JSON.parse(localStorage.getItem(NOTUL_KEYS_LS)||'{}'); }catch{ return {}; } }
+function setNotulKey(id,kode){ const m=getNotulKeys(); m[id]=kode; localStorage.setItem(NOTUL_KEYS_LS,JSON.stringify(m)); }
+function isTopikUnlocked(t){ if(role==='admin') return true; if(!t.kode) return true; return getNotulKeys()[t.id]===t.kode; }
 let activeFilter      = 'all';  /* 'all' | 'recurring' | 'once' */
 let filterMemberName  = null;   /* null | exact string — selected member, shows tasks */
 let memberSearchQuery = '';     /* partial query — filters member list in real-time */
@@ -2416,11 +2421,30 @@ function openModal(mode, ctx){
         <input class="form-input" id="fi-tk-title" value="${esc(t?.title||'')}" placeholder="misal: Kick-off Project, Rapat Evaluasi Semester…" maxlength="100"/>
       </div>
       <div class="form-group">
+        <label class="form-label">Kode Akses <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional — isi untuk kunci konten rapat)</span></label>
+        <input class="form-input" id="fi-tk-kode" value="${esc(t?.kode||'')}" placeholder="misal: MOM2025 — kosongkan jika semua boleh lihat" maxlength="50" style="font-family:var(--mono,monospace);letter-spacing:.05em"/>
+        <div style="font-size:.65rem;color:var(--dim);margin-top:4px">Judul topik terlihat oleh semua. Isi rapat hanya bisa dibuka oleh yang tahu kode ini.</div>
+      </div>
+      <div class="form-group">
         <label class="form-label">Deskripsi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
         <textarea class="form-textarea" id="fi-tk-desc" rows="2" placeholder="Konteks atau tujuan dari rangkaian rapat ini…">${esc(t?.desc||'')}</textarea>
       </div>
     `;
     document.getElementById('fi-tk-title').focus();
+  }
+
+  else if(mode==='notul-unlock'){
+    const t=(db.notulensiTopik||[]).find(x=>x.id===ctx.id);
+    title.textContent='🔒 Buka Akses Rapat';
+    body.innerHTML=`
+      <div style="font-size:.82rem;font-weight:700;margin-bottom:12px;color:var(--text)">${esc(t?.title||'')}</div>
+      <div class="form-group">
+        <label class="form-label">Kode Akses</label>
+        <input class="form-input" id="fi-unlock-kode" type="text" placeholder="Masukkan kode…" maxlength="50" style="font-family:var(--mono,monospace);letter-spacing:.08em"/>
+        <div id="fi-unlock-err" style="color:var(--red);font-size:.72rem;margin-top:5px;display:none">Kode salah. Coba lagi.</div>
+      </div>
+    `;
+    document.getElementById('fi-unlock-kode').focus();
   }
 
   else if(mode==='notul-sesi-add'||mode==='notul-sesi-edit'){
@@ -2920,16 +2944,32 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='notul-topik-add'||mMode==='notul-topik-edit'){
     const title_v=document.getElementById('fi-tk-title').value.trim();
     if(!title_v) return;
+    const kode_v=document.getElementById('fi-tk-kode').value.trim()||null;
     const desc_v=document.getElementById('fi-tk-desc').value.trim()||null;
     if(mMode==='notul-topik-add'){
       db.notulensiTopik=(db.notulensiTopik||[]);
-      db.notulensiTopik.push(touch({id:uid(),title:title_v,desc:desc_v,createdAt:Date.now()}));
+      db.notulensiTopik.push(touch({id:uid(),title:title_v,kode:kode_v,desc:desc_v,createdAt:Date.now()}));
     } else {
       const t=(db.notulensiTopik||[]).find(x=>x.id===mCtx.id);
       if(!t) return;
-      t.title=title_v; t.desc=desc_v; touch(t);
+      t.title=title_v; t.kode=kode_v; t.desc=desc_v; touch(t);
     }
     save(); renderNotulensi(); closeModal();
+  }
+
+  /* ── Notulensi unlock ── */
+  else if(mMode==='notul-unlock'){
+    const entered=document.getElementById('fi-unlock-kode').value.trim();
+    const t=(db.notulensiTopik||[]).find(x=>x.id===mCtx.id);
+    if(!t) return;
+    if(entered===t.kode){
+      setNotulKey(t.id,entered);
+      closeModal(); renderNotulensi();
+    } else {
+      const errEl=document.getElementById('fi-unlock-err');
+      if(errEl){ errEl.style.display=''; errEl.textContent='Kode salah. Coba lagi.'; }
+      return; /* don't close */
+    }
   }
 
   /* ── Notulensi sesi save ── */
@@ -3968,7 +4008,10 @@ function renderNotulensi(){
   /* Toolbar */
   const toolbar=document.createElement('div');
   toolbar.className='notul-toolbar';
-  toolbar.innerHTML=`<span class="notul-toolbar-title">📝 Notulensi</span>`;
+  toolbar.innerHTML=`
+    <span class="notul-toolbar-title">📝 Notulensi</span>
+    <input class="asset-search" id="notulSearchInp" placeholder="Cari topik…" value="${esc(notulSearch)}" style="max-width:200px"/>
+  `;
   if(isAdmin){
     const btn=document.createElement('button');
     btn.className='task-add-inline-btn';
@@ -3977,8 +4020,12 @@ function renderNotulensi(){
     toolbar.appendChild(btn);
   }
   area.appendChild(toolbar);
+  area.querySelector('#notulSearchInp').addEventListener('input',e=>{
+    notulSearch=e.target.value; renderNotulensi();
+  });
 
-  const topiks=(db.notulensiTopik||[]).filter(t=>!t.deleted);
+  const q=notulSearch.trim().toLowerCase();
+  const topiks=(db.notulensiTopik||[]).filter(t=>!t.deleted&&(!q||t.title.toLowerCase().includes(q)));
   const allSesi=(db.notulensi||[]).filter(s=>!s.deleted);
 
   /* Sort topiks: by latest sesi date desc, fallback createdAt desc */
@@ -4013,30 +4060,35 @@ function renderNotulensi(){
 
     const sesiCountLabel=sesiList.length?`${sesiList.length} rapat`:'Belum ada rapat';
     const lastDate=sesiList[0]?.date?fmtDate(sesiList[0].date):'';
+    const locked=t.kode&&!isTopikUnlocked(t);
 
     topikEl.innerHTML=`
       <div class="notul-topik-head">
-        <div class="notul-topik-icon">📋</div>
+        <div class="notul-topik-icon">${locked?'🔒':'📋'}</div>
         <div class="notul-topik-info">
           <div class="notul-topik-title">${esc(t.title)}</div>
-          <div class="notul-topik-meta">${sesiCountLabel}${lastDate?' · '+lastDate:''}</div>
+          <div class="notul-topik-meta">${sesiCountLabel}${lastDate?' · '+lastDate:''}${locked?' · <span style="color:var(--gold)">Kode diperlukan</span>':''}</div>
         </div>
         ${isAdmin?`<div class="notul-topik-acts">
           <button class="asset-act-btn" data-tk-edit="${t.id}" title="Edit topik">✎</button>
           <button class="asset-act-btn del" data-tk-del="${t.id}" title="Hapus topik">✕</button>
         </div>`:''}
-        <span class="notul-chevron">▼</span>
+        <span class="notul-chevron">${locked&&!isAdmin?'🔑':'▼'}</span>
       </div>
       <div class="notul-topik-body">
         ${t.desc?`<div class="notul-topik-desc">${esc(t.desc)}</div>`:''}
-        <div class="notul-sesi-list" id="sesi-list-${t.id}"></div>
-        ${isAdmin?`<button class="notul-topik-add-btn" data-add-sesi="${t.id}">＋ Tambah Rapat</button>`:''}
+        ${locked&&!isAdmin
+          ? `<div style="padding:14px;text-align:center;color:var(--muted);font-size:.78rem">Masukkan kode untuk melihat catatan rapat.</div>`
+          : `<div class="notul-sesi-list" id="sesi-list-${t.id}"></div>
+             ${isAdmin?`<button class="notul-topik-add-btn" data-add-sesi="${t.id}">＋ Tambah Rapat</button>`:''}`
+        }
       </div>
     `;
 
-    /* Toggle open */
+    /* Toggle open — if locked & viewer: open unlock modal */
     topikEl.querySelector('.notul-topik-head').addEventListener('click',e=>{
       if(e.target.closest('.notul-topik-acts')) return;
+      if(locked&&!isAdmin){ openModal('notul-unlock',{id:t.id}); return; }
       topikEl.classList.toggle('open');
     });
 
