@@ -4016,8 +4016,11 @@ function renderNotulensi(){
 
     topikEl.innerHTML=`
       <div class="notul-topik-head">
-        <span class="notul-topik-title">${esc(t.title)}</span>
-        <span class="notul-topik-meta">${sesiCountLabel}${lastDate?' · '+lastDate:''}</span>
+        <div class="notul-topik-icon">📋</div>
+        <div class="notul-topik-info">
+          <div class="notul-topik-title">${esc(t.title)}</div>
+          <div class="notul-topik-meta">${sesiCountLabel}${lastDate?' · '+lastDate:''}</div>
+        </div>
         ${isAdmin?`<div class="notul-topik-acts">
           <button class="asset-act-btn" data-tk-edit="${t.id}" title="Edit topik">✎</button>
           <button class="asset-act-btn del" data-tk-del="${t.id}" title="Hapus topik">✕</button>
@@ -4066,18 +4069,19 @@ function renderNotulensi(){
       sesiEl.innerHTML=`
         <div class="notul-sesi-head">
           <span class="notul-date-badge">${fmtDateTime(s)}</span>
-          <span class="notul-sesi-label">${s.location?`📍 ${esc(s.location)}`:''}</span>
-          ${s.attendees?`<span style="font-size:.62rem;color:var(--muted);flex-shrink:0">👥 ${esc(s.attendees)}</span>`:''}
+          <span class="notul-sesi-loc">${s.location?`📍 ${esc(s.location)}`:s.attendees?'':''}</span>
+          ${s.attendees?`<span style="font-size:.6rem;color:var(--muted);flex-shrink:0;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👥 ${esc(s.attendees)}</span>`:''}
+          ${isAdmin?`<div class="notul-sesi-acts">
+            <button class="asset-act-btn" data-sesi-edit="${s.id}" title="Edit rapat">✎</button>
+            <button class="asset-act-btn del" data-sesi-del="${s.id}" title="Hapus rapat">✕</button>
+          </div>`:''}
           <span class="notul-sesi-chevron">▼</span>
         </div>
         <div class="notul-sesi-body">
+          ${s.attendees?`<div class="notul-sesi-meta"><span>👥 ${esc(s.attendees)}</span>${s.location?`<span>📍 ${esc(s.location)}</span>`:''}</div>`:''}
           ${s.agenda?`<div class="notul-section"><div class="notul-section-label">Agenda</div><div class="notul-section-text">${esc(s.agenda)}</div></div>`:''}
           ${s.notes?`<div class="notul-section"><div class="notul-section-label">Catatan</div><div class="notul-section-text">${esc(s.notes)}</div></div>`:''}
           ${s.decisions?`<div class="notul-section"><div class="notul-section-label">Keputusan / Tindak Lanjut</div><div class="notul-section-text">${esc(s.decisions)}</div></div>`:''}
-          ${isAdmin?`<div class="notul-actions">
-            <button class="asset-act-btn" data-sesi-edit="${s.id}">✎ Edit</button>
-            <button class="asset-act-btn del" data-sesi-del="${s.id}">✕ Hapus</button>
-          </div>`:''}
         </div>
       `;
       sesiEl.querySelector('.notul-sesi-head').addEventListener('click',()=>sesiEl.classList.toggle('open'));
@@ -4106,16 +4110,20 @@ function renderNotulensi(){
       c.className='notul-topik';
       c.innerHTML=`
         <div class="notul-topik-head">
-          <span class="notul-date-badge">${fmtDateTime(n)}</span>
-          <span class="notul-topik-title" style="font-weight:700">${esc(n.title)}</span>
+          <div class="notul-topik-icon">📝</div>
+          <div class="notul-topik-info">
+            <div class="notul-topik-title">${esc(n.title)}</div>
+            <div class="notul-topik-meta">${fmtDateTime(n)}</div>
+          </div>
           ${isAdmin?`<div class="notul-topik-acts">
-            <button class="asset-act-btn" data-orphan-edit="${n.id}">✎</button>
-            <button class="asset-act-btn del" data-orphan-del="${n.id}">✕</button>
+            <button class="asset-act-btn" data-orphan-edit="${n.id}" title="Edit">✎</button>
+            <button class="asset-act-btn del" data-orphan-del="${n.id}" title="Hapus">✕</button>
           </div>`:''}
           <span class="notul-chevron">▼</span>
         </div>
         <div class="notul-topik-body">
-          <div class="notul-sesi-body" style="display:block;padding:8px 14px 12px">
+          <div class="notul-sesi-body" style="display:block;padding:8px 14px 12px;background:var(--surface)">
+            ${n.attendees?`<div class="notul-sesi-meta"><span>👥 ${esc(n.attendees)}</span>${n.location?`<span>📍 ${esc(n.location)}</span>`:''}</div>`:''}
             ${n.agenda?`<div class="notul-section"><div class="notul-section-label">Agenda</div><div class="notul-section-text">${esc(n.agenda)}</div></div>`:''}
             ${n.notes?`<div class="notul-section"><div class="notul-section-label">Catatan</div><div class="notul-section-text">${esc(n.notes)}</div></div>`:''}
             ${n.decisions?`<div class="notul-section"><div class="notul-section-label">Keputusan</div><div class="notul-section-text">${esc(n.decisions)}</div></div>`:''}
