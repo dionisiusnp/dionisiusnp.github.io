@@ -416,38 +416,41 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .fab-culture:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(108,111,245,.6)}
 /* ── Notulensi ── */
 .notul-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.notul-toolbar-title{font-size:.82rem;font-weight:800;flex:1}
+.notul-toolbar-title{font-size:.82rem;font-weight:800;flex:1;color:var(--text)}
 /* Topik card */
-.notul-topik{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .15s}
+.notul-topik{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .2s,background .2s}
 .notul-topik:hover{border-color:var(--accent)}
-.notul-topik-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
-.notul-topik-title{flex:1;font-size:.9rem;font-weight:800;min-width:0}
-.notul-topik-meta{font-size:.62rem;color:var(--muted);flex-shrink:0}
-.notul-topik-acts{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.notul-topik-head{display:flex;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;user-select:none;min-width:0}
+.notul-topik-icon{width:30px;height:30px;border-radius:7px;background:rgba(108,111,245,.12);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.notul-topik-info{flex:1;min-width:0}
+.notul-topik-title{font-size:.86rem;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notul-topik-meta{font-size:.62rem;color:var(--muted);margin-top:1px}
+.notul-topik-acts{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .15s}
 .notul-topik-head:hover .notul-topik-acts{opacity:1}
-.notul-chevron{font-size:.65rem;color:var(--dim);flex-shrink:0;transition:transform .2s;display:inline-block}
+.notul-chevron{font-size:.6rem;color:var(--dim);flex-shrink:0;transition:transform .2s;display:inline-block;margin-left:2px}
 .notul-topik.open .notul-chevron{transform:rotate(180deg)}
 .notul-topik-body{display:none;border-top:1px solid var(--bd)}
 .notul-topik.open .notul-topik-body{display:block}
-.notul-topik-desc{padding:8px 14px 0;font-size:.75rem;color:var(--muted);line-height:1.5}
-.notul-topik-add-btn{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:var(--accent);background:transparent;border:1px dashed var(--accent);border-radius:6px;padding:4px 12px;cursor:pointer;margin:10px 14px;transition:background .15s}
-.notul-topik-add-btn:hover{background:rgba(108,111,245,.08)}
+.notul-topik-desc{padding:8px 14px 4px;font-size:.74rem;color:var(--muted);line-height:1.5}
+.notul-topik-add-btn{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:var(--accent);background:transparent;border:1px dashed rgba(108,111,245,.4);border-radius:6px;padding:5px 12px;cursor:pointer;margin:8px 14px 10px;transition:background .15s,border-color .15s;width:calc(100% - 28px)}
+.notul-topik-add-btn:hover{background:rgba(108,111,245,.08);border-color:var(--accent)}
 /* Sesi rapat */
-.notul-sesi-list{display:flex;flex-direction:column;gap:0}
-.notul-sesi{border-top:1px solid var(--bd)}
-.notul-sesi-head{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;user-select:none;transition:background .1s}
+.notul-sesi-list{display:flex;flex-direction:column}
+.notul-sesi{border-top:1px solid var(--bd);transition:background .1s}
+.notul-sesi-head{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;user-select:none}
 .notul-sesi-head:hover{background:rgba(108,111,245,.05)}
-.notul-date-badge{font-size:.62rem;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--bd);border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
-.notul-sesi-label{flex:1;font-size:.78rem;font-weight:600;color:var(--text);min-width:0}
-.notul-sesi-chevron{font-size:.58rem;color:var(--dim);flex-shrink:0;transition:transform .2s;display:inline-block}
+.notul-date-badge{font-size:.6rem;font-weight:700;color:var(--accent);background:rgba(108,111,245,.1);border:1px solid rgba(108,111,245,.2);border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
+.notul-sesi-loc{flex:1;font-size:.75rem;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notul-sesi-acts{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.notul-sesi-head:hover .notul-sesi-acts{opacity:1}
+.notul-sesi-chevron{font-size:.55rem;color:var(--dim);flex-shrink:0;transition:transform .2s}
 .notul-sesi.open .notul-sesi-chevron{transform:rotate(180deg)}
-.notul-sesi-body{display:none;padding:0 14px 12px}
+.notul-sesi-body{display:none;padding:6px 14px 12px;background:var(--surface);border-top:1px solid var(--bd)}
 .notul-sesi.open .notul-sesi-body{display:block}
-.notul-meta{display:flex;flex-wrap:wrap;gap:5px 12px;padding:8px 0 8px;font-size:.7rem;color:var(--muted)}
-.notul-section{margin-bottom:9px}
-.notul-section-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:3px}
+.notul-sesi-meta{display:flex;flex-wrap:wrap;gap:4px 12px;padding-bottom:8px;font-size:.7rem;color:var(--muted)}
+.notul-section{margin-bottom:8px}
+.notul-section-label{font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--dim);margin-bottom:3px}
 .notul-section-text{font-size:.78rem;color:var(--text);line-height:1.65;white-space:pre-wrap}
-.notul-actions{display:flex;gap:6px;justify-content:flex-end;padding-top:7px;border-top:1px solid var(--bd);margin-top:6px}
 /* ── Regulasi tab / filter pills ── */
 .km-tab-btn{padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;background:var(--card);color:var(--muted)}
 .km-tab-btn.active{background:var(--accent);color:#fff}
@@ -505,6 +508,14 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   .culture-tl-card{width:100%!important;text-align:left!important;margin:0!important}
   .culture-tl-dot{left:16px}
   .asset-view.culture-wrap{padding-bottom:80px}
+
+  /* Notulensi mobile */
+  .notul-topik-acts{opacity:1}
+  .notul-sesi-acts{opacity:1}
+  .notul-topik-head{padding:10px 12px;gap:8px}
+  .notul-sesi-head{padding:8px 12px}
+  .notul-topik-add-btn{width:calc(100% - 24px);margin:8px 12px 10px}
+  .notul-topik-icon{width:26px;height:26px;font-size:.75rem}
 
   /* Modal */
   .modal-box{max-width:calc(100vw - 20px);padding:16px 14px 0}
