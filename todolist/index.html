@@ -417,21 +417,37 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 /* ── Notulensi ── */
 .notul-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .notul-toolbar-title{font-size:.82rem;font-weight:800;flex:1}
-.notul-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .15s}
-.notul-card:hover{border-color:var(--accent)}
-.notul-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
-.notul-date-badge{font-size:.62rem;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--bd);border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
-.notul-title{flex:1;font-size:.88rem;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Topik card */
+.notul-topik{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .15s}
+.notul-topik:hover{border-color:var(--accent)}
+.notul-topik-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.notul-topik-title{flex:1;font-size:.9rem;font-weight:800;min-width:0}
+.notul-topik-meta{font-size:.62rem;color:var(--muted);flex-shrink:0}
+.notul-topik-acts{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.notul-topik-head:hover .notul-topik-acts{opacity:1}
 .notul-chevron{font-size:.65rem;color:var(--dim);flex-shrink:0;transition:transform .2s;display:inline-block}
-.notul-card.open .notul-chevron{transform:rotate(180deg)}
-.notul-body{display:none;padding:0 14px 14px;border-top:1px solid var(--bd)}
-.notul-card.open .notul-body{display:block}
-.notul-meta{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 0 12px;font-size:.7rem;color:var(--muted)}
-.notul-meta-item{display:flex;align-items:center;gap:4px}
-.notul-section{margin-bottom:10px}
-.notul-section-label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:4px}
-.notul-section-text{font-size:.8rem;color:var(--text);line-height:1.65;white-space:pre-wrap}
-.notul-actions{display:flex;gap:6px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--bd);margin-top:8px}
+.notul-topik.open .notul-chevron{transform:rotate(180deg)}
+.notul-topik-body{display:none;border-top:1px solid var(--bd)}
+.notul-topik.open .notul-topik-body{display:block}
+.notul-topik-desc{padding:8px 14px 0;font-size:.75rem;color:var(--muted);line-height:1.5}
+.notul-topik-add-btn{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:var(--accent);background:transparent;border:1px dashed var(--accent);border-radius:6px;padding:4px 12px;cursor:pointer;margin:10px 14px;transition:background .15s}
+.notul-topik-add-btn:hover{background:rgba(108,111,245,.08)}
+/* Sesi rapat */
+.notul-sesi-list{display:flex;flex-direction:column;gap:0}
+.notul-sesi{border-top:1px solid var(--bd)}
+.notul-sesi-head{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;user-select:none;transition:background .1s}
+.notul-sesi-head:hover{background:rgba(108,111,245,.05)}
+.notul-date-badge{font-size:.62rem;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--bd);border-radius:5px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
+.notul-sesi-label{flex:1;font-size:.78rem;font-weight:600;color:var(--text);min-width:0}
+.notul-sesi-chevron{font-size:.58rem;color:var(--dim);flex-shrink:0;transition:transform .2s;display:inline-block}
+.notul-sesi.open .notul-sesi-chevron{transform:rotate(180deg)}
+.notul-sesi-body{display:none;padding:0 14px 12px}
+.notul-sesi.open .notul-sesi-body{display:block}
+.notul-meta{display:flex;flex-wrap:wrap;gap:5px 12px;padding:8px 0 8px;font-size:.7rem;color:var(--muted)}
+.notul-section{margin-bottom:9px}
+.notul-section-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:3px}
+.notul-section-text{font-size:.78rem;color:var(--text);line-height:1.65;white-space:pre-wrap}
+.notul-actions{display:flex;gap:6px;justify-content:flex-end;padding-top:7px;border-top:1px solid var(--bd);margin-top:6px}
 /* ── Regulasi tab / filter pills ── */
 .km-tab-btn{padding:7px 16px;border-radius:99px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:background .15s,color .15s;background:var(--card);color:var(--muted)}
 .km-tab-btn.active{background:var(--accent);color:#fff}
@@ -814,8 +830,9 @@ function mergeDbOnLoad(gist,local){
     tasks:     mergeArrClient(gist.tasks||[],    local.tasks||[]),
     assets:    mergeArrClient(gist.assets||[],   local.assets||[]),
     events:    mergeArrClient(gist.events||[],   local.events||[]),
-    cultures:   mergeArrClient(gist.cultures||[],   local.cultures||[]),
-    notulensi:  mergeArrClient(gist.notulensi||[],  local.notulensi||[]),
+    cultures:        mergeArrClient(gist.cultures||[],        local.cultures||[]),
+    notulensi:       mergeArrClient(gist.notulensi||[],       local.notulensi||[]),
+    notulensiTopik:  mergeArrClient(gist.notulensiTopik||[],  local.notulensiTopik||[]),
     regulasi:   mergeRegulasisClient(gist.regulasi||{},local.regulasi||{}),
     settings:  local.settings||gist.settings,
     orgName:   local.orgName||gist.orgName,
@@ -2379,47 +2396,60 @@ function openModal(mode, ctx){
     document.getElementById('fi-ctitle').focus();
   }
 
-  else if(mode==='notul-add'||mode==='notul-edit'){
-    const n=mode==='notul-edit'?(db.notulensi||[]).find(x=>x.id===ctx.id):null;
-    const today=new Date().toISOString().slice(0,10);
-    title.textContent=mode==='notul-add'?'Tambah Notulensi':'Edit Notulensi';
+  else if(mode==='notul-topik-add'||mode==='notul-topik-edit'){
+    const t=mode==='notul-topik-edit'?(db.notulensiTopik||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='notul-topik-add'?'Topik Rapat Baru':'Edit Topik Rapat';
     body.innerHTML=`
       <div class="form-group">
-        <label class="form-label">Judul Pertemuan *</label>
-        <input class="form-input" id="fi-ntitle" value="${esc(n?.title||'')}" placeholder="misal: Rapat Mingguan #1, Kick-off Project…" maxlength="100"/>
+        <label class="form-label">Nama Topik *</label>
+        <input class="form-input" id="fi-tk-title" value="${esc(t?.title||'')}" placeholder="misal: Kick-off Project, Rapat Evaluasi Semester…" maxlength="100"/>
       </div>
+      <div class="form-group">
+        <label class="form-label">Deskripsi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-tk-desc" rows="2" placeholder="Konteks atau tujuan dari rangkaian rapat ini…">${esc(t?.desc||'')}</textarea>
+      </div>
+    `;
+    document.getElementById('fi-tk-title').focus();
+  }
+
+  else if(mode==='notul-sesi-add'||mode==='notul-sesi-edit'){
+    const s=mode==='notul-sesi-edit'?(db.notulensi||[]).find(x=>x.id===ctx.id):null;
+    const today=new Date().toISOString().slice(0,10);
+    const topik=(db.notulensiTopik||[]).find(x=>x.id===(s?.topikId||ctx.topikId));
+    title.textContent=mode==='notul-sesi-add'?`Tambah Rapat${topik?' — '+topik.title:''}`:'Edit Rapat';
+    body.innerHTML=`
       <div style="display:flex;gap:10px">
         <div class="form-group" style="flex:1">
           <label class="form-label">Tanggal *</label>
-          <input class="form-input" type="date" id="fi-ndate" value="${n?.date||today}"/>
+          <input class="form-input" type="date" id="fi-ndate" value="${s?.date||today}"/>
         </div>
         <div class="form-group" style="flex:1">
           <label class="form-label">Waktu <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
-          <input class="form-input" type="time" id="fi-ntime" value="${n?.time||''}"/>
+          <input class="form-input" type="time" id="fi-ntime" value="${s?.time||''}"/>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Lokasi <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
-        <input class="form-input" id="fi-nlocation" value="${esc(n?.location||'')}" placeholder="misal: Zoom, Aula Lantai 2, Google Meet…" maxlength="100"/>
+        <input class="form-input" id="fi-nlocation" value="${esc(s?.location||'')}" placeholder="misal: Zoom, Aula Lantai 2, Google Meet…" maxlength="100"/>
       </div>
       <div class="form-group">
         <label class="form-label">Peserta <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
-        <input class="form-input" id="fi-nattendees" value="${esc(n?.attendees||'')}" placeholder="misal: Dionisius, Andi, Rina — atau "Semua anggota"" maxlength="200"/>
+        <input class="form-input" id="fi-nattendees" value="${esc(s?.attendees||'')}" placeholder="misal: Dionisius, Andi, Rina" maxlength="200"/>
       </div>
       <div class="form-group">
         <label class="form-label">Agenda <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
-        <textarea class="form-textarea" id="fi-nagenda" rows="2" placeholder="Topik yang dibahas…">${esc(n?.agenda||'')}</textarea>
+        <textarea class="form-textarea" id="fi-nagenda" rows="2" placeholder="Topik yang dibahas…">${esc(s?.agenda||'')}</textarea>
       </div>
       <div class="form-group">
         <label class="form-label">Catatan / Isi Notulensi</label>
-        <textarea class="form-textarea" id="fi-nnotes" rows="6" placeholder="Poin-poin pembahasan, hasil diskusi, informasi penting…">${esc(n?.notes||'')}</textarea>
+        <textarea class="form-textarea" id="fi-nnotes" rows="6" placeholder="Poin-poin pembahasan, hasil diskusi, informasi penting…">${esc(s?.notes||'')}</textarea>
       </div>
       <div class="form-group">
         <label class="form-label">Keputusan / Tindak Lanjut <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
-        <textarea class="form-textarea" id="fi-ndecisions" rows="3" placeholder="Keputusan yang diambil, siapa mengerjakan apa…">${esc(n?.decisions||'')}</textarea>
+        <textarea class="form-textarea" id="fi-ndecisions" rows="3" placeholder="Keputusan yang diambil, siapa mengerjakan apa…">${esc(s?.decisions||'')}</textarea>
       </div>
     `;
-    document.getElementById('fi-ntitle').focus();
+    document.getElementById('fi-ndate').focus();
   }
 
   else if(mode==='vismis-edit'){
@@ -2875,25 +2905,40 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     save(); renderCultures(); closeModal();
   }
 
-  /* ── Notulensi modal save ── */
-  else if(mMode==='notul-add'||mMode==='notul-edit'){
-    const title_v=document.getElementById('fi-ntitle').value.trim();
+  /* ── Notulensi topik save ── */
+  else if(mMode==='notul-topik-add'||mMode==='notul-topik-edit'){
+    const title_v=document.getElementById('fi-tk-title').value.trim();
+    if(!title_v) return;
+    const desc_v=document.getElementById('fi-tk-desc').value.trim()||null;
+    if(mMode==='notul-topik-add'){
+      db.notulensiTopik=(db.notulensiTopik||[]);
+      db.notulensiTopik.push(touch({id:uid(),title:title_v,desc:desc_v,createdAt:Date.now()}));
+    } else {
+      const t=(db.notulensiTopik||[]).find(x=>x.id===mCtx.id);
+      if(!t) return;
+      t.title=title_v; t.desc=desc_v; touch(t);
+    }
+    save(); renderNotulensi(); closeModal();
+  }
+
+  /* ── Notulensi sesi save ── */
+  else if(mMode==='notul-sesi-add'||mMode==='notul-sesi-edit'){
     const date_v=document.getElementById('fi-ndate').value||null;
-    if(!title_v||!date_v) return;
+    if(!date_v) return;
     const time_v=document.getElementById('fi-ntime').value||null;
     const loc_v=document.getElementById('fi-nlocation').value.trim()||null;
     const att_v=document.getElementById('fi-nattendees').value.trim()||null;
     const agenda_v=document.getElementById('fi-nagenda').value.trim()||null;
     const notes_v=document.getElementById('fi-nnotes').value.trim()||null;
     const dec_v=document.getElementById('fi-ndecisions').value.trim()||null;
-    if(mMode==='notul-add'){
+    if(mMode==='notul-sesi-add'){
       db.notulensi=(db.notulensi||[]);
-      db.notulensi.push(touch({id:uid(),title:title_v,date:date_v,time:time_v,location:loc_v,attendees:att_v,agenda:agenda_v,notes:notes_v,decisions:dec_v,createdAt:Date.now()}));
+      db.notulensi.push(touch({id:uid(),topikId:mCtx.topikId,date:date_v,time:time_v,location:loc_v,attendees:att_v,agenda:agenda_v,notes:notes_v,decisions:dec_v,createdAt:Date.now()}));
     } else {
-      const n=(db.notulensi||[]).find(x=>x.id===mCtx.id);
-      if(!n) return;
-      n.title=title_v; n.date=date_v; n.time=time_v; n.location=loc_v; n.attendees=att_v;
-      n.agenda=agenda_v; n.notes=notes_v; n.decisions=dec_v; touch(n);
+      const s=(db.notulensi||[]).find(x=>x.id===mCtx.id);
+      if(!s) return;
+      s.date=date_v; s.time=time_v; s.location=loc_v; s.attendees=att_v;
+      s.agenda=agenda_v; s.notes=notes_v; s.decisions=dec_v; touch(s);
     }
     save(); renderNotulensi(); closeModal();
   }
@@ -3907,76 +3952,182 @@ function renderNotulensi(){
     const [y,m,dd]=d.split('-');
     return `${parseInt(dd)} ${MONTH[parseInt(m)-1]} ${y}`;
   }
+  function fmtDateTime(s){ const d=fmtDate(s.date); return d?(s.time?`${d} · ${s.time}`:d):'Tanpa tanggal'; }
 
-  // Toolbar
+  /* Toolbar */
   const toolbar=document.createElement('div');
   toolbar.className='notul-toolbar';
   toolbar.innerHTML=`<span class="notul-toolbar-title">📝 Notulensi</span>`;
   if(isAdmin){
     const btn=document.createElement('button');
     btn.className='task-add-inline-btn';
-    btn.textContent='＋ Tambah';
-    btn.addEventListener('click',()=>openModal('notul-add',{}));
+    btn.textContent='＋ Topik Baru';
+    btn.addEventListener('click',()=>openModal('notul-topik-add',{}));
     toolbar.appendChild(btn);
   }
   area.appendChild(toolbar);
 
-  const items=(db.notulensi||[]).filter(n=>!n.deleted)
-    .sort((a,b)=>{
-      const ka=a.date||'0000-00-00'; const kb=b.date||'0000-00-00';
-      return ka<kb?1:ka>kb?-1:(b.createdAt||0)-(a.createdAt||0);
-    });
+  const topiks=(db.notulensiTopik||[]).filter(t=>!t.deleted);
+  const allSesi=(db.notulensi||[]).filter(s=>!s.deleted);
 
-  if(!items.length){
+  /* Sort topiks: by latest sesi date desc, fallback createdAt desc */
+  const latestSesiDate=tid=>{
+    const dates=allSesi.filter(s=>s.topikId===tid&&s.date).map(s=>s.date);
+    return dates.length?Math.max(...dates.map(d=>d)):null;
+  };
+  const sorted=[...topiks].sort((a,b)=>{
+    const la=latestSesiDate(a.id)||'0000-00-00';
+    const lb=latestSesiDate(b.id)||'0000-00-00';
+    return la<lb?1:la>lb?-1:(b.createdAt||0)-(a.createdAt||0);
+  });
+
+  /* Orphan sesi (no topikId — backward compat with v1 data) */
+  const orphans=allSesi.filter(s=>!s.topikId)
+    .sort((a,b)=>(b.date||'')>(a.date||'')?1:-1);
+
+  if(!sorted.length&&!orphans.length){
     const e=document.createElement('div');
     e.className='asset-empty';
-    e.textContent='Belum ada notulensi. Klik "+ Tambah" untuk mulai mencatat pertemuan.';
+    e.textContent='Belum ada topik. Klik "+ Topik Baru" untuk mulai mencatat rapat.';
     area.appendChild(e); return;
   }
 
-  items.forEach(n=>{
-    const card=document.createElement('div');
-    card.className='notul-card';
+  /* Render each topik */
+  sorted.forEach(t=>{
+    const sesiList=allSesi.filter(s=>s.topikId===t.id)
+      .sort((a,b)=>(b.date||'')>=(a.date||'')?1:(a.date||'')>(b.date||'')?-1:(b.createdAt||0)-(a.createdAt||0));
 
-    const dateStr=fmtDate(n.date)||'Tanpa tanggal';
-    const timeStr=n.time?` · ${n.time}`:'';
+    const topikEl=document.createElement('div');
+    topikEl.className='notul-topik';
 
-    card.innerHTML=`
-      <div class="notul-head">
-        <span class="notul-date-badge">${dateStr}${timeStr}</span>
-        <span class="notul-title">${esc(n.title)}</span>
+    const sesiCountLabel=sesiList.length?`${sesiList.length} rapat`:'Belum ada rapat';
+    const lastDate=sesiList[0]?.date?fmtDate(sesiList[0].date):'';
+
+    topikEl.innerHTML=`
+      <div class="notul-topik-head">
+        <span class="notul-topik-title">${esc(t.title)}</span>
+        <span class="notul-topik-meta">${sesiCountLabel}${lastDate?' · '+lastDate:''}</span>
+        ${isAdmin?`<div class="notul-topik-acts">
+          <button class="asset-act-btn" data-tk-edit="${t.id}" title="Edit topik">✎</button>
+          <button class="asset-act-btn del" data-tk-del="${t.id}" title="Hapus topik">✕</button>
+        </div>`:''}
         <span class="notul-chevron">▼</span>
       </div>
-      <div class="notul-body">
-        <div class="notul-meta">
-          ${n.location?`<span class="notul-meta-item">📍 ${esc(n.location)}</span>`:''}
-          ${n.attendees?`<span class="notul-meta-item">👥 ${esc(n.attendees)}</span>`:''}
-        </div>
-        ${n.agenda?`<div class="notul-section"><div class="notul-section-label">Agenda</div><div class="notul-section-text">${esc(n.agenda)}</div></div>`:''}
-        ${n.notes?`<div class="notul-section"><div class="notul-section-label">Catatan</div><div class="notul-section-text">${esc(n.notes)}</div></div>`:''}
-        ${n.decisions?`<div class="notul-section"><div class="notul-section-label">Keputusan / Tindak Lanjut</div><div class="notul-section-text">${esc(n.decisions)}</div></div>`:''}
-        ${isAdmin?`<div class="notul-actions">
-          <button class="asset-act-btn" data-notul-edit="${n.id}">✎ Edit</button>
-          <button class="asset-act-btn del" data-notul-del="${n.id}">✕ Hapus</button>
-        </div>`:''}
+      <div class="notul-topik-body">
+        ${t.desc?`<div class="notul-topik-desc">${esc(t.desc)}</div>`:''}
+        <div class="notul-sesi-list" id="sesi-list-${t.id}"></div>
+        ${isAdmin?`<button class="notul-topik-add-btn" data-add-sesi="${t.id}">＋ Tambah Rapat</button>`:''}
       </div>
     `;
 
-    card.querySelector('.notul-head').addEventListener('click',()=>{
-      card.classList.toggle('open');
-    });
-    card.querySelector('[data-notul-edit]')?.addEventListener('click',e=>{
-      e.stopPropagation();
-      openModal('notul-edit',{id:n.id});
-    });
-    card.querySelector('[data-notul-del]')?.addEventListener('click',e=>{
-      e.stopPropagation();
-      if(!confirm(`Hapus notulensi "${n.title}"?`)) return;
-      touch(Object.assign(n,{deleted:true})); save(); renderNotulensi();
+    /* Toggle open */
+    topikEl.querySelector('.notul-topik-head').addEventListener('click',e=>{
+      if(e.target.closest('.notul-topik-acts')) return;
+      topikEl.classList.toggle('open');
     });
 
-    area.appendChild(card);
+    /* Edit topik */
+    topikEl.querySelector('[data-tk-edit]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      openModal('notul-topik-edit',{id:t.id});
+    });
+
+    /* Delete topik (cascade sesi) */
+    topikEl.querySelector('[data-tk-del]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm(`Hapus topik "${t.title}" beserta ${sesiList.length} rapat di dalamnya?`)) return;
+      touch(Object.assign(t,{deleted:true}));
+      sesiList.forEach(s=>touch(Object.assign(s,{deleted:true})));
+      save(); renderNotulensi();
+    });
+
+    /* Add sesi */
+    topikEl.querySelector('[data-add-sesi]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      openModal('notul-sesi-add',{topikId:t.id});
+    });
+
+    /* Render sesi rows */
+    const sesiContainer=topikEl.querySelector(`#sesi-list-${t.id}`);
+    sesiList.forEach(s=>{
+      const sesiEl=document.createElement('div');
+      sesiEl.className='notul-sesi';
+      sesiEl.innerHTML=`
+        <div class="notul-sesi-head">
+          <span class="notul-date-badge">${fmtDateTime(s)}</span>
+          <span class="notul-sesi-label">${s.location?`📍 ${esc(s.location)}`:''}</span>
+          ${s.attendees?`<span style="font-size:.62rem;color:var(--muted);flex-shrink:0">👥 ${esc(s.attendees)}</span>`:''}
+          <span class="notul-sesi-chevron">▼</span>
+        </div>
+        <div class="notul-sesi-body">
+          ${s.agenda?`<div class="notul-section"><div class="notul-section-label">Agenda</div><div class="notul-section-text">${esc(s.agenda)}</div></div>`:''}
+          ${s.notes?`<div class="notul-section"><div class="notul-section-label">Catatan</div><div class="notul-section-text">${esc(s.notes)}</div></div>`:''}
+          ${s.decisions?`<div class="notul-section"><div class="notul-section-label">Keputusan / Tindak Lanjut</div><div class="notul-section-text">${esc(s.decisions)}</div></div>`:''}
+          ${isAdmin?`<div class="notul-actions">
+            <button class="asset-act-btn" data-sesi-edit="${s.id}">✎ Edit</button>
+            <button class="asset-act-btn del" data-sesi-del="${s.id}">✕ Hapus</button>
+          </div>`:''}
+        </div>
+      `;
+      sesiEl.querySelector('.notul-sesi-head').addEventListener('click',()=>sesiEl.classList.toggle('open'));
+      sesiEl.querySelector('[data-sesi-edit]')?.addEventListener('click',e2=>{
+        e2.stopPropagation();
+        openModal('notul-sesi-edit',{id:s.id,topikId:t.id});
+      });
+      sesiEl.querySelector('[data-sesi-del]')?.addEventListener('click',e2=>{
+        e2.stopPropagation();
+        if(!confirm('Hapus rapat ini?')) return;
+        touch(Object.assign(s,{deleted:true})); save(); renderNotulensi();
+      });
+      sesiContainer.appendChild(sesiEl);
+    });
+
+    area.appendChild(topikEl);
   });
+
+  /* Orphan sesi (v1 data without topikId) */
+  if(orphans.length){
+    const orpBox=document.createElement('div');
+    orpBox.style.cssText='margin-top:8px;border-top:1px solid var(--bd);padding-top:8px';
+    orpBox.innerHTML=`<div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:8px">Rapat Lama (tanpa topik)</div>`;
+    orphans.forEach(n=>{
+      const c=document.createElement('div');
+      c.className='notul-topik';
+      c.innerHTML=`
+        <div class="notul-topik-head">
+          <span class="notul-date-badge">${fmtDateTime(n)}</span>
+          <span class="notul-topik-title" style="font-weight:700">${esc(n.title)}</span>
+          ${isAdmin?`<div class="notul-topik-acts">
+            <button class="asset-act-btn" data-orphan-edit="${n.id}">✎</button>
+            <button class="asset-act-btn del" data-orphan-del="${n.id}">✕</button>
+          </div>`:''}
+          <span class="notul-chevron">▼</span>
+        </div>
+        <div class="notul-topik-body">
+          <div class="notul-sesi-body" style="display:block;padding:8px 14px 12px">
+            ${n.agenda?`<div class="notul-section"><div class="notul-section-label">Agenda</div><div class="notul-section-text">${esc(n.agenda)}</div></div>`:''}
+            ${n.notes?`<div class="notul-section"><div class="notul-section-label">Catatan</div><div class="notul-section-text">${esc(n.notes)}</div></div>`:''}
+            ${n.decisions?`<div class="notul-section"><div class="notul-section-label">Keputusan</div><div class="notul-section-text">${esc(n.decisions)}</div></div>`:''}
+          </div>
+        </div>
+      `;
+      c.querySelector('.notul-topik-head').addEventListener('click',e=>{
+        if(e.target.closest('.notul-topik-acts')) return;
+        c.classList.toggle('open');
+      });
+      c.querySelector('[data-orphan-edit]')?.addEventListener('click',e=>{
+        e.stopPropagation();
+        openModal('notul-sesi-edit',{id:n.id,topikId:null});
+      });
+      c.querySelector('[data-orphan-del]')?.addEventListener('click',e=>{
+        e.stopPropagation();
+        if(!confirm(`Hapus "${n.title}"?`)) return;
+        touch(Object.assign(n,{deleted:true})); save(); renderNotulensi();
+      });
+      orpBox.appendChild(c);
+    });
+    area.appendChild(orpBox);
+  }
 }
 
 /* ══════════════════════════════════════════

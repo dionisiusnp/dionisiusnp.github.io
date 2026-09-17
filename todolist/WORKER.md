@@ -155,7 +155,8 @@ export default {
         assets:     mergeArr(gistDb.assets     || [], browserDb.assets     || []),
         events:     mergeArr(gistDb.events     || [], browserDb.events     || []),
         cultures:   mergeArr(gistDb.cultures   || [], browserDb.cultures   || []),
-        notulensi:  mergeArr(gistDb.notulensi  || [], browserDb.notulensi  || []),
+        notulensi:       mergeArr(gistDb.notulensi      || [], browserDb.notulensi      || []),
+        notulensiTopik:  mergeArr(gistDb.notulensiTopik || [], browserDb.notulensiTopik || []),
         projects:   mergeProjects(gistDb.projects || [], browserDb.projects || []),
         regulasi:   mergeRegulasi(gistDb.regulasi || gistDb.komunitas || {}, browserDb.regulasi || {}),
         settings:   browserDb.settings,
@@ -185,7 +186,7 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 
 | Tipe data | Strategi merge |
 |-----------|---------------|
-| Array top-level (`tasks`, `members`, `kelompoks`, `assets`, `events`, `cultures`, `notulensi`) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
+| Array top-level (`tasks`, `members`, `kelompoks`, `assets`, `events`, `cultures`, `notulensi`, `notulensiTopik`) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
 | `projects[].members[].tasks[]` | Deep merge 3 level — per-task `updatedAt` menang |
 | `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.keuntungan` / `regulasi.sanksi` | Merge by `id` + `updatedAt` |
 | `settings`, `orgName`, `visi`, `misi` | Browser always wins (last write) |
