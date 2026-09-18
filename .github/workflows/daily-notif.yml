@@ -95,6 +95,7 @@ jobs:
                 }
 
                 if (ev.type === 'recurring') {
+                  if (ev.recurDate && today < ev.recurDate) return false;
                   const base = ev.recurDate ? new Date(ev.recurDate + 'T00:00:00') : null;
                   if (ev.recurrence === 'harian') return true;
                   if (ev.recurrence === 'mingguan') return base ? dow === base.getDay() : dow === 1;

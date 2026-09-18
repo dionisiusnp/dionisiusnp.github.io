@@ -4287,6 +4287,7 @@ function getTodayEvents(){
       return today>=start.toISOString().slice(0,10) && today<=ev.date;
     }
     if(ev.type==='recurring'){
+      if(ev.recurDate && today < ev.recurDate) return false;
       if(ev.recurrence==='harian') return true;
       /* berulang: notif hanya PADA hari H sesuai recurDate */
       const base = ev.recurDate ? new Date(ev.recurDate+'T00:00:00') : null;
