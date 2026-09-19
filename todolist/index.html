@@ -3121,11 +3121,12 @@ function renderInfoList(area, today){
 function fmtDate(d){ return d?new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):''; }
 
 function computeProjectDates(proj){
-  const allOpt=(proj.members||[]).flatMap(m=>(m.tasks||[]).filter(t=>!t.deleted&&t.dueDate).map(t=>t.dueDate));
-  const allPess=(proj.members||[]).flatMap(m=>(m.tasks||[]).filter(t=>!t.deleted).map(t=>t.datePessimistic||t.dueDate).filter(Boolean));
+  const activeMembers=(proj.members||[]).filter(m=>!m.deleted);
+  const allOpt=activeMembers.flatMap(m=>(m.tasks||[]).filter(t=>!t.deleted&&t.dueDate).map(t=>t.dueDate));
+  const allPess=activeMembers.flatMap(m=>(m.tasks||[]).filter(t=>!t.deleted).map(t=>t.datePessimistic||t.dueDate).filter(Boolean));
   if(!allOpt.length&&!allPess.length) return {optimistic:null,pessimistic:null};
   const pessimistic=allPess.length?allPess.reduce((a,b)=>a>b?a:b):null;
-  const perMember=(proj.members||[]).map(m=>{
+  const perMember=activeMembers.map(m=>{
     const dues=(m.tasks||[]).filter(t=>!t.deleted&&t.dueDate).map(t=>t.dueDate);
     return dues.length?dues.reduce((a,b)=>a>b?a:b):null;
   }).filter(Boolean);
@@ -3142,7 +3143,7 @@ function projectStatus(proj){
 }
 
 function projectProgress(proj){
-  const tasks=(proj.members||[]).flatMap(m=>(m.tasks||[]).filter(t=>!t.deleted));
+  const tasks=(proj.members||[]).filter(m=>!m.deleted).flatMap(m=>(m.tasks||[]).filter(t=>!t.deleted));
   if(!tasks.length) return 0;
   return Math.round(tasks.filter(t=>t.done).length/tasks.length*100);
 }
@@ -3226,7 +3227,7 @@ function renderProject(){
   searchInp.addEventListener('input',e=>{projectSearch=e.target.value;renderProject();});
   if(projectSearch){searchInp.focus();searchInp.setSelectionRange(searchInp.value.length,searchInp.value.length);}
 
-  const allProjects=(db.projects||[]).slice().sort((a,b)=>(a.title||'').localeCompare(b.title||'','id'));
+  const allProjects=(db.projects||[]).filter(p=>!p.deleted).slice().sort((a,b)=>(a.title||'').localeCompare(b.title||'','id'));
   const q=projectSearch.trim().toLowerCase();
   const filtered=q?allProjects.filter(p=>(p.title||'').toLowerCase().includes(q)||(p.clientName||'').toLowerCase().includes(q)):allProjects;
   if(!filtered.length){
@@ -3279,7 +3280,7 @@ function renderProject(){
           ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
           ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
           ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
-          <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
+          <span>${(proj.members||[]).filter(m=>!m.deleted).length} anggota · ${pct}% selesai</span>
         </div>
         ${proj.startDate&&pEnd&&pEnd!==proj.startDate?`
         <div class="proj-timeline-wrap">
@@ -3302,7 +3303,7 @@ function renderProject(){
       collapse.className='proj-collapse'+(isExpanded?' open':'');
       const memSec=document.createElement('div');
       memSec.className='proj-member-section';
-      (proj.members||[]).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'','id')).forEach(mem=>memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,true)));
+      (proj.members||[]).filter(m=>!m.deleted).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'','id')).forEach(mem=>memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,true)));
       const addMemBtn=document.createElement('button');
       addMemBtn.className='proj-add-btn';
       addMemBtn.style.cssText='margin-left:0;margin-top:8px';
@@ -3402,7 +3403,7 @@ function renderProject(){
             ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
             ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
             ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
-            <span>${(proj.members||[]).length} anggota · ${pct}% selesai</span>
+            <span>${(proj.members||[]).filter(m=>!m.deleted).length} anggota · ${pct}% selesai</span>
           </div>
           ${proj.startDate&&pEnd&&pEnd!==proj.startDate?`
           <div class="proj-timeline-wrap">
@@ -3446,7 +3447,7 @@ function renderProject(){
   area.querySelectorAll('[data-proj-del]').forEach(b=>b.addEventListener('click',()=>{
     const p=db.projects.find(x=>x.id===b.dataset.projDel);
     if(!p||!confirm(`Hapus proyek "${p.title}"?`)) return;
-    db.projects=db.projects.filter(x=>x.id!==p.id); save(); renderProject();
+    touch(Object.assign(p,{deleted:true})); save(); renderProject();
   }));
   area.querySelectorAll('[data-task-toggle]').forEach(b=>b.addEventListener('click',()=>{
     const proj=db.projects.find(x=>x.id===b.dataset.proj);
@@ -3469,7 +3470,8 @@ function renderProject(){
     const proj=db.projects.find(x=>x.id===b.dataset.proj);
     const mem=proj?.members?.find(m=>m.id===b.dataset.memDel);
     if(!mem||!confirm(`Hapus anggota "${mem.name}" dari proyek ini?`)) return;
-    proj.members=proj.members.filter(m=>m.id!==mem.id); save(); renderProject();
+    (mem.tasks||[]).forEach(t=>touch(Object.assign(t,{deleted:true})));
+    touch(Object.assign(mem,{deleted:true})); save(); renderProject();
   }));
   area.querySelectorAll('[data-add-mem]').forEach(b=>b.addEventListener('click',()=>openModal('proj-mem-add',{projId:b.dataset.addMem})));
 }
