@@ -581,6 +581,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     🔔
     <span class="bell-badge" id="bellBadge" style="display:none">0</span>
   </button>
+  <button class="theme-btn" id="syncBtn" title="Perbarui data dari server">↻</button>
   <button class="theme-btn" id="themeBtn" title="Ganti tema">🌙</button>
 </nav>
 
@@ -866,19 +867,34 @@ async function gistLoad(){
   return null;
 }
 
-let _lastSync=0;
-const SYNC_COOLDOWN=15000; /* ms — skip if synced <15s ago */
+function getCurrentViewRender(){
+  const views=[
+    {id:'projectView',  fn:()=>{ renderSidebar(); renderProject(); }},
+    {id:'orgView',      fn:()=>{ renderSidebar(); renderOrgChart(); }},
+    {id:'assetView',    fn:()=>{ renderSidebar(); renderAssets(); }},
+    {id:'infoView',     fn:()=>{ renderSidebar(); renderInfo(); updateBellBadge(); }},
+    {id:'settingsView', fn:()=>{ renderSidebar(); renderSettings(); }},
+    {id:'cultureView',  fn:()=>{ renderSidebar(); renderCultures(); }},
+    {id:'komunitasView',fn:()=>{ renderSidebar(); renderKomunitas(); }},
+    {id:'notulensiView',fn:()=>{ renderSidebar(); renderNotulensi(); }},
+  ];
+  const active=views.find(v=>document.getElementById(v.id)?.style.display!=='none');
+  return active?active.fn:()=>{ renderSidebar(); renderMain(); };
+}
 async function syncFromGist(renderFn){
-  if(Date.now()-_lastSync<SYNC_COOLDOWN) return;
-  _lastSync=Date.now();
+  const btn=document.getElementById('syncBtn');
+  if(btn){ btn.textContent='↻'; btn.style.opacity='.4'; btn.disabled=true; }
   try{
     const remote=await gistLoad();
-    if(!remote) return;
-    const merged=mergeDbOnLoad(remote,db);
-    db=merged;
-    localStorage.setItem(LS_KEY,JSON.stringify(db));
-    renderFn();
-  }catch(e){ /* silent — local data already shown */ }
+    if(remote){
+      db=mergeDbOnLoad(remote,db);
+      localStorage.setItem(LS_KEY,JSON.stringify(db));
+      (renderFn||getCurrentViewRender())();
+    }
+  }catch(e){ /* silent */ }
+  finally{
+    if(btn){ btn.textContent='↻'; btn.style.opacity=''; btn.disabled=false; }
+  }
 }
 
 let _saveTimer=null;
@@ -1664,7 +1680,6 @@ document.getElementById('btnProjectView').addEventListener('click',()=>{
     pv.style.display='flex';
     document.getElementById('btnProjectView').classList.add('active');
     renderSidebar(); renderProject();
-    syncFromGist(()=>{ renderSidebar(); renderProject(); });
   }
 });
 
@@ -1681,7 +1696,6 @@ document.getElementById('btnOrgView').addEventListener('click',()=>{
   if(viewMode==='org'){
     activeId=null; tv.style.display='none'; empty.style.display='none';
     ov.style.display='flex'; renderSidebar(); renderOrgChart();
-    syncFromGist(()=>{ renderSidebar(); renderOrgChart(); });
   } else {
     ov.style.display='none'; renderMain();
   }
@@ -1702,7 +1716,6 @@ document.getElementById('btnAssetView').addEventListener('click',()=>{
     av.style.display='flex';
     document.getElementById('btnAssetView').classList.add('active');
     renderSidebar(); renderAssets();
-    syncFromGist(()=>{ renderSidebar(); renderAssets(); });
   }
 });
 
@@ -1723,7 +1736,6 @@ document.getElementById('btnInfoView').addEventListener('click',()=>{
     renderSidebar(); renderInfo();
     localStorage.setItem('alteco_info_read_ts', Date.now().toString());
     updateBellBadge();
-    syncFromGist(()=>{ renderSidebar(); renderInfo(); updateBellBadge(); });
   }
 });
 
@@ -1742,7 +1754,6 @@ document.getElementById('btnSettingsView').addEventListener('click',()=>{
     sv.style.display='flex';
     document.getElementById('btnSettingsView').classList.add('active');
     renderSidebar(); renderSettings();
-    syncFromGist(()=>{ renderSidebar(); renderSettings(); });
   }
 });
 
@@ -1764,7 +1775,6 @@ document.getElementById('btnCultureView').addEventListener('click',()=>{
     document.getElementById('btnCultureView').classList.add('active');
     if(role==='admin') fab.style.display='flex';
     renderSidebar(); renderCultures();
-    syncFromGist(()=>{ renderSidebar(); renderCultures(); });
   }
 });
 document.getElementById('fabCulture').addEventListener('click',()=>openModal('culture-add',{}));
@@ -1784,7 +1794,6 @@ document.getElementById('btnKomunitasView').addEventListener('click',()=>{
     kv.style.display='flex';
     document.getElementById('btnKomunitasView').classList.add('active');
     renderSidebar(); renderKomunitas();
-    syncFromGist(()=>{ renderSidebar(); renderKomunitas(); });
   }
 });
 
@@ -1803,13 +1812,13 @@ document.getElementById('btnNotulensiView').addEventListener('click',()=>{
     nv.style.display='flex';
     document.getElementById('btnNotulensiView').classList.add('active');
     renderSidebar(); renderNotulensi();
-    syncFromGist(()=>{ renderSidebar(); renderNotulensi(); });
   }
 });
 
 document.getElementById('bellBtn').addEventListener('click',()=>{
   document.getElementById('btnInfoView').click();
 });
+document.getElementById('syncBtn').addEventListener('click',()=>syncFromGist());
 
 /* ══════════════════════════════════════════
    ORG CHART RENDER
