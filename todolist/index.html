@@ -770,6 +770,8 @@ function migrate(d){
   if(!d.events) d.events=[];
   if(!d.projects) d.projects=[];
   if(!d.cultures) d.cultures=[];
+  if(!d.notulensi) d.notulensi=[];
+  if(!d.notulensiTopik) d.notulensiTopik=[];
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
@@ -1006,6 +1008,9 @@ function applyRole(){
   updateBellBadge();
   checkLocalNotif();
   if(db.settings?.pushNotifEnabled) loadOneSignalSDK();
+  /* Push local db to Gist on admin login — ensures any locally-created data
+     (e.g. notulensiTopik) that wasn't synced yet gets written to Gist. */
+  if(role==='admin' && WORKER_URL) setTimeout(()=>_doSave(),1500);
 }
 
 /* Inline edit org name (superadmin only) */
