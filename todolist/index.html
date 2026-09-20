@@ -1274,18 +1274,11 @@ function select(id){
   activeId=id; activeFilter='all'; filterMemberName=null; memberSearchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   /* deactivate feature nav */
-  document.getElementById('btnOrgView').classList.remove('active');
-  document.getElementById('btnAssetView').classList.remove('active');
-  document.getElementById('btnInfoView').classList.remove('active');
-  document.getElementById('btnSettingsView').classList.remove('active');
-  document.getElementById('btnProjectView').classList.remove('active');
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView']
+    .forEach(id=>document.getElementById(id)?.classList.remove('active'));
   viewMode='tasks';
-  document.getElementById('orgView').style.display='none';
-  document.getElementById('assetView').style.display='none';
-  document.getElementById('infoView').style.display='none';
-  document.getElementById('settingsView').style.display='none';
-  document.getElementById('projectView').style.display='none';
-  document.getElementById('cultureView').style.display='none';
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   renderSidebar(); renderMain();
 }
 
@@ -1297,19 +1290,11 @@ document.getElementById('allItem').addEventListener('click',()=>select(ALL));
 function renderMain(){
   const empty=document.getElementById('emptyState');
   const tv=document.getElementById('taskView');
-  document.getElementById('orgView').style.display='none';
-  document.getElementById('assetView').style.display='none';
-  document.getElementById('infoView').style.display='none';
-  document.getElementById('settingsView').style.display='none';
-  document.getElementById('projectView').style.display='none';
-  document.getElementById('cultureView').style.display='none';
-  document.getElementById('btnAssetView').classList.remove('active');
-  document.getElementById('btnInfoView').classList.remove('active');
-  document.getElementById('btnSettingsView').classList.remove('active');
-  document.getElementById('btnProjectView').classList.remove('active');
-  document.getElementById('btnCultureView').classList.remove('active');
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnOrgView']
+    .forEach(id=>document.getElementById(id).classList.remove('active'));
   viewMode='tasks';
-  document.getElementById('btnOrgView').classList.remove('active');
 
   if(!activeId){
     empty.style.display='flex'; tv.style.display='none'; return;
