@@ -4153,8 +4153,9 @@ function renderNotulensi(){
       openModal('notul-sesi-add',{topikId:t.id});
     });
 
-    /* Render sesi rows */
+    /* Render sesi rows — sesiContainer is null when locked for viewer */
     const sesiContainer=topikEl.querySelector(`#sesi-list-${t.id}`);
+    if(!sesiContainer){ area.appendChild(topikEl); return; }
     sesiList.forEach(s=>{
       const sesiEl=document.createElement('div');
       sesiEl.className='notul-sesi';
