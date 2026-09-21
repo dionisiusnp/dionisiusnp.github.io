@@ -132,6 +132,40 @@ export default {
         });
       }
 
+      function mergeBroadcastItems(gi = [], bi = []) {
+        const map = new Map();
+        for (const t of gi) map.set(t.id, t);
+        for (const t of bi) {
+          const ex = map.get(t.id);
+          if (!ex || (t.updatedAt || 0) >= (ex.updatedAt || 0)) map.set(t.id, t);
+        }
+        return [...map.values()];
+      }
+
+      function mergeBroadcastKondisi(gk = [], bk = []) {
+        const gMap = new Map(gk.map(k => [k.id, k]));
+        const bMap = new Map(bk.map(k => [k.id, k]));
+        const ids = new Set([...gMap.keys(), ...bMap.keys()]);
+        return [...ids].map(id => {
+          const g = gMap.get(id), b = bMap.get(id);
+          if (!g) return b;
+          if (!b) return g;
+          return { ...g, ...b, items: mergeBroadcastItems(g.items || [], b.items || []) };
+        });
+      }
+
+      function mergeBroadcastProduk(gp = [], bp = []) {
+        const gMap = new Map(gp.map(p => [p.id, p]));
+        const bMap = new Map(bp.map(p => [p.id, p]));
+        const ids = new Set([...gMap.keys(), ...bMap.keys()]);
+        return [...ids].map(id => {
+          const g = gMap.get(id), b = bMap.get(id);
+          if (!g) return b;
+          if (!b) return g;
+          return { ...g, ...b, kondisi: mergeBroadcastKondisi(g.kondisi || [], b.kondisi || []) };
+        });
+      }
+
       function mergeRegulasi(gr, br) {
         const base = { visi: '', misi: '', syaratAnggota: [], syaratTim: [], keuntungan: [], sanksi: [] };
         gr = { ...base, ...gr };
@@ -157,6 +191,7 @@ export default {
         cultures:   mergeArr(gistDb.cultures   || [], browserDb.cultures   || []),
         notulensi:       mergeArr(gistDb.notulensi      || [], browserDb.notulensi      || []),
         notulensiTopik:  mergeArr(gistDb.notulensiTopik || [], browserDb.notulensiTopik || []),
+        broadcastProduk: mergeBroadcastProduk(gistDb.broadcastProduk || [], browserDb.broadcastProduk || []),
         projects:   mergeProjects(gistDb.projects || [], browserDb.projects || []),
         regulasi:   mergeRegulasi(gistDb.regulasi || gistDb.komunitas || {}, browserDb.regulasi || {}),
         settings:   browserDb.settings,
@@ -188,6 +223,7 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 |-----------|---------------|
 | Array top-level (`tasks`, `members`, `kelompoks`, `assets`, `events`, `cultures`, `notulensi`, `notulensiTopik`) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
 | `projects[].members[].tasks[]` | Deep merge 3 level — per-task `updatedAt` menang |
+| `broadcastProduk[].kondisi[].items[]` | Deep merge 3 level — per-item `updatedAt` menang |
 | `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.keuntungan` / `regulasi.sanksi` | Merge by `id` + `updatedAt` |
 | `settings`, `orgName`, `visi`, `misi` | Browser always wins (last write) |
 
