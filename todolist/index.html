@@ -2636,28 +2636,18 @@ function openModal(mode, ctx){
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Kondisi Klien *</label>
-        <textarea class="form-textarea" id="fi-bc-kondisi" rows="3" placeholder="misal: Klien UMKM baru mulai bisnis, belum punya branding…">${esc(k?.nama||'')}</textarea>
+        <textarea class="form-textarea" id="fi-bc-kondisi" rows="3" placeholder="misal: Klien UMKM baru mulai bisnis, belum punya branding…">${esc(k?.kondisi||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Caption Broadcast *</label>
+        <textarea class="form-textarea" id="fi-bc-broadcast" rows="6" placeholder="Teks broadcast yang akan dikirim…">${esc(k?.broadcast||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional — gambar, video, link produk)</span></label>
+        <input class="form-input" id="fi-bc-url" value="${esc(k?.url||'')}" placeholder="https://…" maxlength="500"/>
       </div>
     `;
     document.getElementById('fi-bc-kondisi').focus();
-  }
-
-  else if(mode==='bc-item-add'||mode==='bc-item-edit'){
-    const p=(db.broadcastProduk||[]).find(x=>x.id===ctx.produkId);
-    const k=(p?.kondisi||[]).find(x=>x.id===ctx.kondisiId);
-    const it=mode==='bc-item-edit'?(k?.items||[]).find(x=>x.id===ctx.id):null;
-    title.textContent=mode==='bc-item-add'?'Tambah Broadcast':'Edit Broadcast';
-    body.innerHTML=`
-      <div class="form-group">
-        <label class="form-label">Caption Broadcast *</label>
-        <textarea class="form-textarea" id="fi-bc-caption" rows="6" placeholder="Teks broadcast yang akan dikirim…">${esc(it?.caption||'')}</textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">URL Media <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional — gambar, video, link produk)</span></label>
-        <input class="form-input" id="fi-bc-item-url" value="${esc(it?.url||'')}" placeholder="https://…" maxlength="500"/>
-      </div>
-    `;
-    document.getElementById('fi-bc-caption').focus();
   }
 
   else if(mode==='vismis-edit'){
@@ -3201,39 +3191,21 @@ document.getElementById('modalSave').addEventListener('click',()=>{
 
   /* ── Broadcast kondisi save ── */
   else if(mMode==='bc-kondisi-add'||mMode==='bc-kondisi-edit'){
-    const nama_v=document.getElementById('fi-bc-kondisi').value.trim();
-    if(!nama_v) return;
+    const kondisi_v=document.getElementById('fi-bc-kondisi').value.trim();
+    const broadcast_v=document.getElementById('fi-bc-broadcast').value.trim();
+    if(!kondisi_v||!broadcast_v) return;
+    const url_v=document.getElementById('fi-bc-url').value.trim()||null;
     const p=(db.broadcastProduk||[]).find(x=>x.id===mCtx.produkId);
     if(!p) return;
     if(!p.kondisi) p.kondisi=[];
     if(mMode==='bc-kondisi-add'){
-      p.kondisi.push(touch({id:uid(),nama:nama_v,items:[],createdAt:Date.now()}));
+      p.kondisi.push(touch({id:uid(),kondisi:kondisi_v,broadcast:broadcast_v,url:url_v,createdAt:Date.now()}));
     } else {
       const k=p.kondisi.find(x=>x.id===mCtx.id);
       if(!k) return;
-      k.nama=nama_v; touch(k);
+      k.kondisi=kondisi_v; k.broadcast=broadcast_v; k.url=url_v; touch(k);
     }
     touch(p); save(); renderBroadcast(); closeModal();
-  }
-
-  /* ── Broadcast item save ── */
-  else if(mMode==='bc-item-add'||mMode==='bc-item-edit'){
-    const cap_v=document.getElementById('fi-bc-caption').value.trim();
-    if(!cap_v) return;
-    const url_v=document.getElementById('fi-bc-item-url').value.trim()||null;
-    const p=(db.broadcastProduk||[]).find(x=>x.id===mCtx.produkId);
-    if(!p) return;
-    const k=(p.kondisi||[]).find(x=>x.id===mCtx.kondisiId);
-    if(!k) return;
-    if(!k.items) k.items=[];
-    if(mMode==='bc-item-add'){
-      k.items.push(touch({id:uid(),caption:cap_v,url:url_v,createdAt:Date.now()}));
-    } else {
-      const it=k.items.find(x=>x.id===mCtx.id);
-      if(!it) return;
-      it.caption=cap_v; it.url=url_v; touch(it);
-    }
-    touch(k); touch(p); save(); renderBroadcast(); closeModal();
   }
 });
 
@@ -4548,8 +4520,6 @@ function renderBroadcast(){
     if(!kondisiContainer){ area.appendChild(produkEl); return; }
 
     kondisiList.forEach((k,ki)=>{
-      const itemList=(k.items||[]).filter(it=>!it.deleted);
-
       const kondisiEl=document.createElement('div');
       kondisiEl.className='bc-kondisi';
       kondisiEl.innerHTML=`
@@ -4558,22 +4528,32 @@ function renderBroadcast(){
             <button class="asset-act-btn" data-bc-k-up="${k.id}" title="Naik" style="font-size:.55rem;padding:1px 4px" ${ki===0?'disabled':''}>▲</button>
             <button class="asset-act-btn" data-bc-k-down="${k.id}" title="Turun" style="font-size:.55rem;padding:1px 4px" ${ki===kondisiList.length-1?'disabled':''}>▼</button>
           </div>`:''}
-          <span class="bc-kondisi-name">${esc(k.nama)}</span>
+          <span class="bc-kondisi-name">${esc(k.kondisi||k.nama||'')}</span>
           <div class="bc-kondisi-acts">
-            ${isAdmin?`<button class="asset-act-btn" data-bc-k-edit="${k.id}" title="Edit kondisi">✎</button>
-            <button class="asset-act-btn del" data-bc-k-del="${k.id}" title="Hapus kondisi">✕</button>`:''}
+            ${isAdmin?`<button class="asset-act-btn" data-bc-k-edit="${k.id}" title="Edit">✎</button>
+            <button class="asset-act-btn del" data-bc-k-del="${k.id}" title="Hapus">✕</button>`:''}
+            <button class="bc-copy-btn" data-bc-copy="${k.id}" title="Salin broadcast ke clipboard">📋</button>
           </div>
           <span class="bc-kondisi-chevron">▼</span>
         </div>
         <div class="bc-kondisi-body">
-          <div id="bc-items-${k.id}"></div>
-          ${isAdmin?`<button class="notul-topik-add-btn" data-add-item="${k.id}" style="margin-top:4px">＋ Tambah Broadcast</button>`:''}
+          <div class="bc-item-caption" style="white-space:pre-wrap">${esc(k.broadcast||'')}${k.url?`<br><a class="bc-item-url" href="${esc(k.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(k.url)}</a>`:''}</div>
         </div>
       `;
 
       kondisiEl.querySelector('.bc-kondisi-head').addEventListener('click',e=>{
         if(e.target.closest('.bc-kondisi-acts')||e.target.closest('[data-bc-k-up]')||e.target.closest('[data-bc-k-down]')) return;
         kondisiEl.classList.toggle('open');
+      });
+
+      /* Copy broadcast */
+      kondisiEl.querySelector('[data-bc-copy]').addEventListener('click',e=>{
+        e.stopPropagation();
+        const text=(k.broadcast+(k.url?'\n'+k.url:'')).replace(/[​‌‍⁠﻿]/g,'');
+        navigator.clipboard.writeText(text).then(()=>{
+          const btn=kondisiEl.querySelector('[data-bc-copy]');
+          const orig=btn.textContent; btn.textContent='✓'; setTimeout(()=>btn.textContent=orig,1200);
+        }).catch(()=>{});
       });
 
       /* Reorder kondisi */
@@ -4606,88 +4586,12 @@ function renderBroadcast(){
         openModal('bc-kondisi-edit',{id:k.id,produkId:p.id});
       });
 
-      /* Delete kondisi (cascade) */
+      /* Delete kondisi */
       kondisiEl.querySelector('[data-bc-k-del]')?.addEventListener('click',e=>{
         e.stopPropagation();
-        if(!confirm(`Hapus kondisi ini beserta ${itemList.length} broadcast di dalamnya?`)) return;
-        (k.items||[]).forEach(it=>touch(Object.assign(it,{deleted:true})));
+        if(!confirm('Hapus kondisi ini?')) return;
         touch(Object.assign(k,{deleted:true}));
         touch(p); save(); renderBroadcast();
-      });
-
-      /* Add item */
-      kondisiEl.querySelector('[data-add-item]')?.addEventListener('click',e=>{
-        e.stopPropagation();
-        openModal('bc-item-add',{kondisiId:k.id,produkId:p.id});
-      });
-
-      /* Render items */
-      const itemsContainer=kondisiEl.querySelector(`#bc-items-${k.id}`);
-      itemList.forEach((it,ii)=>{
-        const itemEl=document.createElement('div');
-        itemEl.className='bc-item';
-        itemEl.innerHTML=`
-          <div class="bc-item-caption">${esc(it.caption)}${it.url?`<a class="bc-item-url" href="${esc(it.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(it.url)}</a>`:''}</div>
-          <div class="bc-item-acts">
-            ${isAdmin?`<button class="asset-act-btn" data-bc-i-up="${it.id}" title="Naik" style="font-size:.55rem;padding:1px 4px" ${ii===0?'disabled':''}>▲</button>
-            <button class="asset-act-btn" data-bc-i-down="${it.id}" title="Turun" style="font-size:.55rem;padding:1px 4px" ${ii===itemList.length-1?'disabled':''}>▼</button>
-            <button class="asset-act-btn" data-bc-i-edit="${it.id}" title="Edit">✎</button>
-            <button class="asset-act-btn del" data-bc-i-del="${it.id}" title="Hapus">✕</button>`:''}
-            <button class="bc-copy-btn" data-bc-copy="${it.id}" title="Salin ke clipboard">📋</button>
-          </div>
-        `;
-
-        /* Copy */
-        itemEl.querySelector('[data-bc-copy]').addEventListener('click',e=>{
-          e.stopPropagation();
-          const text=(it.caption+(it.url?'\n'+it.url:'')).replace(/[​‌‍⁠﻿]/g,'');
-          navigator.clipboard.writeText(text).then(()=>{
-            const btn=itemEl.querySelector('[data-bc-copy]');
-            const orig=btn.textContent; btn.textContent='✓'; setTimeout(()=>btn.textContent=orig,1200);
-          }).catch(()=>{});
-        });
-
-        /* Reorder item up */
-        itemEl.querySelector('[data-bc-i-up]')?.addEventListener('click',e=>{
-          e.stopPropagation();
-          const arr=k.items.filter(x=>!x.deleted);
-          const idx=arr.findIndex(x=>x.id===it.id);
-          if(idx<=0) return;
-          const ri=k.items.indexOf(it);
-          const prev=arr[idx-1];
-          const pi=k.items.indexOf(prev);
-          k.items.splice(ri,1); k.items.splice(pi,0,it);
-          touch(it); touch(k); touch(p); save(); renderBroadcast();
-        });
-
-        /* Reorder item down */
-        itemEl.querySelector('[data-bc-i-down]')?.addEventListener('click',e=>{
-          e.stopPropagation();
-          const arr=k.items.filter(x=>!x.deleted);
-          const idx=arr.findIndex(x=>x.id===it.id);
-          if(idx>=arr.length-1) return;
-          const ri=k.items.indexOf(it);
-          const next=arr[idx+1];
-          const ni=k.items.indexOf(next);
-          k.items.splice(ri,1); k.items.splice(ni,0,it);
-          touch(it); touch(k); touch(p); save(); renderBroadcast();
-        });
-
-        /* Edit item */
-        itemEl.querySelector('[data-bc-i-edit]')?.addEventListener('click',e=>{
-          e.stopPropagation();
-          openModal('bc-item-edit',{id:it.id,kondisiId:k.id,produkId:p.id});
-        });
-
-        /* Delete item */
-        itemEl.querySelector('[data-bc-i-del]')?.addEventListener('click',e=>{
-          e.stopPropagation();
-          if(!confirm('Hapus broadcast ini?')) return;
-          touch(Object.assign(it,{deleted:true}));
-          touch(k); touch(p); save(); renderBroadcast();
-        });
-
-        itemsContainer.appendChild(itemEl);
       });
 
       kondisiContainer.appendChild(kondisiEl);
