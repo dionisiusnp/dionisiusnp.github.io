@@ -451,6 +451,10 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .notul-section{margin-bottom:8px}
 .notul-section-label{font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--dim);margin-bottom:3px}
 .notul-section-text{font-size:.78rem;color:var(--text);line-height:1.65;white-space:pre-wrap}
+/* ── Lomba ide row ── */
+.lomba-ide-row{display:flex;align-items:flex-start;gap:8px;padding:8px 14px;border-top:1px solid var(--bd)}
+.lomba-ide-acts{display:flex;gap:2px;flex-shrink:0;opacity:0;transition:opacity .15s;align-items:center;margin-top:1px}
+.lomba-ide-row:hover .lomba-ide-acts{opacity:1}
 /* ── Broadcast Marketing ── */
 .bc-kondisi{border-top:1px solid var(--bd);transition:background .1s}
 .bc-kondisi-head{display:flex;align-items:center;gap:7px;padding:9px 14px;cursor:pointer;user-select:none;min-height:40px}
@@ -4739,11 +4743,12 @@ function renderLomba(){
 
   /* Toolbar */
   const toolbar=document.createElement('div');
-  toolbar.className='asset-toolbar';
-  toolbar.innerHTML=`<span class="asset-toolbar-title">🏆 Lomba</span>`;
+  toolbar.className='notul-toolbar';
+  toolbar.innerHTML=`<span class="notul-toolbar-title">🏆 Lomba</span>`;
   if(isAdmin){
     const btn=document.createElement('button');
-    btn.className='task-add-inline-btn';
+    btn.className='notul-topik-add-btn';
+    btn.style.cssText='margin:0;width:auto';
     btn.textContent='＋ Tambah Lomba';
     btn.addEventListener('click',()=>openModal('lomba-add',{}));
     toolbar.appendChild(btn);
@@ -4762,21 +4767,24 @@ function renderLomba(){
   list.forEach(l=>{
     const ideList=(l.ide||[]).filter(x=>!x.deleted);
     const card=document.createElement('div');
-    card.className='notul-topik-card';
+    card.className='notul-topik';
     card.innerHTML=`
       <div class="notul-topik-head">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.88rem;font-weight:700;color:var(--text)">${esc(l.nama)}</div>
-          ${l.tim?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px">Tim: ${esc(l.tim)}</div>`:''}
-          ${(l.regStart||l.regEnd)?`<div style="font-size:.7rem;color:var(--dim);margin-top:2px">Registrasi: ${esc(l.regStart||'?')} — ${esc(l.regEnd||'?')}</div>`:''}
-          ${l.tanggalDaftar?`<div style="font-size:.7rem;color:var(--dim);margin-top:1px">Mendaftar: ${esc(l.tanggalDaftar)}</div>`:''}
-          <div style="font-size:.7rem;color:var(--muted);margin-top:2px">${ideList.length} ide</div>
+        <div class="notul-topik-icon">🏆</div>
+        <div class="notul-topik-info">
+          <div class="notul-topik-title">${esc(l.nama)}</div>
+          <div class="notul-topik-meta">${[
+            l.tim?`Tim: ${esc(l.tim)}`:'',
+            (l.regStart||l.regEnd)?`Reg: ${esc(l.regStart||'?')} — ${esc(l.regEnd||'?')}`:'',
+            l.tanggalDaftar?`Daftar: ${esc(l.tanggalDaftar)}`:'',
+            `${ideList.length} ide`
+          ].filter(Boolean).join(' · ')}</div>
         </div>
-        <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
+        <div class="notul-topik-acts">
           ${isAdmin?`<button class="asset-act-btn" data-lomba-edit="${l.id}" title="Edit">✎</button>
           <button class="asset-act-btn del" data-lomba-del="${l.id}" title="Hapus">✕</button>`:''}
-          <span class="notul-topik-chevron">▼</span>
         </div>
+        <span class="notul-chevron">▼</span>
       </div>
       <div class="notul-topik-body" id="lomba-ide-list-${l.id}">
         ${isAdmin?`<button class="notul-topik-add-btn" data-add-ide="${l.id}">＋ Tambah Ide</button>`:''}
@@ -4785,7 +4793,7 @@ function renderLomba(){
 
     /* Toggle open */
     card.querySelector('.notul-topik-head').addEventListener('click',e=>{
-      if(e.target.closest('[data-lomba-edit]')||e.target.closest('[data-lomba-del]')||e.target.closest('[data-add-ide]')) return;
+      if(e.target.closest('.notul-topik-acts')||e.target.closest('[data-add-ide]')) return;
       card.classList.toggle('open');
     });
 
@@ -4814,13 +4822,13 @@ function renderLomba(){
     const ideContainer=card.querySelector(`#lomba-ide-list-${l.id}`);
     ideList.forEach((ide,ii)=>{
       const ideEl=document.createElement('div');
-      ideEl.className='notul-sesi-row';
+      ideEl.className='lomba-ide-row';
       ideEl.innerHTML=`
         <div style="flex:1;min-width:0">
           <div style="font-size:.8rem;font-weight:600;color:var(--text)">${esc(ide.judul)}</div>
           ${ide.desc?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px;white-space:pre-wrap;line-height:1.5">${esc(ide.desc)}</div>`:''}
         </div>
-        <div style="display:flex;gap:2px;flex-shrink:0;align-items:center">
+        <div class="lomba-ide-acts">
           ${isAdmin?`<button class="asset-act-btn" style="font-size:.5rem;padding:1px 3px" data-ide-up="${ide.id}" ${ii===0?'disabled':''} title="Naik">▲</button>
           <button class="asset-act-btn" style="font-size:.5rem;padding:1px 3px" data-ide-dn="${ide.id}" ${ii===ideList.length-1?'disabled':''} title="Turun">▼</button>
           <button class="asset-act-btn" data-ide-edit="${ide.id}" title="Edit">✎</button>
