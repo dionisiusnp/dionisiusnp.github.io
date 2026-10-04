@@ -166,6 +166,28 @@ export default {
         });
       }
 
+      function mergeLombaIde(gi = [], bi = []) {
+        const map = new Map();
+        for (const t of gi) map.set(t.id, t);
+        for (const t of bi) {
+          const ex = map.get(t.id);
+          if (!ex || (t.updatedAt || 0) >= (ex.updatedAt || 0)) map.set(t.id, t);
+        }
+        return [...map.values()];
+      }
+
+      function mergeLombas(gl = [], bl = []) {
+        const gMap = new Map(gl.map(l => [l.id, l]));
+        const bMap = new Map(bl.map(l => [l.id, l]));
+        const ids = new Set([...gMap.keys(), ...bMap.keys()]);
+        return [...ids].map(id => {
+          const g = gMap.get(id), b = bMap.get(id);
+          if (!g) return b;
+          if (!b) return g;
+          return { ...g, ...b, ide: mergeLombaIde(g.ide || [], b.ide || []) };
+        });
+      }
+
       function mergeRegulasi(gr, br) {
         const base = { visi: '', misi: '', syaratAnggota: [], syaratTim: [], keuntungan: [], sanksi: [] };
         gr = { ...base, ...gr };
@@ -192,6 +214,7 @@ export default {
         notulensi:       mergeArr(gistDb.notulensi      || [], browserDb.notulensi      || []),
         notulensiTopik:  mergeArr(gistDb.notulensiTopik || [], browserDb.notulensiTopik || []),
         broadcastProduk: mergeBroadcastProduk(gistDb.broadcastProduk || [], browserDb.broadcastProduk || []),
+        lombas:     mergeLombas(gistDb.lombas || [], browserDb.lombas || []),
         projects:   mergeProjects(gistDb.projects || [], browserDb.projects || []),
         regulasi:   mergeRegulasi(gistDb.regulasi || gistDb.komunitas || {}, browserDb.regulasi || {}),
         settings:   browserDb.settings,

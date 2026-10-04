@@ -642,6 +642,10 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <span class="feature-nav-ico">📣</span>
         <span class="feature-nav-label">Broadcast</span>
       </button>
+      <button class="feature-nav-item" id="btnLombaView">
+        <span class="feature-nav-ico">🏆</span>
+        <span class="feature-nav-label">Lomba</span>
+      </button>
       <button class="feature-nav-item admin-only" id="btnSettingsView">
         <span class="feature-nav-ico">⚙️</span>
         <span class="feature-nav-label">Pengaturan</span>
@@ -734,6 +738,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <div id="broadcastView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="broadcastArea"></div>
     </div>
+
+    <!-- Lomba view -->
+    <div id="lombaView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="lombaArea"></div>
+    </div>
   </div>
 </div>
 <button class="fab-culture" id="fabCulture" title="Tambah Sejarah">＋</button>
@@ -802,6 +811,7 @@ function migrate(d){
   if(!d.notulensi) d.notulensi=[];
   if(!d.notulensiTopik) d.notulensiTopik=[];
   if(!d.broadcastProduk) d.broadcastProduk=[];
+  if(!d.lombas) d.lombas=[];
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
@@ -889,6 +899,25 @@ function mergeBcProdukClient(a=[],b=[]){
   });
   return [...b.map(x=>merged.find(m=>m.id===x.id)).filter(Boolean),...merged.filter(x=>!bIds.has(x.id))];
 }
+function mergeLombaIdeClient(a=[],b=[]){
+  const map=new Map();
+  for(const t of a) map.set(t.id,t);
+  for(const t of b){const ex=map.get(t.id);if(!ex||(t.updatedAt||0)>=(ex.updatedAt||0))map.set(t.id,t);}
+  return [...map.values()];
+}
+function mergeLombasClient(a=[],b=[]){
+  const aMap=new Map(a.map(l=>[l.id,l]));
+  const bMap=new Map(b.map(l=>[l.id,l]));
+  const bIds=new Set(b.map(x=>x.id));
+  const all=new Set([...aMap.keys(),...bMap.keys()]);
+  const merged=[...all].map(id=>{
+    const ai=aMap.get(id),bi=bMap.get(id);
+    if(!ai) return bi; if(!bi) return ai;
+    const newer=(bi.updatedAt||0)>=(ai.updatedAt||0)?bi:ai;
+    return {...ai,...newer,ide:mergeLombaIdeClient(ai.ide||[],bi.ide||[])};
+  });
+  return [...b.map(x=>merged.find(m=>m.id===x.id)).filter(Boolean),...merged.filter(x=>!bIds.has(x.id))];
+}
 function mergeRegulasisClient(gr={},br={}){
   const base={visi:'',misi:'',syaratAnggota:[],syaratTim:[],keuntungan:[],sanksi:[]};
   gr={...base,...gr}; br={...base,...br};
@@ -913,6 +942,7 @@ function mergeDbOnLoad(gist,local){
     notulensi:       mergeArrClient(gist.notulensi||[],       local.notulensi||[]),
     notulensiTopik:  mergeArrClient(gist.notulensiTopik||[],  local.notulensiTopik||[]),
     broadcastProduk: mergeBcProdukClient(gist.broadcastProduk||[],local.broadcastProduk||[]),
+    lombas: mergeLombasClient(gist.lombas||[],local.lombas||[]),
     regulasi:   mergeRegulasisClient(gist.regulasi||{},local.regulasi||{}),
     settings:  local.settings||gist.settings,
     orgName:   local.orgName||gist.orgName,
@@ -941,6 +971,7 @@ function getCurrentViewRender(){
     {id:'komunitasView',fn:()=>{ renderSidebar(); renderKomunitas(); }},
     {id:'notulensiView',fn:()=>{ renderSidebar(); renderNotulensi(); }},
     {id:'broadcastView',fn:()=>{ renderSidebar(); renderBroadcast(); }},
+    {id:'lombaView',    fn:()=>{ renderSidebar(); renderLomba(); }},
   ];
   const active=views.find(v=>document.getElementById(v.id)?.style.display!=='none');
   return active?active.fn:()=>{ renderSidebar(); renderMain(); };
@@ -1336,10 +1367,10 @@ function select(id){
   activeId=id; activeFilter='all'; filterMemberName=null; memberSearchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   /* deactivate feature nav */
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView']
     .forEach(id=>document.getElementById(id)?.classList.remove('active'));
   viewMode='tasks';
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   renderSidebar(); renderMain();
 }
@@ -1352,9 +1383,9 @@ document.getElementById('allItem').addEventListener('click',()=>select(ALL));
 function renderMain(){
   const empty=document.getElementById('emptyState');
   const tv=document.getElementById('taskView');
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnOrgView']
+  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnOrgView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   viewMode='tasks';
 
@@ -1710,9 +1741,9 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 ══════════════════════════════════════════ */
 /* helper: hide all feature views, deactivate all nav buttons */
 function hideAllViews(){
-  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView']
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   document.getElementById('emptyState').style.display='none';
   document.getElementById('fabCulture').style.display='none';
@@ -1883,6 +1914,24 @@ document.getElementById('btnBroadcastView').addEventListener('click',()=>{
     bv.style.display='flex';
     document.getElementById('btnBroadcastView').classList.add('active');
     renderSidebar(); renderBroadcast();
+  }
+});
+
+document.getElementById('btnLombaView').addEventListener('click',()=>{
+  const lv=document.getElementById('lombaView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(lv.style.display!=='none'){
+    lv.style.display='none';
+    document.getElementById('btnLombaView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    lv.style.display='flex';
+    document.getElementById('btnLombaView').classList.add('active');
+    renderSidebar(); renderLomba();
   }
 });
 
@@ -2646,6 +2695,39 @@ function openModal(mode, ctx){
     document.getElementById('fi-bc-kondisi').focus();
   }
 
+  else if(mode==='lomba-add'||mode==='lomba-edit'){
+    const l=mode==='lomba-edit'?(db.lombas||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='lomba-add'?'Tambah Lomba':'Edit Lomba';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Lomba *</label>
+        <input class="form-input" id="fi-lomba-nama" type="text" value="${esc(l?.nama||'')}" placeholder="Contoh: Hackathon Nasional 2026" maxlength="150"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Tim <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-lomba-tim" type="text" value="${esc(l?.tim||'')}" placeholder="Nama tim yang ikut lomba ini" maxlength="100"/>
+      </div>
+    `;
+    document.getElementById('fi-lomba-nama').focus();
+  }
+
+  else if(mode==='lomba-ide-add'||mode==='lomba-ide-edit'){
+    const l=(db.lombas||[]).find(x=>x.id===ctx.lombaId);
+    const ide=mode==='lomba-ide-edit'?(l?.ide||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='lomba-ide-add'?`Tambah Ide${l?' — '+l.nama:''}`:'Edit Ide';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Judul Ide *</label>
+        <input class="form-input" id="fi-ide-judul" type="text" value="${esc(ide?.judul||'')}" placeholder="Nama / judul ide yang dilombakan" maxlength="200"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deskripsi <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-ide-desc" rows="4" placeholder="Penjelasan singkat tentang ide ini…">${esc(ide?.desc||'')}</textarea>
+      </div>
+    `;
+    document.getElementById('fi-ide-judul').focus();
+  }
+
   else if(mode==='vismis-edit'){
     const km=db.regulasi;
     title.textContent='Edit Visi & Misi';
@@ -3202,6 +3284,40 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       k.kondisi=kondisi_v; k.broadcast=broadcast_v; k.url=url_v; touch(k);
     }
     touch(p); save(); renderBroadcast(); closeModal();
+  }
+
+  /* ── Lomba save ── */
+  else if(mMode==='lomba-add'||mMode==='lomba-edit'){
+    const nama_v=document.getElementById('fi-lomba-nama').value.trim();
+    if(!nama_v) return;
+    const tim_v=document.getElementById('fi-lomba-tim').value.trim()||null;
+    if(!db.lombas) db.lombas=[];
+    if(mMode==='lomba-add'){
+      db.lombas.push(touch({id:uid(),nama:nama_v,tim:tim_v,ide:[],createdAt:Date.now()}));
+    } else {
+      const l=db.lombas.find(x=>x.id===mCtx.id);
+      if(!l) return;
+      l.nama=nama_v; l.tim=tim_v; touch(l);
+    }
+    save(); renderLomba(); closeModal();
+  }
+
+  /* ── Lomba ide save ── */
+  else if(mMode==='lomba-ide-add'||mMode==='lomba-ide-edit'){
+    const judul_v=document.getElementById('fi-ide-judul').value.trim();
+    if(!judul_v) return;
+    const desc_v=document.getElementById('fi-ide-desc').value.trim()||null;
+    const l=(db.lombas||[]).find(x=>x.id===mCtx.lombaId);
+    if(!l) return;
+    if(!l.ide) l.ide=[];
+    if(mMode==='lomba-ide-add'){
+      l.ide.push(touch({id:uid(),judul:judul_v,desc:desc_v,createdAt:Date.now()}));
+    } else {
+      const ide=l.ide.find(x=>x.id===mCtx.id);
+      if(!ide) return;
+      ide.judul=judul_v; ide.desc=desc_v; touch(ide);
+    }
+    touch(l); save(); renderLomba(); closeModal();
   }
 });
 
@@ -4595,6 +4711,146 @@ function renderBroadcast(){
     });
 
     area.appendChild(produkEl);
+  });
+}
+
+/* ══════════════════════════════════════════
+   LOMBA
+══════════════════════════════════════════ */
+function renderLomba(){
+  const area=document.getElementById('lombaArea');
+  area.innerHTML='';
+  const isAdmin=role==='admin'||role==='superadmin';
+
+  /* Toolbar */
+  const toolbar=document.createElement('div');
+  toolbar.className='asset-toolbar';
+  toolbar.innerHTML=`<span class="asset-toolbar-title">🏆 Lomba</span>`;
+  if(isAdmin){
+    const btn=document.createElement('button');
+    btn.className='asset-add-btn';
+    btn.textContent='＋ Tambah Lomba';
+    btn.addEventListener('click',()=>openModal('lomba-add',{}));
+    toolbar.appendChild(btn);
+  }
+  area.appendChild(toolbar);
+
+  const list=(db.lombas||[]).filter(l=>!l.deleted);
+  if(!list.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:40px;text-align:center;color:var(--dim);font-size:.82rem';
+    empty.textContent='Belum ada lomba. Tambah lomba pertama!';
+    area.appendChild(empty);
+    return;
+  }
+
+  list.forEach(l=>{
+    const ideList=(l.ide||[]).filter(x=>!x.deleted);
+    const card=document.createElement('div');
+    card.className='notul-topik-card';
+    card.innerHTML=`
+      <div class="notul-topik-head">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.88rem;font-weight:700;color:var(--text)">${esc(l.nama)}</div>
+          ${l.tim?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px">Tim: ${esc(l.tim)}</div>`:''}
+          <div style="font-size:.7rem;color:var(--muted);margin-top:2px">${ideList.length} ide</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
+          ${isAdmin?`<button class="asset-act-btn" data-lomba-edit="${l.id}" title="Edit">✎</button>
+          <button class="asset-act-btn del" data-lomba-del="${l.id}" title="Hapus">✕</button>`:''}
+          <span class="notul-topik-chevron">▼</span>
+        </div>
+      </div>
+      <div class="notul-topik-body" id="lomba-ide-list-${l.id}">
+        ${isAdmin?`<button class="notul-topik-add-btn" data-add-ide="${l.id}">＋ Tambah Ide</button>`:''}
+      </div>
+    `;
+
+    /* Toggle open */
+    card.querySelector('.notul-topik-head').addEventListener('click',e=>{
+      if(e.target.closest('[data-lomba-edit]')||e.target.closest('[data-lomba-del]')||e.target.closest('[data-add-ide]')) return;
+      card.classList.toggle('open');
+    });
+
+    /* Edit lomba */
+    card.querySelector('[data-lomba-edit]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      openModal('lomba-edit',{id:l.id});
+    });
+
+    /* Delete lomba (cascade) */
+    card.querySelector('[data-lomba-del]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm(`Hapus lomba "${l.nama}" dan ${ideList.length} idenya?`)) return;
+      (l.ide||[]).forEach(ide=>touch(Object.assign(ide,{deleted:true})));
+      touch(Object.assign(l,{deleted:true}));
+      save(); renderLomba();
+    });
+
+    /* Add ide */
+    card.querySelector('[data-add-ide]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      openModal('lomba-ide-add',{lombaId:l.id});
+    });
+
+    /* Render ide list */
+    const ideContainer=card.querySelector(`#lomba-ide-list-${l.id}`);
+    ideList.forEach((ide,ii)=>{
+      const ideEl=document.createElement('div');
+      ideEl.className='notul-sesi-row';
+      ideEl.innerHTML=`
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.8rem;font-weight:600;color:var(--text)">${esc(ide.judul)}</div>
+          ${ide.desc?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px;white-space:pre-wrap;line-height:1.5">${esc(ide.desc)}</div>`:''}
+        </div>
+        <div style="display:flex;gap:2px;flex-shrink:0;align-items:center">
+          ${isAdmin?`<button class="asset-act-btn" style="font-size:.5rem;padding:1px 3px" data-ide-up="${ide.id}" ${ii===0?'disabled':''} title="Naik">▲</button>
+          <button class="asset-act-btn" style="font-size:.5rem;padding:1px 3px" data-ide-dn="${ide.id}" ${ii===ideList.length-1?'disabled':''} title="Turun">▼</button>
+          <button class="asset-act-btn" data-ide-edit="${ide.id}" title="Edit">✎</button>
+          <button class="asset-act-btn del" data-ide-del="${ide.id}" title="Hapus">✕</button>`:''}
+        </div>
+      `;
+
+      /* Reorder up */
+      ideEl.querySelector('[data-ide-up]')?.addEventListener('click',e=>{
+        e.stopPropagation();
+        const arr=l.ide.filter(x=>!x.deleted);
+        const idx=arr.findIndex(x=>x.id===ide.id);
+        if(idx<=0) return;
+        const ri=l.ide.indexOf(ide), prev=arr[idx-1], pi=l.ide.indexOf(prev);
+        l.ide.splice(ri,1); l.ide.splice(pi,0,ide);
+        touch(ide); touch(l); save(); renderLomba();
+      });
+
+      /* Reorder down */
+      ideEl.querySelector('[data-ide-dn]')?.addEventListener('click',e=>{
+        e.stopPropagation();
+        const arr=l.ide.filter(x=>!x.deleted);
+        const idx=arr.findIndex(x=>x.id===ide.id);
+        if(idx>=arr.length-1) return;
+        const ri=l.ide.indexOf(ide), next=arr[idx+1], ni=l.ide.indexOf(next);
+        l.ide.splice(ri,1); l.ide.splice(ni,0,ide);
+        touch(ide); touch(l); save(); renderLomba();
+      });
+
+      /* Edit ide */
+      ideEl.querySelector('[data-ide-edit]')?.addEventListener('click',e=>{
+        e.stopPropagation();
+        openModal('lomba-ide-edit',{id:ide.id,lombaId:l.id});
+      });
+
+      /* Delete ide */
+      ideEl.querySelector('[data-ide-del]')?.addEventListener('click',e=>{
+        e.stopPropagation();
+        if(!confirm(`Hapus ide "${ide.judul}"?`)) return;
+        touch(Object.assign(ide,{deleted:true}));
+        touch(l); save(); renderLomba();
+      });
+
+      ideContainer.insertBefore(ideEl,ideContainer.querySelector('[data-add-ide]'));
+    });
+
+    area.appendChild(card);
   });
 }
 
