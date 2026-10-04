@@ -790,9 +790,14 @@ function isTopikUnlocked(t){ if(role==='admin') return true; if(!t.kode) return 
 let broadcastSearch  = '';
 const BC_KEYS_LS     = 'alteco_bc_keys_v1';
 const LOMBA_VOTES_LS = 'alteco_lomba_votes_v1';
+/* { [lombaId]: { ideId, vote: 'like'|'dislike' } } — 1 vote per lomba per device */
 function getLombaVotes(){ try{ return JSON.parse(localStorage.getItem(LOMBA_VOTES_LS)||'{}'); }catch{ return {}; } }
-function setLombaVote(ideId,val){ const m=getLombaVotes(); m[ideId]=val; localStorage.setItem(LOMBA_VOTES_LS,JSON.stringify(m)); }
-function getLombaVote(ideId){ return getLombaVotes()[ideId]||null; }
+function getLombaVoteForLomba(lombaId){ return getLombaVotes()[lombaId]||null; }
+function setLombaVoteForLomba(lombaId,ideId,vote){
+  const m=getLombaVotes();
+  if(!vote) delete m[lombaId]; else m[lombaId]={ideId,vote};
+  localStorage.setItem(LOMBA_VOTES_LS,JSON.stringify(m));
+}
 function getBcKeys(){ try{ return JSON.parse(localStorage.getItem(BC_KEYS_LS)||'{}'); }catch{ return {}; } }
 function setBcKey(id,kode){ const m=getBcKeys(); m[id]=kode; localStorage.setItem(BC_KEYS_LS,JSON.stringify(m)); }
 function isProdukUnlocked(p){ if(role==='admin') return true; if(!p.kode) return true; return getBcKeys()[p.id]===p.kode; }
@@ -4827,8 +4832,43 @@ function renderLomba(){
 
     /* Render ide list */
     const ideContainer=card.querySelector(`#lomba-ide-list-${l.id}`);
+    const lombaVote=getLombaVoteForLomba(l.id); // { ideId, vote } | null
+
+    function doVote(ide,voteType){
+      const prevIdeId=lombaVote?.ideId;
+      const prevVote=lombaVote?.vote;
+      /* undo: same ide same vote */
+      if(prevIdeId===ide.id && prevVote===voteType){
+        if(voteType==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
+        else ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
+        touch(ide);
+        setLombaVoteForLomba(l.id,null,null);
+      } else {
+        /* remove old vote from previous ide if different ide */
+        if(prevIdeId && prevIdeId!==ide.id){
+          const prevIde=(l.ide||[]).find(x=>x.id===prevIdeId);
+          if(prevIde){
+            if(prevVote==='like') prevIde.likes=Math.max(0,(prevIde.likes||0)-1);
+            else prevIde.dislikes=Math.max(0,(prevIde.dislikes||0)-1);
+            touch(prevIde);
+          }
+        }
+        /* remove same-ide opposite vote */
+        if(prevIdeId===ide.id && prevVote && prevVote!==voteType){
+          if(prevVote==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
+          else ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
+        }
+        /* apply new vote */
+        if(voteType==='like') ide.likes=(ide.likes||0)+1;
+        else ide.dislikes=(ide.dislikes||0)+1;
+        touch(ide);
+        setLombaVoteForLomba(l.id,ide.id,voteType);
+      }
+      touch(l); save(); renderLomba();
+    }
+
     ideList.forEach(ide=>{
-      const myVote=getLombaVote(ide.id);
+      const myVote=(lombaVote?.ideId===ide.id)?lombaVote.vote:null;
       const likes=ide.likes||0;
       const dislikes=ide.dislikes||0;
       const ideEl=document.createElement('div');
@@ -4846,29 +4886,8 @@ function renderLomba(){
         </div>
       `;
 
-      /* Like */
-      ideEl.querySelector('[data-ide-like]').addEventListener('click',e=>{
-        e.stopPropagation();
-        const prev=getLombaVote(ide.id);
-        if(prev==='like'){ ide.likes=Math.max(0,(ide.likes||0)-1); setLombaVote(ide.id,null); }
-        else {
-          if(prev==='dislike') ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
-          ide.likes=(ide.likes||0)+1; setLombaVote(ide.id,'like');
-        }
-        touch(ide); touch(l); save(); renderLomba();
-      });
-
-      /* Dislike */
-      ideEl.querySelector('[data-ide-dislike]').addEventListener('click',e=>{
-        e.stopPropagation();
-        const prev=getLombaVote(ide.id);
-        if(prev==='dislike'){ ide.dislikes=Math.max(0,(ide.dislikes||0)-1); setLombaVote(ide.id,null); }
-        else {
-          if(prev==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
-          ide.dislikes=(ide.dislikes||0)+1; setLombaVote(ide.id,'dislike');
-        }
-        touch(ide); touch(l); save(); renderLomba();
-      });
+      ideEl.querySelector('[data-ide-like]').addEventListener('click',e=>{ e.stopPropagation(); doVote(ide,'like'); });
+      ideEl.querySelector('[data-ide-dislike]').addEventListener('click',e=>{ e.stopPropagation(); doVote(ide,'dislike'); });
 
       /* Edit ide */
       ideEl.querySelector('[data-ide-edit]')?.addEventListener('click',e=>{
