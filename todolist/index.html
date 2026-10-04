@@ -2707,6 +2707,18 @@ function openModal(mode, ctx){
         <label class="form-label">Nama Tim <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
         <input class="form-input" id="fi-lomba-tim" type="text" value="${esc(l?.tim||'')}" placeholder="Nama tim yang ikut lomba ini" maxlength="100"/>
       </div>
+      <div class="form-group">
+        <label class="form-label">Periode Registrasi <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" id="fi-lomba-reg-start" type="date" value="${esc(l?.regStart||'')}" style="flex:1"/>
+          <span style="font-size:.75rem;color:var(--dim)">s/d</span>
+          <input class="form-input" id="fi-lomba-reg-end" type="date" value="${esc(l?.regEnd||'')}" style="flex:1"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tim Mendaftar <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-lomba-daftar" type="date" value="${esc(l?.tanggalDaftar||'')}"/>
+      </div>
     `;
     document.getElementById('fi-lomba-nama').focus();
   }
@@ -3291,13 +3303,16 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const nama_v=document.getElementById('fi-lomba-nama').value.trim();
     if(!nama_v) return;
     const tim_v=document.getElementById('fi-lomba-tim').value.trim()||null;
+    const regStart_v=document.getElementById('fi-lomba-reg-start').value||null;
+    const regEnd_v=document.getElementById('fi-lomba-reg-end').value||null;
+    const daftar_v=document.getElementById('fi-lomba-daftar').value||null;
     if(!db.lombas) db.lombas=[];
     if(mMode==='lomba-add'){
-      db.lombas.push(touch({id:uid(),nama:nama_v,tim:tim_v,ide:[],createdAt:Date.now()}));
+      db.lombas.push(touch({id:uid(),nama:nama_v,tim:tim_v,regStart:regStart_v,regEnd:regEnd_v,tanggalDaftar:daftar_v,ide:[],createdAt:Date.now()}));
     } else {
       const l=db.lombas.find(x=>x.id===mCtx.id);
       if(!l) return;
-      l.nama=nama_v; l.tim=tim_v; touch(l);
+      l.nama=nama_v; l.tim=tim_v; l.regStart=regStart_v; l.regEnd=regEnd_v; l.tanggalDaftar=daftar_v; touch(l);
     }
     save(); renderLomba(); closeModal();
   }
@@ -4753,6 +4768,8 @@ function renderLomba(){
         <div style="flex:1;min-width:0">
           <div style="font-size:.88rem;font-weight:700;color:var(--text)">${esc(l.nama)}</div>
           ${l.tim?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px">Tim: ${esc(l.tim)}</div>`:''}
+          ${(l.regStart||l.regEnd)?`<div style="font-size:.7rem;color:var(--dim);margin-top:2px">Registrasi: ${esc(l.regStart||'?')} — ${esc(l.regEnd||'?')}</div>`:''}
+          ${l.tanggalDaftar?`<div style="font-size:.7rem;color:var(--dim);margin-top:1px">Mendaftar: ${esc(l.tanggalDaftar)}</div>`:''}
           <div style="font-size:.7rem;color:var(--muted);margin-top:2px">${ideList.length} ide</div>
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
