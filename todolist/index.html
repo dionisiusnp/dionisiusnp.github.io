@@ -4728,7 +4728,7 @@ function renderLomba(){
   toolbar.innerHTML=`<span class="asset-toolbar-title">🏆 Lomba</span>`;
   if(isAdmin){
     const btn=document.createElement('button');
-    btn.className='asset-add-btn';
+    btn.className='task-add-inline-btn';
     btn.textContent='＋ Tambah Lomba';
     btn.addEventListener('click',()=>openModal('lomba-add',{}));
     toolbar.appendChild(btn);
