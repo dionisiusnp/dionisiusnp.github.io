@@ -1785,19 +1785,15 @@ document.getElementById('btnProjectView').addEventListener('click',()=>{
 
 document.getElementById('btnOrgView').addEventListener('click',()=>{
   viewMode=viewMode==='org'?'tasks':'org';
-  document.getElementById('btnOrgView').classList.toggle('active', viewMode==='org');
-  const tv=document.getElementById('taskView');
   const ov=document.getElementById('orgView');
-  const empty=document.getElementById('emptyState');
-  ['assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView']
-    .forEach(id=>{ document.getElementById(id).style.display='none'; });
-  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView']
-    .forEach(id=>document.getElementById(id).classList.remove('active'));
+  hideAllViews();
   if(viewMode==='org'){
-    activeId=null; tv.style.display='none'; empty.style.display='none';
-    ov.style.display='flex'; renderSidebar(); renderOrgChart();
+    activeId=null;
+    ov.style.display='flex';
+    document.getElementById('btnOrgView').classList.add('active');
+    renderSidebar(); renderOrgChart();
   } else {
-    ov.style.display='none'; renderMain();
+    renderMain();
   }
 });
 
