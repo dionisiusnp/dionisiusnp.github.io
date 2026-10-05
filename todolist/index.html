@@ -99,7 +99,8 @@ input[type="date"].form-input{color-scheme:dark}
 /* ── Sidebar ── */
 .sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s}
 .sidebar-head{padding:10px 12px 6px;flex-shrink:0;display:flex;align-items:center;transition:border-color .25s}
-.feature-nav{display:flex;flex-direction:column;gap:2px;padding:4px 6px 6px;flex-shrink:0;border-bottom:1px solid var(--bd);transition:border-color .25s}
+.feature-nav{display:flex;flex-direction:column;gap:1px;padding:4px 6px 6px;flex-shrink:0;border-bottom:1px solid var(--bd);transition:border-color .25s}
+.feature-nav-group{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:6px 10px 2px;margin-top:2px}
 .feature-nav-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;text-align:left;width:100%;transition:background .15s,color .15s;font-size:.78rem;font-weight:500}
 .feature-nav-item:hover{background:var(--card);color:var(--text)}
 .feature-nav-item.active{background:rgba(108,111,245,.12);color:var(--accent);font-weight:600}
@@ -617,33 +618,23 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <span class="sidebar-head-title">Fitur</span>
     </div>
     <div class="feature-nav">
+      <div class="feature-nav-group">Organisasi</div>
       <button class="feature-nav-item" id="btnOrgView">
         <span class="feature-nav-ico">🏢</span>
-        <span class="feature-nav-label">Bagan Organisasi</span>
-      </button>
-      <button class="feature-nav-item project-access" id="btnProjectView">
-        <span class="feature-nav-ico">🗂️</span>
-        <span class="feature-nav-label">Proyek</span>
-      </button>
-      <button class="feature-nav-item" id="btnCultureView">
-        <span class="feature-nav-ico">🌱</span>
-        <span class="feature-nav-label">Sejarah</span>
+        <span class="feature-nav-label">Bagan</span>
       </button>
       <button class="feature-nav-item" id="btnKomunitasView">
         <span class="feature-nav-ico">📋</span>
         <span class="feature-nav-label">Regulasi</span>
       </button>
-      <button class="feature-nav-item" id="btnAssetView">
-        <span class="feature-nav-ico">📦</span>
-        <span class="feature-nav-label">Inventaris</span>
+      <button class="feature-nav-item" id="btnCultureView">
+        <span class="feature-nav-ico">🌱</span>
+        <span class="feature-nav-label">Sejarah</span>
       </button>
-      <button class="feature-nav-item" id="btnInfoView">
-        <span class="feature-nav-ico">🔔</span>
-        <span class="feature-nav-label">Pemberitahuan</span>
-      </button>
-      <button class="feature-nav-item" id="btnNotulensiView">
-        <span class="feature-nav-ico">📝</span>
-        <span class="feature-nav-label">Notulensi</span>
+      <div class="feature-nav-group">Manajemen</div>
+      <button class="feature-nav-item project-access" id="btnProjectView">
+        <span class="feature-nav-ico">🗂️</span>
+        <span class="feature-nav-label">Proyek</span>
       </button>
       <button class="feature-nav-item" id="btnBroadcastView">
         <span class="feature-nav-ico">📣</span>
@@ -652,6 +643,19 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <button class="feature-nav-item" id="btnLombaView">
         <span class="feature-nav-ico">🏆</span>
         <span class="feature-nav-label">Lomba</span>
+      </button>
+      <div class="feature-nav-group">Administrasi</div>
+      <button class="feature-nav-item" id="btnNotulensiView">
+        <span class="feature-nav-ico">📝</span>
+        <span class="feature-nav-label">Notulensi</span>
+      </button>
+      <button class="feature-nav-item" id="btnAssetView">
+        <span class="feature-nav-ico">📦</span>
+        <span class="feature-nav-label">Inventaris</span>
+      </button>
+      <button class="feature-nav-item" id="btnInfoView">
+        <span class="feature-nav-ico">🔔</span>
+        <span class="feature-nav-label">Pemberitahuan</span>
       </button>
       <button class="feature-nav-item admin-only" id="btnSettingsView">
         <span class="feature-nav-ico">⚙️</span>
