@@ -100,14 +100,16 @@ a{text-decoration:none;color:inherit}
 .kerja-items li::before{content:'—';position:absolute;left:0;color:var(--dim)}
 
 /* ─── FOOTER ─── */
-.footer{border-top:1px solid var(--bd);padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;transition:border-color .25s}
-.footer-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.footer-btn{font-size:.8rem;font-weight:700;padding:10px 22px;border-radius:7px;transition:opacity .2s,transform .15s}
-.footer-btn:hover{opacity:.85;transform:translateY(-1px)}
-.footer-btn-primary{background:var(--accent);color:#fff}
-.footer-btn-secondary{background:var(--card);border:1px solid var(--bd);color:var(--muted)}
-.footer-btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.footer{border-top:1px solid var(--bd);padding:18px 24px;text-align:center;transition:border-color .25s}
 .footer-copy{font-size:.68rem;color:var(--dim)}
+
+/* ─── FLOATING BUTTONS ─── */
+.fab-group{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;z-index:300}
+.fab-btn{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:700;padding:10px 18px;border-radius:100px;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.35);transition:opacity .2s,transform .15s}
+.fab-btn:hover{opacity:.88;transform:translateY(-2px)}
+.fab-primary{background:var(--accent);color:#fff}
+.fab-secondary{background:var(--surface);border:1px solid var(--bd);color:var(--muted)}
+.fab-secondary:hover{border-color:var(--accent);color:var(--accent)}
 
 @media(max-width:900px){
   .tentang-grid{grid-template-columns:1fr}
@@ -326,12 +328,14 @@ a{text-decoration:none;color:inherit}
 
 <!-- FOOTER -->
 <footer class="footer">
-  <div class="footer-btns">
-    <a href="todolist/index.html" class="footer-btn footer-btn-primary" id="footerKelola">Manajemen Aliria</a>
-    <a href="proyekan/index.html" class="footer-btn footer-btn-secondary">⌨️ Command Penting</a>
-  </div>
   <span class="footer-copy">© 2026 Aliria Tech Community</span>
 </footer>
+
+<!-- FLOATING BUTTONS -->
+<div class="fab-group">
+  <a href="proyekan/index.html" class="fab-btn fab-secondary">⌨️ Command Penting</a>
+  <a href="todolist/index.html" class="fab-btn fab-primary" id="footerKelola">Manajemen Aliria</a>
+</div>
 
 <script>
 // orgName dynamic
