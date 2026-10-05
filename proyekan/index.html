@@ -145,8 +145,8 @@ code{font-family:var(--mono)}
 
 <div class="page">
   <div class="header">
-    <h1>Code &amp; Command per Stack</h1>
-    <p>Semua command yang sering dipakai di lima stack pengembangan. Klik tab sesuai stack yang sedang dikerjakan — tombol copy ada di samping tiap command biar tinggal paste.</p>
+    <h1>Command Referensi</h1>
+    <p>Kumpulan command yang sering dipakai di berbagai stack — dari backend, mobile, DevOps, sampai workflow automation. Pilih tab, cari yang dibutuhkan, copy langsung.</p>
   </div>
 
   <div class="search-box">
@@ -162,6 +162,7 @@ code{font-family:var(--mono)}
     <button class="tab" data-tab="ai">AI</button>
     <button class="tab" data-tab="cicd">CI/CD</button>
     <button class="tab" data-tab="ngrok">ngrok</button>
+    <button class="tab" data-tab="n8n">n8n</button>
   </div>
 
   <!-- Laravel -->
@@ -740,6 +741,96 @@ code{font-family:var(--mono)}
         <div class="tip"><h4><span class="tag tag-green">Webhook</span> Testing webhook lokal</h4><p>Set webhook URL di Midtrans/Stripe/GitHub ke URL ngrok. Reload di dashboard ngrok (port 4040) untuk replay request yang gagal — tidak perlu trigger ulang dari provider.</p></div>
         <div class="tip"><h4><span class="tag tag-gold">Static</span> Domain statis gratis</h4><p>Akun gratis dapat 1 domain statis di ngrok.com/dashboard → Domains. Pakai <code>--domain</code> agar URL tidak berubah setiap sesi — tidak perlu update webhook URL setiap restart.</p></div>
         <div class="tip"><h4><span class="tag tag-blue">Config</span> Multi-tunnel di ngrok.yml</h4><p>Definisikan beberapa tunnel di ngrok.yml dengan nama berbeda. Jalankan sekaligus dengan <code>ngrok start --all</code>. Berguna saat develop frontend (3000) dan backend (8000) bersamaan.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- n8n -->
+  <div class="panel" id="panel-n8n">
+    <p class="stack-desc">Workflow automation open-source. Dipakai Aliria untuk integrasi WA Chatbot AI, Odoo CRM, dan pipeline data antar layanan. Self-hosted, jalan di server atau lokal.</p>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">1. Install &amp; Start</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>npm install n8n -g</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Install n8n secara global via npm</div></div>
+      <div class="row"><div class="cmd"><code>n8n start</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan n8n — buka di http://localhost:5678</div></div>
+      <div class="row"><div class="cmd"><code>n8n start --tunnel</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan dengan tunnel publik bawaan (berguna untuk testing webhook dari luar)</div></div>
+      <div class="row"><div class="cmd"><code>N8N_PORT=5679 n8n start</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan di port lain kalau 5678 sudah dipakai</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">2. Docker</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>docker run -it --rm --name n8n -p 5678:5678 -v ~/.n8n:/home/node/.n8n n8nio/n8n</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan n8n via Docker — data disimpan di ~/.n8n lokal</div></div>
+      <div class="row"><div class="cmd"><code>docker run -d --name n8n -p 5678:5678 -v ~/.n8n:/home/node/.n8n --restart unless-stopped n8nio/n8n</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Jalankan sebagai background service — restart otomatis kalau server reboot</div></div>
+      <div class="row"><div class="cmd"><code>docker stop n8n && docker start n8n</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Restart container n8n yang sudah berjalan</div></div>
+      <div class="row"><div class="cmd"><code>docker logs n8n -f</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Lihat log n8n secara realtime</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">3. Export &amp; Import Workflow</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>n8n export:workflow --all --output=./workflows/</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Export semua workflow ke folder — bagus untuk backup rutin</div></div>
+      <div class="row"><div class="cmd"><code>n8n export:workflow --id=&lt;id&gt; --output=workflow.json</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Export satu workflow by ID ke file JSON</div></div>
+      <div class="row"><div class="cmd"><code>n8n import:workflow --input=workflow.json</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Import workflow dari file JSON</div></div>
+      <div class="row"><div class="cmd"><code>n8n import:workflow --separate --input=./workflows/</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Import semua workflow dari folder (satu file per workflow)</div></div>
+      <div class="row"><div class="cmd"><code>n8n export:credentials --all --output=./creds.json</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Export semua credentials (hati-hati — file ini sensitif)</div></div>
+      <div class="row"><div class="cmd"><code>n8n import:credentials --input=creds.json</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Import credentials dari file JSON</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">4. Kelola Workflow via CLI</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>n8n list:workflow</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Tampilkan semua workflow beserta ID-nya</div></div>
+      <div class="row"><div class="cmd"><code>n8n update:workflow --id=&lt;id&gt; --active=true</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Aktifkan workflow — trigger akan mulai berjalan</div></div>
+      <div class="row"><div class="cmd"><code>n8n update:workflow --id=&lt;id&gt; --active=false</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Nonaktifkan workflow — semua trigger berhenti</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">5. REST API n8n</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>GET  http://localhost:5678/api/v1/workflows</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">List semua workflow</div></div>
+      <div class="row"><div class="cmd"><code>GET  http://localhost:5678/api/v1/workflows/:id</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Ambil detail satu workflow</div></div>
+      <div class="row"><div class="cmd"><code>POST http://localhost:5678/api/v1/workflows/:id/activate</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Aktifkan workflow via API</div></div>
+      <div class="row"><div class="cmd"><code>POST http://localhost:5678/api/v1/workflows/:id/deactivate</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Nonaktifkan workflow via API</div></div>
+      <div class="row"><div class="cmd"><code>GET  http://localhost:5678/api/v1/executions</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">List semua eksekusi (riwayat run workflow)</div></div>
+      <div class="row"><div class="cmd"><code>GET  http://localhost:5678/api/v1/executions/:id</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Detail satu eksekusi — lihat input/output tiap node</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">6. Webhook URL</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>https://your-n8n.com/webhook/&lt;webhook-id&gt;</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">URL webhook produksi — aktif saat workflow diaktifkan</div></div>
+      <div class="row"><div class="cmd"><code>https://your-n8n.com/webhook-test/&lt;webhook-id&gt;</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">URL webhook test — dipakai saat workflow dalam mode editor (belum aktif)</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title" style="margin-bottom:10px">7. Environment Variables Penting</div>
+    </div>
+    <div class="table">
+      <div class="row"><div class="cmd"><code>WEBHOOK_URL=https://your-domain.com/</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Set base URL untuk webhook — wajib kalau n8n di belakang reverse proxy</div></div>
+      <div class="row"><div class="cmd"><code>N8N_BASIC_AUTH_ACTIVE=true</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Aktifkan basic auth di depan UI n8n</div></div>
+      <div class="row"><div class="cmd"><code>N8N_BASIC_AUTH_USER=user</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Username untuk basic auth</div></div>
+      <div class="row"><div class="cmd"><code>N8N_BASIC_AUTH_PASSWORD=pass</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Password untuk basic auth</div></div>
+      <div class="row"><div class="cmd"><code>N8N_ENCRYPTION_KEY=your-random-key</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Key enkripsi untuk credentials — simpan baik-baik, hilang = credentials tidak terbaca</div></div>
+      <div class="row"><div class="cmd"><code>GENERIC_TIMEZONE=Asia/Jakarta</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Set timezone agar schedule trigger pakai WIB</div></div>
+      <div class="row"><div class="cmd"><code>DB_TYPE=postgresdb</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Ganti dari SQLite ke PostgreSQL — dianjurkan untuk production</div></div>
+      <div class="row"><div class="cmd"><code>N8N_LOG_LEVEL=debug</code><button class="copy-btn" onclick="copyCmd(this)">📋</button></div><div class="desc">Set log level ke debug untuk troubleshooting</div></div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-title">Tips Pakai n8n</div>
+      <div class="tips-grid">
+        <div class="tip"><h4><span class="tag tag-green">Webhook</span> Test dulu sebelum aktifkan</h4><p>Pakai URL <code>/webhook-test/</code> saat workflow masih di editor. URL <code>/webhook/</code> baru aktif setelah workflow diaktifkan. Kalau langsung test pakai URL produksi dan workflow belum aktif — request akan ditolak.</p></div>
+        <div class="tip"><h4><span class="tag tag-accent">Backup</span> Export rutin ke Git</h4><p>Jalankan <code>n8n export:workflow --all</code> secara rutin dan commit ke repository. File credentials jangan dicommit — simpan terpisah dan enkripsi sebelum backup.</p></div>
+        <div class="tip"><h4><span class="tag tag-gold">Timezone</span> Set WIB dari awal</h4><p>Tanpa <code>GENERIC_TIMEZONE=Asia/Jakarta</code>, semua schedule trigger pakai UTC. Ini bikin schedule jam 8 pagi WIB malah jalan jam 3 pagi WIB — set timezone sebelum buat workflow apapun.</p></div>
+        <div class="tip"><h4><span class="tag tag-blue">Production</span> Ganti SQLite ke PostgreSQL</h4><p>SQLite cukup untuk development dan personal use. Untuk production yang diakses banyak orang atau workflow yang sering jalan, ganti ke PostgreSQL agar tidak ada bottleneck dan data lebih aman dari korupsi file.</p></div>
       </div>
     </div>
   </div>
