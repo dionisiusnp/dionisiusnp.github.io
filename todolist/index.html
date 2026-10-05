@@ -2735,6 +2735,10 @@ function openModal(mode, ctx){
         <label class="form-label">Tim Mendaftar <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
         <input class="form-input" id="fi-lomba-daftar" type="date" value="${esc(l?.tanggalDaftar||'')}"/>
       </div>
+      <div class="form-group">
+        <label class="form-label">URL Lomba <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-lomba-url" type="url" value="${esc(l?.url||'')}" placeholder="https://lomba.example.com"/>
+      </div>
     `;
     document.getElementById('fi-lomba-nama').focus();
   }
@@ -3322,13 +3326,14 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const regStart_v=document.getElementById('fi-lomba-reg-start').value||null;
     const regEnd_v=document.getElementById('fi-lomba-reg-end').value||null;
     const daftar_v=document.getElementById('fi-lomba-daftar').value||null;
+    const url_v=document.getElementById('fi-lomba-url').value.trim()||null;
     if(!db.lombas) db.lombas=[];
     if(mMode==='lomba-add'){
-      db.lombas.push(touch({id:uid(),nama:nama_v,tim:tim_v,regStart:regStart_v,regEnd:regEnd_v,tanggalDaftar:daftar_v,ide:[],createdAt:Date.now()}));
+      db.lombas.push(touch({id:uid(),nama:nama_v,tim:tim_v,regStart:regStart_v,regEnd:regEnd_v,tanggalDaftar:daftar_v,url:url_v,ide:[],createdAt:Date.now()}));
     } else {
       const l=db.lombas.find(x=>x.id===mCtx.id);
       if(!l) return;
-      l.nama=nama_v; l.tim=tim_v; l.regStart=regStart_v; l.regEnd=regEnd_v; l.tanggalDaftar=daftar_v; touch(l);
+      l.nama=nama_v; l.tim=tim_v; l.regStart=regStart_v; l.regEnd=regEnd_v; l.tanggalDaftar=daftar_v; l.url=url_v; touch(l);
     }
     save(); renderLomba(); closeModal();
   }
@@ -4789,6 +4794,7 @@ function renderLomba(){
             l.tim?`Tim: ${esc(l.tim)}`:'',
             (l.regStart||l.regEnd)?`Reg: ${esc(l.regStart||'?')} — ${esc(l.regEnd||'?')}`:'',
             l.tanggalDaftar?`Daftar: ${esc(l.tanggalDaftar)}`:'',
+            l.url?`<a href="${esc(l.url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">🔗 Link</a>`:'',
             `${ideList.length} ide`
           ].filter(Boolean).join(' · ')}</div>
         </div>
