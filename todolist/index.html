@@ -787,6 +787,7 @@ let assetSearch      = '';
 let assetCatFilter   = '';
 let infoSearch       = '';
 let notulSearch      = '';
+let lombaSearch      = '';
 const NOTUL_KEYS_LS  = 'alteco_notul_keys_v1';
 function getNotulKeys(){ try{ return JSON.parse(localStorage.getItem(NOTUL_KEYS_LS)||'{}'); }catch{ return {}; } }
 function setNotulKey(id,kode){ const m=getNotulKeys(); m[id]=kode; localStorage.setItem(NOTUL_KEYS_LS,JSON.stringify(m)); }
@@ -2485,6 +2486,14 @@ function openModal(mode, ctx){
       <div class="form-group"><label class="form-label">Nama Klien</label><input class="form-input" id="fi-pclient" value="${esc(p?.clientName||'')}" placeholder="Nama perusahaan/klien"/></div>
       <div class="form-group"><label class="form-label">Kode Klien *</label><input class="form-input" id="fi-pcode" value="${esc(p?.clientCode||'')}" placeholder="Kode unik untuk login anggota" style="font-family:var(--mono)"/></div>
       <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-pdesc">${esc(p?.description||'')}</textarea></div>
+      <div class="form-group"><label class="form-label">Prioritas</label>
+        <select class="form-input" id="fi-ppriority">
+          <option value=""${!p?.priority?' selected':''}>— Tanpa Prioritas —</option>
+          <option value="low"${p?.priority==='low'?' selected':''}>Low</option>
+          <option value="medium"${p?.priority==='medium'?' selected':''}>Medium</option>
+          <option value="high"${p?.priority==='high'?' selected':''}>High</option>
+        </select>
+      </div>
       <div class="form-group"><label class="form-label">Tanggal Mulai</label><input class="form-input" type="date" id="fi-pstart" value="${p?.startDate||''}"/></div>
       <div style="font-size:.72rem;color:var(--muted);padding:2px 0 8px">🎯 Target optimis &amp; pesimis otomatis dihitung dari tanggal tugas anggota.</div>
     `;
@@ -3064,12 +3073,13 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       alert(`Kode "${clientCode}" sudah dipakai proyek "${codeConflict.title}". Gunakan kode berbeda.`);
       return;
     }
+    const priority=document.getElementById('fi-ppriority').value||null;
     if(mMode==='proj-add'){
       db.projects.push(touch({
         id:uid(), title, clientName, clientCode,
         description:document.getElementById('fi-pdesc').value.trim(),
         startDate:document.getElementById('fi-pstart').value||null,
-        members:[], createdAt:Date.now()
+        priority, members:[], createdAt:Date.now()
       }));
     } else {
       const p=db.projects.find(x=>x.id===mCtx.id);
@@ -3077,6 +3087,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       p.title=title; p.clientName=clientName; p.clientCode=clientCode;
       p.description=document.getElementById('fi-pdesc').value.trim();
       p.startDate=document.getElementById('fi-pstart').value||null;
+      p.priority=priority;
       touch(p);
     }
     save(); renderProject(); closeModal();
@@ -3639,6 +3650,7 @@ function renderProject(){
           </div>
         </div>
         <div class="proj-meta">
+          ${proj.priority?`<span style="color:${proj.priority==='high'?'var(--red,#f87171)':proj.priority==='medium'?'#fbbf24':'var(--dim)'}">● ${proj.priority==='high'?'High':proj.priority==='medium'?'Medium':'Low'}</span>`:''}
           ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
           ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
           ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
@@ -3762,6 +3774,7 @@ function renderProject(){
               style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:.82rem;padding:4px;margin-left:4px">🔓</button>
           </div>
           <div class="proj-meta">
+            ${proj.priority?`<span style="color:${proj.priority==='high'?'var(--red,#f87171)':proj.priority==='medium'?'#fbbf24':'var(--dim)'}">● ${proj.priority==='high'?'High':proj.priority==='medium'?'Medium':'Low'}</span>`:''}
             ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
             ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
             ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
@@ -4761,7 +4774,8 @@ function renderLomba(){
   /* Toolbar */
   const toolbar=document.createElement('div');
   toolbar.className='notul-toolbar';
-  toolbar.innerHTML=`<span class="notul-toolbar-title">🏆 Lomba</span>`;
+  toolbar.innerHTML=`<span class="notul-toolbar-title">🏆 Lomba</span>
+    <input class="asset-search" id="lombaSearchInp" placeholder="Cari lomba…" value="${esc(lombaSearch)}" style="max-width:200px"/>`;
   if(isSuperAdmin){
     const btn=document.createElement('button');
     btn.className='notul-topik-add-btn';
@@ -4771,18 +4785,30 @@ function renderLomba(){
     toolbar.appendChild(btn);
   }
   area.appendChild(toolbar);
+  area.querySelector('#lombaSearchInp').addEventListener('input',e=>{lombaSearch=e.target.value;renderLomba();});
 
-  const list=(db.lombas||[]).filter(l=>!l.deleted);
+  const q=lombaSearch.trim().toLowerCase();
+  const list=(db.lombas||[]).filter(l=>!l.deleted&&(!q||l.nama.toLowerCase().includes(q)));
   if(!list.length){
     const empty=document.createElement('div');
     empty.style.cssText='padding:40px;text-align:center;color:var(--dim);font-size:.82rem';
-    empty.textContent='Belum ada lomba. Tambah lomba pertama!';
+    empty.textContent=q?'Tidak ada lomba yang cocok.':'Belum ada lomba. Tambah lomba pertama!';
     area.appendChild(empty);
     return;
   }
 
   list.forEach(l=>{
     const ideList=(l.ide||[]).filter(x=>!x.deleted);
+    /* countdown */
+    let countdownHtml='';
+    if(l.regEnd){
+      const today=new Date(); today.setHours(0,0,0,0);
+      const end=new Date(l.regEnd); end.setHours(0,0,0,0);
+      const diff=Math.round((end-today)/(1000*60*60*24));
+      if(diff>0) countdownHtml=`<span style="color:${diff<=3?'var(--red,#f87171)':diff<=7?'#fbbf24':'var(--green,#34d399)'}">⏳ ${diff} hari lagi</span>`;
+      else if(diff===0) countdownHtml=`<span style="color:var(--red,#f87171)">⏳ Tutup hari ini</span>`;
+      else countdownHtml=`<span style="color:var(--dim)">Reg ditutup</span>`;
+    }
     const card=document.createElement('div');
     card.className='notul-topik';
     card.innerHTML=`
@@ -4793,6 +4819,7 @@ function renderLomba(){
           <div class="notul-topik-meta">${[
             l.tim?`Tim: ${esc(l.tim)}`:'',
             (l.regStart||l.regEnd)?`Reg: ${esc(l.regStart||'?')} — ${esc(l.regEnd||'?')}`:'',
+            countdownHtml,
             l.tanggalDaftar?`Daftar: ${esc(l.tanggalDaftar)}`:'',
             l.url?`<a href="${esc(l.url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">🔗 Link</a>`:'',
             `${ideList.length} ide`
