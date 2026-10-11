@@ -4788,7 +4788,13 @@ function renderLomba(){
     toolbar.appendChild(btn);
   }
   area.appendChild(toolbar);
-  area.querySelector('#lombaSearchInp').addEventListener('input',e=>{lombaSearch=e.target.value;renderLomba();});
+  area.querySelector('#lombaSearchInp').addEventListener('input',e=>{
+    lombaSearch=e.target.value;
+    const pos=e.target.selectionStart;
+    renderLomba();
+    const inp=document.getElementById('lombaSearchInp');
+    if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
+  });
 
   const q=lombaSearch.trim().toLowerCase();
   const list=(db.lombas||[]).filter(l=>!l.deleted&&(!q||l.nama.toLowerCase().includes(q)));
