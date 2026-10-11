@@ -2486,6 +2486,7 @@ function openModal(mode, ctx){
       <div class="form-group"><label class="form-label">Nama Klien</label><input class="form-input" id="fi-pclient" value="${esc(p?.clientName||'')}" placeholder="Nama perusahaan/klien"/></div>
       <div class="form-group"><label class="form-label">Kode Klien *</label><input class="form-input" id="fi-pcode" value="${esc(p?.clientCode||'')}" placeholder="Kode unik untuk login anggota" style="font-family:var(--mono)"/></div>
       <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-pdesc">${esc(p?.description||'')}</textarea></div>
+      <div class="form-group"><label class="form-label">Link Repo <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label><input class="form-input" id="fi-prepo" type="url" value="${esc(p?.repoUrl||'')}" placeholder="https://github.com/org/repo"/></div>
       <div class="form-group"><label class="form-label">Prioritas</label>
         <select class="form-input" id="fi-ppriority">
           <option value=""${!p?.priority?' selected':''}>— Tanpa Prioritas —</option>
@@ -3074,12 +3075,13 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       return;
     }
     const priority=document.getElementById('fi-ppriority').value||null;
+    const repoUrl=document.getElementById('fi-prepo').value.trim()||null;
     if(mMode==='proj-add'){
       db.projects.push(touch({
         id:uid(), title, clientName, clientCode,
         description:document.getElementById('fi-pdesc').value.trim(),
         startDate:document.getElementById('fi-pstart').value||null,
-        priority, members:[], createdAt:Date.now()
+        priority, repoUrl, members:[], createdAt:Date.now()
       }));
     } else {
       const p=db.projects.find(x=>x.id===mCtx.id);
@@ -3087,7 +3089,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       p.title=title; p.clientName=clientName; p.clientCode=clientCode;
       p.description=document.getElementById('fi-pdesc').value.trim();
       p.startDate=document.getElementById('fi-pstart').value||null;
-      p.priority=priority;
+      p.priority=priority; p.repoUrl=repoUrl;
       touch(p);
     }
     save(); renderProject(); closeModal();
@@ -3655,6 +3657,7 @@ function renderProject(){
           ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
           ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
           <span>${(proj.members||[]).filter(m=>!m.deleted).length} anggota · ${pct}% selesai</span>
+          ${proj.repoUrl?`<a href="${esc(proj.repoUrl)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:.72rem;text-decoration:none" onclick="event.stopPropagation()">🔗 Repo</a>`:''}
         </div>
         ${proj.startDate&&pEnd&&pEnd!==proj.startDate?`
         <div class="proj-timeline-wrap">
