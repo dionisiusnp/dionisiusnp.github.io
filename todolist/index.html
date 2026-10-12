@@ -798,6 +798,22 @@ const LOMBA_VOTES_LS = 'alteco_lomba_votes_v1';
 /* { [lombaId]: { ideId, vote: 'like'|'dislike' } } — 1 vote per lomba per device */
 function getLombaVotes(){ try{ return JSON.parse(localStorage.getItem(LOMBA_VOTES_LS)||'{}'); }catch{ return {}; } }
 function getLombaVoteForLomba(lombaId){ return getLombaVotes()[lombaId]||null; }
+function showFullNamePopup(el, fullName){
+  document.querySelectorAll('.fn-popup').forEach(p=>p.remove());
+  const pop=document.createElement('div');
+  pop.className='fn-popup';
+  pop.textContent=fullName;
+  pop.style.cssText='position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.8rem;color:var(--text);box-shadow:0 4px 16px rgba(0,0,0,.3);pointer-events:none;max-width:220px;word-break:break-word;white-space:pre-wrap';
+  document.body.appendChild(pop);
+  const rect=el.getBoundingClientRect();
+  const pw=pop.offsetWidth;
+  let left=rect.left+rect.width/2-pw/2;
+  if(left<8) left=8;
+  if(left+pw>window.innerWidth-8) left=window.innerWidth-8-pw;
+  pop.style.left=left+'px';
+  pop.style.top=(rect.bottom+6)+'px';
+  setTimeout(()=>pop.remove(),2500);
+}
 function setLombaVoteForLomba(lombaId,ideId,vote){
   const m=getLombaVotes();
   if(!vote) delete m[lombaId]; else m[lombaId]={ideId,vote};
@@ -1351,7 +1367,7 @@ function makeMemberItem(m){
   div.innerHTML=`
     <div class="member-avatar">${initials(m.name)}</div>
     <div class="member-info">
-      <div class="member-name">${esc(m.name)}</div>
+      <div class="member-name"${m.fullName?` style="cursor:pointer;text-decoration:underline dotted" title="${esc(m.fullName)}"`:''}>${esc(m.name)}</div>
       ${m.role?`<div class="member-role">${esc(m.role)}</div>`:''}
     </div>
     <span class="member-task-count">${count||''}</span>
@@ -1360,8 +1376,15 @@ function makeMemberItem(m){
       <button class="m-act-btn del" data-mem-del="${m.id}">✕</button>
     </span>`:''}
   `;
+  if(m.fullName){
+    div.querySelector('.member-name').addEventListener('click',e=>{
+      e.stopPropagation();
+      showFullNamePopup(e.currentTarget, m.fullName);
+    });
+  }
   div.addEventListener('click',e=>{
     if(e.target.closest('.member-actions')) return;
+    if(e.target.closest('.member-name')&&m.fullName) return;
     select(m.id);
   });
   if(role==='admin'){
@@ -1449,7 +1472,7 @@ function renderMain(){
     mh.innerHTML=`
       <div class="mh-avatar">${initials(m.name)}</div>
       <div>
-        <div class="mh-name">${esc(m.name)}</div>
+        <div class="mh-name"${m.fullName?` style="cursor:pointer;text-decoration:underline dotted" title="${esc(m.fullName)}" data-fullname="${esc(m.fullName)}"`:''}>${esc(m.name)}</div>
         <div class="mh-sub">${[m.role,divName].filter(Boolean).map(esc).join(' · ')}</div>
       </div>
       <span class="mh-spacer"></span>
@@ -1462,6 +1485,10 @@ function renderMain(){
       taskAddRow.style.display='flex';
     } else {
       taskAddRow.style.display='none';
+    }
+    if(m.fullName){
+      const mhName=mh.querySelector('.mh-name');
+      if(mhName) mhName.addEventListener('click',e=>showFullNamePopup(e.currentTarget,m.fullName));
     }
   }
 
@@ -2272,7 +2299,8 @@ function openModal(mode, ctx){
       row.className='repeater-row';
       row.innerHTML=`
         <div class="repeater-fields">
-          <input class="form-input" type="text" placeholder="Nama lengkap" maxlength="80"/>
+          <input class="form-input" type="text" placeholder="Nama pendek (akses proyek)" maxlength="80"/>
+          <input class="form-input" type="text" placeholder="Nama lengkap (opsional)" maxlength="120"/>
           <input class="form-input" type="text" placeholder="Jabatan / Role (opsional)" maxlength="80"/>
           <select class="form-select">
             <option value="">— Tanpa Kelompok —</option>
@@ -2299,8 +2327,12 @@ function openModal(mode, ctx){
     const divOpts=db.kelompoks.filter(d=>!d.deleted).map(d=>`<option value="${d.id}" ${mem&&mem.kelompokId===d.id?'selected':''}>${esc(d.name)}</option>`).join('');
     body.innerHTML=`
       <div class="form-group">
-        <label class="form-label">Nama</label>
-        <input class="form-input" id="fi-name" type="text" value="${mem?esc(mem.name):''}" placeholder="Nama lengkap" maxlength="80"/>
+        <label class="form-label">Nama Pendek <span style="font-size:.65rem;color:var(--dim);font-weight:400">(digunakan untuk akses proyek)</span></label>
+        <input class="form-input" id="fi-name" type="text" value="${mem?esc(mem.name):''}" placeholder="Nama pendek" maxlength="80"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-fullname" type="text" value="${mem?esc(mem.fullName||''):''}" placeholder="Nama lengkap" maxlength="120"/>
       </div>
       <div class="form-group">
         <label class="form-label">Jabatan / Role</label>
@@ -3023,9 +3055,10 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       const inputs=row.querySelectorAll('input');
       const name=inputs[0].value.trim();
       if(!name) return;
-      const role_v=inputs[1].value.trim();
+      const fullName_v=inputs[1].value.trim()||undefined;
+      const role_v=inputs[2].value.trim();
       const kelompokId=row.querySelector('select').value||null;
-      const m=touch({id:uid(),name,role:role_v,kelompokId,createdAt:Date.now()});
+      const m=touch({id:uid(),name,fullName:fullName_v,role:role_v,kelompokId,createdAt:Date.now()});
       db.members.push(m);
       lastMember=m;
     });
@@ -3036,11 +3069,12 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='mem-edit'){
     const name=document.getElementById('fi-name').value.trim();
     if(!name) return;
+    const fullName_v=document.getElementById('fi-fullname').value.trim()||undefined;
     const role_v=document.getElementById('fi-role').value.trim();
     const kelompokId=document.getElementById('fi-div').value||null;
     {
       const m=db.members.find(x=>x.id===mCtx.id);
-      if(m){m.name=name;m.role=role_v;m.kelompokId=kelompokId;touch(m);}
+      if(m){m.name=name;m.fullName=fullName_v;m.role=role_v;m.kelompokId=kelompokId;touch(m);}
       save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain(); closeModal();
     }
   }
