@@ -144,7 +144,7 @@ body.is-admin .viewer-only{display:none!important}
 .member-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0;background:var(--bd);color:var(--text)}
 .member-item.active .member-avatar{background:rgba(108,111,245,.2);border:1px solid rgba(108,111,245,.35);color:var(--accent)}
 .member-info{flex:1;min-width:0}
-.member-name{font-size:.75rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-name{font-size:.75rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-flex;align-items:center;gap:3px}
 .member-role{font-size:.6rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .25s}
 .member-task-count{font-size:.58rem;font-family:var(--mono);color:var(--dim);flex-shrink:0}
 .member-actions{display:none;gap:2px;flex-shrink:0}
@@ -163,7 +163,9 @@ body.is-admin .viewer-only{display:none!important}
 /* Member header */
 .member-header{padding:14px 18px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:center;gap:12px;transition:border-color .25s}
 .mh-avatar{width:38px;height:38px;border-radius:50%;background:rgba(108,111,245,.15);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--accent);flex-shrink:0}
-.mh-name{font-size:.95rem;font-weight:800;letter-spacing:-.01em}
+.mh-name{font-size:.95rem;font-weight:800;letter-spacing:-.01em;display:inline-flex;align-items:center;gap:4px}
+.fn-info-btn{display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--accent);opacity:.55;cursor:pointer;transition:opacity .15s;flex-shrink:0;line-height:1;user-select:none}
+.fn-info-btn:hover{opacity:1}
 .mh-sub{font-size:.68rem;color:var(--muted);margin-top:1px;transition:color .25s}
 .mh-spacer{flex:1}
 .mh-actions{display:flex;gap:6px;align-items:center}
@@ -231,7 +233,7 @@ body.is-admin .viewer-only{display:none!important}
 .modal-member-row:hover{border-color:var(--accent)}
 .modal-member-av{width:28px;height:28px;border-radius:50%;background:rgba(108,111,245,.15);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;color:var(--accent);flex-shrink:0}
 .modal-member-info{flex:1;min-width:0}
-.modal-member-name{font-size:.8rem;font-weight:600}
+.modal-member-name{font-size:.8rem;font-weight:600;display:inline-flex;align-items:center;gap:3px}
 .modal-member-role{font-size:.62rem;color:var(--dim)}
 .modal-member-tasks{font-size:.6rem;font-family:var(--mono);color:var(--dim);flex-shrink:0;display:flex;gap:6px;align-items:center}
 /* sidebar indent */
@@ -281,7 +283,7 @@ body.is-admin .viewer-only{display:none!important}
 .group-header{display:flex;align-items:center;gap:8px;padding:10px 2px 5px;border-bottom:1px solid var(--bd);margin:10px 0 6px;transition:border-color .25s}
 .group-header:first-child{margin-top:0}
 .group-avatar{width:22px;height:22px;border-radius:50%;background:rgba(108,111,245,.18);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:var(--accent)}
-.group-name{font-size:.74rem;font-weight:700;flex:1}
+.group-name{font-size:.74rem;font-weight:700;flex:1;display:inline-flex;align-items:center;gap:3px}
 .group-role{font-size:.62rem;color:var(--dim)}
 .group-count{font-size:.6rem;font-family:var(--mono);color:var(--dim);background:var(--card);padding:1px 7px;border-radius:8px;border:1px solid var(--bd)}
 .group-empty{font-size:.72rem;color:var(--dim);padding:6px 2px 10px}
@@ -370,7 +372,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .proj-member-row{margin-bottom:14px}
 .proj-member-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .proj-member-avatar{width:26px;height:26px;border-radius:50%;background:rgba(108,111,245,.15);border:1px solid rgba(108,111,245,.3);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--accent);flex-shrink:0}
-.proj-member-name{font-size:.78rem;font-weight:600;flex:1}
+.proj-member-name{font-size:.78rem;font-weight:600;flex:1;display:inline-flex;align-items:center;gap:3px}
 .proj-member-role{font-size:.62rem;color:var(--muted)}
 .proj-member-tl{height:6px;border-radius:3px;background:rgba(108,111,245,.25);margin:5px 0 8px;position:relative;overflow:hidden}
 .proj-member-tl-bar{height:100%;border-radius:3px;background:var(--accent);position:absolute}
@@ -1367,7 +1369,7 @@ function makeMemberItem(m){
   div.innerHTML=`
     <div class="member-avatar">${initials(m.name)}</div>
     <div class="member-info">
-      <div class="member-name"${m.fullName?` style="cursor:pointer;text-decoration:underline dotted" title="${esc(m.fullName)}"`:''}>${esc(m.name)}</div>
+      <div class="member-name">${esc(m.name)}${m.fullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</div>
       ${m.role?`<div class="member-role">${esc(m.role)}</div>`:''}
     </div>
     <span class="member-task-count">${count||''}</span>
@@ -1377,14 +1379,14 @@ function makeMemberItem(m){
     </span>`:''}
   `;
   if(m.fullName){
-    div.querySelector('.member-name').addEventListener('click',e=>{
+    div.querySelector('.fn-info-btn').addEventListener('click',e=>{
       e.stopPropagation();
       showFullNamePopup(e.currentTarget, m.fullName);
     });
   }
   div.addEventListener('click',e=>{
     if(e.target.closest('.member-actions')) return;
-    if(e.target.closest('.member-name')&&m.fullName) return;
+    if(e.target.closest('.fn-info-btn')) return;
     select(m.id);
   });
   if(role==='admin'){
@@ -1472,7 +1474,7 @@ function renderMain(){
     mh.innerHTML=`
       <div class="mh-avatar">${initials(m.name)}</div>
       <div>
-        <div class="mh-name"${m.fullName?` style="cursor:pointer;text-decoration:underline dotted" title="${esc(m.fullName)}" data-fullname="${esc(m.fullName)}"`:''}>${esc(m.name)}</div>
+        <div class="mh-name">${esc(m.name)}${m.fullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</div>
         <div class="mh-sub">${[m.role,divName].filter(Boolean).map(esc).join(' · ')}</div>
       </div>
       <span class="mh-spacer"></span>
@@ -1487,8 +1489,8 @@ function renderMain(){
       taskAddRow.style.display='none';
     }
     if(m.fullName){
-      const mhName=mh.querySelector('.mh-name');
-      if(mhName) mhName.addEventListener('click',e=>showFullNamePopup(e.currentTarget,m.fullName));
+      const infoBtn=mh.querySelector('.fn-info-btn');
+      if(infoBtn) infoBtn.addEventListener('click',e=>showFullNamePopup(e.currentTarget,m.fullName));
     }
   }
 
@@ -1533,14 +1535,21 @@ function renderTasks(){
       if(filterMemberName){
         /* filtered by name: sub-section per kelompok */
         const totalFiltered=members.reduce((s,m)=>s+applyFilter(memberTasks(m.id)).length,0);
+        const gFullName=members[0]?.fullName||null;
         const gh=document.createElement('div');
         gh.className='group-header';
         gh.innerHTML=`
           <div class="group-avatar">${initials(name)}</div>
-          <span class="group-name">${esc(name)}</span>
+          <span class="group-name">${esc(name)}${gFullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</span>
           ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
           <span class="group-count">${totalFiltered} tugas</span>
         `;
+        if(gFullName){
+          gh.querySelector('.fn-info-btn').addEventListener('click',e=>{
+            e.stopPropagation();
+            showFullNamePopup(e.currentTarget,gFullName);
+          });
+        }
         area.appendChild(gh);
 
         members.forEach(m=>{
@@ -1562,20 +1571,28 @@ function renderTasks(){
       } else {
         /* not filtered: header only, clickable → filter by name */
         const totalTasks=members.reduce((s,m)=>s+memberTasks(m.id).length,0);
+        const gFullName2=members[0]?.fullName||null;
         const gh=document.createElement('div');
         gh.className='group-header';
         gh.style.cssText='cursor:pointer;transition:background .15s';
         gh.innerHTML=`
           <div class="group-avatar">${initials(name)}</div>
-          <span class="group-name">${esc(name)}</span>
+          <span class="group-name">${esc(name)}${gFullName2?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</span>
           ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
           <span style="flex:1"></span>
           <span class="group-count" style="margin-right:4px">${totalTasks} tugas</span>
           <span style="font-size:.68rem;color:var(--accent);font-weight:600;padding:2px 8px;border:1px solid var(--accent);border-radius:4px;flex-shrink:0">Lihat →</span>
         `;
+        if(gFullName2){
+          gh.querySelector('.fn-info-btn').addEventListener('click',e=>{
+            e.stopPropagation();
+            showFullNamePopup(e.currentTarget,gFullName2);
+          });
+        }
         gh.addEventListener('mouseenter',()=>gh.style.background='var(--card)');
         gh.addEventListener('mouseleave',()=>gh.style.background='');
-        gh.addEventListener('click',()=>{
+        gh.addEventListener('click',e=>{
+          if(e.target.closest('.fn-info-btn')) return;
           filterMemberName=name; memberSearchQuery='';
           document.getElementById('memberSearchInput').value=name;
           activeFilter='all';
@@ -2273,12 +2290,19 @@ function openModal(mode, ctx){
         row.innerHTML=`
           <div class="modal-member-av">${initials(m.name)}</div>
           <div class="modal-member-info">
-            <div class="modal-member-name">${esc(m.name)}</div>
+            <div class="modal-member-name">${esc(m.name)}${m.fullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</div>
             ${m.role?`<div class="modal-member-role">${esc(m.role)}</div>`:''}
           </div>
           <span class="modal-member-tasks">${rec?`<span>🔁 ${rec}</span>`:''} ${once?`<span>📌 ${once}</span>`:''}</span>
         `;
-        row.addEventListener('click',()=>{
+        if(m.fullName){
+          row.querySelector('.fn-info-btn').addEventListener('click',e=>{
+            e.stopPropagation();
+            showFullNamePopup(e.currentTarget,m.fullName);
+          });
+        }
+        row.addEventListener('click',e=>{
+          if(e.target.closest('.fn-info-btn')) return;
           closeModal();
           viewMode='tasks';
           document.getElementById('btnOrgView').classList.remove('active');
@@ -3577,11 +3601,12 @@ function buildMemberRow(proj, mem, pEnd, canEditTask, canEditMember){
   const mLeft=timelinePercent(proj.startDate,pEnd,mStart);
   const mWidth=Math.max(2,timelinePercent(proj.startDate,pEnd,mEnd)-mLeft);
 
+  const memFullName=mem.type==='internal'?(db.members.find(x=>x.id===mem.internalMemberId)?.fullName||null):null;
   memRow.innerHTML=`
     <div class="proj-member-head">
       <div class="proj-member-avatar">${initials(mem.name)}</div>
       <div style="flex:1">
-        <div class="proj-member-name">${esc(mem.name)}</div>
+        <div class="proj-member-name">${esc(mem.name)}${memFullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</div>
         <div class="proj-member-role">${esc(mem.role||'')}${mem.type==='external'?' · Eksternal':''}</div>
       </div>
       <div style="font-size:.62rem;color:var(--dim)">${memDone}/${memTasks.length} tugas</div>
@@ -3597,6 +3622,12 @@ function buildMemberRow(proj, mem, pEnd, canEditTask, canEditMember){
     ${canEditTask?`<button class="proj-add-btn" data-task-add="${mem.id}" data-proj="${proj.id}">＋ Tambah tugas</button>`:''}
   `;
 
+  if(memFullName){
+    memRow.querySelector('.fn-info-btn').addEventListener('click',e=>{
+      e.stopPropagation();
+      showFullNamePopup(e.currentTarget,memFullName);
+    });
+  }
   const taskList=memRow.querySelector(`#tasklist-${proj.id}-${mem.id}`);
   memTasks.forEach(task=>{
     const ti=document.createElement('div');
