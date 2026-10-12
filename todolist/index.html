@@ -97,16 +97,34 @@ input[type="date"].form-input{color-scheme:dark}
 .app{flex:1;display:flex;overflow:hidden}
 
 /* ── Sidebar ── */
-.sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s}
+.sidebar{width:260px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s,width .2s}
 .sidebar-head{padding:10px 12px 6px;flex-shrink:0;display:flex;align-items:center;transition:border-color .25s}
 .feature-nav{display:flex;flex-direction:column;gap:1px;padding:4px 6px 6px;flex-shrink:0;border-bottom:1px solid var(--bd);transition:border-color .25s}
-.feature-nav-group{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:6px 10px 2px;margin-top:2px}
-.feature-nav-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;text-align:left;width:100%;transition:background .15s,color .15s;font-size:.78rem;font-weight:500}
+.feature-nav-group{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:6px 10px 2px;margin-top:2px;transition:opacity .15s}
+.feature-nav-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;text-align:left;width:100%;transition:background .15s,color .15s,justify-content .15s;font-size:.78rem;font-weight:500}
 .feature-nav-item:hover{background:var(--card);color:var(--text)}
 .feature-nav-item.active{background:rgba(108,111,245,.12);color:var(--accent);font-weight:600}
 .feature-nav-ico{font-size:.9rem;flex-shrink:0;width:18px;text-align:center}
-.feature-nav-label{flex:1}
-.sidebar-head-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);flex:1}
+.feature-nav-label{flex:1;transition:opacity .15s,width .15s}
+.sidebar-head-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);flex:1;transition:opacity .15s}
+/* sidebar toggle button */
+.sb-toggle-btn{width:22px;height:22px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;flex-shrink:0;transition:all .15s;line-height:1}
+.sb-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* minimized sidebar */
+.sidebar.sb-mini{width:48px}
+.sidebar.sb-mini .sidebar-head-title,
+.sidebar.sb-mini .feature-nav-group,
+.sidebar.sb-mini .feature-nav-label,
+.sidebar.sb-mini .all-label,
+.sidebar.sb-mini .all-count,
+.sidebar.sb-mini .all-avatar,
+.sidebar.sb-mini .people-scroll,
+.sidebar.sb-mini .sb-mini-hide{display:none!important}
+.sidebar.sb-mini .sidebar-head{justify-content:center;padding:10px 6px 6px}
+.sidebar.sb-mini .feature-nav{padding:4px 4px 6px}
+.sidebar.sb-mini .feature-nav-item{justify-content:center;padding:7px 4px;gap:0}
+.sidebar.sb-mini .all-item{justify-content:center;padding:7px 4px}
+.sidebar.sb-mini .feature-nav-ico{width:auto}
 .add-btn{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
 .add-btn:hover{border-color:var(--accent);color:var(--accent)}
 .admin-only{display:none!important}
@@ -321,7 +339,7 @@ body.is-admin .viewer-only{display:none!important}
 .toggle-inp:checked+.toggle-track::after{transform:translateX(18px)}
 
 @media(max-width:640px){
-  .sidebar{width:100%;height:210px;flex-shrink:0;border-right:none;border-top:1px solid var(--bd);order:2}
+  .sidebar{width:100%!important;height:210px;flex-shrink:0;border-right:none;border-top:1px solid var(--bd);order:2}
   .app{flex-direction:column}
   .main{order:1}
 }
@@ -618,6 +636,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   <div class="sidebar">
     <div class="sidebar-head">
       <span class="sidebar-head-title">Fitur</span>
+      <button class="sb-toggle-btn" id="sbToggleBtn" title="Perkecil sidebar">‹</button>
     </div>
     <div class="feature-nav">
       <div class="feature-nav-group">Organisasi</div>
@@ -673,7 +692,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <div class="divider"></div>
 
     <div class="people-scroll" id="peopleScroll"></div>
-    <div class="admin-only" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
+    <div class="admin-only sb-mini-hide" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
       <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
       <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
       <button class="task-add-inline-btn" id="btnResetData" style="font-size:.68rem;margin-top:4px;border-color:var(--red);color:var(--red)">⚠ Reset Semua Data</button>
@@ -1172,6 +1191,26 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
   btn.addEventListener('click',()=>{
     if(html.getAttribute('data-theme')==='light'){html.removeAttribute('data-theme');btn.textContent='🌙';localStorage.setItem('theme','dark')}
     else{html.setAttribute('data-theme','light');btn.textContent='☀️';localStorage.setItem('theme','light')}
+  });
+})();
+
+/* ── Sidebar minimize toggle ── */
+(function(){
+  const sidebar=document.querySelector('.sidebar');
+  const btn=document.getElementById('sbToggleBtn');
+  if(!sidebar||!btn) return;
+  const SB_KEY='sb_minimized';
+  function applyMini(mini){
+    sidebar.classList.toggle('sb-mini',mini);
+    btn.textContent=mini?'›':'‹';
+    btn.title=mini?'Perlebar sidebar':'Perkecil sidebar';
+    localStorage.setItem(SB_KEY,mini?'1':'0');
+  }
+  // restore on load
+  applyMini(localStorage.getItem(SB_KEY)==='1');
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    applyMini(!sidebar.classList.contains('sb-mini'));
   });
 })();
 
