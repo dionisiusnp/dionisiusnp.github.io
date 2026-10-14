@@ -819,11 +819,14 @@ const LOMBA_VOTES_LS = 'alteco_lomba_votes_v1';
 /* { [lombaId]: { ideId, vote: 'like'|'dislike' } } — 1 vote per lomba per device */
 function getLombaVotes(){ try{ return JSON.parse(localStorage.getItem(LOMBA_VOTES_LS)||'{}'); }catch{ return {}; } }
 function getLombaVoteForLomba(lombaId){ return getLombaVotes()[lombaId]||null; }
-function showFullNamePopup(el, fullName){
+function memberPopupText(fullName, angkatan){
+  return [fullName||null, angkatan?`Angkatan ${angkatan}`:null].filter(Boolean).join('\n');
+}
+function showFullNamePopup(el, text){
   document.querySelectorAll('.fn-popup').forEach(p=>p.remove());
   const pop=document.createElement('div');
   pop.className='fn-popup';
-  pop.textContent=fullName;
+  pop.textContent=text;
   pop.style.cssText='position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.8rem;color:var(--text);box-shadow:0 4px 16px rgba(0,0,0,.3);pointer-events:none;max-width:220px;word-break:break-word;white-space:pre-wrap';
   document.body.appendChild(pop);
   const rect=el.getBoundingClientRect();
@@ -1408,7 +1411,7 @@ function makeMemberItem(m){
   div.innerHTML=`
     <div class="member-avatar">${initials(m.name)}</div>
     <div class="member-info">
-      <div class="member-name">${esc(m.name)}${m.fullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</div>
+      <div class="member-name">${esc(m.name)}${(m.fullName||m.angkatan)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</div>
       ${m.role?`<div class="member-role">${esc(m.role)}</div>`:''}
     </div>
     <span class="member-task-count">${count||''}</span>
@@ -1417,10 +1420,10 @@ function makeMemberItem(m){
       <button class="m-act-btn del" data-mem-del="${m.id}">✕</button>
     </span>`:''}
   `;
-  if(m.fullName){
+  if(m.fullName||m.angkatan){
     div.querySelector('.fn-info-btn').addEventListener('click',e=>{
       e.stopPropagation();
-      showFullNamePopup(e.currentTarget, m.fullName);
+      showFullNamePopup(e.currentTarget, memberPopupText(m.fullName,m.angkatan));
     });
   }
   div.addEventListener('click',e=>{
@@ -1513,7 +1516,7 @@ function renderMain(){
     mh.innerHTML=`
       <div class="mh-avatar">${initials(m.name)}</div>
       <div>
-        <div class="mh-name">${esc(m.name)}${m.fullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</div>
+        <div class="mh-name">${esc(m.name)}${(m.fullName||m.angkatan)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</div>
         <div class="mh-sub">${[m.role,divName].filter(Boolean).map(esc).join(' · ')}</div>
       </div>
       <span class="mh-spacer"></span>
@@ -1527,9 +1530,9 @@ function renderMain(){
     } else {
       taskAddRow.style.display='none';
     }
-    if(m.fullName){
+    if(m.fullName||m.angkatan){
       const infoBtn=mh.querySelector('.fn-info-btn');
-      if(infoBtn) infoBtn.addEventListener('click',e=>showFullNamePopup(e.currentTarget,m.fullName));
+      if(infoBtn) infoBtn.addEventListener('click',e=>showFullNamePopup(e.currentTarget,memberPopupText(m.fullName,m.angkatan)));
     }
   }
 
@@ -1575,18 +1578,19 @@ function renderTasks(){
         /* filtered by name: sub-section per kelompok */
         const totalFiltered=members.reduce((s,m)=>s+applyFilter(memberTasks(m.id)).length,0);
         const gFullName=members[0]?.fullName||null;
+        const gAngkatan=members[0]?.angkatan||null;
         const gh=document.createElement('div');
         gh.className='group-header';
         gh.innerHTML=`
           <div class="group-avatar">${initials(name)}</div>
-          <span class="group-name">${esc(name)}${gFullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</span>
+          <span class="group-name">${esc(name)}${(gFullName||gAngkatan)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</span>
           ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
           <span class="group-count">${totalFiltered} tugas</span>
         `;
-        if(gFullName){
+        if(gFullName||gAngkatan){
           gh.querySelector('.fn-info-btn').addEventListener('click',e=>{
             e.stopPropagation();
-            showFullNamePopup(e.currentTarget,gFullName);
+            showFullNamePopup(e.currentTarget,memberPopupText(gFullName,gAngkatan));
           });
         }
         area.appendChild(gh);
@@ -1611,21 +1615,22 @@ function renderTasks(){
         /* not filtered: header only, clickable → filter by name */
         const totalTasks=members.reduce((s,m)=>s+memberTasks(m.id).length,0);
         const gFullName2=members[0]?.fullName||null;
+        const gAngkatan2=members[0]?.angkatan||null;
         const gh=document.createElement('div');
         gh.className='group-header';
         gh.style.cssText='cursor:pointer;transition:background .15s';
         gh.innerHTML=`
           <div class="group-avatar">${initials(name)}</div>
-          <span class="group-name">${esc(name)}${gFullName2?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</span>
+          <span class="group-name">${esc(name)}${(gFullName2||gAngkatan2)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</span>
           ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
           <span style="flex:1"></span>
           <span class="group-count" style="margin-right:4px">${totalTasks} tugas</span>
           <span style="font-size:.68rem;color:var(--accent);font-weight:600;padding:2px 8px;border:1px solid var(--accent);border-radius:4px;flex-shrink:0">Lihat →</span>
         `;
-        if(gFullName2){
+        if(gFullName2||gAngkatan2){
           gh.querySelector('.fn-info-btn').addEventListener('click',e=>{
             e.stopPropagation();
-            showFullNamePopup(e.currentTarget,gFullName2);
+            showFullNamePopup(e.currentTarget,memberPopupText(gFullName2,gAngkatan2));
           });
         }
         gh.addEventListener('mouseenter',()=>gh.style.background='var(--card)');
@@ -2329,15 +2334,15 @@ function openModal(mode, ctx){
         row.innerHTML=`
           <div class="modal-member-av">${initials(m.name)}</div>
           <div class="modal-member-info">
-            <div class="modal-member-name">${esc(m.name)}${m.fullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</div>
+            <div class="modal-member-name">${esc(m.name)}${(m.fullName||m.angkatan)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</div>
             ${m.role?`<div class="modal-member-role">${esc(m.role)}</div>`:''}
           </div>
           <span class="modal-member-tasks">${rec?`<span>🔁 ${rec}</span>`:''} ${once?`<span>📌 ${once}</span>`:''}</span>
         `;
-        if(m.fullName){
+        if(m.fullName||m.angkatan){
           row.querySelector('.fn-info-btn').addEventListener('click',e=>{
             e.stopPropagation();
-            showFullNamePopup(e.currentTarget,m.fullName);
+            showFullNamePopup(e.currentTarget,memberPopupText(m.fullName,m.angkatan));
           });
         }
         row.addEventListener('click',e=>{
@@ -2364,6 +2369,7 @@ function openModal(mode, ctx){
         <div class="repeater-fields">
           <input class="form-input" type="text" placeholder="Nama pendek (akses proyek)" maxlength="80"/>
           <input class="form-input" type="text" placeholder="Nama lengkap (opsional)" maxlength="120"/>
+          <input class="form-input" type="text" placeholder="Angkatan (opsional, cth: 2023)" maxlength="10"/>
           <input class="form-input" type="text" placeholder="Jabatan / Role (opsional)" maxlength="80"/>
           <select class="form-select">
             <option value="">— Tanpa Kelompok —</option>
@@ -2396,6 +2402,10 @@ function openModal(mode, ctx){
       <div class="form-group">
         <label class="form-label">Nama Lengkap <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
         <input class="form-input" id="fi-fullname" type="text" value="${mem?esc(mem.fullName||''):''}" placeholder="Nama lengkap" maxlength="120"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Angkatan <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-angkatan" type="text" value="${mem?esc(mem.angkatan||''):''}" placeholder="cth: 2023" maxlength="10"/>
       </div>
       <div class="form-group">
         <label class="form-label">Jabatan / Role</label>
@@ -3119,9 +3129,10 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       const name=inputs[0].value.trim();
       if(!name) return;
       const fullName_v=inputs[1].value.trim()||undefined;
-      const role_v=inputs[2].value.trim();
+      const angkatan_v=inputs[2].value.trim()||undefined;
+      const role_v=inputs[3].value.trim();
       const kelompokId=row.querySelector('select').value||null;
-      const m=touch({id:uid(),name,fullName:fullName_v,role:role_v,kelompokId,createdAt:Date.now()});
+      const m=touch({id:uid(),name,fullName:fullName_v,angkatan:angkatan_v,role:role_v,kelompokId,createdAt:Date.now()});
       db.members.push(m);
       lastMember=m;
     });
@@ -3133,11 +3144,12 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const name=document.getElementById('fi-name').value.trim();
     if(!name) return;
     const fullName_v=document.getElementById('fi-fullname').value.trim()||undefined;
+    const angkatan_v=document.getElementById('fi-angkatan').value.trim()||undefined;
     const role_v=document.getElementById('fi-role').value.trim();
     const kelompokId=document.getElementById('fi-div').value||null;
     {
       const m=db.members.find(x=>x.id===mCtx.id);
-      if(m){m.name=name;m.fullName=fullName_v;m.role=role_v;m.kelompokId=kelompokId;touch(m);}
+      if(m){m.name=name;m.fullName=fullName_v;m.angkatan=angkatan_v;m.role=role_v;m.kelompokId=kelompokId;touch(m);}
       save(); renderSidebar(); if(viewMode==='org') renderOrgChart(); else renderMain(); closeModal();
     }
   }
@@ -3640,12 +3652,14 @@ function buildMemberRow(proj, mem, pEnd, canEditTask, canEditMember){
   const mLeft=timelinePercent(proj.startDate,pEnd,mStart);
   const mWidth=Math.max(2,timelinePercent(proj.startDate,pEnd,mEnd)-mLeft);
 
-  const memFullName=mem.type==='internal'?(db.members.find(x=>x.id===mem.internalMemberId)?.fullName||null):null;
+  const _dbMem=mem.type==='internal'?db.members.find(x=>x.id===mem.internalMemberId):null;
+  const memFullName=_dbMem?.fullName||null;
+  const memAngkatan=_dbMem?.angkatan||null;
   memRow.innerHTML=`
     <div class="proj-member-head">
       <div class="proj-member-avatar">${initials(mem.name)}</div>
       <div style="flex:1">
-        <div class="proj-member-name">${esc(mem.name)}${memFullName?`<span class="fn-info-btn" title="Lihat nama lengkap">ⓘ</span>`:''}</div>
+        <div class="proj-member-name">${esc(mem.name)}${(memFullName||memAngkatan)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</div>
         <div class="proj-member-role">${esc(mem.role||'')}${mem.type==='external'?' · Eksternal':''}</div>
       </div>
       <div style="font-size:.62rem;color:var(--dim)">${memDone}/${memTasks.length} tugas</div>
@@ -3661,10 +3675,10 @@ function buildMemberRow(proj, mem, pEnd, canEditTask, canEditMember){
     ${canEditTask?`<button class="proj-add-btn" data-task-add="${mem.id}" data-proj="${proj.id}">＋ Tambah tugas</button>`:''}
   `;
 
-  if(memFullName){
+  if(memFullName||memAngkatan){
     memRow.querySelector('.fn-info-btn').addEventListener('click',e=>{
       e.stopPropagation();
-      showFullNamePopup(e.currentTarget,memFullName);
+      showFullNamePopup(e.currentTarget,memberPopupText(memFullName,memAngkatan));
     });
   }
   const taskList=memRow.querySelector(`#tasklist-${proj.id}-${mem.id}`);
