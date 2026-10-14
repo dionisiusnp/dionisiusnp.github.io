@@ -814,7 +814,7 @@ function getNotulKeys(){ try{ return JSON.parse(localStorage.getItem(NOTUL_KEYS_
 function setNotulKey(id,kode){ const m=getNotulKeys(); m[id]=kode; localStorage.setItem(NOTUL_KEYS_LS,JSON.stringify(m)); }
 function isTopikUnlocked(t){ if(role==='admin') return true; if(!t.kode) return true; return getNotulKeys()[t.id]===t.kode; }
 let broadcastSearch  = '';
-const BC_KEYS_LS     = 'alteco_bc_keys_v1';
+let bcSession        = false; /* true after viewer enters global broadcastKode */
 const LOMBA_VOTES_LS = 'alteco_lomba_votes_v1';
 /* { [lombaId]: { ideId, vote: 'like'|'dislike' } } — 1 vote per lomba per device */
 function getLombaVotes(){ try{ return JSON.parse(localStorage.getItem(LOMBA_VOTES_LS)||'{}'); }catch{ return {}; } }
@@ -843,9 +843,7 @@ function setLombaVoteForLomba(lombaId,ideId,vote){
   if(!vote) delete m[lombaId]; else m[lombaId]={ideId,vote};
   localStorage.setItem(LOMBA_VOTES_LS,JSON.stringify(m));
 }
-function getBcKeys(){ try{ return JSON.parse(localStorage.getItem(BC_KEYS_LS)||'{}'); }catch{ return {}; } }
-function setBcKey(id,kode){ const m=getBcKeys(); m[id]=kode; localStorage.setItem(BC_KEYS_LS,JSON.stringify(m)); }
-function isProdukUnlocked(p){ if(role==='admin') return true; if(!p.kode) return true; return getBcKeys()[p.id]===p.kode; }
+function isBroadcastUnlocked(){ return role==='admin'||!db.settings.broadcastKode||bcSession; }
 let activeFilter      = 'all';  /* 'all' | 'recurring' | 'once' */
 let filterMemberName  = null;   /* null | exact string — selected member, shows tasks */
 let memberSearchQuery = '';     /* partial query — filters member list in real-time */
@@ -878,6 +876,7 @@ function migrate(d){
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
   if(!d.settings.writePat) d.settings.writePat='';
   if(d.settings.projectKode==null) d.settings.projectKode='';
+  if(d.settings.broadcastKode==null) d.settings.broadcastKode='';
   /* migrate komunitas → regulasi */
   if(d.komunitas&&!d.regulasi) d.regulasi=d.komunitas;
   if(!d.regulasi) d.regulasi={visi:'',misi:'',syaratAnggota:[],syaratTim:[],sanksi:[]};
@@ -1109,6 +1108,9 @@ window.addEventListener('beforeunload',()=>{
     try{
       const ps=sessionStorage.getItem('alteco_proj_session');
       if(ps) projSession=JSON.parse(ps);
+    }catch{}
+    try{
+      if(sessionStorage.getItem('alteco_bc_session')==='1') bcSession=true;
     }catch{}
     gate.classList.add('hidden'); applyRole(); return;
   }
@@ -2783,27 +2785,8 @@ function openModal(mode, ctx){
         <label class="form-label">URL Pitch Deck <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional)</span></label>
         <input class="form-input" id="fi-bc-url" value="${esc(p?.urlPitchDeck||'')}" placeholder="https://…" maxlength="500"/>
       </div>
-      <div class="form-group">
-        <label class="form-label">Kode Akses <span style="font-size:.65rem;color:var(--muted);font-weight:400">(opsional — kunci kondisi & broadcast)</span></label>
-        <input class="form-input" id="fi-bc-kode" value="${esc(p?.kode||'')}" placeholder="misal: BC2025 — kosongkan jika semua boleh lihat" maxlength="50" style="font-family:var(--mono,monospace);letter-spacing:.05em"/>
-        <div style="font-size:.65rem;color:var(--dim);margin-top:4px">Nama produk & link pitch deck terlihat semua. Kondisi & broadcast hanya dibuka dengan kode ini.</div>
-      </div>
     `;
     document.getElementById('fi-bc-nama').focus();
-  }
-
-  else if(mode==='bc-unlock'){
-    const p=(db.broadcastProduk||[]).find(x=>x.id===ctx.id);
-    title.textContent='🔒 Buka Akses Broadcast';
-    body.innerHTML=`
-      <div style="font-size:.82rem;font-weight:700;margin-bottom:12px;color:var(--text)">${esc(p?.nama||'')}</div>
-      <div class="form-group">
-        <label class="form-label">Kode Akses</label>
-        <input class="form-input" id="fi-bc-unlock-kode" type="text" placeholder="Masukkan kode…" maxlength="50" style="font-family:var(--mono,monospace);letter-spacing:.08em"/>
-        <div id="fi-bc-unlock-err" style="color:var(--red);font-size:.72rem;margin-top:5px;display:none">Kode salah. Coba lagi.</div>
-      </div>
-    `;
-    document.getElementById('fi-bc-unlock-kode').focus();
   }
 
   else if(mode==='bc-kondisi-add'||mode==='bc-kondisi-edit'){
@@ -3386,31 +3369,15 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const nama_v=document.getElementById('fi-bc-nama').value.trim();
     if(!nama_v) return;
     const url_v=document.getElementById('fi-bc-url').value.trim()||null;
-    const kode_v=document.getElementById('fi-bc-kode').value.trim()||null;
     if(mMode==='bc-produk-add'){
       db.broadcastProduk=(db.broadcastProduk||[]);
-      db.broadcastProduk.push(touch({id:uid(),nama:nama_v,urlPitchDeck:url_v,kode:kode_v,kondisi:[],createdAt:Date.now()}));
+      db.broadcastProduk.push(touch({id:uid(),nama:nama_v,urlPitchDeck:url_v,kondisi:[],createdAt:Date.now()}));
     } else {
       const p=(db.broadcastProduk||[]).find(x=>x.id===mCtx.id);
       if(!p) return;
-      p.nama=nama_v; p.urlPitchDeck=url_v; p.kode=kode_v; touch(p);
+      p.nama=nama_v; p.urlPitchDeck=url_v; touch(p);
     }
     save(); renderBroadcast(); closeModal();
-  }
-
-  /* ── Broadcast unlock ── */
-  else if(mMode==='bc-unlock'){
-    const entered=document.getElementById('fi-bc-unlock-kode').value.trim();
-    const p=(db.broadcastProduk||[]).find(x=>x.id===mCtx.id);
-    if(!p) return;
-    if(entered===p.kode){
-      setBcKey(p.id,entered);
-      closeModal(); renderBroadcast();
-    } else {
-      const errEl=document.getElementById('fi-bc-unlock-err');
-      if(errEl){ errEl.style.display=''; errEl.textContent='Kode salah. Coba lagi.'; }
-      return;
-    }
   }
 
   /* ── Broadcast kondisi save ── */
@@ -4015,6 +3982,42 @@ function renderSettings(){
   card1.appendChild(saveBtn);
   area.appendChild(card1);
 
+
+  /* ── Card: Kode Akses Broadcast ── */
+  const cardBc = document.createElement('div');
+  cardBc.className = 'settings-card';
+  cardBc.innerHTML = `
+    <div class="settings-section-title">Akses Broadcast</div>
+    <div class="settings-row">
+      <div style="flex:1">
+        <div class="settings-row-label">Kode Broadcast Global</div>
+        <div class="settings-row-desc">Satu kode untuk semua produk broadcast. Viewer masukkan kode ini untuk melihat kondisi &amp; broadcast. Kosongkan jika semua boleh akses.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+      <div style="position:relative;flex:1;max-width:300px">
+        <input class="form-input" id="fi-bc-global-kode" type="password" value="${esc(s.broadcastKode||'')}"
+          placeholder="Buat kode akses broadcast" maxlength="60"
+          style="padding-right:36px;width:100%;box-sizing:border-box;font-family:var(--mono)"/>
+        <button id="bcKodeEye" tabindex="-1"
+          style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:2px">👁</button>
+      </div>
+      <button class="btn-save" id="saveBcKodeBtn">Simpan</button>
+    </div>
+    <div id="bcKodeMsg" style="font-size:.72rem;color:var(--green);margin-top:6px;min-height:14px"></div>
+  `;
+  area.appendChild(cardBc);
+  cardBc.querySelector('#bcKodeEye').addEventListener('click',()=>{
+    const inp=cardBc.querySelector('#fi-bc-global-kode');
+    inp.type=inp.type==='password'?'text':'password';
+  });
+  cardBc.querySelector('#saveBcKodeBtn').addEventListener('click',()=>{
+    db.settings.broadcastKode=cardBc.querySelector('#fi-bc-global-kode').value.trim();
+    save();
+    const msg=cardBc.querySelector('#bcKodeMsg');
+    msg.textContent='✓ Kode tersimpan';
+    setTimeout(()=>msg.textContent='',2000);
+  });
 
   /* ── Card: Kode Akses Proyek ── */
   const cardProj = document.createElement('div');
@@ -4752,9 +4755,67 @@ function renderBroadcast(){
     area.appendChild(e); return;
   }
 
+  /* Viewer gate — global broadcastKode */
+  if(!isAdmin&&!isBroadcastUnlocked()){
+    const gate=document.createElement('div');
+    gate.className='notul-topik';
+    gate.style.cssText='padding:20px;text-align:center';
+    gate.innerHTML=`
+      <div style="font-size:.85rem;font-weight:700;margin-bottom:4px">🔒 Akses Broadcast</div>
+      <div style="font-size:.72rem;color:var(--dim);margin-bottom:14px">Masukkan kode untuk melihat kondisi &amp; broadcast produk</div>
+      <div style="display:flex;flex-direction:column;gap:8px;max-width:280px;margin:0 auto">
+        <div style="position:relative">
+          <input class="form-input" id="bcGateCode" type="password" placeholder="Kode akses" maxlength="60"
+            style="padding-right:36px;width:100%;box-sizing:border-box;font-family:var(--mono)"/>
+          <button id="bcGateEye" tabindex="-1"
+            style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:2px">👁</button>
+        </div>
+        <button id="bcGateBtn" style="padding:8px 16px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:700">Masuk</button>
+        <div id="bcGateErr" style="font-size:.72rem;color:var(--red,#f87171);min-height:14px"></div>
+      </div>
+    `;
+    area.appendChild(gate);
+    const codeInp=gate.querySelector('#bcGateCode');
+    const eyeBtn=gate.querySelector('#bcGateEye');
+    const btn=gate.querySelector('#bcGateBtn');
+    const errEl=gate.querySelector('#bcGateErr');
+    eyeBtn.addEventListener('click',()=>{ codeInp.type=codeInp.type==='password'?'text':'password'; });
+    function tryBcGate(){
+      const code=codeInp.value.trim();
+      if(!code){ errEl.textContent='Isi kode.'; return; }
+      if(code!==db.settings.broadcastKode){
+        errEl.textContent='Kode tidak sesuai.';
+        codeInp.classList.add('error');
+        setTimeout(()=>{codeInp.classList.remove('error');errEl.textContent=''},1800); return;
+      }
+      bcSession=true;
+      try{sessionStorage.setItem('alteco_bc_session','1');}catch{}
+      renderBroadcast();
+    }
+    btn.addEventListener('click',tryBcGate);
+    codeInp.addEventListener('keydown',e=>{if(e.key==='Enter')tryBcGate();});
+    codeInp.focus();
+    return;
+  }
+
+  /* Session badge + keluar btn for viewer */
+  if(!isAdmin&&bcSession){
+    const badge=document.createElement('span');
+    badge.style.cssText='display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--dim);margin-bottom:4px';
+    const outBtn=document.createElement('button');
+    outBtn.textContent='Keluar';
+    outBtn.style.cssText='font-size:.68rem;padding:3px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--muted);cursor:pointer';
+    outBtn.addEventListener('click',()=>{
+      bcSession=false;
+      try{sessionStorage.removeItem('alteco_bc_session');}catch{}
+      renderBroadcast();
+    });
+    badge.appendChild(outBtn);
+    toolbar.appendChild(badge);
+  }
+
   produkList.forEach(p=>{
     const kondisiList=(p.kondisi||[]).filter(k=>!k.deleted);
-    const locked=p.kode&&!isProdukUnlocked(p);
 
     const produkEl=document.createElement('div');
     produkEl.className='notul-topik';
@@ -4762,30 +4823,26 @@ function renderBroadcast(){
     const metaKondisi=kondisiList.length?`${kondisiList.length} kondisi`:'Belum ada kondisi';
     produkEl.innerHTML=`
       <div class="notul-topik-head">
-        <div class="notul-topik-icon">${locked?'🔒':'📣'}</div>
+        <div class="notul-topik-icon">📣</div>
         <div class="notul-topik-info">
           <div class="notul-topik-title">${esc(p.nama)}</div>
-          <div class="notul-topik-meta">${metaKondisi}${locked?' · <span style="color:var(--gold)">Kode diperlukan</span>':''}${p.urlPitchDeck?` · <a href="${esc(p.urlPitchDeck)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">📄 Pitch Deck</a>`:''}</div>
+          <div class="notul-topik-meta">${metaKondisi}${p.urlPitchDeck?` · <a href="${esc(p.urlPitchDeck)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">📄 Pitch Deck</a>`:''}</div>
         </div>
         ${isAdmin?`<div class="notul-topik-acts">
           <button class="asset-act-btn" data-bc-edit="${p.id}" title="Edit produk">✎</button>
           <button class="asset-act-btn del" data-bc-del="${p.id}" title="Hapus produk">✕</button>
         </div>`:''}
-        <span class="notul-chevron">${locked&&!isAdmin?'🔑':'▼'}</span>
+        <span class="notul-chevron">▼</span>
       </div>
       <div class="notul-topik-body">
-        ${locked&&!isAdmin
-          ? `<div style="padding:14px;text-align:center;color:var(--muted);font-size:.78rem">Masukkan kode untuk melihat kondisi dan broadcast.</div>`
-          : `<div id="bc-kondisi-list-${p.id}"></div>
-             ${isAdmin?`<button class="notul-topik-add-btn" data-add-kondisi="${p.id}">＋ Tambah Kondisi</button>`:''}`
-        }
+        <div id="bc-kondisi-list-${p.id}"></div>
+        ${isAdmin?`<button class="notul-topik-add-btn" data-add-kondisi="${p.id}">＋ Tambah Kondisi</button>`:''}
       </div>
     `;
 
     /* Toggle open */
     produkEl.querySelector('.notul-topik-head').addEventListener('click',e=>{
       if(e.target.closest('.notul-topik-acts')) return;
-      if(locked&&!isAdmin){ openModal('bc-unlock',{id:p.id}); return; }
       produkEl.classList.toggle('open');
     });
 
