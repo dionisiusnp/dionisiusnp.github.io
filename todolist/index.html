@@ -799,7 +799,7 @@ const WORKER_URL= 'https://alteco-writer.dionisiusn1.workers.dev';
 ══════════════════════════════════════════ */
 let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
 let role         = null;   /* 'viewer' | 'admin' */
-let unlockedProjects = new Map(); /* projectId → {memberName, memberId} — unlocked via inline form */
+let projSession = null; /* null | {memberName} — single global viewer session for fitur proyek */
 let activeId     = null;   /* null | ALL | memberId */
 let expandedKelompoks = new Set(); /* kelompok IDs that are expanded */
 let expandedProjects  = new Set(); /* project IDs that are expanded */
@@ -877,6 +877,7 @@ function migrate(d){
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
   if(!d.settings.writePat) d.settings.writePat='';
+  if(d.settings.projectKode==null) d.settings.projectKode='';
   /* migrate komunitas → regulasi */
   if(d.komunitas&&!d.regulasi) d.regulasi=d.komunitas;
   if(!d.regulasi) d.regulasi={visi:'',misi:'',syaratAnggota:[],syaratTim:[],sanksi:[]};
@@ -1106,8 +1107,8 @@ window.addEventListener('beforeunload',()=>{
   if(stored==='admin'||stored==='viewer'){
     role=stored;
     try{
-      const up=localStorage.getItem('alteco_unlocked_projects');
-      if(up) unlockedProjects=new Map(JSON.parse(up));
+      const ps=sessionStorage.getItem('alteco_proj_session');
+      if(ps) projSession=JSON.parse(ps);
     }catch{}
     gate.classList.add('hidden'); applyRole(); return;
   }
@@ -1146,8 +1147,9 @@ function syncOrgName(){
   document.title='Kelola '+name;
 }
 
-function saveUnlocked(){
-  localStorage.setItem('alteco_unlocked_projects', JSON.stringify([...unlockedProjects.entries()]));
+function saveProjSession(){
+  if(projSession) sessionStorage.setItem('alteco_proj_session', JSON.stringify(projSession));
+  else sessionStorage.removeItem('alteco_proj_session');
 }
 
 function applyRole(){
@@ -2589,7 +2591,6 @@ function openModal(mode, ctx){
     body.innerHTML=`
       <div class="form-group"><label class="form-label">Judul Proyek *</label><input class="form-input" id="fi-ptitle" value="${esc(p?.title||'')}" placeholder="Nama proyek"/></div>
       <div class="form-group"><label class="form-label">Nama Klien</label><input class="form-input" id="fi-pclient" value="${esc(p?.clientName||'')}" placeholder="Nama perusahaan/klien"/></div>
-      <div class="form-group"><label class="form-label">Kode Klien *</label><input class="form-input" id="fi-pcode" value="${esc(p?.clientCode||'')}" placeholder="Kode unik untuk login anggota" style="font-family:var(--mono)"/></div>
       <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-pdesc">${esc(p?.description||'')}</textarea></div>
       <div class="form-group"><label class="form-label">Link Repo <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label><input class="form-input" id="fi-prepo" type="url" value="${esc(p?.repoUrl||'')}" placeholder="https://github.com/org/repo"/></div>
       <div class="form-group"><label class="form-label">Prioritas</label>
@@ -3173,21 +3174,12 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='proj-add'||mMode==='proj-edit'){
     const title=document.getElementById('fi-ptitle').value.trim();
     const clientName=document.getElementById('fi-pclient').value.trim();
-    const clientCode=document.getElementById('fi-pcode').value.trim();
-    if(!title||!clientCode) return;
-    const codeConflict=(db.projects||[]).find(p=>p.clientCode===clientCode&&p.id!==(mCtx.id||''));
-    if(codeConflict){
-      const inp=document.getElementById('fi-pcode');
-      inp.style.borderColor='var(--red,#f87171)';
-      setTimeout(()=>inp.style.borderColor='',1800);
-      alert(`Kode "${clientCode}" sudah dipakai proyek "${codeConflict.title}". Gunakan kode berbeda.`);
-      return;
-    }
+    if(!title) return;
     const priority=document.getElementById('fi-ppriority').value||null;
     const repoUrl=document.getElementById('fi-prepo').value.trim()||null;
     if(mMode==='proj-add'){
       db.projects.push(touch({
-        id:uid(), title, clientName, clientCode,
+        id:uid(), title, clientName,
         description:document.getElementById('fi-pdesc').value.trim(),
         startDate:document.getElementById('fi-pstart').value||null,
         priority, repoUrl, members:[], createdAt:Date.now()
@@ -3195,7 +3187,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     } else {
       const p=db.projects.find(x=>x.id===mCtx.id);
       if(!p) return;
-      p.title=title; p.clientName=clientName; p.clientCode=clientCode;
+      p.title=title; p.clientName=clientName;
       p.description=document.getElementById('fi-pdesc').value.trim();
       p.startDate=document.getElementById('fi-pstart').value||null;
       p.priority=priority; p.repoUrl=repoUrl;
@@ -3720,26 +3712,86 @@ function renderProject(){
   searchInp.addEventListener('input',e=>{projectSearch=e.target.value;renderProject();});
   if(projectSearch){searchInp.focus();searchInp.setSelectionRange(searchInp.value.length,searchInp.value.length);}
 
+  /* Viewer session badge in toolbar */
+  if(role!=='admin'&&projSession){
+    const badge=document.createElement('span');
+    badge.style.cssText='display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--dim)';
+    badge.innerHTML=`<span>👤 <strong style="color:var(--text)">${esc(projSession.memberName)}</strong></span>`;
+    const outBtn=document.createElement('button');
+    outBtn.textContent='Keluar';
+    outBtn.style.cssText='font-size:.68rem;padding:3px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--muted);cursor:pointer';
+    outBtn.addEventListener('click',()=>{ projSession=null; saveProjSession(); renderProject(); });
+    badge.appendChild(outBtn);
+    toolbar.appendChild(badge);
+  }
+
   const allProjects=(db.projects||[]).filter(p=>!p.deleted).slice().sort((a,b)=>(a.title||'').localeCompare(b.title||'','id'));
   const q=projectSearch.trim().toLowerCase();
-  const filtered=q?allProjects.filter(p=>(p.title||'').toLowerCase().includes(q)||(p.clientName||'').toLowerCase().includes(q)):allProjects;
+  let filtered=q?allProjects.filter(p=>(p.title||'').toLowerCase().includes(q)||(p.clientName||'').toLowerCase().includes(q)):allProjects;
+  /* Viewer: filter to only projects where session member appears */
+  if(role!=='admin'&&projSession){
+    const mn=projSession.memberName.toLowerCase();
+    filtered=filtered.filter(p=>(p.members||[]).some(m=>!m.deleted&&m.name.toLowerCase()===mn));
+  }
   if(!filtered.length){
     const e=document.createElement('div');
     e.className='asset-empty';
-    e.textContent=q?'Tidak ada proyek yang cocok.':'Belum ada proyek.';
+    e.textContent=q?'Tidak ada proyek yang cocok.':(role!=='admin'?'Kamu belum terdaftar di proyek manapun.':'Belum ada proyek.');
     area.appendChild(e); return;
   }
 
-  /* For viewer: validate unlocked members still exist, re-lock if removed */
-  if(role!=='admin'){
-    let changed=false;
-    for(const [projId,info] of unlockedProjects){
-      const proj=allProjects.find(p=>p.id===projId);
-      if(!proj||!proj.members?.find(m=>m.id===info.memberId)){
-        unlockedProjects.delete(projId); changed=true;
+  /* Viewer: show global unlock gate if no session */
+  if(role!=='admin'&&!projSession){
+    const gate=document.createElement('div');
+    gate.className='proj-card';
+    gate.style.cssText='padding:20px;text-align:center';
+    gate.innerHTML=`
+      <div style="font-size:.85rem;font-weight:700;margin-bottom:4px">🔒 Akses Proyek</div>
+      <div style="font-size:.72rem;color:var(--dim);margin-bottom:14px">Masukkan nama dan kode untuk melihat proyek kamu</div>
+      <div style="display:flex;flex-direction:column;gap:8px;max-width:300px;margin:0 auto">
+        <input class="form-input" id="projGateName" type="text" placeholder="Nama kamu (sesuai data anggota)" autocomplete="off"/>
+        <div style="position:relative">
+          <input class="form-input" id="projGateCode" type="password" placeholder="Kode akses" maxlength="40"
+            style="padding-right:36px;width:100%;box-sizing:border-box;font-family:var(--mono)"/>
+          <button id="projGateEye" tabindex="-1"
+            style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:2px">👁</button>
+        </div>
+        <button id="projGateBtn" style="padding:8px 16px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:700">Masuk</button>
+        <div id="projGateErr" style="font-size:.72rem;color:var(--red,#f87171);min-height:14px"></div>
+      </div>
+    `;
+    area.appendChild(gate);
+    const nameInp=gate.querySelector('#projGateName');
+    const codeInp=gate.querySelector('#projGateCode');
+    const eyeBtn=gate.querySelector('#projGateEye');
+    const btn=gate.querySelector('#projGateBtn');
+    const errEl=gate.querySelector('#projGateErr');
+    eyeBtn.addEventListener('click',()=>{ codeInp.type=codeInp.type==='password'?'text':'password'; });
+    function tryGlobal(){
+      const name=nameInp.value.trim();
+      const code=codeInp.value.trim();
+      if(!name||!code){ errEl.textContent='Isi nama dan kode.'; return; }
+      if(!db.settings.projectKode){ errEl.textContent='Kode belum diatur admin.'; return; }
+      if(code!==db.settings.projectKode){
+        errEl.textContent='Kode tidak sesuai.';
+        codeInp.classList.add('error');
+        setTimeout(()=>{codeInp.classList.remove('error');errEl.textContent=''},1800); return;
       }
+      const hasProj=(db.projects||[]).filter(p=>!p.deleted).some(p=>
+        (p.members||[]).some(m=>!m.deleted&&m.name.toLowerCase()===name.toLowerCase())
+      );
+      if(!hasProj){
+        errEl.textContent='Nama tidak ditemukan di proyek manapun.';
+        nameInp.classList.add('error');
+        setTimeout(()=>{nameInp.classList.remove('error');errEl.textContent=''},1800); return;
+      }
+      projSession={memberName:name}; saveProjSession(); renderProject();
     }
-    if(changed) saveUnlocked();
+    btn.addEventListener('click',tryGlobal);
+    codeInp.addEventListener('keydown',e=>{if(e.key==='Enter')tryGlobal();});
+    nameInp.addEventListener('keydown',e=>{if(e.key==='Enter')codeInp.focus();});
+    nameInp.focus();
+    return;
   }
 
   filtered.forEach(proj=>{
@@ -3815,123 +3867,51 @@ function renderProject(){
       });
 
     } else {
-      /* ── Viewer: locked or unlocked per-project ── */
-      const unlockInfo=unlockedProjects.get(proj.id);
-
-      if(!unlockInfo){
-        /* Locked card */
-        card.innerHTML=`
-          <div class="proj-card-head" style="align-items:center">
-            <div style="flex:1">
-              <div class="proj-title" style="color:var(--muted)">🔒 ${esc(proj.title)}</div>
-              <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
-            </div>
+      /* ── Viewer: global session already verified, show member's card ── */
+      const mn=projSession.memberName.toLowerCase();
+      const mem=(proj.members||[]).find(m=>!m.deleted&&m.name.toLowerCase()===mn);
+      card.innerHTML=`
+        <div class="proj-card-head" data-toggle-proj="${proj.id}">
+          <span class="proj-chevron${isExpanded?' open':''}">▶</span>
+          <div style="flex:1">
+            <div class="proj-title">${esc(proj.title)}</div>
+            <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
           </div>
-          <div class="proj-lock-form" style="display:none;margin-top:8px">
-            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
-              <input class="proj-lock-name" type="text" placeholder="Nama lengkap" autocomplete="off"
-                style="flex:1;min-width:120px;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--surface);color:var(--text);font-size:.78rem;outline:none"/>
-              <div style="flex:1;min-width:100px;position:relative">
-                <input class="proj-lock-code" type="password" placeholder="Kode klien" maxlength="20"
-                  style="width:100%;padding:6px 32px 6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--surface);color:var(--text);font-size:.78rem;outline:none"/>
-                <button class="proj-lock-eye" tabindex="-1"
-                  style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.72rem;padding:2px">👁</button>
-              </div>
-              <button class="proj-lock-btn"
-                style="padding:6px 14px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.78rem;font-weight:600;white-space:nowrap">Masuk</button>
-            </div>
-            <div class="proj-lock-err" style="font-size:.7rem;color:var(--red,#f87171);margin-top:4px;min-height:14px"></div>
+          <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
+        </div>
+        <div class="proj-meta">
+          ${proj.priority?`<span style="color:${proj.priority==='high'?'var(--red,#f87171)':proj.priority==='medium'?'#fbbf24':'var(--dim)'}">● ${proj.priority==='high'?'High':proj.priority==='medium'?'Medium':'Low'}</span>`:''}
+          ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
+          ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
+          ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
+          <span>${(proj.members||[]).filter(m=>!m.deleted).length} anggota · ${pct}% selesai</span>
+        </div>
+        ${proj.startDate&&pEnd&&pEnd!==proj.startDate?`
+        <div class="proj-timeline-wrap">
+          <div class="proj-timeline-label">
+            <span>${fmtDate(proj.startDate)}</span>
+            <span>${fmtDate(pEnd)}</span>
           </div>
-          <button class="proj-lihat-btn"
-            style="margin-top:8px;padding:5px 14px;border-radius:6px;background:transparent;color:var(--accent);border:1px solid var(--accent);cursor:pointer;font-size:.75rem;font-weight:600">Lihat</button>
-        `;
-
-        const form=card.querySelector('.proj-lock-form');
-        const lihatBtn=card.querySelector('.proj-lihat-btn');
-        const nameInp=card.querySelector('.proj-lock-name');
-        const codeInp=card.querySelector('.proj-lock-code');
-        const eyeBtn=card.querySelector('.proj-lock-eye');
-        const lockBtn=card.querySelector('.proj-lock-btn');
-        const errEl=card.querySelector('.proj-lock-err');
-
-        lihatBtn.addEventListener('click',()=>{
-          form.style.display=''; lihatBtn.style.display='none'; nameInp.focus();
+          <div class="proj-timeline-bar">
+            <div class="proj-tl-optimistic" style="width:${optPct}%"></div>
+            <div class="proj-tl-buffer" style="width:${100-optPct}%"></div>
+          </div>
+        </div>`:''}
+        <div class="proj-progress"><div class="proj-progress-bar" style="width:${pct}%"></div></div>
+      `;
+      if(mem){
+        const colV=document.createElement('div');
+        colV.className='proj-collapse'+(isExpanded?' open':'');
+        const memSec=document.createElement('div');
+        memSec.className='proj-member-section';
+        memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,false));
+        colV.appendChild(memSec);
+        card.appendChild(colV);
+        card.querySelector('[data-toggle-proj]').addEventListener('click',()=>{
+          if(expandedProjects.has(proj.id)) expandedProjects.delete(proj.id); else expandedProjects.add(proj.id);
+          colV.classList.toggle('open');
+          card.querySelector('.proj-chevron').classList.toggle('open');
         });
-        eyeBtn.addEventListener('click',()=>{
-          codeInp.type=codeInp.type==='password'?'text':'password';
-        });
-
-        function tryUnlock(){
-          const name=(nameInp.value||'').trim();
-          const code=(codeInp.value||'').trim();
-          if(!name||!code){ errEl.textContent='Isi nama dan kode klien.'; return; }
-          if(proj.clientCode===code){
-            const mem=(proj.members||[]).find(m=>m.name.toLowerCase()===name.toLowerCase());
-            if(mem){
-              unlockedProjects.set(proj.id,{memberName:name,memberId:mem.id});
-              saveUnlocked(); renderProject(); return;
-            }
-          }
-          errEl.textContent='Nama atau kode tidak sesuai.';
-          codeInp.classList.add('error');
-          setTimeout(()=>{codeInp.classList.remove('error');errEl.textContent=''},1800);
-        }
-        lockBtn.addEventListener('click',tryUnlock);
-        codeInp.addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock()});
-        nameInp.addEventListener('keydown',e=>{if(e.key==='Enter')codeInp.focus()});
-
-      } else {
-        /* Unlocked card — show this member's content */
-        const mem=(proj.members||[]).find(m=>m.id===unlockInfo.memberId);
-        card.innerHTML=`
-          <div class="proj-card-head" data-toggle-proj="${proj.id}">
-            <span class="proj-chevron${isExpanded?' open':''}">▶</span>
-            <div style="flex:1">
-              <div class="proj-title">${esc(proj.title)}</div>
-              <div class="proj-client">Klien: ${esc(proj.clientName||'—')}</div>
-            </div>
-            <span class="proj-badge ${badgeCls}">${badgeTxt}</span>
-            <button class="proj-relock-btn" title="Kunci kembali"
-              style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:.82rem;padding:4px;margin-left:4px">🔓</button>
-          </div>
-          <div class="proj-meta">
-            ${proj.priority?`<span style="color:${proj.priority==='high'?'var(--red,#f87171)':proj.priority==='medium'?'#fbbf24':'var(--dim)'}">● ${proj.priority==='high'?'High':proj.priority==='medium'?'Medium':'Low'}</span>`:''}
-            ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
-            ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
-            ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
-            <span>${(proj.members||[]).filter(m=>!m.deleted).length} anggota · ${pct}% selesai</span>
-          </div>
-          ${proj.startDate&&pEnd&&pEnd!==proj.startDate?`
-          <div class="proj-timeline-wrap">
-            <div class="proj-timeline-label">
-              <span>${fmtDate(proj.startDate)}</span>
-              <span>${fmtDate(pEnd)}</span>
-            </div>
-            <div class="proj-timeline-bar">
-              <div class="proj-tl-optimistic" style="width:${optPct}%"></div>
-              <div class="proj-tl-buffer" style="width:${100-optPct}%"></div>
-            </div>
-          </div>`:''}
-          <div class="proj-progress"><div class="proj-progress-bar" style="width:${pct}%"></div></div>
-        `;
-        card.querySelector('.proj-relock-btn').addEventListener('click',()=>{
-          unlockedProjects.delete(proj.id); saveUnlocked(); renderProject();
-        });
-        if(mem){
-          const collapse2=document.createElement('div');
-          collapse2.className='proj-collapse'+(isExpanded?' open':'');
-          const memSec=document.createElement('div');
-          memSec.className='proj-member-section';
-          memSec.appendChild(buildMemberRow(proj,mem,pEnd,true,false));
-          collapse2.appendChild(memSec);
-          card.appendChild(collapse2);
-          card.querySelector('[data-toggle-proj]').addEventListener('click',e=>{
-            if(e.target.closest('.proj-relock-btn')) return;
-            if(expandedProjects.has(proj.id)) expandedProjects.delete(proj.id); else expandedProjects.add(proj.id);
-            collapse2.classList.toggle('open');
-            card.querySelector('.proj-chevron').classList.toggle('open');
-          });
-        }
       }
     }
 
@@ -4035,6 +4015,42 @@ function renderSettings(){
   card1.appendChild(saveBtn);
   area.appendChild(card1);
 
+
+  /* ── Card: Kode Akses Proyek ── */
+  const cardProj = document.createElement('div');
+  cardProj.className = 'settings-card';
+  cardProj.innerHTML = `
+    <div class="settings-section-title">Akses Proyek</div>
+    <div class="settings-row">
+      <div style="flex:1">
+        <div class="settings-row-label">Kode Proyek Global</div>
+        <div class="settings-row-desc">Satu kode untuk semua proyek. Viewer masukkan nama + kode ini untuk mengakses proyek mereka.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+      <div style="position:relative;flex:1;max-width:300px">
+        <input class="form-input" id="fi-proj-kode" type="password" value="${esc(s.projectKode||'')}"
+          placeholder="Buat kode akses proyek" maxlength="60"
+          style="padding-right:36px;width:100%;box-sizing:border-box;font-family:var(--mono)"/>
+        <button id="projKodeEye" tabindex="-1"
+          style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:2px">👁</button>
+      </div>
+      <button class="btn-save" id="saveProjKodeBtn">Simpan</button>
+    </div>
+    <div id="projKodeMsg" style="font-size:.72rem;color:var(--green);margin-top:6px;min-height:14px"></div>
+  `;
+  area.appendChild(cardProj);
+  cardProj.querySelector('#projKodeEye').addEventListener('click',()=>{
+    const inp=cardProj.querySelector('#fi-proj-kode');
+    inp.type=inp.type==='password'?'text':'password';
+  });
+  cardProj.querySelector('#saveProjKodeBtn').addEventListener('click',()=>{
+    db.settings.projectKode=cardProj.querySelector('#fi-proj-kode').value.trim();
+    save();
+    const msg=cardProj.querySelector('#projKodeMsg');
+    msg.textContent='✓ Kode tersimpan';
+    setTimeout(()=>msg.textContent='',2000);
+  });
 
   /* ── Card 2: Kirim Manual ── */
   const card2 = document.createElement('div');
