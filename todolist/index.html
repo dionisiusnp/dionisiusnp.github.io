@@ -4805,10 +4805,16 @@ function renderNotulensi(){
       sesiEl.className='notul-sesi';
       sesiEl.innerHTML=`
         <div class="notul-sesi-head">
-          <span class="notul-date-badge">${fmtDateTime(s)}</span>
-          <span class="notul-sesi-loc">${s.location?`📍 ${esc(s.location)}`:s.attendees?'':''}</span>
-          ${s.agenda?`<span style="font-size:.68rem;color:var(--dim);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:1">📋 ${esc(s.agenda)}</span>`:''}
-          ${s.attendees?`<span style="font-size:.6rem;color:var(--muted);flex-shrink:0;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👥 ${esc(s.attendees)}</span>`:''}
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="notul-date-badge">${fmtDateTime(s)}</span>
+              ${s.location?`<span class="notul-sesi-loc">📍 ${esc(s.location)}</span>`:''}
+            </div>
+            ${(s.agenda||s.attendees)?`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              ${s.agenda?`<span style="font-size:.7rem;color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:320px">📋 ${esc(s.agenda)}</span>`:''}
+              ${s.attendees?`<span style="font-size:.64rem;color:var(--muted);white-space:nowrap">👥 ${esc(s.attendees)}</span>`:''}
+            </div>`:''}
+          </div>
           ${isAdmin?`<div class="notul-sesi-acts">
             <button class="asset-act-btn" data-sesi-edit="${s.id}" title="Edit rapat">✎</button>
             <button class="asset-act-btn del" data-sesi-del="${s.id}" title="Hapus rapat">✕</button>
