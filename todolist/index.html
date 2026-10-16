@@ -1552,13 +1552,14 @@ function renderMain(){
     taskAddRow.style.display='none';
     mSearchWrap.style.display='';
     if(!filterMemberName) mSearchInput.value=memberSearchQuery;
-    const projBadgeBtn=document.getElementById('btnToggleProjBadge');
-    projBadgeBtn.style.display='';
-    projBadgeBtn.classList.toggle('active',showMemberProjects);
     /* show type-filter only when member selected */
     const showTypeFilter=!!filterMemberName;
     document.getElementById('filterDivider').style.display=showTypeFilter?'':'none';
     document.querySelectorAll('.filter-btn').forEach(b=>b.style.display=showTypeFilter?'':'none');
+    /* proj badge toggle — always visible in isAll, re-set after querySelectorAll */
+    const projBadgeBtn=document.getElementById('btnToggleProjBadge');
+    projBadgeBtn.style.display='';
+    projBadgeBtn.classList.toggle('active',showMemberProjects);
   } else {
     filterMemberName=null; memberSearchQuery='';
     mSearchWrap.style.display='none';
