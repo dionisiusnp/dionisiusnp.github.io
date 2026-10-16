@@ -2654,7 +2654,8 @@ function openModal(mode, ctx){
     `;
     document.getElementById('fi-pkoor-wrap').replaceWith(
       makeMemberSearchSelect('fi-pkoor',
-        db.members.filter(m=>!m.deleted).slice().sort((a,b)=>a.name.localeCompare(b.name,'id')),
+        db.members.filter(m=>!m.deleted).slice().sort((a,b)=>a.name.localeCompare(b.name,'id'))
+          .filter((m,i,arr)=>i===0||m.name.toLowerCase()!==arr[i-1].name.toLowerCase()),
         p?.koordinatorId||null, '— Tanpa Koordinator —'));
     document.getElementById('fi-ptitle').focus();
   }
