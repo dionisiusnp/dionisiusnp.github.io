@@ -205,6 +205,8 @@ body.is-admin .viewer-only{display:none!important}
 .member-search-list{position:fixed;background:var(--surface);border:1px solid var(--bd);border-radius:7px;z-index:9000;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,.35);display:none}
 .member-search-item{padding:6px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap;transition:background .1s}
 .member-search-item:hover,.member-search-item.selected{background:rgba(108,111,245,.15);color:var(--accent)}
+.mss-item{padding:7px 12px;cursor:pointer;font-size:.78rem;transition:background .1s;color:var(--text)}
+.mss-item:hover,.mss-item.mss-sel{background:var(--surface)}
 .search-input:focus{border-color:var(--accent)}
 .search-input::placeholder{color:var(--dim)}
 .filter-divider{width:1px;height:16px;background:var(--bd);flex-shrink:0}
@@ -837,6 +839,47 @@ function showFullNamePopup(el, text){
   pop.style.left=left+'px';
   pop.style.top=(rect.bottom+6)+'px';
   setTimeout(()=>pop.remove(),2500);
+}
+function makeMemberSearchSelect(id, members, currentId, placeholder){
+  const ph=placeholder||'— Pilih —';
+  const selMem=members.find(m=>m.id===currentId)||null;
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:relative';
+  wrap.innerHTML=`<input class="form-input" id="${id}-q" type="text" value="${selMem?esc(selMem.name):''}" placeholder="${esc(ph)}" autocomplete="off" spellcheck="false"/><input type="hidden" id="${id}" value="${esc(currentId||'')}"/><div id="${id}-list" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:400;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-top:2px;max-height:200px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.25)"></div>`;
+  const qInp=wrap.querySelector(`#${id}-q`);
+  const hInp=wrap.querySelector(`#${id}`);
+  const list=wrap.querySelector(`#${id}-list`);
+  function showList(q){
+    const ql=q.toLowerCase();
+    const rows=[{id:'',name:ph},...members].filter(m=>!ql||m.name.toLowerCase().includes(ql));
+    list.innerHTML='';
+    rows.forEach(m=>{
+      const d=document.createElement('div');
+      d.className='mss-item'+(m.id===hInp.value?' mss-sel':'');
+      d.textContent=m.name;
+      d.addEventListener('mousedown',e=>{
+        e.preventDefault();
+        hInp.value=m.id;
+        qInp.value=m.id?m.name:'';
+        list.style.display='none';
+      });
+      list.appendChild(d);
+    });
+    list.style.display=rows.length?'':'none';
+  }
+  qInp.addEventListener('focus',()=>showList(qInp.value));
+  qInp.addEventListener('input',()=>{hInp.value='';showList(qInp.value);});
+  qInp.addEventListener('blur',()=>{
+    setTimeout(()=>{
+      list.style.display='none';
+      if(!hInp.value){
+        const match=members.find(m=>m.name.toLowerCase()===qInp.value.toLowerCase().trim());
+        if(match){hInp.value=match.id;qInp.value=match.name;}
+        else qInp.value='';
+      }
+    },160);
+  });
+  return wrap;
 }
 function setLombaVoteForLomba(lombaId,ideId,vote){
   const m=getLombaVotes();
@@ -2594,10 +2637,7 @@ function openModal(mode, ctx){
       <div class="form-group"><label class="form-label">Judul Proyek *</label><input class="form-input" id="fi-ptitle" value="${esc(p?.title||'')}" placeholder="Nama proyek"/></div>
       <div class="form-group"><label class="form-label">Nama Klien</label><input class="form-input" id="fi-pclient" value="${esc(p?.clientName||'')}" placeholder="Nama perusahaan/klien"/></div>
       <div class="form-group"><label class="form-label">Koordinator <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
-        <select class="form-input" id="fi-pkoor">
-          <option value="">— Tanpa Koordinator —</option>
-          ${db.members.filter(m=>!m.deleted).slice().sort((a,b)=>a.name.localeCompare(b.name,'id')).map(m=>`<option value="${m.id}"${p?.koordinatorId===m.id?' selected':''}>${esc(m.name)}</option>`).join('')}
-        </select>
+        <div id="fi-pkoor-wrap"></div>
       </div>
       <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-pdesc">${esc(p?.description||'')}</textarea></div>
       <div class="form-group"><label class="form-label">Link Repo <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label><input class="form-input" id="fi-prepo" type="url" value="${esc(p?.repoUrl||'')}" placeholder="https://github.com/org/repo"/></div>
@@ -2612,6 +2652,10 @@ function openModal(mode, ctx){
       <div class="form-group"><label class="form-label">Tanggal Mulai</label><input class="form-input" type="date" id="fi-pstart" value="${p?.startDate||''}"/></div>
       <div style="font-size:.72rem;color:var(--muted);padding:2px 0 8px">🎯 Target optimis &amp; pesimis otomatis dihitung dari tanggal tugas anggota.</div>
     `;
+    document.getElementById('fi-pkoor-wrap').replaceWith(
+      makeMemberSearchSelect('fi-pkoor',
+        db.members.filter(m=>!m.deleted).slice().sort((a,b)=>a.name.localeCompare(b.name,'id')),
+        p?.koordinatorId||null, '— Tanpa Koordinator —'));
     document.getElementById('fi-ptitle').focus();
   }
 
@@ -2621,11 +2665,10 @@ function openModal(mode, ctx){
     title.textContent=mode==='proj-mem-add'?'Tambah Anggota Proyek':'Edit Anggota Proyek';
     const usedNames=new Set((proj?.members||[]).filter(m=>m.type==='internal'&&m.id!==ctx.memberId).map(m=>m.name.toLowerCase()));
     const seenNames=new Set();
-    const internalOpts=db.members
+    const internalMembers=db.members
       .filter(m=>!m.deleted)
       .sort((a,b)=>a.name.localeCompare(b.name))
-      .filter(m=>{const nl=m.name.toLowerCase();if(usedNames.has(nl)||seenNames.has(nl))return false;seenNames.add(nl);return true;})
-      .map(m=>`<option value="${m.id}"${mem?.internalMemberId===m.id?' selected':''}>${esc(m.name)}</option>`).join('');
+      .filter(m=>{const nl=m.name.toLowerCase();if(usedNames.has(nl)||seenNames.has(nl))return false;seenNames.add(nl);return true;});
     const isExt=mem?.type==='external';
     body.innerHTML=`
       <div class="form-group"><label class="form-label">Tipe Anggota</label>
@@ -2636,7 +2679,7 @@ function openModal(mode, ctx){
       </div>
       <div class="form-group" id="pm-int-group" style="${isExt?'display:none':''}">
         <label class="form-label">Pilih Anggota</label>
-        <select class="form-select" id="fi-pm-internal"><option value="">— pilih —</option>${internalOpts}</select>
+        <div id="fi-pm-internal-wrap"></div>
       </div>
       <div class="form-group" id="pm-ext-group" style="${!isExt?'display:none':''}">
         <label class="form-label">Nama Lengkap *</label>
@@ -2645,6 +2688,9 @@ function openModal(mode, ctx){
       <div class="form-group"><label class="form-label">Peran / Jabatan</label><input class="form-input" id="fi-pm-role" value="${esc(mem?.role||'')}" placeholder="Contoh: Frontend Dev"/></div>
       <div class="form-group" style="font-size:.7rem;color:var(--muted);padding:4px 0">ℹ Timeline anggota dihitung otomatis dari tanggal mulai & selesai tugas.</div>
     `;
+    document.getElementById('fi-pm-internal-wrap').replaceWith(
+      makeMemberSearchSelect('fi-pm-internal', internalMembers,
+        mem?.internalMemberId||null, '— Pilih anggota —'));
     let currentMType=isExt?'external':'internal';
     mCtx._getMemberType=()=>currentMType;
     body.querySelectorAll('[data-mtype]').forEach(b=>{
