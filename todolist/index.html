@@ -671,7 +671,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       </button>
       <button class="feature-nav-item" id="btnPersView">
         <span class="feature-nav-ico">📰</span>
-        <span class="feature-nav-label">Bahan Pers</span>
+        <span class="feature-nav-label">Pers</span>
       </button>
       <div class="feature-nav-group">Administrasi</div>
       <button class="feature-nav-item" id="btnNotulensiView">
@@ -2887,8 +2887,8 @@ function openModal(mode, ctx){
 
   else if(mode==='pers-add'||mode==='pers-edit'){
     const p=mode==='pers-edit'?(db.bahanPers||[]).find(x=>x.id===ctx.id):null;
-    title.textContent=mode==='pers-add'?'Tambah Bahan Pers':'Edit Bahan Pers';
-    const statusOpts=[['draft','📝 Draft'],['siap','✅ Siap Publish'],['publish','🟢 Sudah Publish']];
+    title.textContent=mode==='pers-add'?'Tambah Pers':'Edit Pers';
+    const statusOpts=[['pengajuan','📋 Pengajuan'],['proses','⚙️ Proses'],['review','🔍 Review'],['disetujui','✅ Disetujui'],['ditolak','❌ Ditolak']];
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Judul *</label>
@@ -3512,7 +3512,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='pers-add'||mMode==='pers-edit'){
     const judul_v=document.getElementById('fi-pers-judul').value.trim();
     if(!judul_v) return;
-    const status_v=document.getElementById('fi-pers-status').value||'draft';
+    const status_v=document.getElementById('fi-pers-status').value||'pengajuan';
     const tgl_v=document.getElementById('fi-pers-tgl').value||null;
     const url_v=document.getElementById('fi-pers-url').value.trim()||null;
     const catatan_v=document.getElementById('fi-pers-catatan').value.trim()||null;
@@ -5317,13 +5317,13 @@ function renderPers(){
   area.innerHTML='';
   const isAdmin=role==='admin';
 
-  const STATUS_LABEL={draft:'📝 Draft',siap:'✅ Siap Publish',publish:'🟢 Sudah Publish'};
-  const STATUS_COLOR={draft:'var(--dim)',siap:'#fbbf24',publish:'var(--green,#34d399)'};
+  const STATUS_LABEL={pengajuan:'📋 Pengajuan',proses:'⚙️ Proses',review:'🔍 Review',disetujui:'✅ Disetujui',ditolak:'❌ Ditolak'};
+  const STATUS_COLOR={pengajuan:'var(--dim)',proses:'#fbbf24',review:'var(--accent)',disetujui:'var(--green,#34d399)',ditolak:'var(--red,#f87171)'};
 
   /* Toolbar */
   const toolbar=document.createElement('div');
   toolbar.className='notul-toolbar';
-  toolbar.innerHTML=`<span class="notul-toolbar-title">📰 Bahan Pers</span>
+  toolbar.innerHTML=`<span class="notul-toolbar-title">📰 Pers</span>
     <input class="asset-search" id="persSearchInp" placeholder="Cari bahan…" value="${esc(persSearch)}" style="max-width:200px"/>`;
   if(isAdmin){
     const btn=document.createElement('button');
@@ -5353,9 +5353,9 @@ function renderPers(){
     return;
   }
 
-  /* Group by status for ordering: draft → siap → publish */
-  const order={draft:0,siap:1,publish:2};
-  const sorted=list.slice().sort((a,b)=>(order[a.status||'draft']||0)-(order[b.status||'draft']||0)||(a.tanggalPublish||'').localeCompare(b.tanggalPublish||'')||(a.judul||'').localeCompare(b.judul||'','id'));
+  /* Group by status for ordering: pengajuan → proses → review → disetujui → ditolak */
+  const order={pengajuan:0,proses:1,review:2,disetujui:3,ditolak:4};
+  const sorted=list.slice().sort((a,b)=>(order[a.status||'pengajuan']??0)-(order[b.status||'pengajuan']??0)||(a.tanggalPublish||'').localeCompare(b.tanggalPublish||'')||(a.judul||'').localeCompare(b.judul||'','id'));
 
   sorted.forEach(p=>{
     const statusLabel=STATUS_LABEL[p.status]||p.status||'Draft';
@@ -5363,7 +5363,7 @@ function renderPers(){
 
     /* Countdown to publish date */
     let countdownHtml='';
-    if(p.tanggalPublish&&p.status!=='publish'){
+    if(p.tanggalPublish&&p.status!=='disetujui'&&p.status!=='ditolak'){
       const today=new Date(); today.setHours(0,0,0,0);
       const pub=new Date(p.tanggalPublish); pub.setHours(0,0,0,0);
       const diff=Math.round((pub-today)/(1000*60*60*24));
