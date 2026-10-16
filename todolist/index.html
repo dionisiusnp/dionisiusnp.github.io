@@ -205,6 +205,8 @@ body.is-admin .viewer-only{display:none!important}
 .member-search-list{position:fixed;background:var(--surface);border:1px solid var(--bd);border-radius:7px;z-index:9000;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,.35);display:none}
 .member-search-item{padding:6px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap;transition:background .1s}
 .member-search-item:hover,.member-search-item.selected{background:rgba(108,111,245,.15);color:var(--accent)}
+.proj-badge-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.proj-badge{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);opacity:.8;white-space:nowrap}
 .mss-item{padding:7px 12px;cursor:pointer;font-size:.78rem;transition:background .1s;color:var(--text)}
 .mss-item:hover,.mss-item.mss-sel{background:var(--surface)}
 .search-input:focus{border-color:var(--accent)}
@@ -719,6 +721,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <button class="filter-btn active" data-f="all" style="display:none">Semua Jenis</button>
         <button class="filter-btn" data-f="recurring" style="display:none">Tugas Berulang</button>
         <button class="filter-btn" data-f="once" style="display:none">Tugas Sekali</button>
+        <button class="filter-btn" id="btnToggleProjBadge" style="display:none">📁 Proyek</button>
       </div>
 
       <div class="task-add-btn-row" id="taskAddRow" style="display:none">
@@ -890,6 +893,7 @@ function isBroadcastUnlocked(){ return role==='admin'||!db.settings.broadcastKod
 let activeFilter      = 'all';  /* 'all' | 'recurring' | 'once' */
 let filterMemberName  = null;   /* null | exact string — selected member, shows tasks */
 let memberSearchQuery = '';     /* partial query — filters member list in real-time */
+let showMemberProjects = localStorage.getItem('show_mem_proj')==='1';
 let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
@@ -1548,6 +1552,9 @@ function renderMain(){
     taskAddRow.style.display='none';
     mSearchWrap.style.display='';
     if(!filterMemberName) mSearchInput.value=memberSearchQuery;
+    const projBadgeBtn=document.getElementById('btnToggleProjBadge');
+    projBadgeBtn.style.display='';
+    projBadgeBtn.classList.toggle('active',showMemberProjects);
     /* show type-filter only when member selected */
     const showTypeFilter=!!filterMemberName;
     document.getElementById('filterDivider').style.display=showTypeFilter?'':'none';
@@ -1555,6 +1562,7 @@ function renderMain(){
   } else {
     filterMemberName=null; memberSearchQuery='';
     mSearchWrap.style.display='none';
+    document.getElementById('btnToggleProjBadge').style.display='none';
     document.getElementById('filterDivider').style.display='';
     document.querySelectorAll('.filter-btn').forEach(b=>b.style.display='');
     const m=db.members.find(x=>x.id===activeId);
@@ -1626,13 +1634,19 @@ function renderTasks(){
         const totalFiltered=members.reduce((s,m)=>s+applyFilter(memberTasks(m.id)).length,0);
         const gFullName=members[0]?.fullName||null;
         const gAngkatan=members[0]?.angkatan||null;
+        const memberProjs=showMemberProjects?db.projects.filter(p=>!p.deleted&&(p.members||[]).some(pm=>!pm.deleted&&pm.name.toLowerCase()===name.toLowerCase())):[];
         const gh=document.createElement('div');
         gh.className='group-header';
         gh.innerHTML=`
-          <div class="group-avatar">${initials(name)}</div>
-          <span class="group-name">${esc(name)}${(gFullName||gAngkatan)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</span>
-          ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
-          <span class="group-count">${totalFiltered} tugas</span>
+          <div style="display:flex;flex-direction:column;flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <div class="group-avatar">${initials(name)}</div>
+              <span class="group-name">${esc(name)}${(gFullName||gAngkatan)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</span>
+              ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
+              <span class="group-count">${totalFiltered} tugas</span>
+            </div>
+            ${memberProjs.length?`<div class="proj-badge-row">${memberProjs.map(p=>`<span class="proj-badge">${esc(p.title)}</span>`).join('')}</div>`:''}
+          </div>
         `;
         if(gFullName||gAngkatan){
           gh.querySelector('.fn-info-btn').addEventListener('click',e=>{
@@ -1663,16 +1677,22 @@ function renderTasks(){
         const totalTasks=members.reduce((s,m)=>s+memberTasks(m.id).length,0);
         const gFullName2=members[0]?.fullName||null;
         const gAngkatan2=members[0]?.angkatan||null;
+        const memberProjs2=showMemberProjects?db.projects.filter(p=>!p.deleted&&(p.members||[]).some(pm=>!pm.deleted&&pm.name.toLowerCase()===name.toLowerCase())):[];
         const gh=document.createElement('div');
         gh.className='group-header';
         gh.style.cssText='cursor:pointer;transition:background .15s';
         gh.innerHTML=`
-          <div class="group-avatar">${initials(name)}</div>
-          <span class="group-name">${esc(name)}${(gFullName2||gAngkatan2)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</span>
-          ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
-          <span style="flex:1"></span>
-          <span class="group-count" style="margin-right:4px">${totalTasks} tugas</span>
-          <span style="font-size:.68rem;color:var(--accent);font-weight:600;padding:2px 8px;border:1px solid var(--accent);border-radius:4px;flex-shrink:0">Lihat →</span>
+          <div style="display:flex;flex-direction:column;flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <div class="group-avatar">${initials(name)}</div>
+              <span class="group-name">${esc(name)}${(gFullName2||gAngkatan2)?`<span class="fn-info-btn" title="Lihat info lengkap">ⓘ</span>`:''}</span>
+              ${kelompokLabel?`<span class="group-role" style="color:var(--dim)">${kelompokLabel}</span>`:''}
+              <span style="flex:1"></span>
+              <span class="group-count" style="margin-right:4px">${totalTasks} tugas</span>
+              <span style="font-size:.68rem;color:var(--accent);font-weight:600;padding:2px 8px;border:1px solid var(--accent);border-radius:4px;flex-shrink:0">Lihat →</span>
+            </div>
+            ${memberProjs2.length?`<div class="proj-badge-row">${memberProjs2.map(p=>`<span class="proj-badge">${esc(p.title)}</span>`).join('')}</div>`:''}
+          </div>
         `;
         if(gFullName2||gAngkatan2){
           gh.querySelector('.fn-info-btn').addEventListener('click',e=>{
@@ -1882,6 +1902,13 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
     btn.classList.add('active');
     renderTasks();
   });
+});
+
+document.getElementById('btnToggleProjBadge').addEventListener('click',()=>{
+  showMemberProjects=!showMemberProjects;
+  localStorage.setItem('show_mem_proj',showMemberProjects?'1':'0');
+  document.getElementById('btnToggleProjBadge').classList.toggle('active',showMemberProjects);
+  renderTasks();
 });
 
 document.getElementById('memberSearchInput').addEventListener('input',function(){
