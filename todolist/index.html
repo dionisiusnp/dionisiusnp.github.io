@@ -2889,24 +2889,10 @@ function openModal(mode, ctx){
     const p=mode==='pers-edit'?(db.bahanPers||[]).find(x=>x.id===ctx.id):null;
     title.textContent=mode==='pers-add'?'Tambah Bahan Pers':'Edit Bahan Pers';
     const statusOpts=[['draft','📝 Draft'],['siap','✅ Siap Publish'],['publish','🟢 Sudah Publish']];
-    const kategoriOpts=[['','— Pilih Kategori —'],['artikel','Artikel'],['siaran-pers','Siaran Pers'],['konten-sosmed','Konten Sosmed'],['video','Video'],['foto','Foto'],['infografis','Infografis'],['lainnya','Lainnya']];
-    const platformOpts=[['','— Pilih Platform —'],['website','Website'],['instagram','Instagram'],['tiktok','TikTok'],['youtube','YouTube'],['twitter','Twitter/X'],['linkedin','LinkedIn'],['lainnya','Lainnya']];
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Judul *</label>
         <input class="form-input" id="fi-pers-judul" value="${esc(p?.judul||'')}" placeholder="Judul konten / materi pers" maxlength="200"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Kategori <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
-        <select class="form-input" id="fi-pers-kat">
-          ${kategoriOpts.map(([v,l])=>`<option value="${v}"${p?.kategori===v?' selected':''}>${l}</option>`).join('')}
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Platform <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
-        <select class="form-input" id="fi-pers-platform">
-          ${platformOpts.map(([v,l])=>`<option value="${v}"${p?.platform===v?' selected':''}>${l}</option>`).join('')}
-        </select>
       </div>
       <div class="form-group">
         <label class="form-label">Status</label>
@@ -3526,19 +3512,17 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='pers-add'||mMode==='pers-edit'){
     const judul_v=document.getElementById('fi-pers-judul').value.trim();
     if(!judul_v) return;
-    const kat_v=document.getElementById('fi-pers-kat').value||null;
-    const platform_v=document.getElementById('fi-pers-platform').value||null;
     const status_v=document.getElementById('fi-pers-status').value||'draft';
     const tgl_v=document.getElementById('fi-pers-tgl').value||null;
     const url_v=document.getElementById('fi-pers-url').value.trim()||null;
     const catatan_v=document.getElementById('fi-pers-catatan').value.trim()||null;
     if(mMode==='pers-add'){
       if(!db.bahanPers) db.bahanPers=[];
-      db.bahanPers.push(touch({id:uid(),judul:judul_v,kategori:kat_v,platform:platform_v,status:status_v,tanggalPublish:tgl_v,urlDesain:url_v,catatan:catatan_v,createdAt:Date.now()}));
+      db.bahanPers.push(touch({id:uid(),judul:judul_v,status:status_v,tanggalPublish:tgl_v,urlDesain:url_v,catatan:catatan_v,createdAt:Date.now()}));
     } else {
       const p=(db.bahanPers||[]).find(x=>x.id===mCtx.id);
       if(!p) return;
-      p.judul=judul_v; p.kategori=kat_v; p.platform=platform_v; p.status=status_v;
+      p.judul=judul_v; p.status=status_v;
       p.tanggalPublish=tgl_v; p.urlDesain=url_v; p.catatan=catatan_v;
       touch(p);
     }
@@ -5389,8 +5373,6 @@ function renderPers(){
     }
 
     const meta=[
-      p.kategori?`<span style="font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(108,111,245,.12);color:var(--accent)">${esc(p.kategori)}</span>`:'',
-      p.platform?`<span style="font-size:.6rem;color:var(--dim)">📱 ${esc(p.platform)}</span>`:'',
       p.tanggalPublish?`<span style="font-size:.6rem;color:var(--dim)">📅 ${esc(p.tanggalPublish)}</span>`:'',
       countdownHtml,
     ].filter(Boolean).join(' ');
