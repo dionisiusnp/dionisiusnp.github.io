@@ -2593,7 +2593,12 @@ function openModal(mode, ctx){
     body.innerHTML=`
       <div class="form-group"><label class="form-label">Judul Proyek *</label><input class="form-input" id="fi-ptitle" value="${esc(p?.title||'')}" placeholder="Nama proyek"/></div>
       <div class="form-group"><label class="form-label">Nama Klien</label><input class="form-input" id="fi-pclient" value="${esc(p?.clientName||'')}" placeholder="Nama perusahaan/klien"/></div>
-      <div class="form-group"><label class="form-label">Koordinator <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label><input class="form-input" id="fi-pkoor" value="${esc(p?.koordinator||'')}" placeholder="Nama koordinator proyek"/></div>
+      <div class="form-group"><label class="form-label">Koordinator <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <select class="form-input" id="fi-pkoor">
+          <option value="">— Tanpa Koordinator —</option>
+          ${db.members.filter(m=>!m.deleted).slice().sort((a,b)=>a.name.localeCompare(b.name,'id')).map(m=>`<option value="${m.id}"${p?.koordinatorId===m.id?' selected':''}>${esc(m.name)}</option>`).join('')}
+        </select>
+      </div>
       <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-textarea" id="fi-pdesc">${esc(p?.description||'')}</textarea></div>
       <div class="form-group"><label class="form-label">Link Repo <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label><input class="form-input" id="fi-prepo" type="url" value="${esc(p?.repoUrl||'')}" placeholder="https://github.com/org/repo"/></div>
       <div class="form-group"><label class="form-label">Prioritas</label>
@@ -3159,12 +3164,12 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const title=document.getElementById('fi-ptitle').value.trim();
     const clientName=document.getElementById('fi-pclient').value.trim();
     if(!title) return;
-    const koordinator=document.getElementById('fi-pkoor').value.trim()||null;
+    const koordinatorId=document.getElementById('fi-pkoor').value||null;
     const priority=document.getElementById('fi-ppriority').value||null;
     const repoUrl=document.getElementById('fi-prepo').value.trim()||null;
     if(mMode==='proj-add'){
       db.projects.push(touch({
-        id:uid(), title, clientName, koordinator,
+        id:uid(), title, clientName, koordinatorId,
         description:document.getElementById('fi-pdesc').value.trim(),
         startDate:document.getElementById('fi-pstart').value||null,
         priority, repoUrl, members:[], createdAt:Date.now()
@@ -3172,7 +3177,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     } else {
       const p=db.projects.find(x=>x.id===mCtx.id);
       if(!p) return;
-      p.title=title; p.clientName=clientName; p.koordinator=koordinator;
+      p.title=title; p.clientName=clientName; p.koordinatorId=koordinatorId;
       p.description=document.getElementById('fi-pdesc').value.trim();
       p.startDate=document.getElementById('fi-pstart').value||null;
       p.priority=priority; p.repoUrl=repoUrl;
@@ -3792,7 +3797,7 @@ function renderProject(){
         </div>
         <div class="proj-meta">
           ${proj.priority?`<span style="color:${proj.priority==='high'?'var(--red,#f87171)':proj.priority==='medium'?'#fbbf24':'var(--dim)'}">● ${proj.priority==='high'?'High':proj.priority==='medium'?'Medium':'Low'}</span>`:''}
-          ${proj.koordinator?`<span>👤 ${esc(proj.koordinator)}</span>`:''}
+          ${proj.koordinatorId?`<span>👤 ${esc(db.members.find(m=>m.id===proj.koordinatorId)?.name||'—')}</span>`:''}
           ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
           ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
           ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
@@ -3851,7 +3856,7 @@ function renderProject(){
         </div>
         <div class="proj-meta">
           ${proj.priority?`<span style="color:${proj.priority==='high'?'var(--red,#f87171)':proj.priority==='medium'?'#fbbf24':'var(--dim)'}">● ${proj.priority==='high'?'High':proj.priority==='medium'?'Medium':'Low'}</span>`:''}
-          ${proj.koordinator?`<span>👤 ${esc(proj.koordinator)}</span>`:''}
+          ${proj.koordinatorId?`<span>👤 ${esc(db.members.find(m=>m.id===proj.koordinatorId)?.name||'—')}</span>`:''}
           ${proj.startDate?`<span>Mulai: ${fmtDate(proj.startDate)}</span>`:''}
           ${pOpt?`<span>🎯 Optimis: ${fmtDate(pOpt)}</span>`:''}
           ${pPess&&pPess!==pOpt?`<span>⚠ Pesimis: ${fmtDate(pPess)}</span>`:''}
