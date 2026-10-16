@@ -669,6 +669,10 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <span class="feature-nav-ico">🏆</span>
         <span class="feature-nav-label">Lomba</span>
       </button>
+      <button class="feature-nav-item" id="btnPersView">
+        <span class="feature-nav-ico">📰</span>
+        <span class="feature-nav-label">Bahan Pers</span>
+      </button>
       <div class="feature-nav-group">Administrasi</div>
       <button class="feature-nav-item" id="btnNotulensiView">
         <span class="feature-nav-ico">📝</span>
@@ -779,6 +783,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <!-- Lomba view -->
     <div id="lombaView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="lombaArea"></div>
+    </div>
+
+    <!-- Bahan Pers view -->
+    <div id="persView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="persArea"></div>
     </div>
   </div>
 </div>
@@ -894,6 +903,7 @@ let activeFilter      = 'all';  /* 'all' | 'recurring' | 'once' */
 let filterMemberName  = null;   /* null | exact string — selected member, shows tasks */
 let memberSearchQuery = '';     /* partial query — filters member list in real-time */
 let showMemberProjects = localStorage.getItem('show_mem_proj')==='1';
+let persSearch = '';
 let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
@@ -918,6 +928,7 @@ function migrate(d){
   if(!d.notulensiTopik) d.notulensiTopik=[];
   if(!d.broadcastProduk) d.broadcastProduk=[];
   if(!d.lombas) d.lombas=[];
+  if(!d.bahanPers) d.bahanPers=[];
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
@@ -1050,7 +1061,8 @@ function mergeDbOnLoad(gist,local){
     notulensi:       mergeArrClient(gist.notulensi||[],       local.notulensi||[]),
     notulensiTopik:  mergeArrClient(gist.notulensiTopik||[],  local.notulensiTopik||[]),
     broadcastProduk: mergeBcProdukClient(gist.broadcastProduk||[],local.broadcastProduk||[]),
-    lombas: mergeLombasClient(gist.lombas||[],local.lombas||[]),
+    lombas:    mergeLombasClient(gist.lombas||[],local.lombas||[]),
+    bahanPers: mergeArrClient(gist.bahanPers||[],local.bahanPers||[]),
     regulasi:   mergeRegulasisClient(gist.regulasi||{},local.regulasi||{}),
     settings:  local.settings||gist.settings,
     orgName:   local.orgName||gist.orgName,
@@ -1080,6 +1092,7 @@ function getCurrentViewRender(){
     {id:'notulensiView',fn:()=>{ renderSidebar(); renderNotulensi(); }},
     {id:'broadcastView',fn:()=>{ renderSidebar(); renderBroadcast(); }},
     {id:'lombaView',    fn:()=>{ renderSidebar(); renderLomba(); }},
+    {id:'persView',     fn:()=>{ renderSidebar(); renderPers(); }},
   ];
   const active=views.find(v=>document.getElementById(v.id)?.style.display!=='none');
   return active?active.fn:()=>{ renderSidebar(); renderMain(); };
@@ -1925,9 +1938,9 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 ══════════════════════════════════════════ */
 /* helper: hide all feature views, deactivate all nav buttons */
 function hideAllViews(){
-  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView']
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   document.getElementById('emptyState').style.display='none';
   document.getElementById('fabCulture').style.display='none';
@@ -2112,6 +2125,24 @@ document.getElementById('btnLombaView').addEventListener('click',()=>{
     lv.style.display='flex';
     document.getElementById('btnLombaView').classList.add('active');
     renderSidebar(); renderLomba();
+  }
+});
+
+document.getElementById('btnPersView').addEventListener('click',()=>{
+  const pv=document.getElementById('persView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(pv.style.display!=='none'){
+    pv.style.display='none';
+    document.getElementById('btnPersView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    pv.style.display='flex';
+    document.getElementById('btnPersView').classList.add('active');
+    renderSidebar(); renderPers();
   }
 });
 
@@ -2854,6 +2885,51 @@ function openModal(mode, ctx){
     document.getElementById('fi-ndate').focus();
   }
 
+  else if(mode==='pers-add'||mode==='pers-edit'){
+    const p=mode==='pers-edit'?(db.bahanPers||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='pers-add'?'Tambah Bahan Pers':'Edit Bahan Pers';
+    const statusOpts=[['draft','📝 Draft'],['siap','✅ Siap Publish'],['publish','🟢 Sudah Publish']];
+    const kategoriOpts=[['','— Pilih Kategori —'],['artikel','Artikel'],['siaran-pers','Siaran Pers'],['konten-sosmed','Konten Sosmed'],['video','Video'],['foto','Foto'],['infografis','Infografis'],['lainnya','Lainnya']];
+    const platformOpts=[['','— Pilih Platform —'],['website','Website'],['instagram','Instagram'],['tiktok','TikTok'],['youtube','YouTube'],['twitter','Twitter/X'],['linkedin','LinkedIn'],['lainnya','Lainnya']];
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Judul *</label>
+        <input class="form-input" id="fi-pers-judul" value="${esc(p?.judul||'')}" placeholder="Judul konten / materi pers" maxlength="200"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <select class="form-input" id="fi-pers-kat">
+          ${kategoriOpts.map(([v,l])=>`<option value="${v}"${p?.kategori===v?' selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Platform <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <select class="form-input" id="fi-pers-platform">
+          ${platformOpts.map(([v,l])=>`<option value="${v}"${p?.platform===v?' selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="fi-pers-status">
+          ${statusOpts.map(([v,l])=>`<option value="${v}"${(p?.status||'draft')===v?' selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jadwal Publish <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" type="date" id="fi-pers-tgl" value="${esc(p?.tanggalPublish||'')}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL Desain / Aset <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" type="url" id="fi-pers-url" value="${esc(p?.urlDesain||'')}" placeholder="https://drive.google.com/… atau canva.com/…"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-pers-catatan" rows="3" placeholder="Catatan riset, brief, atau hal penting lainnya…">${esc(p?.catatan||'')}</textarea>
+      </div>
+    `;
+    document.getElementById('fi-pers-judul').focus();
+  }
+
   else if(mode==='bc-produk-add'||mode==='bc-produk-edit'){
     const p=mode==='bc-produk-edit'?(db.broadcastProduk||[]).find(x=>x.id===ctx.id):null;
     title.textContent=mode==='bc-produk-add'?'Produk / Jasa Baru':'Edit Produk / Jasa';
@@ -3447,6 +3523,28 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   }
 
   /* ── Broadcast produk save ── */
+  else if(mMode==='pers-add'||mMode==='pers-edit'){
+    const judul_v=document.getElementById('fi-pers-judul').value.trim();
+    if(!judul_v) return;
+    const kat_v=document.getElementById('fi-pers-kat').value||null;
+    const platform_v=document.getElementById('fi-pers-platform').value||null;
+    const status_v=document.getElementById('fi-pers-status').value||'draft';
+    const tgl_v=document.getElementById('fi-pers-tgl').value||null;
+    const url_v=document.getElementById('fi-pers-url').value.trim()||null;
+    const catatan_v=document.getElementById('fi-pers-catatan').value.trim()||null;
+    if(mMode==='pers-add'){
+      if(!db.bahanPers) db.bahanPers=[];
+      db.bahanPers.push(touch({id:uid(),judul:judul_v,kategori:kat_v,platform:platform_v,status:status_v,tanggalPublish:tgl_v,urlDesain:url_v,catatan:catatan_v,createdAt:Date.now()}));
+    } else {
+      const p=(db.bahanPers||[]).find(x=>x.id===mCtx.id);
+      if(!p) return;
+      p.judul=judul_v; p.kategori=kat_v; p.platform=platform_v; p.status=status_v;
+      p.tanggalPublish=tgl_v; p.urlDesain=url_v; p.catatan=catatan_v;
+      touch(p);
+    }
+    save(); renderPers(); closeModal();
+  }
+
   else if(mMode==='bc-produk-add'||mMode==='bc-produk-edit'){
     const nama_v=document.getElementById('fi-bc-nama').value.trim();
     if(!nama_v) return;
@@ -5221,6 +5319,112 @@ function renderLomba(){
       });
 
       ideContainer.insertBefore(ideEl,ideContainer.querySelector('[data-add-ide]'));
+    });
+
+    area.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════
+   BAHAN PERS
+══════════════════════════════════════════ */
+function renderPers(){
+  const area=document.getElementById('persArea');
+  area.innerHTML='';
+  const isAdmin=role==='admin';
+
+  const STATUS_LABEL={draft:'📝 Draft',siap:'✅ Siap Publish',publish:'🟢 Sudah Publish'};
+  const STATUS_COLOR={draft:'var(--dim)',siap:'#fbbf24',publish:'var(--green,#34d399)'};
+
+  /* Toolbar */
+  const toolbar=document.createElement('div');
+  toolbar.className='notul-toolbar';
+  toolbar.innerHTML=`<span class="notul-toolbar-title">📰 Bahan Pers</span>
+    <input class="asset-search" id="persSearchInp" placeholder="Cari bahan…" value="${esc(persSearch)}" style="max-width:200px"/>`;
+  if(isAdmin){
+    const btn=document.createElement('button');
+    btn.className='notul-topik-add-btn';
+    btn.style.cssText='margin:0;width:auto';
+    btn.textContent='＋ Tambah';
+    btn.addEventListener('click',()=>openModal('pers-add',{}));
+    toolbar.appendChild(btn);
+  }
+  area.appendChild(toolbar);
+  area.querySelector('#persSearchInp').addEventListener('input',e=>{
+    persSearch=e.target.value;
+    const pos=e.target.selectionStart;
+    renderPers();
+    const inp=document.getElementById('persSearchInp');
+    if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
+  });
+
+  const q=persSearch.trim().toLowerCase();
+  const list=(db.bahanPers||[]).filter(p=>!p.deleted&&(!q||p.judul.toLowerCase().includes(q)||(p.kategori||'').toLowerCase().includes(q)||(p.platform||'').toLowerCase().includes(q)));
+
+  if(!list.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:40px;text-align:center;color:var(--dim);font-size:.82rem';
+    empty.textContent=q?'Tidak ada bahan yang cocok.':'Belum ada bahan pers. Tambah bahan pertama!';
+    area.appendChild(empty);
+    return;
+  }
+
+  /* Group by status for ordering: draft → siap → publish */
+  const order={draft:0,siap:1,publish:2};
+  const sorted=list.slice().sort((a,b)=>(order[a.status||'draft']||0)-(order[b.status||'draft']||0)||(a.tanggalPublish||'').localeCompare(b.tanggalPublish||'')||(a.judul||'').localeCompare(b.judul||'','id'));
+
+  sorted.forEach(p=>{
+    const statusLabel=STATUS_LABEL[p.status]||p.status||'Draft';
+    const statusColor=STATUS_COLOR[p.status]||'var(--dim)';
+
+    /* Countdown to publish date */
+    let countdownHtml='';
+    if(p.tanggalPublish&&p.status!=='publish'){
+      const today=new Date(); today.setHours(0,0,0,0);
+      const pub=new Date(p.tanggalPublish); pub.setHours(0,0,0,0);
+      const diff=Math.round((pub-today)/(1000*60*60*24));
+      if(diff>0) countdownHtml=`<span style="color:${diff<=3?'var(--red,#f87171)':diff<=7?'#fbbf24':'var(--dim)'}">⏰ ${diff}h lagi</span>`;
+      else if(diff===0) countdownHtml=`<span style="color:var(--red,#f87171)">⏰ Hari ini</span>`;
+      else if(diff<0) countdownHtml=`<span style="color:var(--red,#f87171)">⚠ Terlambat ${Math.abs(diff)}h</span>`;
+    }
+
+    const meta=[
+      p.kategori?`<span style="font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(108,111,245,.12);color:var(--accent)">${esc(p.kategori)}</span>`:'',
+      p.platform?`<span style="font-size:.6rem;color:var(--dim)">📱 ${esc(p.platform)}</span>`:'',
+      p.tanggalPublish?`<span style="font-size:.6rem;color:var(--dim)">📅 ${esc(p.tanggalPublish)}</span>`:'',
+      countdownHtml,
+    ].filter(Boolean).join(' ');
+
+    const card=document.createElement('div');
+    card.className='notul-topik';
+    card.innerHTML=`
+      <div class="notul-topik-head" style="cursor:default">
+        <div class="notul-topik-icon">📰</div>
+        <div class="notul-topik-info" style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="notul-topik-title">${esc(p.judul)}</span>
+            <span style="font-size:.65rem;font-weight:700;color:${statusColor};white-space:nowrap">${statusLabel}</span>
+          </div>
+          ${meta?`<div class="notul-topik-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px">${meta}</div>`:''}
+          ${p.urlDesain?`<div style="margin-top:4px"><a href="${esc(p.urlDesain)}" target="_blank" rel="noopener" style="font-size:.68rem;color:var(--accent);text-decoration:none">🎨 Lihat Desain →</a></div>`:''}
+          ${p.catatan?`<div style="font-size:.72rem;color:var(--dim);margin-top:4px;white-space:pre-wrap;line-height:1.5">${esc(p.catatan)}</div>`:''}
+        </div>
+        <div class="notul-topik-acts">
+          ${isAdmin?`<button class="asset-act-btn" data-pers-edit="${p.id}" title="Edit">✎</button>
+          <button class="asset-act-btn del" data-pers-del="${p.id}" title="Hapus">✕</button>`:''}
+        </div>
+      </div>
+    `;
+
+    card.querySelector('[data-pers-edit]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      openModal('pers-edit',{id:p.id});
+    });
+    card.querySelector('[data-pers-del]')?.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm(`Hapus "${p.judul}"?`)) return;
+      touch(Object.assign(p,{deleted:true}));
+      save(); renderPers();
     });
 
     area.appendChild(card);
