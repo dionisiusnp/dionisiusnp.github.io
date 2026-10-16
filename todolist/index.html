@@ -2901,7 +2901,7 @@ function openModal(mode, ctx){
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Jadwal Publish <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <label class="form-label">Deadline <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
         <input class="form-input" type="date" id="fi-pers-tgl" value="${esc(p?.tanggalPublish||'')}"/>
       </div>
       <div class="form-group">
@@ -5361,7 +5361,7 @@ function renderPers(){
     const statusLabel=STATUS_LABEL[p.status]||p.status||'Draft';
     const statusColor=STATUS_COLOR[p.status]||'var(--dim)';
 
-    /* Countdown to publish date */
+    /* Countdown to deadline */
     let countdownHtml='';
     if(p.tanggalPublish&&p.status!=='disetujui'&&p.status!=='ditolak'){
       const today=new Date(); today.setHours(0,0,0,0);
@@ -5373,7 +5373,7 @@ function renderPers(){
     }
 
     const meta=[
-      p.tanggalPublish?`<span style="font-size:.6rem;color:var(--dim)">📅 ${esc(p.tanggalPublish)}</span>`:'',
+      p.tanggalPublish?`<span style="font-size:.6rem;color:var(--dim)">⏳ Deadline: ${esc(p.tanggalPublish)}</span>`:'',
       countdownHtml,
     ].filter(Boolean).join(' ');
 
