@@ -624,6 +624,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   <span class="nav-title viewer-only" id="navOrgNameView" style="margin-left:4px">Alteco</span>
   <span class="nav-spacer"></span>
   <span class="nav-role-badge" id="roleBadge">—</span>
+  <button class="theme-btn" id="logoutBtn" title="Logout / ganti akun" style="font-size:.7rem;opacity:.7">⏏</button>
   <button class="bell-btn" id="bellBtn" title="Notifikasi hari ini">
     🔔
     <span class="bell-badge" id="bellBadge" style="display:none">0</span>
@@ -2150,6 +2151,12 @@ document.getElementById('bellBtn').addEventListener('click',()=>{
   document.getElementById('btnInfoView').click();
 });
 document.getElementById('syncBtn').addEventListener('click',()=>syncFromGist());
+document.getElementById('logoutBtn').addEventListener('click',()=>{
+  sessionStorage.removeItem('rak_alteco_role');
+  sessionStorage.removeItem('alteco_proj_session');
+  sessionStorage.removeItem('alteco_bc_session');
+  location.reload();
+});
 
 /* ══════════════════════════════════════════
    ORG CHART RENDER
