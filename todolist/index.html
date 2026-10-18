@@ -5547,10 +5547,9 @@ function renderRuangan(){
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">KEGIATAN</span><br>${esc(r.kegiatan)}</div>
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">PIC</span><br>${esc(r.pic||'—')}</div>
       </div>`:''}
-      ${r.lokasi||r.kapasitas||r.tipe==='eksternal'?`<div style="font-size:.68rem;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap">
-        ${r.lokasi?(r.tipe==='eksternal'?`<a href="${esc(r.lokasi)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">📍 Lihat Lokasi ↗</a>`:`<span>📍 ${esc(r.lokasi)}</span>`):''}
-        ${r.tipe==='eksternal'?`<span>👥 Unlimited</span>`:(r.kapasitas?`<span>👥 Maks. ${r.kapasitas} orang</span>`:'')}
-      </div>`:''}
+      ${r.lokasi?(r.tipe==='eksternal'?`<a href="${esc(r.lokasi)}" target="_blank" rel="noopener" style="font-size:.68rem;color:var(--accent);text-decoration:none">📍 Lihat Lokasi ↗</a>`:`<div style="font-size:.68rem;color:var(--dim)">📍 ${esc(r.lokasi)}</div>`):''}
+      ${r.tipe==='eksternal'?`<div style="font-size:.68rem;color:var(--dim)">👥 Unlimited</div>`:(r.kapasitas?`<div style="font-size:.68rem;color:var(--dim)">👥 Maks. ${r.kapasitas} orang</div>`:'')}
+
       ${r.catatan?`<div style="font-size:.68rem;color:var(--dim);white-space:pre-wrap">${esc(r.catatan)}</div>`:''}
       ${isAdmin?`<div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap">
         ${isAktif
