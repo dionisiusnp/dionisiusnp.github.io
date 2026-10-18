@@ -2976,9 +2976,9 @@ function openModal(mode, ctx){
           <option value="eksternal"${r?.tipe==='eksternal'?' selected':''}>Eksternal</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Lokasi <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
-        <input class="form-input" id="fi-ru-lokasi" value="${esc(r?.lokasi||'')}" placeholder="misal: Gedung A Lt. 2" maxlength="100"/>
+      <div class="form-group" id="fi-ru-lokasi-group">
+        <label class="form-label" id="fi-ru-lokasi-label">Lokasi <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-ru-lokasi" value="${esc(r?.lokasi||'')}" placeholder="${(r?.tipe||'internal')==='eksternal'?'https://maps.google.com/...':'misal: Gedung A Lt. 2'}" ${(r?.tipe||'internal')==='eksternal'?'type="url"':'maxlength="100"'}/>
       </div>
       <div class="form-group">
         <label class="form-label">Kapasitas <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
@@ -2990,6 +2990,14 @@ function openModal(mode, ctx){
       </div>
     `;
     document.getElementById('fi-ru-nama').focus();
+    document.getElementById('fi-ru-tipe').addEventListener('change',function(){
+      const inp=document.getElementById('fi-ru-lokasi');
+      if(this.value==='eksternal'){
+        inp.type='url'; inp.removeAttribute('maxlength'); inp.placeholder='https://maps.google.com/...';
+      } else {
+        inp.type='text'; inp.setAttribute('maxlength','100'); inp.placeholder='misal: Gedung A Lt. 2';
+      }
+    });
   }
 
   else if(mode==='ruangan-pakai'){
@@ -5537,7 +5545,7 @@ function renderRuangan(){
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">PIC</span><br>${esc(r.pic||'—')}</div>
       </div>`:''}
       ${r.lokasi||r.kapasitas?`<div style="font-size:.68rem;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap">
-        ${r.lokasi?`<span>📍 ${esc(r.lokasi)}</span>`:''}
+        ${r.lokasi?(r.tipe==='eksternal'?`<a href="${esc(r.lokasi)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">📍 Lihat Lokasi ↗</a>`:`<span>📍 ${esc(r.lokasi)}</span>`):''}
         ${r.kapasitas?`<span>👥 Maks. ${r.kapasitas} orang</span>`:''}
       </div>`:''}
       ${r.catatan?`<div style="font-size:.68rem;color:var(--dim);white-space:pre-wrap">${esc(r.catatan)}</div>`:''}
