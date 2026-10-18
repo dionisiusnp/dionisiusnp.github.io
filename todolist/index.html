@@ -637,20 +637,16 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   <span class="nav-title viewer-only" id="navOrgNameView" style="margin-left:4px">Alteco</span>
   <span class="nav-spacer"></span>
   <div style="position:relative;display:flex;align-items:center">
-    <span class="nav-role-badge" id="roleBadge" style="cursor:pointer">—</span>
+    <span class="nav-role-badge" id="roleBadge" style="cursor:pointer">— <span style="font-size:.5rem;opacity:.6">▾</span></span>
     <div class="role-menu" id="roleMenu">
+      <button class="role-menu-item" id="rmNotif">🔔 Pemberitahuan <span id="rmNotifBadge" style="display:none;background:var(--red,#f87171);color:#fff;font-size:.55rem;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">0</span></button>
       <button class="role-menu-item" id="rmTheme">🌙 Ganti Tema</button>
       <button class="role-menu-item" id="rmSync">↻ Perbarui Data</button>
       <div class="role-menu-divider"></div>
       <button class="role-menu-item danger" id="rmLogout">⏏ Logout</button>
     </div>
   </div>
-  <button class="bell-btn" id="bellBtn" title="Notifikasi hari ini">
-    🔔
-    <span class="bell-badge" id="bellBadge" style="display:none">0</span>
-  </button>
-  <button class="theme-btn" id="syncBtn" title="Perbarui data dari server">↻</button>
-  <button class="theme-btn" id="themeBtn" title="Ganti tema">🌙</button>
+  <span id="bellBadge" style="display:none">0</span>
 </nav>
 
 <!-- App -->
@@ -1287,12 +1283,8 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
    THEME
 ══════════════════════════════════════════ */
 (function(){
-  const btn=document.getElementById('themeBtn'),html=document.documentElement;
-  if(localStorage.getItem('theme')==='light'){html.setAttribute('data-theme','light');btn.textContent='☀️'}
-  btn.addEventListener('click',()=>{
-    if(html.getAttribute('data-theme')==='light'){html.removeAttribute('data-theme');btn.textContent='🌙';localStorage.setItem('theme','dark')}
-    else{html.setAttribute('data-theme','light');btn.textContent='☀️';localStorage.setItem('theme','light')}
-  });
+  const html=document.documentElement;
+  if(localStorage.getItem('theme')==='light') html.setAttribute('data-theme','light');
 })();
 
 /* ── Sidebar minimize toggle ── */
@@ -2198,10 +2190,7 @@ document.getElementById('btnPersView').addEventListener('click',()=>{
   }
 });
 
-document.getElementById('bellBtn').addEventListener('click',()=>{
-  document.getElementById('btnInfoView').click();
-});
-document.getElementById('syncBtn').addEventListener('click',()=>syncFromGist());
+document.getElementById('syncBtn')?.addEventListener('click',()=>syncFromGist());
 (function(){
   const badge=document.getElementById('roleBadge');
   const menu=document.getElementById('roleMenu');
@@ -2211,13 +2200,16 @@ document.getElementById('syncBtn').addEventListener('click',()=>syncFromGist());
     menu.classList.toggle('open');
   });
   document.addEventListener('click',()=>menu.classList.remove('open'));
+  document.getElementById('rmNotif').addEventListener('click',e=>{
+    e.stopPropagation();
+    menu.classList.remove('open');
+    document.getElementById('btnInfoView').click();
+  });
   document.getElementById('rmTheme').addEventListener('click',e=>{
     e.stopPropagation();
     const isLight=html.getAttribute('data-theme')==='light';
     if(isLight){html.removeAttribute('data-theme');localStorage.setItem('theme','dark');}
     else{html.setAttribute('data-theme','light');localStorage.setItem('theme','light');}
-    const themeBtn=document.getElementById('themeBtn');
-    if(themeBtn) themeBtn.textContent=isLight?'🌙':'☀️';
     document.getElementById('rmTheme').textContent=isLight?'🌙 Ganti Tema':'☀️ Ganti Tema';
     menu.classList.remove('open');
   });
@@ -5785,10 +5777,8 @@ function getTodayEvents(){
 function updateBellBadge(){
   const lastRead = parseInt(localStorage.getItem('alteco_info_read_ts')||'0');
   const unread = (db.events||[]).filter(ev=>!ev.deleted&&Math.max(ev.createdAt||0, ev.updatedAt||0)>lastRead).length;
-  const badge = document.getElementById('bellBadge');
-  if(!badge) return;
-  if(unread>0){ badge.textContent=unread; badge.style.display='flex'; }
-  else badge.style.display='none';
+  const nb = document.getElementById('rmNotifBadge');
+  if(nb){ if(unread>0){nb.textContent=unread;nb.style.display='';} else nb.style.display='none'; }
 }
 
 function checkLocalNotif(){
