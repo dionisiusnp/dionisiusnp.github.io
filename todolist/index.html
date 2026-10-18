@@ -724,7 +724,6 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <div class="admin-only sb-mini-hide" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
       <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
       <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
-      <button class="task-add-inline-btn" id="btnResetData" style="font-size:.68rem;margin-top:4px;border-color:var(--red);color:var(--red)">⚠ Reset Semua Data</button>
     </div>
   </div>
 
@@ -2358,12 +2357,6 @@ function renderOrgChart(){
 ══════════════════════════════════════════ */
 document.getElementById('btnAddKelompokon').addEventListener('click',()=>openModal('div-add',{}));
 document.getElementById('btnAddMemberRoot').addEventListener('click',()=>openModal('mem-add',{kelompokId:''}));
-document.getElementById('btnResetData').addEventListener('click',()=>{
-  if(!confirm('Reset SEMUA data? Kelompok, anggota, dan tugas akan terhapus permanen. Tidak bisa dibatalkan.')) return;
-  db={kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
-  save(); activeId=null; viewMode='tasks';
-  renderSidebar(); renderMain();
-});
 document.getElementById('btnAddTask').addEventListener('click',()=>{
   if(!activeId||activeId===ALL) return;
   openModal('task-add',{memberId:activeId});
