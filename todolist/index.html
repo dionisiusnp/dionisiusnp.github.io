@@ -211,6 +211,13 @@ body.is-admin .viewer-only{display:none!important}
 .member-search-list{position:fixed;background:var(--surface);border:1px solid var(--bd);border-radius:7px;z-index:9000;max-height:220px;overflow-y:auto;box-shadow:0 6px 20px rgba(0,0,0,.35);display:none}
 .member-search-item{padding:6px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap;transition:background .1s}
 .member-search-item:hover,.member-search-item.selected{background:rgba(108,111,245,.15);color:var(--accent)}
+.ruangan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:16px}
+.ruangan-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s}
+.ruangan-card.dipakai{border-color:rgba(248,113,113,.4)}
+.ruangan-card.tersedia{border-color:rgba(52,211,153,.3)}
+.ruangan-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ruangan-status-dot.tersedia{background:var(--green,#34d399);box-shadow:0 0 6px rgba(52,211,153,.5)}
+.ruangan-status-dot.dipakai{background:var(--red,#f87171);box-shadow:0 0 6px rgba(248,113,113,.5)}
 .proj-badge-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .proj-badge{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);opacity:.8;white-space:nowrap}
 .mss-item{padding:7px 12px;cursor:pointer;font-size:.78rem;transition:background .1s;color:var(--text)}
@@ -688,6 +695,10 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <span class="feature-nav-label">Pers</span>
       </button>
       <div class="feature-nav-group">Administrasi</div>
+      <button class="feature-nav-item" id="btnRuanganView">
+        <span class="feature-nav-ico">🏠</span>
+        <span class="feature-nav-label">Ruangan</span>
+      </button>
       <button class="feature-nav-item" id="btnNotulensiView">
         <span class="feature-nav-ico">📝</span>
         <span class="feature-nav-label">Notulensi</span>
@@ -802,6 +813,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <!-- Bahan Pers view -->
     <div id="persView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="persArea"></div>
+    </div>
+
+    <!-- Ruangan view -->
+    <div id="ruanganView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="ruanganArea"></div>
     </div>
   </div>
 </div>
@@ -918,6 +934,7 @@ let filterMemberName  = null;   /* null | exact string — selected member, show
 let memberSearchQuery = '';     /* partial query — filters member list in real-time */
 let showMemberProjects = localStorage.getItem('show_mem_proj')==='1';
 let persSearch = '';
+let ruanganSearch = '';
 let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
@@ -943,6 +960,7 @@ function migrate(d){
   if(!d.broadcastProduk) d.broadcastProduk=[];
   if(!d.lombas) d.lombas=[];
   if(!d.bahanPers) d.bahanPers=[];
+  if(!d.ruangan) d.ruangan=[];
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
   if(!d.settings.notifTime) d.settings.notifTime='07:00';
   if(d.settings.notifDaysBefore==null) d.settings.notifDaysBefore=1;
@@ -1077,6 +1095,7 @@ function mergeDbOnLoad(gist,local){
     broadcastProduk: mergeBcProdukClient(gist.broadcastProduk||[],local.broadcastProduk||[]),
     lombas:    mergeLombasClient(gist.lombas||[],local.lombas||[]),
     bahanPers: mergeArrClient(gist.bahanPers||[],local.bahanPers||[]),
+    ruangan:   mergeArrClient(gist.ruangan||[],local.ruangan||[]),
     regulasi:   mergeRegulasisClient(gist.regulasi||{},local.regulasi||{}),
     settings:  local.settings||gist.settings,
     orgName:   local.orgName||gist.orgName,
@@ -1107,6 +1126,7 @@ function getCurrentViewRender(){
     {id:'broadcastView',fn:()=>{ renderSidebar(); renderBroadcast(); }},
     {id:'lombaView',    fn:()=>{ renderSidebar(); renderLomba(); }},
     {id:'persView',     fn:()=>{ renderSidebar(); renderPers(); }},
+    {id:'ruanganView',  fn:()=>{ renderSidebar(); renderRuangan(); }},
   ];
   const active=views.find(v=>document.getElementById(v.id)?.style.display!=='none');
   return active?active.fn:()=>{ renderSidebar(); renderMain(); };
@@ -1952,9 +1972,9 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 ══════════════════════════════════════════ */
 /* helper: hide all feature views, deactivate all nav buttons */
 function hideAllViews(){
-  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView']
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   document.getElementById('emptyState').style.display='none';
   document.getElementById('fabCulture').style.display='none';
@@ -2139,6 +2159,24 @@ document.getElementById('btnLombaView').addEventListener('click',()=>{
     lv.style.display='flex';
     document.getElementById('btnLombaView').classList.add('active');
     renderSidebar(); renderLomba();
+  }
+});
+
+document.getElementById('btnRuanganView').addEventListener('click',()=>{
+  const rv=document.getElementById('ruanganView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(rv.style.display!=='none'){
+    rv.style.display='none';
+    document.getElementById('btnRuanganView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    rv.style.display='flex';
+    document.getElementById('btnRuanganView').classList.add('active');
+    renderSidebar(); renderRuangan();
   }
 });
 
@@ -2931,6 +2969,53 @@ function openModal(mode, ctx){
     document.getElementById('fi-ndate').focus();
   }
 
+  else if(mode==='ruangan-add'||mode==='ruangan-edit'){
+    const r=mode==='ruangan-edit'?(db.ruangan||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='ruangan-add'?'Tambah Ruangan':'Edit Ruangan';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Ruangan *</label>
+        <input class="form-input" id="fi-ru-nama" value="${esc(r?.nama||'')}" placeholder="misal: Ruang Rapat A, Lab Komputer" maxlength="100"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipe</label>
+        <select class="form-input" id="fi-ru-tipe">
+          <option value="internal"${(r?.tipe||'internal')==='internal'?' selected':''}>Internal</option>
+          <option value="eksternal"${r?.tipe==='eksternal'?' selected':''}>Eksternal</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lokasi <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-ru-lokasi" value="${esc(r?.lokasi||'')}" placeholder="misal: Gedung A Lt. 2" maxlength="100"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kapasitas <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-ru-kapasitas" type="number" min="1" value="${esc(r?.kapasitas||'')}" placeholder="Jumlah orang"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-ru-catatan" rows="2" placeholder="Fasilitas, syarat, dll.">${esc(r?.catatan||'')}</textarea>
+      </div>
+    `;
+    document.getElementById('fi-ru-nama').focus();
+  }
+
+  else if(mode==='ruangan-pakai'){
+    const r=(db.ruangan||[]).find(x=>x.id===ctx.id);
+    title.textContent=`Tandai Dipakai — ${esc(r?.nama||'')}`;
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Kegiatan *</label>
+        <input class="form-input" id="fi-ru-kegiatan" value="${esc(r?.kegiatan||'')}" placeholder="misal: Rapat Tim Proyek, Workshop" maxlength="150"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Penanggung Jawab (PIC) *</label>
+        <input class="form-input" id="fi-ru-pic" value="${esc(r?.pic||'')}" placeholder="Nama PIC" maxlength="100"/>
+      </div>
+    `;
+    document.getElementById('fi-ru-kegiatan').focus();
+  }
+
   else if(mode==='pers-add'||mode==='pers-edit'){
     const p=mode==='pers-edit'?(db.bahanPers||[]).find(x=>x.id===ctx.id):null;
     title.textContent=mode==='pers-add'?'Tambah Pers':'Edit Pers';
@@ -3555,6 +3640,35 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   }
 
   /* ── Broadcast produk save ── */
+  else if(mMode==='ruangan-add'||mMode==='ruangan-edit'){
+    const nama_v=document.getElementById('fi-ru-nama').value.trim();
+    if(!nama_v) return;
+    const tipe_v=document.getElementById('fi-ru-tipe').value||'internal';
+    const lokasi_v=document.getElementById('fi-ru-lokasi').value.trim()||null;
+    const kapasitas_v=parseInt(document.getElementById('fi-ru-kapasitas').value)||null;
+    const catatan_v=document.getElementById('fi-ru-catatan').value.trim()||null;
+    if(mMode==='ruangan-add'){
+      if(!db.ruangan) db.ruangan=[];
+      db.ruangan.push(touch({id:uid(),nama:nama_v,tipe:tipe_v,lokasi:lokasi_v,kapasitas:kapasitas_v,catatan:catatan_v,status:'tersedia',kegiatan:null,pic:null,createdAt:Date.now()}));
+    } else {
+      const r=(db.ruangan||[]).find(x=>x.id===mCtx.id);
+      if(!r) return;
+      r.nama=nama_v; r.tipe=tipe_v; r.lokasi=lokasi_v; r.kapasitas=kapasitas_v; r.catatan=catatan_v;
+      touch(r);
+    }
+    save(); renderRuangan(); closeModal();
+  }
+
+  else if(mMode==='ruangan-pakai'){
+    const kegiatan_v=document.getElementById('fi-ru-kegiatan').value.trim();
+    const pic_v=document.getElementById('fi-ru-pic').value.trim();
+    if(!kegiatan_v||!pic_v) return;
+    const r=(db.ruangan||[]).find(x=>x.id===mCtx.id);
+    if(!r) return;
+    r.status='dipakai'; r.kegiatan=kegiatan_v; r.pic=pic_v;
+    touch(r); save(); renderRuangan(); closeModal();
+  }
+
   else if(mMode==='pers-add'||mMode==='pers-edit'){
     const judul_v=document.getElementById('fi-pers-judul').value.trim();
     if(!judul_v) return;
@@ -5360,6 +5474,106 @@ function renderLomba(){
 
     area.appendChild(card);
   });
+}
+
+/* ══════════════════════════════════════════
+   RUANGAN
+══════════════════════════════════════════ */
+function renderRuangan(){
+  const area=document.getElementById('ruanganArea');
+  area.innerHTML='';
+  const isAdmin=role==='admin';
+
+  /* Toolbar */
+  const toolbar=document.createElement('div');
+  toolbar.className='notul-toolbar';
+  toolbar.innerHTML=`<span class="notul-toolbar-title">🏠 Ruangan</span>
+    <input class="asset-search" id="ruanganSearchInp" placeholder="Cari ruangan…" value="${esc(ruanganSearch)}" style="max-width:180px"/>`;
+  if(isAdmin){
+    const btn=document.createElement('button');
+    btn.className='notul-topik-add-btn';
+    btn.style.cssText='margin:0;width:auto';
+    btn.textContent='＋ Tambah';
+    btn.addEventListener('click',()=>openModal('ruangan-add',{}));
+    toolbar.appendChild(btn);
+  }
+  area.appendChild(toolbar);
+  area.querySelector('#ruanganSearchInp').addEventListener('input',e=>{
+    ruanganSearch=e.target.value;
+    const pos=e.target.selectionStart;
+    renderRuangan();
+    const inp=document.getElementById('ruanganSearchInp');
+    if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
+  });
+
+  const q=ruanganSearch.trim().toLowerCase();
+  const list=(db.ruangan||[]).filter(r=>!r.deleted&&(!q||r.nama.toLowerCase().includes(q)||(r.lokasi||'').toLowerCase().includes(q)));
+
+  if(!list.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:40px;text-align:center;color:var(--dim);font-size:.82rem';
+    empty.textContent=q?'Tidak ada ruangan yang cocok.':'Belum ada ruangan. Tambah ruangan pertama!';
+    area.appendChild(empty);
+    return;
+  }
+
+  /* Sort: dipakai dulu, lalu nama */
+  const sorted=list.slice().sort((a,b)=>{
+    if(a.status==='dipakai'&&b.status!=='dipakai') return -1;
+    if(b.status==='dipakai'&&a.status!=='dipakai') return 1;
+    return a.nama.localeCompare(b.nama,'id');
+  });
+
+  const grid=document.createElement('div');
+  grid.className='ruangan-grid';
+
+  sorted.forEach(r=>{
+    const isDipakai=r.status==='dipakai';
+    const card=document.createElement('div');
+    card.className=`ruangan-card ${isDipakai?'dipakai':'tersedia'}`;
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="ruangan-status-dot ${isDipakai?'dipakai':'tersedia'}"></div>
+        <span style="font-size:.88rem;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.nama)}</span>
+        <span style="font-size:.58rem;font-weight:700;padding:1px 7px;border-radius:8px;border:1px solid var(--bd);color:var(--dim);white-space:nowrap">${esc(r.tipe||'internal')}</span>
+      </div>
+      <div style="font-size:.8rem;font-weight:700;color:${isDipakai?'var(--red,#f87171)':'var(--green,#34d399)'}">
+        ${isDipakai?'🔴 Sedang Dipakai':'🟢 Tersedia'}
+      </div>
+      ${isDipakai&&r.kegiatan?`<div style="font-size:.72rem;color:var(--text);background:var(--surface);border-radius:7px;padding:7px 10px;display:flex;flex-direction:column;gap:3px">
+        <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">KEGIATAN</span><br>${esc(r.kegiatan)}</div>
+        <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">PIC</span><br>${esc(r.pic||'—')}</div>
+      </div>`:''}
+      ${r.lokasi||r.kapasitas?`<div style="font-size:.68rem;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap">
+        ${r.lokasi?`<span>📍 ${esc(r.lokasi)}</span>`:''}
+        ${r.kapasitas?`<span>👥 Maks. ${r.kapasitas} orang</span>`:''}
+      </div>`:''}
+      ${r.catatan?`<div style="font-size:.68rem;color:var(--dim);white-space:pre-wrap">${esc(r.catatan)}</div>`:''}
+      ${isAdmin?`<div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap">
+        ${isDipakai
+          ?`<button class="task-add-inline-btn" data-ru-tersedia="${r.id}" style="flex:1;font-size:.7rem;border-color:var(--green,#34d399);color:var(--green,#34d399)">✓ Tandai Tersedia</button>`
+          :`<button class="task-add-inline-btn" data-ru-pakai="${r.id}" style="flex:1;font-size:.7rem;border-color:var(--red,#f87171);color:var(--red,#f87171)">● Tandai Dipakai</button>`
+        }
+        <button class="asset-act-btn" data-ru-edit="${r.id}" title="Edit">✎</button>
+        <button class="asset-act-btn del" data-ru-del="${r.id}" title="Hapus">✕</button>
+      </div>`:''}
+    `;
+
+    card.querySelector('[data-ru-pakai]')?.addEventListener('click',()=>openModal('ruangan-pakai',{id:r.id}));
+    card.querySelector('[data-ru-tersedia]')?.addEventListener('click',()=>{
+      r.status='tersedia'; r.kegiatan=null; r.pic=null;
+      touch(r); save(); renderRuangan();
+    });
+    card.querySelector('[data-ru-edit]')?.addEventListener('click',()=>openModal('ruangan-edit',{id:r.id}));
+    card.querySelector('[data-ru-del]')?.addEventListener('click',()=>{
+      if(!confirm(`Hapus ruangan "${r.nama}"?`)) return;
+      touch(Object.assign(r,{deleted:true})); save(); renderRuangan();
+    });
+
+    grid.appendChild(card);
+  });
+
+  area.appendChild(grid);
 }
 
 /* ══════════════════════════════════════════
