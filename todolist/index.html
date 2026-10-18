@@ -213,11 +213,11 @@ body.is-admin .viewer-only{display:none!important}
 .member-search-item:hover,.member-search-item.selected{background:rgba(108,111,245,.15);color:var(--accent)}
 .ruangan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:16px}
 .ruangan-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s}
-.ruangan-card.dipakai{border-color:rgba(248,113,113,.4)}
-.ruangan-card.tersedia{border-color:rgba(52,211,153,.3)}
+.ruangan-card.aktif{border-color:rgba(52,211,153,.4)}
+.ruangan-card.idle{border-color:var(--border)}
 .ruangan-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.ruangan-status-dot.tersedia{background:var(--green,#34d399);box-shadow:0 0 6px rgba(52,211,153,.5)}
-.ruangan-status-dot.dipakai{background:var(--red,#f87171);box-shadow:0 0 6px rgba(248,113,113,.5)}
+.ruangan-status-dot.idle{background:var(--muted,#6b7280)}
+.ruangan-status-dot.aktif{background:var(--green,#34d399);box-shadow:0 0 6px rgba(52,211,153,.5)}
 .proj-badge-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .proj-badge{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);opacity:.8;white-space:nowrap}
 .mss-item{padding:7px 12px;cursor:pointer;font-size:.78rem;transition:background .1s;color:var(--text)}
@@ -2994,7 +2994,7 @@ function openModal(mode, ctx){
 
   else if(mode==='ruangan-pakai'){
     const r=(db.ruangan||[]).find(x=>x.id===ctx.id);
-    title.textContent=`Tandai Dipakai — ${esc(r?.nama||'')}`;
+    title.textContent=`Tandai Aktif — ${esc(r?.nama||'')}`;
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Nama Kegiatan *</label>
@@ -3641,7 +3641,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const catatan_v=document.getElementById('fi-ru-catatan').value.trim()||null;
     if(mMode==='ruangan-add'){
       if(!db.ruangan) db.ruangan=[];
-      db.ruangan.push(touch({id:uid(),nama:nama_v,tipe:tipe_v,lokasi:lokasi_v,kapasitas:kapasitas_v,catatan:catatan_v,status:'tersedia',kegiatan:null,pic:null,createdAt:Date.now()}));
+      db.ruangan.push(touch({id:uid(),nama:nama_v,tipe:tipe_v,lokasi:lokasi_v,kapasitas:kapasitas_v,catatan:catatan_v,status:'idle',kegiatan:null,pic:null,createdAt:Date.now()}));
     } else {
       const r=(db.ruangan||[]).find(x=>x.id===mCtx.id);
       if(!r) return;
@@ -3657,7 +3657,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     if(!kegiatan_v||!pic_v) return;
     const r=(db.ruangan||[]).find(x=>x.id===mCtx.id);
     if(!r) return;
-    r.status='dipakai'; r.kegiatan=kegiatan_v; r.pic=pic_v;
+    r.status='aktif'; r.kegiatan=kegiatan_v; r.pic=pic_v;
     touch(r); save(); renderRuangan(); closeModal();
   }
 
@@ -5509,10 +5509,10 @@ function renderRuangan(){
     return;
   }
 
-  /* Sort: dipakai dulu, lalu nama */
+  /* Sort: aktif dulu, lalu nama */
   const sorted=list.slice().sort((a,b)=>{
-    if(a.status==='dipakai'&&b.status!=='dipakai') return -1;
-    if(b.status==='dipakai'&&a.status!=='dipakai') return 1;
+    if(a.status==='aktif'&&b.status!=='aktif') return -1;
+    if(b.status==='aktif'&&a.status!=='aktif') return 1;
     return a.nama.localeCompare(b.nama,'id');
   });
 
@@ -5520,19 +5520,19 @@ function renderRuangan(){
   grid.className='ruangan-grid';
 
   sorted.forEach(r=>{
-    const isDipakai=r.status==='dipakai';
+    const isAktif=r.status==='aktif';
     const card=document.createElement('div');
-    card.className=`ruangan-card ${isDipakai?'dipakai':'tersedia'}`;
+    card.className=`ruangan-card ${isAktif?'aktif':'idle'}`;
     card.innerHTML=`
       <div style="display:flex;align-items:center;gap:8px">
-        <div class="ruangan-status-dot ${isDipakai?'dipakai':'tersedia'}"></div>
+        <div class="ruangan-status-dot ${isAktif?'aktif':'idle'}"></div>
         <span style="font-size:.88rem;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.nama)}</span>
         <span style="font-size:.58rem;font-weight:700;padding:1px 7px;border-radius:8px;border:1px solid var(--bd);color:var(--dim);white-space:nowrap">${esc(r.tipe||'internal')}</span>
       </div>
-      <div style="font-size:.8rem;font-weight:700;color:${isDipakai?'var(--red,#f87171)':'var(--green,#34d399)'}">
-        ${isDipakai?'🔴 Sedang Dipakai':'🟢 Tersedia'}
+      <div style="font-size:.8rem;font-weight:700;color:${isAktif?'var(--green,#34d399)':'var(--muted)'}">
+        ${isAktif?'🟢 Aktif':'⚪ Idle'}
       </div>
-      ${isDipakai&&r.kegiatan?`<div style="font-size:.72rem;color:var(--text);background:var(--surface);border-radius:7px;padding:7px 10px;display:flex;flex-direction:column;gap:3px">
+      ${isAktif&&r.kegiatan?`<div style="font-size:.72rem;color:var(--text);background:var(--surface);border-radius:7px;padding:7px 10px;display:flex;flex-direction:column;gap:3px">
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">KEGIATAN</span><br>${esc(r.kegiatan)}</div>
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">PIC</span><br>${esc(r.pic||'—')}</div>
       </div>`:''}
@@ -5542,18 +5542,18 @@ function renderRuangan(){
       </div>`:''}
       ${r.catatan?`<div style="font-size:.68rem;color:var(--dim);white-space:pre-wrap">${esc(r.catatan)}</div>`:''}
       ${isAdmin?`<div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap">
-        ${isDipakai
-          ?`<button class="task-add-inline-btn" data-ru-tersedia="${r.id}" style="flex:1;font-size:.7rem;border-color:var(--green,#34d399);color:var(--green,#34d399)">✓ Tandai Tersedia</button>`
-          :`<button class="task-add-inline-btn" data-ru-pakai="${r.id}" style="flex:1;font-size:.7rem;border-color:var(--red,#f87171);color:var(--red,#f87171)">● Tandai Dipakai</button>`
+        ${isAktif
+          ?`<button class="task-add-inline-btn" data-ru-idle="${r.id}" style="flex:1;font-size:.7rem">↩ Set Idle</button>`
+          :`<button class="task-add-inline-btn" data-ru-aktif="${r.id}" style="flex:1;font-size:.7rem;border-color:var(--green,#34d399);color:var(--green,#34d399)">▶ Set Aktif</button>`
         }
         <button class="asset-act-btn" data-ru-edit="${r.id}" title="Edit">✎</button>
         <button class="asset-act-btn del" data-ru-del="${r.id}" title="Hapus">✕</button>
       </div>`:''}
     `;
 
-    card.querySelector('[data-ru-pakai]')?.addEventListener('click',()=>openModal('ruangan-pakai',{id:r.id}));
-    card.querySelector('[data-ru-tersedia]')?.addEventListener('click',()=>{
-      r.status='tersedia'; r.kegiatan=null; r.pic=null;
+    card.querySelector('[data-ru-aktif]')?.addEventListener('click',()=>openModal('ruangan-pakai',{id:r.id}));
+    card.querySelector('[data-ru-idle]')?.addEventListener('click',()=>{
+      r.status='idle'; r.kegiatan=null; r.pic=null;
       touch(r); save(); renderRuangan();
     });
     card.querySelector('[data-ru-edit]')?.addEventListener('click',()=>openModal('ruangan-edit',{id:r.id}));
