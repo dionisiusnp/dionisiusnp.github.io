@@ -216,6 +216,7 @@ export default {
         broadcastProduk: mergeBroadcastProduk(gistDb.broadcastProduk || [], browserDb.broadcastProduk || []),
         lombas:     mergeLombas(gistDb.lombas || [], browserDb.lombas || []),
         bahanPers:  mergeArr(gistDb.bahanPers || [], browserDb.bahanPers || []),
+        ruangan:    mergeArr(gistDb.ruangan   || [], browserDb.ruangan   || []),
         projects:   mergeProjects(gistDb.projects || [], browserDb.projects || []),
         regulasi:   mergeRegulasi(gistDb.regulasi || gistDb.komunitas || {}, browserDb.regulasi || {}),
         settings:   browserDb.settings,
@@ -245,7 +246,7 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 
 | Tipe data | Strategi merge |
 |-----------|---------------|
-| Array top-level (`tasks`, `members`, `kelompoks`, `assets`, `events`, `cultures`, `notulensi`, `notulensiTopik`, `bahanPers`) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
+| Array top-level (`tasks`, `members`, `kelompoks`, `assets`, `events`, `cultures`, `notulensi`, `notulensiTopik`, `bahanPers`, `ruangan`) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
 | `projects[].members[].tasks[]` | Deep merge 3 level — per-task `updatedAt` menang |
 | `broadcastProduk[].kondisi[].items[]` | Deep merge 3 level — per-item `updatedAt` menang |
 | `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.keuntungan` / `regulasi.sanksi` | Merge by `id` + `updatedAt` |
