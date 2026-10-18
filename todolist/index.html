@@ -87,7 +87,7 @@ input[type="date"].form-input{color-scheme:dark}
 .nav-back:hover{color:var(--accent);border-color:var(--accent)}
 .nav-title{font-size:.82rem;font-weight:700}
 .nav-spacer{flex:1}
-.nav-role-badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid;letter-spacing:.05em;text-transform:uppercase;position:relative}
+.nav-role-badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid;letter-spacing:.05em;text-transform:uppercase}
 .role-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);min-width:160px;z-index:9000;overflow:hidden;display:none}
 .role-menu.open{display:block}
 .role-menu-item{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:.76rem;color:var(--text);cursor:pointer;transition:background .1s;white-space:nowrap;border:none;background:none;width:100%;text-align:left}
@@ -629,12 +629,15 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   <span class="nav-title admin-only" id="navOrgName" style="margin-left:4px;cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s" title="Klik untuk edit nama organisasi">Alteco</span>
   <span class="nav-title viewer-only" id="navOrgNameView" style="margin-left:4px">Alteco</span>
   <span class="nav-spacer"></span>
-  <span class="nav-role-badge" id="roleBadge" style="cursor:pointer" title="Opsi akun">—<div class="role-menu" id="roleMenu">
-    <button class="role-menu-item" id="rmTheme">🌙 Ganti Tema</button>
-    <button class="role-menu-item" id="rmSync">↻ Perbarui Data</button>
-    <div class="role-menu-divider"></div>
-    <button class="role-menu-item danger" id="rmLogout">⏏ Logout</button>
-  </div></span>
+  <div style="position:relative;display:flex;align-items:center">
+    <span class="nav-role-badge" id="roleBadge" style="cursor:pointer">—</span>
+    <div class="role-menu" id="roleMenu">
+      <button class="role-menu-item" id="rmTheme">🌙 Ganti Tema</button>
+      <button class="role-menu-item" id="rmSync">↻ Perbarui Data</button>
+      <div class="role-menu-divider"></div>
+      <button class="role-menu-item danger" id="rmLogout">⏏ Logout</button>
+    </div>
+  </div>
   <button class="bell-btn" id="bellBtn" title="Notifikasi hari ini">
     🔔
     <span class="bell-badge" id="bellBadge" style="display:none">0</span>
