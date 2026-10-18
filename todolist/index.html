@@ -2980,7 +2980,7 @@ function openModal(mode, ctx){
         <label class="form-label" id="fi-ru-lokasi-label">Lokasi <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
         <input class="form-input" id="fi-ru-lokasi" value="${esc(r?.lokasi||'')}" placeholder="${(r?.tipe||'internal')==='eksternal'?'https://maps.google.com/...':'misal: Gedung A Lt. 2'}" ${(r?.tipe||'internal')==='eksternal'?'type="url"':'maxlength="100"'}/>
       </div>
-      <div class="form-group">
+      <div class="form-group" id="fi-ru-kapasitas-group" style="${(r?.tipe||'internal')==='eksternal'?'display:none':''}">
         <label class="form-label">Kapasitas <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
         <input class="form-input" id="fi-ru-kapasitas" type="number" min="1" value="${esc(r?.kapasitas||'')}" placeholder="Jumlah orang"/>
       </div>
@@ -2992,10 +2992,13 @@ function openModal(mode, ctx){
     document.getElementById('fi-ru-nama').focus();
     document.getElementById('fi-ru-tipe').addEventListener('change',function(){
       const inp=document.getElementById('fi-ru-lokasi');
+      const kapGrp=document.getElementById('fi-ru-kapasitas-group');
       if(this.value==='eksternal'){
         inp.type='url'; inp.removeAttribute('maxlength'); inp.placeholder='https://maps.google.com/...';
+        kapGrp.style.display='none';
       } else {
         inp.type='text'; inp.setAttribute('maxlength','100'); inp.placeholder='misal: Gedung A Lt. 2';
+        kapGrp.style.display='';
       }
     });
   }
@@ -5544,9 +5547,9 @@ function renderRuangan(){
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">KEGIATAN</span><br>${esc(r.kegiatan)}</div>
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">PIC</span><br>${esc(r.pic||'—')}</div>
       </div>`:''}
-      ${r.lokasi||r.kapasitas?`<div style="font-size:.68rem;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap">
+      ${r.lokasi||r.kapasitas||r.tipe==='eksternal'?`<div style="font-size:.68rem;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap">
         ${r.lokasi?(r.tipe==='eksternal'?`<a href="${esc(r.lokasi)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">📍 Lihat Lokasi ↗</a>`:`<span>📍 ${esc(r.lokasi)}</span>`):''}
-        ${r.kapasitas?`<span>👥 Maks. ${r.kapasitas} orang</span>`:''}
+        ${r.tipe==='eksternal'?`<span>👥 Unlimited</span>`:(r.kapasitas?`<span>👥 Maks. ${r.kapasitas} orang</span>`:'')}
       </div>`:''}
       ${r.catatan?`<div style="font-size:.68rem;color:var(--dim);white-space:pre-wrap">${esc(r.catatan)}</div>`:''}
       ${isAdmin?`<div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap">
