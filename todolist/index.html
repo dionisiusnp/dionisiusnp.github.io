@@ -623,8 +623,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   <span class="nav-title admin-only" id="navOrgName" style="margin-left:4px;cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s" title="Klik untuk edit nama organisasi">Alteco</span>
   <span class="nav-title viewer-only" id="navOrgNameView" style="margin-left:4px">Alteco</span>
   <span class="nav-spacer"></span>
-  <span class="nav-role-badge" id="roleBadge">—</span>
-  <button class="theme-btn" id="logoutBtn" title="Logout / ganti akun" style="font-size:.7rem;opacity:.7">⏏</button>
+  <span class="nav-role-badge" id="roleBadge" style="cursor:pointer" title="Klik untuk logout / ganti akun">—</span>
   <button class="bell-btn" id="bellBtn" title="Notifikasi hari ini">
     🔔
     <span class="bell-badge" id="bellBadge" style="display:none">0</span>
@@ -2151,7 +2150,7 @@ document.getElementById('bellBtn').addEventListener('click',()=>{
   document.getElementById('btnInfoView').click();
 });
 document.getElementById('syncBtn').addEventListener('click',()=>syncFromGist());
-document.getElementById('logoutBtn').addEventListener('click',()=>{
+document.getElementById('roleBadge').addEventListener('click',()=>{
   sessionStorage.removeItem('rak_alteco_role');
   sessionStorage.removeItem('alteco_proj_session');
   sessionStorage.removeItem('alteco_bc_session');
