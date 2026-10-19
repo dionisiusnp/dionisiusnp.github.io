@@ -5528,18 +5528,27 @@ function renderRuangan(){
     return;
   }
 
-  /* Sort: aktif dulu, lalu nama */
-  const sorted=list.slice().sort((a,b)=>{
-    if(a.status==='aktif'&&b.status!=='aktif') return -1;
-    if(b.status==='aktif'&&a.status!=='aktif') return 1;
-    return a.nama.localeCompare(b.nama,'id');
-  });
+  /* Sort: aktif dulu, lalu terjadwal, lalu nama */
+  const nowSort=new Date();
+  function ruSort(r){
+    if(r.status!=='aktif') return 2;
+    if(r.tglKegiatan&&r.waktuMulai&&new Date(r.tglKegiatan+'T'+r.waktuMulai)>nowSort) return 1;
+    return 0;
+  }
+  const sorted=list.slice().sort((a,b)=>ruSort(a)-ruSort(b)||a.nama.localeCompare(b.nama,'id'));
 
   const grid=document.createElement('div');
   grid.className='ruangan-grid';
 
   sorted.forEach(r=>{
-    const isAktif=r.status==='aktif';
+    const now=new Date();
+    /* compute effective status: if scheduled in future, treat as idle */
+    let isAktif=r.status==='aktif';
+    let isTerjadwal=false;
+    if(isAktif&&r.tglKegiatan&&r.waktuMulai){
+      const startDt=new Date(r.tglKegiatan+'T'+r.waktuMulai);
+      if(startDt>now){ isAktif=false; isTerjadwal=true; }
+    }
     const card=document.createElement('div');
     card.className=`ruangan-card ${isAktif?'aktif':'idle'}`;
     card.innerHTML=`
@@ -5548,10 +5557,10 @@ function renderRuangan(){
         <span style="font-size:.88rem;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.nama)}</span>
         <span style="font-size:.58rem;font-weight:700;padding:1px 7px;border-radius:8px;border:1px solid var(--bd);color:var(--dim);white-space:nowrap">${esc(r.tipe||'internal')}</span>
       </div>
-      <div style="font-size:.8rem;font-weight:700;color:${isAktif?'var(--green,#34d399)':'var(--muted)'}">
-        ${isAktif?'🟢 Aktif':'⚪ Idle'}
+      <div style="font-size:.8rem;font-weight:700;color:${isAktif?'var(--green,#34d399)':isTerjadwal?'var(--accent)':'var(--muted)'}">
+        ${isAktif?'Aktif':isTerjadwal?'🕐 Terjadwal':'Idle'}
       </div>
-      ${isAktif&&r.kegiatan?`<div style="font-size:.72rem;color:var(--text);background:var(--surface);border-radius:7px;padding:7px 10px;display:flex;flex-direction:column;gap:3px">
+      ${r.status==='aktif'&&r.kegiatan?`<div style="font-size:.72rem;color:var(--text);background:var(--surface);border-radius:7px;padding:7px 10px;display:flex;flex-direction:column;gap:3px">
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">KEGIATAN</span><br>${esc(r.kegiatan)}</div>
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">PIC</span><br>${esc(r.pic||'—')}</div>
         ${r.tglKegiatan||r.waktuMulai?`<div style="color:var(--muted);font-size:.62rem;margin-top:2px">🗓 ${r.tglKegiatan?new Date(r.tglKegiatan+'T00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):''} ${r.waktuMulai?r.waktuMulai:''} ${r.waktuSelesai?'– '+r.waktuSelesai:''}</div>`:''}
