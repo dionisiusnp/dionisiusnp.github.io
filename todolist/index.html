@@ -5537,18 +5537,17 @@ function renderRuangan(){
   }
   const sorted=list.slice().sort((a,b)=>ruSort(a)-ruSort(b)||a.nama.localeCompare(b.nama,'id'));
 
-  const grid=document.createElement('div');
-  grid.className='ruangan-grid';
-
-  sorted.forEach(r=>{
-    const now=new Date();
-    /* compute effective status: if scheduled in future, treat as idle */
-    let isAktif=r.status==='aktif';
-    let isTerjadwal=false;
-    if(isAktif&&r.tglKegiatan&&r.waktuMulai){
-      const startDt=new Date(r.tglKegiatan+'T'+r.waktuMulai);
-      if(startDt>now){ isAktif=false; isTerjadwal=true; }
+  const nowCard=new Date();
+  function ruEffective(r){
+    let isAktif=r.status==='aktif', isTerjadwal=false;
+    if(isAktif&&r.tglKegiatan&&r.waktuMulai&&new Date(r.tglKegiatan+'T'+r.waktuMulai)>nowCard){
+      isAktif=false; isTerjadwal=true;
     }
+    return {isAktif,isTerjadwal};
+  }
+
+  function makeCard(r){
+    const {isAktif,isTerjadwal}=ruEffective(r);
     const card=document.createElement('div');
     card.className=`ruangan-card ${isAktif?'aktif':'idle'}`;
     card.innerHTML=`
@@ -5567,10 +5566,9 @@ function renderRuangan(){
       </div>`:''}
       ${r.lokasi?(r.tipe==='eksternal'?`<a href="${esc(r.lokasi)}" target="_blank" rel="noopener" style="font-size:.68rem;color:var(--accent);text-decoration:none">📍 Lihat Lokasi ↗</a>`:`<div style="font-size:.68rem;color:var(--dim)">📍 ${esc(r.lokasi)}</div>`):''}
       ${r.tipe==='eksternal'?`<div style="font-size:.68rem;color:var(--dim)">👥 Unlimited</div>`:(r.kapasitas?`<div style="font-size:.68rem;color:var(--dim)">👥 Maks. ${r.kapasitas} orang</div>`:'')}
-
       ${r.catatan?`<div style="font-size:.68rem;color:var(--dim);white-space:pre-wrap">${esc(r.catatan)}</div>`:''}
       ${isAdmin?`<div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap">
-        ${isAktif
+        ${isAktif||isTerjadwal
           ?`<button class="task-add-inline-btn" data-ru-idle="${r.id}" style="flex:1;font-size:.7rem">↩ Set Idle</button>`
           :`<button class="task-add-inline-btn" data-ru-aktif="${r.id}" style="flex:1;font-size:.7rem;border-color:var(--green,#34d399);color:var(--green,#34d399)">▶ Set Aktif</button>`
         }
@@ -5578,7 +5576,6 @@ function renderRuangan(){
         <button class="asset-act-btn del" data-ru-del="${r.id}" title="Hapus">✕</button>
       </div>`:''}
     `;
-
     card.querySelector('[data-ru-aktif]')?.addEventListener('click',()=>openModal('ruangan-pakai',{id:r.id}));
     card.querySelector('[data-ru-idle]')?.addEventListener('click',()=>{
       r.status='idle'; r.kegiatan=null; r.pic=null; r.tglKegiatan=null; r.waktuMulai=null; r.waktuSelesai=null;
@@ -5589,11 +5586,34 @@ function renderRuangan(){
       if(!confirm(`Hapus ruangan "${r.nama}"?`)) return;
       touch(Object.assign(r,{deleted:true})); save(); renderRuangan();
     });
+    return card;
+  }
 
-    grid.appendChild(card);
-  });
+  function makeSection(items, label){
+    const wrap=document.createElement('div');
+    const hdr=document.createElement('div');
+    hdr.style.cssText='padding:14px 16px 2px;font-size:.65rem;font-weight:800;color:var(--muted);letter-spacing:.08em;text-transform:uppercase';
+    hdr.textContent=label;
+    wrap.appendChild(hdr);
+    const grid=document.createElement('div');
+    grid.className='ruangan-grid';
+    items.forEach(r=>grid.appendChild(makeCard(r)));
+    wrap.appendChild(grid);
+    return wrap;
+  }
 
-  area.appendChild(grid);
+  const aktifList=sorted.filter(r=>{ const e=ruEffective(r); return e.isAktif||e.isTerjadwal; });
+  const idleList=sorted.filter(r=>{ const e=ruEffective(r); return !e.isAktif&&!e.isTerjadwal; });
+
+  if(aktifList.length){
+    area.appendChild(makeSection(aktifList,'Berlangsung / Terjadwal'));
+    if(idleList.length){
+      const sep=document.createElement('div');
+      sep.style.cssText='height:1px;background:var(--border);margin:4px 16px 0';
+      area.appendChild(sep);
+    }
+  }
+  if(idleList.length) area.appendChild(makeSection(idleList,'Idle'));
 }
 
 /* ══════════════════════════════════════════
