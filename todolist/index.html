@@ -3008,6 +3008,18 @@ function openModal(mode, ctx){
         <label class="form-label">Penanggung Jawab (PIC) *</label>
         <input class="form-input" id="fi-ru-pic" value="${esc(r?.pic||'')}" placeholder="Nama PIC" maxlength="100"/>
       </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <input class="form-input" id="fi-ru-tgl" type="date" value="${esc(r?.tglKegiatan||'')}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Waktu <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" id="fi-ru-mulai" type="time" value="${esc(r?.waktuMulai||'')}" style="flex:1"/>
+          <span style="font-size:.75rem;color:var(--muted)">s/d</span>
+          <input class="form-input" id="fi-ru-selesai" type="time" value="${esc(r?.waktuSelesai||'')}" style="flex:1"/>
+        </div>
+      </div>
     `;
     document.getElementById('fi-ru-kegiatan').focus();
   }
@@ -3662,6 +3674,9 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const r=(db.ruangan||[]).find(x=>x.id===mCtx.id);
     if(!r) return;
     r.status='aktif'; r.kegiatan=kegiatan_v; r.pic=pic_v;
+    r.tglKegiatan=document.getElementById('fi-ru-tgl').value||null;
+    r.waktuMulai=document.getElementById('fi-ru-mulai').value||null;
+    r.waktuSelesai=document.getElementById('fi-ru-selesai').value||null;
     touch(r); save(); renderRuangan(); closeModal();
   }
 
@@ -5539,6 +5554,7 @@ function renderRuangan(){
       ${isAktif&&r.kegiatan?`<div style="font-size:.72rem;color:var(--text);background:var(--surface);border-radius:7px;padding:7px 10px;display:flex;flex-direction:column;gap:3px">
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">KEGIATAN</span><br>${esc(r.kegiatan)}</div>
         <div><span style="color:var(--muted);font-size:.62rem;font-weight:700">PIC</span><br>${esc(r.pic||'—')}</div>
+        ${r.tglKegiatan||r.waktuMulai?`<div style="color:var(--muted);font-size:.62rem;margin-top:2px">🗓 ${r.tglKegiatan?new Date(r.tglKegiatan+'T00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):''} ${r.waktuMulai?r.waktuMulai:''} ${r.waktuSelesai?'– '+r.waktuSelesai:''}</div>`:''}
       </div>`:''}
       ${r.lokasi?(r.tipe==='eksternal'?`<a href="${esc(r.lokasi)}" target="_blank" rel="noopener" style="font-size:.68rem;color:var(--accent);text-decoration:none">📍 Lihat Lokasi ↗</a>`:`<div style="font-size:.68rem;color:var(--dim)">📍 ${esc(r.lokasi)}</div>`):''}
       ${r.tipe==='eksternal'?`<div style="font-size:.68rem;color:var(--dim)">👥 Unlimited</div>`:(r.kapasitas?`<div style="font-size:.68rem;color:var(--dim)">👥 Maks. ${r.kapasitas} orang</div>`:'')}
@@ -5556,7 +5572,7 @@ function renderRuangan(){
 
     card.querySelector('[data-ru-aktif]')?.addEventListener('click',()=>openModal('ruangan-pakai',{id:r.id}));
     card.querySelector('[data-ru-idle]')?.addEventListener('click',()=>{
-      r.status='idle'; r.kegiatan=null; r.pic=null;
+      r.status='idle'; r.kegiatan=null; r.pic=null; r.tglKegiatan=null; r.waktuMulai=null; r.waktuSelesai=null;
       touch(r); save(); renderRuangan();
     });
     card.querySelector('[data-ru-edit]')?.addEventListener('click',()=>openModal('ruangan-edit',{id:r.id}));
