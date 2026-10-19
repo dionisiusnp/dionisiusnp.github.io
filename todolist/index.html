@@ -1560,9 +1560,9 @@ document.getElementById('allItem').addEventListener('click',()=>select(ALL));
 function renderMain(){
   const empty=document.getElementById('emptyState');
   const tv=document.getElementById('taskView');
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnOrgView']
+  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnOrgView','btnPersView','btnRuanganView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
   viewMode='tasks';
 
