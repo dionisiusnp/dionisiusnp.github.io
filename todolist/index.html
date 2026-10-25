@@ -576,10 +576,23 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   .notul-topik-add-btn{width:calc(100% - 24px);margin:8px 12px 10px}
   .notul-topik-icon{width:26px;height:26px;font-size:.75rem}
 
+  /* Touch: show hover-only actions that aren't already handled */
+  .task-card-actions{opacity:1}
+  .culture-tl-acts{display:flex}
+  .bc-kondisi-acts{opacity:1}
+  .proj-task-acts{display:flex}
+  .proj-task-due{display:none}
+
+  /* Project task list: reduce deep indent on narrow screens */
+  .proj-task-list{padding-left:16px}
+  .proj-add-btn{margin-left:16px}
+
   /* Modal */
-  .modal-box{max-width:calc(100vw - 20px);padding:16px 14px 0}
-  .modal-foot{padding:10px 14px 14px}
-  .modal-head{padding:0 0 10px}
+  .modal{padding:10px}
+  .modal-box{max-width:calc(100vw - 20px);padding:0}
+  .modal-head{padding:14px 16px 10px}
+  .modal-body{padding:14px 16px}
+  .modal-foot{padding:10px 16px 14px}
 }
 </style>
 </head>
