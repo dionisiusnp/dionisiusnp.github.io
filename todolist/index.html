@@ -2664,6 +2664,7 @@ function openModal(mode, ctx){
     body.innerHTML = `
       <div class="form-group"><label class="form-label">Judul *</label><input class="form-input" id="fi-etitle" placeholder="Nama pemberitahuan"/></div>
       <div class="form-group"><label class="form-label">Deskripsi <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><textarea class="form-textarea" id="fi-edesc" placeholder="Detail tambahan..."></textarea></div>
+      <div class="form-group"><label class="form-label">URL <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><input class="form-input" id="fi-eurl" type="url" placeholder="https://..."/></div>
       <div class="form-group"><label class="form-label">Tipe</label>
         <div class="type-toggle">
           <button type="button" class="type-btn active-once" data-etype="once">📌 Sekali</button>
@@ -2717,6 +2718,7 @@ function openModal(mode, ctx){
     body.innerHTML = `
       <div class="form-group"><label class="form-label">Judul *</label><input class="form-input" id="fi-etitle" value="${esc(ev.title)}"/></div>
       <div class="form-group"><label class="form-label">Deskripsi <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><textarea class="form-textarea" id="fi-edesc">${esc(ev.desc||'')}</textarea></div>
+      <div class="form-group"><label class="form-label">URL <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label><input class="form-input" id="fi-eurl" type="url" value="${esc(ev.url||'')}" placeholder="https://..."/></div>
       <div class="form-group"><label class="form-label">Tipe</label>
         <div class="type-toggle">
           <button type="button" class="type-btn${!isRec?' active-once':''}" data-etype="once">📌 Sekali</button>
@@ -3319,6 +3321,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     db.events.push(touch({
       id:uid(), title:title2,
       desc:document.getElementById('fi-edesc').value.trim(),
+      url:document.getElementById('fi-eurl').value.trim()||null,
       type:etype,
       date:etype==='once'?(document.getElementById('fi-edate').value||null):null,
       recurrence:erecur,
@@ -3339,6 +3342,7 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const recurDateEl=document.getElementById('fi-erecurdate');
     ev.title=title2;
     ev.desc=document.getElementById('fi-edesc').value.trim();
+    ev.url=document.getElementById('fi-eurl').value.trim()||null;
     ev.type=etype;
     ev.date=etype==='once'?(document.getElementById('fi-edate').value||null):null;
     ev.recurrence=erecur;
@@ -3856,6 +3860,7 @@ function renderInfoList(area, today){
         ${metaDate?`<span>${metaDate}</span>`:''}
       </div>
       ${ev.desc?`<div style="font-size:.78rem;color:var(--muted);margin-top:6px;white-space:pre-wrap;line-height:1.55">${esc(ev.desc)}</div>`:''}
+      ${ev.url?`<a href="${esc(ev.url)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:.74rem;color:var(--accent);text-decoration:none">🔗 Buka Link ↗</a>`:''}
     `;
     if(role === 'admin'){
       const actions = document.createElement('div');
