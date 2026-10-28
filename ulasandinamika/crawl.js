@@ -63,11 +63,12 @@
           const date =
             card.querySelector('.rsGxI')?.textContent?.trim() ||
             card.querySelector('.dehysf')?.textContent?.trim() || '';
-          const moreBtn = card.querySelector('button.w8nwRe, [jsaction*="expandReview"]');
-          if (moreBtn) { try { moreBtn.click(); } catch(_){} }
           const text =
             card.querySelector('.wiI7pd')?.textContent?.trim() ||
-            card.querySelector('.MyEned')?.textContent?.trim() || '';
+            card.querySelector('.MyEned')?.textContent?.trim() ||
+            card.querySelector('[data-expandable-section]')?.textContent?.trim() ||
+            card.querySelector('.Jtu6Td')?.textContent?.trim() ||
+            card.querySelector('[jsname="bN97Pc"]')?.textContent?.trim() || '';
           const avatar = card.querySelector('img[src*="googleusercontent"]')?.src || '';
           if (name) extracted.push({ name, rating, date, text, avatar });
         } catch(_) {}
@@ -95,18 +96,36 @@
     return extracted;
   }
 
+  /* ── 2b. Klik semua tombol expand yang terlihat ── */
+  async function expandAll() {
+    if (isMaps) {
+      document.querySelectorAll('button.w8nwRe, [jsaction*="expandReview"], [aria-label*="Lainnya"], [aria-label*="More"]').forEach(btn => {
+        try { btn.click(); } catch(_) {}
+      });
+    } else {
+      document.querySelectorAll('[jsname="ShBeI"]').forEach(card => {
+        const btn = [...card.querySelectorAll('span')].find(el =>
+          /lebih banyak|selengkapnya/i.test(el.textContent.trim()) && el.childElementCount === 0
+        );
+        if (btn) { try { btn.click(); } catch(_) {} }
+      });
+    }
+    await new Promise(r => setTimeout(r, 400));
+  }
+
   /* ── 3. Scroll sambil kumpulkan ── */
   const seen = new Map();
   let noNewCount = 0, scrolls = 0;
-  const STEP  = isMaps ? 600  : 300;
-  const DELAY = isMaps ? 1500 : 1000;
-  const MAX_NO_NEW = isMaps ? 20 : 12;
+  const STEP  = isMaps ? 400  : 300;
+  const DELAY = isMaps ? 1800 : 1000;
+  const MAX_NO_NEW = isMaps ? 50 : 12;
 
   console.log(`⏳ Scroll + ekstrak... (${isMaps ? 'Maps: estimasi 10-20 menit' : 'Search: ~1 menit, max ~30 ulasan'})`);
   scrollTarget.scrollTop = 0;
   await new Promise(r => setTimeout(r, 1000));
 
   while (noNewCount < MAX_NO_NEW) {
+    await expandAll();
     const batch = extractVisible();
     let newFound = 0;
     for (const item of batch) {
