@@ -33,18 +33,19 @@
   const cards = document.querySelectorAll('[jsname="ShBeI"]');
   console.log(`Total card: ${cards.length}`);
 
-  /* ── DEBUG: log semua elemen dalam card pertama (class + text pendek) ── */
+  /* ── DEBUG RATING: lihat isi .h3PQJ dan .y3Ibjb di card pertama ── */
   if (cards.length > 0) {
-    console.log('=== SEMUA ELEMEN di card[0] ===');
-    cards[0].querySelectorAll('*').forEach(el => {
-      const cls = el.className && typeof el.className === 'string' ? el.className.trim() : '';
-      const txt = el.childElementCount === 0 ? el.textContent.trim().slice(0, 80) : '';
-      const tag = el.tagName.toLowerCase();
-      const aria = el.getAttribute('aria-label') || '';
-      const jsn = el.getAttribute('jsname') || '';
-      if (cls || txt || aria) {
-        console.log(`${tag}${cls?'.'+cls.split(' ').join('.'):''}${jsn?'[jsname='+jsn+']':''} | aria="${aria}" | txt="${txt}"`);
-      }
+    const c = cards[0];
+    const ratingArea = c.querySelector('.h3PQJ');
+    const starSpan = c.querySelector('.y3Ibjb');
+    console.log('=== DEBUG RATING ===');
+    console.log('.h3PQJ innerHTML:', ratingArea?.innerHTML?.slice(0, 500) || 'tidak ada');
+    console.log('.y3Ibjb innerHTML:', starSpan?.innerHTML?.slice(0, 300) || 'tidak ada');
+    console.log('.y3Ibjb textContent:', JSON.stringify(starSpan?.textContent));
+    console.log('.y3Ibjb childElementCount:', starSpan?.childElementCount);
+    // log semua img dan span tanpa filter di dalam h3PQJ
+    ratingArea?.querySelectorAll('*').forEach(el => {
+      console.log(`  ${el.tagName} cls="${el.className}" aria="${el.getAttribute('aria-label')||''}" txt="${el.textContent.trim().slice(0,30)}"`);
     });
     console.log('=== END DEBUG ===');
   }
@@ -55,83 +56,51 @@
   cards.forEach((card, i) => {
     try {
       /* Nama */
-      const nameEl =
-        card.querySelector('.rhtdWc') ||   // confirmed dari debug
-        card.querySelector('.d4r55') ||
-        card.querySelector('.TSUbDb') ||
-        card.querySelector('[class*="Eolon"]') ||
-        card.querySelector('a span:first-child');
-      let name = (nameEl?.textContent || '').trim()
-        .replace(/\s*[\d,.]+\s*(ulasan|foto|review|Local Guide)[^]*/i, '').trim();
+      const name = card.querySelector('.rhtdWc')?.textContent?.trim() || '';
 
-      /* Rating — coba berbagai pendekatan */
+      /* Rating — fallback bertingkat */
       let rating = null;
-
-      // A) aria-label langsung di elemen bintang
-      card.querySelectorAll('[aria-label]').forEach(el => {
-        const lbl = el.getAttribute('aria-label') || '';
-        const m = lbl.match(/(\d+(?:[.,]\d+)?)\s*(bintang|stars?|out of)/i);
-        if (m) rating = parseFloat(m[1].replace(',', '.'));
-      });
-
-      // B) hitung img/svg bintang terisi
-      if (!rating) {
-        const filled = card.querySelectorAll(
-          'img[src*="star"][src*="active"], img[src*="star_rate"], ' +
-          '.lTi8oc, .DkEaL, .hCCjke, .fFtTze, [class*="star"][class*="fill"]'
-        );
-        if (filled.length) rating = filled.length;
+      const starSpan = card.querySelector('.y3Ibjb');
+      if (starSpan) {
+        // A) aria-label di dalam starSpan
+        starSpan.querySelectorAll('[aria-label]').forEach(el => {
+          const m = (el.getAttribute('aria-label') || '').match(/(\d+(?:[.,]\d+)?)\s*(bintang|star)/i);
+          if (m) rating = parseFloat(m[1].replace(',', '.'));
+        });
+        // B) hitung img bintang
+        if (!rating) {
+          const imgs = starSpan.querySelectorAll('img');
+          if (imgs.length >= 1 && imgs.length <= 5) rating = imgs.length;
+        }
+        // C) hitung child elements (tiap bintang = 1 elemen)
+        if (!rating) {
+          const n = starSpan.childElementCount;
+          if (n >= 1 && n <= 5) rating = n;
+        }
+        // D) karakter ★ atau unicode bintang
+        if (!rating) {
+          const stars = (starSpan.textContent.match(/[★⭐]/g) || []).length;
+          if (stars >= 1 && stars <= 5) rating = stars;
+        }
       }
-
-      // C) hitung karakter ★ dalam text
+      // E) cek .h3PQJ secara keseluruhan jika masih null
       if (!rating) {
-        const allText = card.textContent;
-        const stars = (allText.match(/★/g) || []).length;
-        if (stars >= 1 && stars <= 5) rating = stars;
-      }
-
-      // D) cari span/div yang hanya berisi angka 1-5 diikuti "/" atau "dari"
-      if (!rating) {
-        [...card.querySelectorAll('span,div')].forEach(el => {
-          if (el.children.length === 0) {
-            const m = el.textContent.trim().match(/^([1-5])(?:\s*\/\s*5|\s*dari\s*5)?$/);
-            if (m) rating = parseInt(m[1]);
-          }
+        const h3 = card.querySelector('.h3PQJ');
+        h3?.querySelectorAll('[aria-label]').forEach(el => {
+          const m = (el.getAttribute('aria-label') || '').match(/(\d+(?:[.,]\d+)?)\s*(bintang|star)/i);
+          if (m) rating = parseFloat(m[1].replace(',', '.'));
         });
       }
 
       /* Tanggal */
-      const dateEl =
-        card.querySelector('.rsGxI') ||
-        card.querySelector('.dehysf') ||
-        card.querySelector('.y3Ibjb') ||
-        [...card.querySelectorAll('span')].find(el =>
-          /^\d+\s*(bulan|tahun|hari|minggu|jam|detik|menit|month|year|day|week)/i.test(el.textContent.trim())
-        );
-      const date = dateEl?.textContent?.trim() || '';
+      const date = card.querySelector('span.m6Mr5d')?.textContent?.trim() || '';
 
       /* Teks ulasan */
-      // expand "Lainnya" dulu
-      const moreBtn = card.querySelector('a.review-more-link, [jsaction*="reviewBody"] a');
-      if (moreBtn) { try { moreBtn.click(); } catch(_){} }
-
-      const textEl =
-        card.querySelector('[jsname="bN97Pc"]') ||
-        card.querySelector('.wiI7pd') ||
-        card.querySelector('.MyEned') ||
-        card.querySelector('.Jtu6Td') ||
-        card.querySelector('[class*="review-full"]') ||
-        card.querySelector('[data-expandable-section]') ||
-        // fallback: ambil semua span teks panjang (>10 char) yang bukan nama/tanggal
-        [...card.querySelectorAll('span')].find(el =>
-          el.children.length === 0 &&
-          el.textContent.trim().length > 15 &&
-          el !== dateEl && el !== nameEl
-        );
-      const text = textEl?.textContent?.trim() || '';
+      const text = card.querySelector('div.d83Iyc')?.textContent?.trim() || '';
 
       /* Avatar */
-      const avatar = card.querySelector('img[src*="googleusercontent"]')?.src || '';
+      const avatar = card.querySelector('img[src*="googleusercontent"]')?.src ||
+                     card.querySelector('.QNewyd')?.style?.backgroundImage?.match(/url\("([^"]+)"\)/)?.[1] || '';
 
       results.push({ index: i + 1, name, rating, date, text, avatar });
     } catch (e) {
@@ -140,8 +109,8 @@
   });
 
   const withRating = results.filter(r => r.rating !== null).length;
-  const withText = results.filter(r => r.text).length;
-  console.log(`✅ Ekstrak ${results.length} ulasan | rating: ${withRating} | teks: ${withText}`);
+  const withText   = results.filter(r => r.text).length;
+  console.log(`✅ Ekstrak ${results.length} | rating OK: ${withRating} | teks OK: ${withText}`);
 
   /* ── 4. Download JSON ── */
   const blob = new Blob([JSON.stringify({
