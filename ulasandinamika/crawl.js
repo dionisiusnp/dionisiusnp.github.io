@@ -30,13 +30,23 @@
   }
   console.log(`✅ Scroll selesai (${scrolls}x).`);
 
-  /* ── DEBUG: dump innerHTML card pertama untuk cek struktur ── */
   const cards = document.querySelectorAll('[jsname="ShBeI"]');
   console.log(`Total card: ${cards.length}`);
+
+  /* ── DEBUG: log semua elemen dalam card pertama (class + text pendek) ── */
   if (cards.length > 0) {
-    console.log('=== innerHTML card pertama (untuk debug selector) ===');
-    console.log(cards[0].innerHTML);
-    console.log('=====================================================');
+    console.log('=== SEMUA ELEMEN di card[0] ===');
+    cards[0].querySelectorAll('*').forEach(el => {
+      const cls = el.className && typeof el.className === 'string' ? el.className.trim() : '';
+      const txt = el.childElementCount === 0 ? el.textContent.trim().slice(0, 80) : '';
+      const tag = el.tagName.toLowerCase();
+      const aria = el.getAttribute('aria-label') || '';
+      const jsn = el.getAttribute('jsname') || '';
+      if (cls || txt || aria) {
+        console.log(`${tag}${cls?'.'+cls.split(' ').join('.'):''}${jsn?'[jsname='+jsn+']':''} | aria="${aria}" | txt="${txt}"`);
+      }
+    });
+    console.log('=== END DEBUG ===');
   }
 
   /* ── 3. Ekstrak ulasan ── */
@@ -46,6 +56,7 @@
     try {
       /* Nama */
       const nameEl =
+        card.querySelector('.rhtdWc') ||   // confirmed dari debug
         card.querySelector('.d4r55') ||
         card.querySelector('.TSUbDb') ||
         card.querySelector('[class*="Eolon"]') ||
