@@ -7,7 +7,7 @@
  * 2. Klik "981 ulasan" untuk buka panel ulasan
  * 3. Buka DevTools → Console
  * 4. Paste seluruh script ini → Enter
- * 5. Tunggu sampai selesai scroll (~1-2 menit tergantung jumlah ulasan)
+ * 5. Tunggu sampai selesai scroll (~1-2 menit)
  * 6. File JSON otomatis ter-download
  */
 
@@ -18,7 +18,6 @@
     document.querySelector('[jscontroller="AdYPFb"]') ||
     document.querySelector('.RVCQse') ||
     (() => {
-      // fallback: cari div yang overflow-y scroll dan tinggi > 300
       return [...document.querySelectorAll('div')].find(el => {
         const s = getComputedStyle(el);
         return (s.overflowY === 'scroll' || s.overflowY === 'auto') && el.clientHeight > 300;
@@ -30,100 +29,103 @@
     return;
   }
 
-  console.log('✅ Scroll target ditemukan:', scrollTarget.className || scrollTarget.tagName);
+  console.log('✅ Scroll target:', scrollTarget.className || scrollTarget.tagName);
 
-  /* ── 2. Scroll sampai bawah untuk load semua ulasan ── */
-  let lastHeight = 0;
-  let sameCount = 0;
-  let totalScrolls = 0;
-
-  console.log('⏳ Mulai scroll untuk load semua ulasan...');
+  /* ── 2. Scroll sampai bawah ── */
+  let lastHeight = 0, sameCount = 0, totalScrolls = 0;
+  console.log('⏳ Scrolling...');
 
   while (sameCount < 5) {
     scrollTarget.scrollTop = scrollTarget.scrollHeight;
     await new Promise(r => setTimeout(r, 800));
-
-    const newHeight = scrollTarget.scrollHeight;
-    if (newHeight === lastHeight) {
-      sameCount++;
-    } else {
-      sameCount = 0;
-      lastHeight = newHeight;
-    }
+    const h = scrollTarget.scrollHeight;
+    sameCount = h === lastHeight ? sameCount + 1 : 0;
+    lastHeight = h;
     totalScrolls++;
-    if (totalScrolls % 10 === 0) console.log(`  Scroll ke-${totalScrolls}, height: ${newHeight}px`);
+    if (totalScrolls % 10 === 0) console.log(`  scroll ke-${totalScrolls}, height: ${h}px`);
   }
+  console.log(`✅ Selesai scroll (${totalScrolls}x). Ekstrak data...`);
 
-  console.log(`✅ Selesai scroll (${totalScrolls}x). Mulai ekstrak data...`);
-
-  /* ── 3. Ekstrak data ulasan ── */
+  /* ── 3. Ekstrak ulasan ── */
   const results = [];
+  const cards = document.querySelectorAll('[jsname="ShBeI"]');
 
-  // Selector utama: card ulasan individual
-  const reviewCards = document.querySelectorAll('[jsname="ShBeI"]');
-
-  reviewCards.forEach((card, i) => {
+  cards.forEach((card, i) => {
     try {
-      // Nama reviewer
-      const nameEl = card.querySelector('[class*="Eolon"]') ||
-                     card.querySelector('.TSUbDb') ||
-                     card.querySelector('[jsname="r4nke"]') ||
-                     card.querySelector('a[href*="contrib"]');
-      const name = nameEl?.textContent?.trim() || '';
-
-      // Rating (hitung bintang terisi)
-      const starsEl = card.querySelectorAll('[aria-label*="bintang"], [aria-label*="star"], span[role="img"]');
-      let rating = null;
-      starsEl.forEach(el => {
-        const lbl = el.getAttribute('aria-label') || '';
-        const match = lbl.match(/(\d+(\.\d+)?)/);
-        if (match) rating = parseFloat(match[1]);
-      });
-      // fallback: hitung elemen bintang aktif
-      if (!rating) {
-        const activeStar = card.querySelectorAll('.z3HNkc, [class*="star"][class*="active"], .hCCjke');
-        if (activeStar.length) rating = activeStar.length;
+      /* Nama — ambil hanya teks node pertama / span nama saja */
+      const nameEl =
+        card.querySelector('.d4r55') ||          // nama reviewer (umum)
+        card.querySelector('.TSUbDb') ||
+        card.querySelector('[class*="Eolon"]') ||
+        card.querySelector('a[href*="contrib"] span') ||
+        card.querySelector('a span');
+      // Bersihkan: hapus " · X ulasan" / "X ulasan" / "X foto" dll
+      let name = (nameEl?.textContent || '').trim().replace(/\s*[\d,]+\s*(ulasan|foto|review)[^]*/i, '').trim();
+      // fallback: ambil dari link teks utuh lalu split
+      if (!name) {
+        const link = card.querySelector('a[href*="contrib"]');
+        name = (link?.textContent || '').replace(/\s*[\d,]+\s*(ulasan|foto|review|Local Guide)[^]*/i, '').trim();
       }
 
-      // Tanggal
-      const dateEl = card.querySelector('[class*="dehysf"], .rsGxI, .y3Ibjb, [jsname="MZnM8e"]') ||
-                     [...card.querySelectorAll('span')].find(el => /\d+\s*(bulan|tahun|hari|minggu|jam)/i.test(el.textContent));
+      /* Rating — cari elemen dengan aria-label "X bintang" atau "X stars" */
+      let rating = null;
+      card.querySelectorAll('[aria-label]').forEach(el => {
+        const lbl = el.getAttribute('aria-label') || '';
+        const m = lbl.match(/^(\d+(?:[.,]\d+)?)\s*(bintang|star)/i);
+        if (m) rating = parseFloat(m[1].replace(',', '.'));
+      });
+      // fallback: hitung img/span bintang penuh
+      if (!rating) {
+        const stars = card.querySelectorAll('.hCCjke, .fFtTze, [class*="filled"]');
+        if (stars.length) rating = stars.length;
+      }
+
+      /* Tanggal */
+      const dateEl =
+        card.querySelector('.rsGxI') ||
+        card.querySelector('.dehysf') ||
+        card.querySelector('.y3Ibjb') ||
+        [...card.querySelectorAll('span')].find(el =>
+          /^\d+\s*(bulan|tahun|hari|minggu|jam|detik|menit|month|year|day|week)/i.test(el.textContent.trim())
+        );
       const date = dateEl?.textContent?.trim() || '';
 
-      // Teks ulasan — expand "Lainnya" dulu kalau ada
-      const moreBtn = card.querySelector('[jsaction*="click:"] span[style*="cursor"]') ||
-                      card.querySelector('button.review-more-link, [data-expandable]');
-      if (moreBtn) moreBtn.click();
+      /* Teks ulasan — expand "Lainnya" dulu */
+      const expandBtn = card.querySelector('[jsaction*="pane.review"] button, .review-more-link, [data-expandable-section] button');
+      if (expandBtn) { try { expandBtn.click(); } catch(_){} }
 
-      const textEl = card.querySelector('[jsname="bN97Pc"], .Jtu6Td, [class*="review-full-text"], .wiI7pd');
+      const textEl =
+        card.querySelector('[jsname="bN97Pc"]') ||
+        card.querySelector('.wiI7pd') ||
+        card.querySelector('.MyEned') ||
+        card.querySelector('[class*="review-full"]') ||
+        card.querySelector('.Jtu6Td');
       const text = textEl?.textContent?.trim() || '';
 
-      // Foto reviewer
-      const avatarEl = card.querySelector('img[src*="googleusercontent"], img[jsname]');
+      /* Avatar */
+      const avatarEl = card.querySelector('img[src*="googleusercontent"]');
       const avatar = avatarEl?.src || '';
 
-      // Hanya simpan kalau minimal ada nama atau teks
-      if (name || text) {
-        results.push({ index: i + 1, name, rating, date, text, avatar });
-      }
+      if (name || text) results.push({ index: i + 1, name, rating, date, text, avatar });
     } catch (e) {
       console.warn(`Skip card ${i}:`, e.message);
     }
   });
 
-  console.log(`✅ Berhasil ekstrak ${results.length} ulasan dari ${reviewCards.length} card.`);
+  console.log(`✅ Ekstrak ${results.length} ulasan dari ${cards.length} card.`);
 
-  if (results.length === 0) {
-    // Fallback: coba selector alternatif
-    console.warn('Tidak ada hasil dengan selector utama. Coba selector fallback...');
-    document.querySelectorAll('.bwb7ce').forEach((card, i) => {
-      const spans = [...card.querySelectorAll('span')].map(s => s.textContent.trim()).filter(Boolean);
-      results.push({ index: i + 1, raw: spans.slice(0, 10) });
-    });
-    console.log(`Fallback: ${results.length} card ditemukan (raw data).`);
+  /* ── Debug: log nama semua card untuk cek selector ── */
+  if (results.filter(r => !r.rating).length > results.length / 2) {
+    console.warn('⚠️ Banyak rating null. Cek manual:');
+    const sample = cards[0];
+    if (sample) {
+      console.log('Semua aria-label di card pertama:',
+        [...sample.querySelectorAll('[aria-label]')].map(el => el.getAttribute('aria-label'))
+      );
+    }
   }
 
-  /* ── 4. Download sebagai JSON ── */
+  /* ── 4. Download JSON ── */
   const payload = {
     source: 'Google Reviews — Universitas Dinamika',
     crawledAt: new Date().toISOString(),
@@ -133,14 +135,16 @@
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `ulasan-dinamika-${new Date().toISOString().slice(0,10)}.json`;
+  const a = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `ulasan-dinamika-${new Date().toISOString().slice(0,10)}.json`
+  });
   document.body.appendChild(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
 
-  console.log(`🎉 Download selesai: ${a.download}`);
-  console.table(results.slice(0, 5));
+  console.log(`🎉 Download: ${a.download}`);
+  console.log('Preview 10 pertama:');
+  console.table(results.slice(0, 10));
 })();
