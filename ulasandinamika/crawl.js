@@ -17,18 +17,32 @@
   if (!scrollTarget) { alert('Panel ulasan tidak ditemukan.'); return; }
   console.log('✅ Scroll target:', scrollTarget.className || scrollTarget.tagName);
 
-  /* ── 2. Scroll sampai bawah ── */
-  let lastH = 0, same = 0, scrolls = 0;
-  console.log('⏳ Scrolling...');
-  while (same < 5) {
+  /* ── 2. Scroll sampai bawah — agresif + sabar ── */
+  let lastCount = 0, sameCount = 0, scrolls = 0;
+  console.log('⏳ Scrolling... (bisa 3-10 menit untuk 900+ ulasan)');
+
+  while (sameCount < 8) {
+    // scroll ke bawah
     scrollTarget.scrollTop = scrollTarget.scrollHeight;
-    await new Promise(r => setTimeout(r, 800));
-    const h = scrollTarget.scrollHeight;
-    same = h === lastH ? same + 1 : 0;
-    lastH = h; scrolls++;
-    if (scrolls % 10 === 0) console.log(`  ke-${scrolls}, h=${h}`);
+    await new Promise(r => setTimeout(r, 1500));
+
+    // scroll sedikit ke atas lalu balik bawah (paksa lazy-load trigger)
+    scrollTarget.scrollTop -= 300;
+    await new Promise(r => setTimeout(r, 200));
+    scrollTarget.scrollTop = scrollTarget.scrollHeight;
+    await new Promise(r => setTimeout(r, 1500));
+
+    const currentCount = document.querySelectorAll('[jsname="ShBeI"]').length;
+    if (currentCount === lastCount) {
+      sameCount++;
+    } else {
+      sameCount = 0;
+      lastCount = currentCount;
+    }
+    scrolls++;
+    if (scrolls % 5 === 0) console.log(`  scroll ke-${scrolls} | ulasan ter-load: ${currentCount}`);
   }
-  console.log(`✅ Scroll selesai (${scrolls}x).`);
+  console.log(`✅ Scroll selesai (${scrolls}x) | total card: ${document.querySelectorAll('[jsname="ShBeI"]').length}`);
 
   const cards = document.querySelectorAll('[jsname="ShBeI"]');
   console.log(`Total card: ${cards.length}`);
