@@ -103,15 +103,15 @@ input[type="date"].form-input{color-scheme:dark}
 
 /* ── Navbar dropdowns ── */
 .nb-group{position:relative}
-.nb-trigger{display:flex;align-items:center;gap:5px;padding:7px 12px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:7px;font-size:.9rem;font-weight:600;white-space:nowrap;transition:background .15s,color .15s}
-.nb-tl{font-size:.78rem}
+.nb-trigger{display:flex;align-items:center;gap:5px;padding:7px 12px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:7px;font-size:.78rem;font-weight:600;white-space:nowrap;transition:background .15s,color .15s}
+.nb-ico{font-size:1.1rem;line-height:1;flex-shrink:0}
 .nb-trigger:hover{background:var(--card);color:var(--text)}
 .nb-trigger.active{background:rgba(108,111,245,.12);color:var(--accent)}
 .nb-trigger.open .nb-arrow{transform:rotate(180deg)}
 .nb-arrow{font-size:.55rem;transition:transform .2s;display:inline-block;opacity:.6}
 .nb-dropdown{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:5px;min-width:170px;z-index:200;display:none;flex-direction:column;gap:1px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .nb-dropdown.open{display:flex}
-.nb-feature-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:7px;border:none;background:transparent;color:var(--text);font-size:.88rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;text-align:left;width:100%}
+.nb-feature-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:7px;border:none;background:transparent;color:var(--text);font-size:.8rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;text-align:left;width:100%}
 .nb-feature-item:hover{background:var(--surface)}
 .nb-feature-item.active{background:rgba(108,111,245,.12);color:var(--accent);font-weight:600}
 
@@ -686,30 +686,30 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   </div>
   <div class="nav-center">
     <div class="nb-group" id="nbgOrg">
-      <button class="nb-trigger" id="nbtOrg">🏢 <span class="nb-tl">Organisasi</span> <span class="nb-arrow">▾</span></button>
+      <button class="nb-trigger" id="nbtOrg"><span class="nb-ico">🏢</span><span class="nb-tl">Organisasi</span> <span class="nb-arrow">▾</span></button>
       <div class="nb-dropdown" id="nbdOrg">
-        <button class="nb-feature-item" id="btnOrgView">🏢 Bagan</button>
-        <button class="nb-feature-item" id="btnKomunitasView">📋 Regulasi</button>
-        <button class="nb-feature-item" id="btnCultureView">🌱 Sejarah</button>
-        <button class="nb-feature-item project-access" id="btnProjectView">🗂️ Proyek</button>
+        <button class="nb-feature-item" id="btnOrgView"><span class="nb-ico">🏢</span> Bagan</button>
+        <button class="nb-feature-item" id="btnKomunitasView"><span class="nb-ico">📋</span> Regulasi</button>
+        <button class="nb-feature-item" id="btnCultureView"><span class="nb-ico">🌱</span> Sejarah</button>
+        <button class="nb-feature-item project-access" id="btnProjectView"><span class="nb-ico">🗂️</span> Proyek</button>
       </div>
     </div>
     <div class="nb-group" id="nbgProgram">
-      <button class="nb-trigger" id="nbtProgram">📣 <span class="nb-tl">Program</span> <span class="nb-arrow">▾</span></button>
+      <button class="nb-trigger" id="nbtProgram"><span class="nb-ico">📣</span><span class="nb-tl">Program</span> <span class="nb-arrow">▾</span></button>
       <div class="nb-dropdown" id="nbdProgram">
-        <button class="nb-feature-item" id="btnBroadcastView">📣 Broadcast</button>
-        <button class="nb-feature-item" id="btnLombaView">🏆 Lomba</button>
-        <button class="nb-feature-item" id="btnPersView">📰 Pers</button>
+        <button class="nb-feature-item" id="btnBroadcastView"><span class="nb-ico">📣</span> Broadcast</button>
+        <button class="nb-feature-item" id="btnLombaView"><span class="nb-ico">🏆</span> Lomba</button>
+        <button class="nb-feature-item" id="btnPersView"><span class="nb-ico">📰</span> Pers</button>
       </div>
     </div>
     <div class="nb-group" id="nbgFasilitas">
-      <button class="nb-trigger" id="nbtFasilitas">🏠 <span class="nb-tl">Fasilitas</span> <span class="nb-arrow">▾</span></button>
+      <button class="nb-trigger" id="nbtFasilitas"><span class="nb-ico">🏠</span><span class="nb-tl">Fasilitas</span> <span class="nb-arrow">▾</span></button>
       <div class="nb-dropdown" id="nbdFasilitas">
-        <button class="nb-feature-item" id="btnRuanganView">🏠 Ruangan</button>
-        <button class="nb-feature-item" id="btnNotulensiView">📝 Notulensi</button>
-        <button class="nb-feature-item" id="btnAssetView">📦 Inventaris</button>
-        <button class="nb-feature-item" id="btnInfoView">🔔 Pemberitahuan</button>
-        <button class="nb-feature-item admin-only" id="btnSettingsView">⚙️ Pengaturan</button>
+        <button class="nb-feature-item" id="btnRuanganView"><span class="nb-ico">🏠</span> Ruangan</button>
+        <button class="nb-feature-item" id="btnNotulensiView"><span class="nb-ico">📝</span> Notulensi</button>
+        <button class="nb-feature-item" id="btnAssetView"><span class="nb-ico">📦</span> Inventaris</button>
+        <button class="nb-feature-item" id="btnInfoView"><span class="nb-ico">🔔</span> Pemberitahuan</button>
+        <button class="nb-feature-item admin-only" id="btnSettingsView"><span class="nb-ico">⚙️</span> Pengaturan</button>
       </div>
     </div>
   </div>
