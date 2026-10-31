@@ -118,6 +118,17 @@ input[type="date"].form-input{color-scheme:dark}
 /* ── App ── */
 .app{flex:1;display:flex;overflow:hidden}
 
+/* ── Sidebar tabs (mobile) ── */
+.sb-tab-bar{display:none;flex-shrink:0;border-bottom:1px solid var(--bd);transition:border-color .25s}
+.sb-tab{flex:1;padding:10px 0;font-size:.75rem;font-weight:600;color:var(--muted);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.sb-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.sb-nav-label{font-size:.58rem;font-weight:700;color:var(--dim);letter-spacing:.09em;text-transform:uppercase;padding:8px 12px 4px}
+.sb-nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border:none;background:transparent;color:var(--text);font-size:.82rem;font-weight:500;cursor:pointer;border-radius:7px;width:100%;text-align:left;transition:background .15s}
+.sb-nav-item:hover,.sb-nav-item:active{background:var(--card)}
+.sb-nav-item .sb-ico{font-size:1rem;flex-shrink:0}
+#sbPanelFitur{display:none;flex-direction:column;overflow-y:auto}
+#sbPanelAnggota{display:flex;flex:1;overflow:hidden;flex-direction:column}
+
 /* ── Sidebar ── */
 .sidebar{flex-shrink:0;width:280px;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border-right:1px solid var(--bd);transition:background .25s,border-color .25s,width .2s}
 .sidebar.sb-mini{width:40px}
@@ -563,9 +574,17 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   .nb-trigger{padding:7px 8px}
 
   /* Sidebar drawer */
-  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;flex-direction:column;width:280px!important;border-right:none}
-  .sidebar.sb-mini{width:280px!important;transform:translateX(-100%)}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;flex-direction:column;width:300px!important;border-right:none}
+  .sidebar.sb-mini{width:300px!important;transform:translateX(-100%)}
   .sidebar.mobile-open{transform:translateX(0)}
+  /* Sidebar tabs mobile: visible, panels driven by data-tab */
+  .sb-tab-bar{display:flex}
+  .sidebar[data-tab="fitur"] #sbPanelFitur{display:flex;flex:1;overflow-y:auto}
+  .sidebar[data-tab="fitur"] #sbPanelAnggota{display:none}
+  .sidebar[data-tab="anggota"] #sbPanelFitur{display:none}
+  .sidebar[data-tab="anggota"] #sbPanelAnggota{display:flex;flex:1;overflow:hidden;flex-direction:column}
+  /* Hide desktop-only toggle btn on mobile */
+  .sb-toggle-btn{display:none}
 
   /* Touch: always show hover-only actions */
   .grp-actions{opacity:1}
@@ -733,21 +752,47 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 
   <!-- Sidebar -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <div class="sidebar">
-    <div class="sidebar-head">
-      <span class="sidebar-head-title">Anggota</span>
-      <button class="sb-toggle-btn" id="sbToggleBtn" title="Sembunyikan sidebar">‹</button>
+  <div class="sidebar" data-tab="fitur">
+    <!-- Mobile tab bar -->
+    <div class="sb-tab-bar">
+      <button class="sb-tab active" id="sbTabFitur">Fitur</button>
+      <button class="sb-tab" id="sbTabAnggota">Anggota</button>
     </div>
-    <div class="all-item" id="allItem">
-      <div class="all-avatar">☰</div>
-      <span class="all-label">Semua Anggota</span>
-      <span class="all-count" id="allCount"></span>
+    <!-- Fitur panel (mobile only) -->
+    <div id="sbPanelFitur">
+      <div class="sb-nav-label">Organisasi</div>
+      <button class="sb-nav-item" id="sbn-org"><span class="sb-ico">🏢</span>Bagan</button>
+      <button class="sb-nav-item" id="sbn-kom"><span class="sb-ico">📋</span>Regulasi</button>
+      <button class="sb-nav-item" id="sbn-cul"><span class="sb-ico">🌱</span>Sejarah</button>
+      <button class="sb-nav-item project-access" id="sbn-prj"><span class="sb-ico">🗂️</span>Proyek</button>
+      <div class="sb-nav-label">Program</div>
+      <button class="sb-nav-item" id="sbn-bc"><span class="sb-ico">📣</span>Broadcast</button>
+      <button class="sb-nav-item" id="sbn-lom"><span class="sb-ico">🏆</span>Lomba</button>
+      <button class="sb-nav-item" id="sbn-per"><span class="sb-ico">📰</span>Pers</button>
+      <div class="sb-nav-label">Fasilitas</div>
+      <button class="sb-nav-item" id="sbn-rua"><span class="sb-ico">🏠</span>Ruangan</button>
+      <button class="sb-nav-item" id="sbn-not"><span class="sb-ico">📝</span>Notulensi</button>
+      <button class="sb-nav-item" id="sbn-ast"><span class="sb-ico">📦</span>Inventaris</button>
+      <button class="sb-nav-item" id="sbn-inf"><span class="sb-ico">🔔</span>Pemberitahuan</button>
+      <button class="sb-nav-item admin-only" id="sbn-set"><span class="sb-ico">⚙️</span>Pengaturan</button>
     </div>
-    <div class="divider"></div>
-    <div class="people-scroll" id="peopleScroll"></div>
-    <div class="admin-only" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
-      <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
-      <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
+    <!-- Anggota panel -->
+    <div id="sbPanelAnggota">
+      <div class="sidebar-head">
+        <span class="sidebar-head-title">Anggota</span>
+        <button class="sb-toggle-btn" id="sbToggleBtn" title="Sembunyikan sidebar">‹</button>
+      </div>
+      <div class="all-item" id="allItem">
+        <div class="all-avatar">☰</div>
+        <span class="all-label">Semua Anggota</span>
+        <span class="all-count" id="allCount"></span>
+      </div>
+      <div class="divider"></div>
+      <div class="people-scroll" id="peopleScroll"></div>
+      <div class="admin-only" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
+        <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
+        <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
+      </div>
     </div>
   </div>
 
@@ -1390,14 +1435,21 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
   if(navCenter) new MutationObserver(syncGroupActive).observe(navCenter,{subtree:true,attributeFilter:['class']});
 })();
 
-/* ── Mobile sidebar toggle ── */
+/* ── Mobile sidebar toggle + tabs ── */
 (function(){
   const toggle=document.getElementById('sidebarToggle');
   const sidebar=document.querySelector('.sidebar');
   const overlay=document.getElementById('sidebarOverlay');
   if(!toggle||!sidebar||!overlay) return;
-  function openSidebar(){ sidebar.classList.add('mobile-open'); overlay.classList.add('open'); }
+  function openSidebar(){ sidebar.classList.add('mobile-open'); overlay.classList.add('open'); sidebar.dataset.tab='fitur'; setSbTab('fitur'); }
   function closeSidebar(){ sidebar.classList.remove('mobile-open'); overlay.classList.remove('open'); }
+  function setSbTab(t){
+    sidebar.dataset.tab=t;
+    document.getElementById('sbTabFitur').classList.toggle('active',t==='fitur');
+    document.getElementById('sbTabAnggota').classList.toggle('active',t==='anggota');
+  }
+  document.getElementById('sbTabFitur').addEventListener('click',()=>setSbTab('fitur'));
+  document.getElementById('sbTabAnggota').addEventListener('click',()=>setSbTab('anggota'));
   toggle.addEventListener('click',openSidebar);
   overlay.addEventListener('click',closeSidebar);
   sidebar.querySelectorAll('[data-grp-add-mem],#btnAddKelompokon,#btnAddMemberRoot').forEach(el=>{
@@ -1408,6 +1460,17 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
   });
   const allItem=document.getElementById('allItem');
   if(allItem) allItem.addEventListener('click',()=>{ if(window.innerWidth<=768) closeSidebar(); });
+  /* Sidebar fitur proxy → trigger existing btn*View handlers */
+  const map={
+    'sbn-org':'btnOrgView','sbn-kom':'btnKomunitasView','sbn-cul':'btnCultureView','sbn-prj':'btnProjectView',
+    'sbn-bc':'btnBroadcastView','sbn-lom':'btnLombaView','sbn-per':'btnPersView',
+    'sbn-rua':'btnRuanganView','sbn-not':'btnNotulensiView','sbn-ast':'btnAssetView',
+    'sbn-inf':'btnInfoView','sbn-set':'btnSettingsView'
+  };
+  Object.entries(map).forEach(([sbnId,btnId])=>{
+    const sbn=document.getElementById(sbnId);
+    if(sbn) sbn.addEventListener('click',()=>{ closeSidebar(); document.getElementById(btnId).click(); });
+  });
 })();
 
 /* ══════════════════════════════════════════
