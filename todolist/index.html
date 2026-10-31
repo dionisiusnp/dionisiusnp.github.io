@@ -114,7 +114,9 @@ input[type="date"].form-input{color-scheme:dark}
 
 /* ── Sidebar ── */
 .sidebar{flex-shrink:0;width:280px;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border-right:1px solid var(--bd);transition:background .25s,border-color .25s,width .2s}
-.sidebar.sb-mini{width:0;border-right:none}
+.sidebar.sb-mini{width:40px}
+.sidebar.sb-mini .sidebar-head{justify-content:center;padding:10px 4px}
+.sidebar.sb-mini .sidebar-head-title,.sidebar.sb-mini .all-item,.sidebar.sb-mini .divider,.sidebar.sb-mini .people-scroll,.sidebar.sb-mini .admin-only{display:none!important}
 .sidebar-head{padding:10px 12px 6px;flex-shrink:0;display:flex;align-items:center;gap:6px;transition:border-color .25s}
 .sidebar-head-title{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;flex:1}
 .sb-toggle-btn{flex-shrink:0;width:24px;height:24px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;transition:all .15s;line-height:1}
@@ -1575,10 +1577,10 @@ function select(id){
   activeId=id; activeFilter='all'; filterMemberName=null; memberSearchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   /* deactivate feature nav */
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView']
     .forEach(id=>document.getElementById(id)?.classList.remove('active'));
   viewMode='tasks';
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','gitGuideView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','gitGuideView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   renderSidebar(); renderMain();
 }
