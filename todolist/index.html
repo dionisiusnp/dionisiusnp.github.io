@@ -4688,6 +4688,33 @@ function renderKomunitas(){
           if(t) touch(Object.assign(t,{deleted:true}));
           save(); renderKomunitas();
         });
+        if(isAdmin){
+          row.setAttribute('draggable','true');
+          row.style.cursor='grab';
+          row.addEventListener('dragstart',e=>{
+            e.dataTransfer.setData('text/plain',s.id);
+            e.dataTransfer.effectAllowed='move';
+            setTimeout(()=>{row.style.opacity='.4';},0);
+          });
+          row.addEventListener('dragend',()=>{row.style.opacity='';row.style.outline='';});
+          row.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';row.style.outline='2px solid var(--accent)';});
+          row.addEventListener('dragleave',()=>{row.style.outline='';});
+          row.addEventListener('drop',e=>{
+            e.preventDefault();
+            row.style.outline='';
+            const fromId=e.dataTransfer.getData('text/plain');
+            if(!fromId||fromId===s.id) return;
+            const arr=db.regulasi[listKey];
+            const fi=arr.findIndex(x=>x.id===fromId);
+            const ti=arr.findIndex(x=>x.id===s.id);
+            if(fi<0||ti<0) return;
+            const [moved]=arr.splice(fi,1);
+            arr.splice(ti,0,moved);
+            touch(moved);
+            save();
+            renderKomunitas();
+          });
+        }
         listWrap.appendChild(row);
       });
     }
@@ -4798,6 +4825,33 @@ function renderKomunitas(){
           if(t) touch(Object.assign(t,{deleted:true}));
           save(); renderKomunitas();
         });
+        if(isAdmin){
+          row.setAttribute('draggable','true');
+          row.style.cursor='grab';
+          row.addEventListener('dragstart',e=>{
+            e.dataTransfer.setData('text/plain',s.id);
+            e.dataTransfer.effectAllowed='move';
+            setTimeout(()=>{row.style.opacity='.4';},0);
+          });
+          row.addEventListener('dragend',()=>{row.style.opacity='';row.style.outline='';});
+          row.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';row.style.outline='2px solid var(--accent)';});
+          row.addEventListener('dragleave',()=>{row.style.outline='';});
+          row.addEventListener('drop',e=>{
+            e.preventDefault();
+            row.style.outline='';
+            const fromId=e.dataTransfer.getData('text/plain');
+            if(!fromId||fromId===s.id) return;
+            const arr=db.regulasi.keuntungan;
+            const fi=arr.findIndex(x=>x.id===fromId);
+            const ti=arr.findIndex(x=>x.id===s.id);
+            if(fi<0||ti<0) return;
+            const [moved]=arr.splice(fi,1);
+            arr.splice(ti,0,moved);
+            touch(moved);
+            save();
+            renderKomunitas();
+          });
+        }
         listWrap.appendChild(row);
       });
     }
