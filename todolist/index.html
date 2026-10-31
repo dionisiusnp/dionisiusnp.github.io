@@ -1394,6 +1394,7 @@ function renderSidebar(){
         ${memberCount?`<span class="kelompok-chevron" style="transform:rotate(${expanded?90:0}deg);cursor:pointer" data-toggle-grp="${k.id}">▶</span>`:''}
         <span class="kelompok-name-text">${esc(k.name)}</span>
         ${!isJoinable?`<span style="font-size:.75rem;color:var(--dim);margin-left:4px">(${k.jumlah??0})</span>`:''}
+        ${k.deskripsi?`<span style="display:block;font-size:.68rem;color:var(--dim);font-weight:400;margin-top:2px;line-height:1.4;white-space:normal">${esc(k.deskripsi)}</span>`:''}
         ${role==='admin'?`<span class="grp-actions">
           ${idx>0?`<button class="grp-order-btn" data-grp-up="${k.id}" title="Naik">▲</button>`:''}
           ${idx<siblings.length-1?`<button class="grp-order-btn" data-grp-dn="${k.id}" title="Turun">▼</button>`:''}
@@ -2460,6 +2461,10 @@ function openModal(mode, ctx){
         <label class="form-label">Jumlah Anggota</label>
         <input class="form-input" id="fi-jumlah" type="number" min="0" value="${div?.jumlah??''}" placeholder="0"/>
       </div>
+      <div class="form-group">
+        <label class="form-label">Deskripsi / Jobdesk <span style="color:var(--dim);font-weight:400;text-transform:none">(opsional)</span></label>
+        <textarea class="form-textarea" id="fi-deskripsi" placeholder="Tugas dan tanggung jawab kelompok ini…" rows="3">${div?esc(div.deskripsi||''):''}</textarea>
+      </div>
     `;
     document.getElementById('fi-joinable').addEventListener('change',function(){
       document.getElementById('fi-jumlah-wrap').style.display=this.checked?'none':'';
@@ -3398,7 +3403,8 @@ document.getElementById('modalSave').addEventListener('click',()=>{
         const siblings=kelompokChildren(parentId).filter(s=>s.id!==k.id);
         k.order=siblings.length?Math.max(...siblings.map(s=>s.order))+1:0;
       }
-      k.name=name; k.parentId=parentId; k.joinable=joinable; k.jumlah=jumlah; touch(k);
+      const deskripsi_v=document.getElementById('fi-deskripsi').value.trim()||null;
+      k.name=name; k.parentId=parentId; k.joinable=joinable; k.jumlah=jumlah; k.deskripsi=deskripsi_v; touch(k);
       save(); renderSidebar(); if(viewMode==='org') renderOrgChart();
     }
     closeModal();
