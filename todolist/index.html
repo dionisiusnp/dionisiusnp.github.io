@@ -710,24 +710,29 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <button class="nb-feature-item" id="btnOrgView"><span class="nb-ico">🏢</span> Bagan</button>
         <button class="nb-feature-item" id="btnKomunitasView"><span class="nb-ico">📋</span> Regulasi</button>
         <button class="nb-feature-item" id="btnCultureView"><span class="nb-ico">🌱</span> Sejarah</button>
-        <button class="nb-feature-item project-access" id="btnProjectView"><span class="nb-ico">🗂️</span> Proyek</button>
       </div>
     </div>
-    <div class="nb-group" id="nbgProgram">
-      <button class="nb-trigger" id="nbtProgram"><span class="nb-ico">📣</span><span class="nb-tl">Program</span> <span class="nb-arrow">▾</span></button>
-      <div class="nb-dropdown" id="nbdProgram">
+    <div class="nb-group" id="nbgTim">
+      <button class="nb-trigger" id="nbtTim"><span class="nb-ico">📣</span><span class="nb-tl">Tim</span> <span class="nb-arrow">▾</span></button>
+      <div class="nb-dropdown" id="nbdTim">
         <button class="nb-feature-item" id="btnBroadcastView"><span class="nb-ico">📣</span> Broadcast</button>
         <button class="nb-feature-item" id="btnLombaView"><span class="nb-ico">🏆</span> Lomba</button>
         <button class="nb-feature-item" id="btnPersView"><span class="nb-ico">📰</span> Pers</button>
+        <button class="nb-feature-item project-access" id="btnProjectView"><span class="nb-ico">🗂️</span> Proyek</button>
       </div>
     </div>
-    <div class="nb-group" id="nbgFasilitas">
-      <button class="nb-trigger" id="nbtFasilitas"><span class="nb-ico">🏠</span><span class="nb-tl">Fasilitas</span> <span class="nb-arrow">▾</span></button>
-      <div class="nb-dropdown" id="nbdFasilitas">
-        <button class="nb-feature-item" id="btnRuanganView"><span class="nb-ico">🏠</span> Ruangan</button>
+    <div class="nb-group" id="nbgAktivitas">
+      <button class="nb-trigger" id="nbtAktivitas"><span class="nb-ico">📝</span><span class="nb-tl">Aktivitas</span> <span class="nb-arrow">▾</span></button>
+      <div class="nb-dropdown" id="nbdAktivitas">
         <button class="nb-feature-item" id="btnNotulensiView"><span class="nb-ico">📝</span> Notulensi</button>
-        <button class="nb-feature-item" id="btnAssetView"><span class="nb-ico">📦</span> Inventaris</button>
+        <button class="nb-feature-item" id="btnRuanganView"><span class="nb-ico">🏠</span> Ruangan</button>
         <button class="nb-feature-item" id="btnInfoView"><span class="nb-ico">🔔</span> Pemberitahuan</button>
+      </div>
+    </div>
+    <div class="nb-group" id="nbgUtilitas">
+      <button class="nb-trigger" id="nbtUtilitas"><span class="nb-ico">📦</span><span class="nb-tl">Utilitas</span> <span class="nb-arrow">▾</span></button>
+      <div class="nb-dropdown" id="nbdUtilitas">
+        <button class="nb-feature-item" id="btnAssetView"><span class="nb-ico">📦</span> Inventaris</button>
         <button class="nb-feature-item admin-only" id="btnSettingsView"><span class="nb-ico">⚙️</span> Pengaturan</button>
       </div>
     </div>
@@ -764,16 +769,17 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <button class="sb-nav-item" id="sbn-org"><span class="sb-ico">🏢</span>Bagan</button>
       <button class="sb-nav-item" id="sbn-kom"><span class="sb-ico">📋</span>Regulasi</button>
       <button class="sb-nav-item" id="sbn-cul"><span class="sb-ico">🌱</span>Sejarah</button>
-      <button class="sb-nav-item project-access" id="sbn-prj"><span class="sb-ico">🗂️</span>Proyek</button>
-      <div class="sb-nav-label">Program</div>
+      <div class="sb-nav-label">Tim</div>
       <button class="sb-nav-item" id="sbn-bc"><span class="sb-ico">📣</span>Broadcast</button>
       <button class="sb-nav-item" id="sbn-lom"><span class="sb-ico">🏆</span>Lomba</button>
       <button class="sb-nav-item" id="sbn-per"><span class="sb-ico">📰</span>Pers</button>
-      <div class="sb-nav-label">Fasilitas</div>
-      <button class="sb-nav-item" id="sbn-rua"><span class="sb-ico">🏠</span>Ruangan</button>
+      <button class="sb-nav-item project-access" id="sbn-prj"><span class="sb-ico">🗂️</span>Proyek</button>
+      <div class="sb-nav-label">Aktivitas</div>
       <button class="sb-nav-item" id="sbn-not"><span class="sb-ico">📝</span>Notulensi</button>
-      <button class="sb-nav-item" id="sbn-ast"><span class="sb-ico">📦</span>Inventaris</button>
+      <button class="sb-nav-item" id="sbn-rua"><span class="sb-ico">🏠</span>Ruangan</button>
       <button class="sb-nav-item" id="sbn-inf"><span class="sb-ico">🔔</span>Pemberitahuan</button>
+      <div class="sb-nav-label">Utilitas</div>
+      <button class="sb-nav-item" id="sbn-ast"><span class="sb-ico">📦</span>Inventaris</button>
       <button class="sb-nav-item admin-only" id="sbn-set"><span class="sb-ico">⚙️</span>Pengaturan</button>
     </div>
     <!-- Anggota panel -->
