@@ -3229,15 +3229,9 @@ function openModal(mode, ctx){
     title.textContent=mode==='lomba-peserta-add'?'Tambah Peserta':'Edit Peserta';
     /* kelompoks excluding already registered (except current if editing) */
     const usedKelIds=new Set((l?.peserta||[]).filter(x=>!x.deleted&&x.id!==(p?.id)).map(x=>x.kelompokId));
-    const kelList=(db.kelompoks||[]).filter(k=>!k.deleted&&!usedKelIds.has(k.id));
-    const kelOpts=kelList.map(k=>`<option value="${k.id}" ${p?.kelompokId===k.id?'selected':''}>${esc(k.name)}</option>`).join('');
-    /* members per kelompok for dynamic PIC dropdown */
-    const membersByKel={};
-    (db.kelompoks||[]).filter(k=>!k.deleted).forEach(k=>{
-      membersByKel[k.id]=(db.members||[]).filter(m=>!m.deleted&&m.kelompokId===k.id).sort((a,b)=>a.name.localeCompare(b.name,'id'));
-    });
-    const initKelId=p?.kelompokId||'';
-    const initPicOpts=(membersByKel[initKelId]||[]).map(m=>`<option value="${esc(m.name)}" ${p?.pic===m.name?'selected':''}>${esc(m.name)}</option>`).join('');
+    /* all members for PIC dropdown */
+    const allMembers=(db.members||[]).filter(m=>!m.deleted).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+    const picOpts=allMembers.map(m=>`<option value="${esc(m.name)}" ${p?.pic===m.name?'selected':''}>${esc(m.name)}</option>`).join('');
     /* ide from pool excluding already used in this lomba (except current peserta's ide) */
     const usedIdeIds=new Set((l?.peserta||[]).filter(x=>!x.deleted&&x.ideSource==='pool'&&x.id!==(p?.id)).map(x=>x.ideId));
     const idePool=(db.lombaIde||[]).filter(x=>!x.deleted&&!usedIdeIds.has(x.id));
@@ -3245,17 +3239,14 @@ function openModal(mode, ctx){
     const isPool=p?.ideSource==='pool'||(!p);
     body.innerHTML=`
       <div class="form-group">
-        <label class="form-label">Kelompok *</label>
-        <select class="form-select" id="fi-peserta-kel">
-          <option value="">— Pilih Kelompok —</option>
-          ${kelOpts}
-        </select>
+        <label class="form-label">Nama Kelompok / Tim *</label>
+        <input class="form-input" id="fi-peserta-kel" type="text" value="${esc(p?.kelompokNama||'')}" placeholder="Nama tim yang ikut lomba ini" maxlength="100"/>
       </div>
       <div class="form-group">
         <label class="form-label">PIC *</label>
         <select class="form-select" id="fi-peserta-pic">
           <option value="">— Pilih Anggota —</option>
-          ${initPicOpts}
+          ${picOpts}
         </select>
       </div>
       <div class="form-group">
@@ -3279,14 +3270,6 @@ function openModal(mode, ctx){
         </select>
       </div>
     `;
-    document.getElementById('fi-peserta-kel').addEventListener('change',function(){
-      const picSel=document.getElementById('fi-peserta-pic');
-      picSel.innerHTML='<option value="">— Pilih Anggota —</option>';
-      (membersByKel[this.value]||[]).forEach(m=>{
-        const o=document.createElement('option');
-        o.value=m.name; o.textContent=m.name; picSel.appendChild(o);
-      });
-    });
     document.getElementById('fi-ide-src-pool').addEventListener('change',function(){
       document.getElementById('fi-ide-pool-wrap').style.display=this.checked?'':'none';
     });
@@ -3929,38 +3912,34 @@ document.getElementById('modalSave').addEventListener('click',()=>{
 
   /* ── Lomba peserta save ── */
   else if(mMode==='lomba-peserta-add'||mMode==='lomba-peserta-edit'){
-    const kelId=document.getElementById('fi-peserta-kel').value;
-    const pic_v=document.getElementById('fi-peserta-pic').value.trim();
+    const kelNama_v=document.getElementById('fi-peserta-kel').value.trim();
+    const pic_v=document.getElementById('fi-peserta-pic').value;
     const ideSource_v=document.querySelector('input[name="ide-source"]:checked')?.value||'pool';
     const ideId_v=ideSource_v==='pool'?document.getElementById('fi-peserta-ide').value:null;
-    if(!kelId){ alert('Pilih kelompok terlebih dahulu.'); return; }
-    if(!pic_v){ alert('Nama PIC wajib diisi.'); return; }
+    if(!kelNama_v){ alert('Nama kelompok/tim wajib diisi.'); return; }
+    if(!pic_v){ alert('Pilih PIC terlebih dahulu.'); return; }
     if(ideSource_v==='pool'&&!ideId_v){ alert('Pilih ide dari pool atau pilih "Ide Sendiri".'); return; }
     const l=(db.lombas||[]).find(x=>x.id===mCtx.lombaId);
     if(!l) return;
     if(!l.peserta) l.peserta=[];
-    const kel=db.kelompoks.find(k=>k.id===kelId);
     if(mMode==='lomba-peserta-add'){
-      /* validate: kelompok belum terdaftar */
-      if(l.peserta.some(x=>!x.deleted&&x.kelompokId===kelId)){
-        alert('Kelompok ini sudah terdaftar di lomba ini.'); return;
+      if(l.peserta.some(x=>!x.deleted&&(x.kelompokNama||'').toLowerCase()===kelNama_v.toLowerCase())){
+        alert('Kelompok/tim ini sudah terdaftar di lomba ini.'); return;
       }
-      /* validate: ide pool tidak duplikat */
       if(ideSource_v==='pool'&&l.peserta.some(x=>!x.deleted&&x.ideSource==='pool'&&x.ideId===ideId_v)){
         alert('Ide ini sudah dipakai kelompok lain di lomba ini.'); return;
       }
-      l.peserta.push(touch({id:uid(),kelompokId:kelId,kelompokNama:kel?.name||kelId,pic:pic_v,ideSource:ideSource_v,ideId:ideId_v||null,createdAt:Date.now()}));
+      l.peserta.push(touch({id:uid(),kelompokNama:kelNama_v,pic:pic_v,ideSource:ideSource_v,ideId:ideId_v||null,createdAt:Date.now()}));
     } else {
       const p=l.peserta.find(x=>x.id===mCtx.id);
       if(!p) return;
-      /* validate for edit (exclude self) */
-      if(l.peserta.some(x=>!x.deleted&&x.id!==p.id&&x.kelompokId===kelId)){
-        alert('Kelompok ini sudah terdaftar di lomba ini.'); return;
+      if(l.peserta.some(x=>!x.deleted&&x.id!==p.id&&(x.kelompokNama||'').toLowerCase()===kelNama_v.toLowerCase())){
+        alert('Kelompok/tim ini sudah terdaftar di lomba ini.'); return;
       }
       if(ideSource_v==='pool'&&l.peserta.some(x=>!x.deleted&&x.id!==p.id&&x.ideSource==='pool'&&x.ideId===ideId_v)){
         alert('Ide ini sudah dipakai kelompok lain di lomba ini.'); return;
       }
-      p.kelompokId=kelId; p.kelompokNama=kel?.name||kelId; p.pic=pic_v; p.ideSource=ideSource_v; p.ideId=ideId_v||null; touch(p);
+      p.kelompokNama=kelNama_v; p.pic=pic_v; p.ideSource=ideSource_v; p.ideId=ideId_v||null; touch(p);
     }
     touch(l); save(); renderLomba(); closeModal();
   }
