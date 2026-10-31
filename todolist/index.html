@@ -218,6 +218,40 @@ body.is-admin .viewer-only{display:none!important}
 .ruangan-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .ruangan-status-dot.idle{background:var(--muted,#6b7280)}
 .ruangan-status-dot.aktif{background:var(--green,#34d399);box-shadow:0 0 6px rgba(52,211,153,.5)}
+.gg-wrap{max-width:860px;margin:0 auto;padding:20px 20px 40px}
+.gg-back{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);cursor:pointer;margin-bottom:16px;padding:4px 0;border:none;background:none}
+.gg-back:hover{color:var(--accent)}
+.gg-title{font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.gg-subtitle{font-size:.8rem;color:var(--dim);margin-bottom:28px}
+.gg-diagram{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:32px;padding:20px;background:var(--card);border:1px solid var(--bd);border-radius:14px}
+.gg-node{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
+.gg-box{padding:8px 14px;border-radius:8px;font-size:.72rem;font-weight:700;text-align:center;line-height:1.3;border:2px solid transparent;min-width:80px}
+.gg-box.phase-init{background:rgba(108,111,245,.12);border-color:rgba(108,111,245,.4);color:var(--accent)}
+.gg-box.phase-branch{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.4);color:#34d399}
+.gg-box.phase-commit{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4);color:#f59e0b}
+.gg-box.phase-push{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4);color:#f59e0b}
+.gg-box.phase-pr{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.4);color:#a855f7}
+.gg-box.phase-review{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.4);color:#a855f7}
+.gg-box.phase-merge{background:rgba(52,211,245,.1);border-color:rgba(52,211,245,.4);color:#22d3ee}
+.gg-box.phase-conflict{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35);color:#ef4444;font-style:italic}
+.gg-arrow{color:var(--muted);font-size:.9rem;flex-shrink:0;padding:0 2px}
+.gg-label{font-size:.58rem;color:var(--dim);font-weight:500}
+.gg-sections{display:flex;flex-direction:column;gap:16px}
+.gg-section{background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.gg-section-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--bd)}
+.gg-section-icon{font-size:1.1rem}
+.gg-section-title{font-size:.88rem;font-weight:700;color:var(--text)}
+.gg-section-desc{font-size:.75rem;color:var(--dim);margin-left:auto;text-align:right}
+.gg-section-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.gg-cmd-group{display:flex;flex-direction:column;gap:4px}
+.gg-cmd-label{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.gg-cmd{background:var(--surface);border:1px solid var(--bd);border-radius:6px;padding:7px 12px;font-family:var(--mono);font-size:.76rem;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;transition:border-color .15s}
+.gg-cmd:hover{border-color:var(--accent)}
+.gg-cmd-copy{font-size:.6rem;color:var(--dim);flex-shrink:0;user-select:none}
+.gg-cmd:hover .gg-cmd-copy{color:var(--accent)}
+.gg-note{font-size:.75rem;color:var(--dim);line-height:1.6;padding:8px 12px;background:var(--surface);border-radius:6px;border-left:3px solid var(--accent)}
+.gg-note.warn{border-left-color:#f59e0b}
+.gg-note.danger{border-left-color:#ef4444}
 .proj-badge-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .proj-badge{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid var(--accent);color:var(--accent);opacity:.8;white-space:nowrap}
 .mss-item{padding:7px 12px;cursor:pointer;font-size:.78rem;transition:background .1s;color:var(--text)}
@@ -825,6 +859,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <!-- Ruangan view -->
     <div id="ruanganView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="ruanganArea"></div>
+    </div>
+
+    <!-- Git Guide view -->
+    <div id="gitGuideView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="asset-view" id="gitGuideArea"></div>
     </div>
   </div>
 </div>
@@ -1559,7 +1598,7 @@ function select(id){
   ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView']
     .forEach(id=>document.getElementById(id)?.classList.remove('active'));
   viewMode='tasks';
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','gitGuideView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   renderSidebar(); renderMain();
 }
@@ -1572,7 +1611,7 @@ document.getElementById('allItem').addEventListener('click',()=>select(ALL));
 function renderMain(){
   const empty=document.getElementById('emptyState');
   const tv=document.getElementById('taskView');
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','gitGuideView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnOrgView','btnPersView','btnRuanganView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
@@ -1975,7 +2014,7 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 ══════════════════════════════════════════ */
 /* helper: hide all feature views, deactivate all nav buttons */
 function hideAllViews(){
-  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView']
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','gitGuideView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView']
     .forEach(id=>document.getElementById(id).classList.remove('active'));
@@ -4038,6 +4077,17 @@ function renderProject(){
   toolbar.style.flexWrap='wrap';
   toolbar.innerHTML=`<span class="asset-toolbar-title">Proyek</span>
     <input class="asset-search" id="projSearchInp" type="search" placeholder="Cari proyek…" value="${esc(projectSearch)}" style="max-width:220px"/>`;
+  const gitBtn=document.createElement('button');
+  gitBtn.className='task-add-inline-btn';
+  gitBtn.style.cssText='background:var(--card);color:var(--text);border:1px solid var(--bd)';
+  gitBtn.textContent='📖 Panduan Git';
+  gitBtn.addEventListener('click',()=>{
+    hideAllViews();
+    const gv=document.getElementById('gitGuideView');
+    gv.style.display='flex';
+    renderGitGuide();
+  });
+  toolbar.appendChild(gitBtn);
   if(role==='admin'){
     const btn=document.createElement('button');
     btn.className='task-add-inline-btn';
@@ -4451,6 +4501,211 @@ function renderSettings(){
   forceRow.appendChild(forceInner);
   card2.appendChild(forceRow);
   area.appendChild(card2);
+}
+
+/* ══════════════════════════════════════════
+   GIT GUIDE VIEW
+══════════════════════════════════════════ */
+function renderGitGuide(){
+  const area=document.getElementById('gitGuideArea');
+  area.innerHTML='';
+
+  function cmd(text,desc){
+    const el=document.createElement('div');
+    el.className='gg-cmd';
+    el.title='Klik untuk copy';
+    el.innerHTML=`<code>${esc(text)}</code>${desc?`<span class="gg-cmd-copy">${esc(desc)}</span>`:'<span class="gg-cmd-copy">copy</span>'}`;
+    el.addEventListener('click',()=>{
+      navigator.clipboard?.writeText(text).then(()=>{
+        el.querySelector('.gg-cmd-copy').textContent='✓ copied';
+        setTimeout(()=>{ el.querySelector('.gg-cmd-copy').textContent=desc||'copy'; },1500);
+      });
+    });
+    return el;
+  }
+
+  function note(text,type=''){
+    const el=document.createElement('div');
+    el.className='gg-note'+(type?' '+type:'');
+    el.textContent=text;
+    return el;
+  }
+
+  function cmdGroup(label,...cmds){
+    const wrap=document.createElement('div');
+    wrap.className='gg-cmd-group';
+    if(label){const l=document.createElement('div');l.className='gg-cmd-label';l.textContent=label;wrap.appendChild(l);}
+    cmds.forEach(c=>wrap.appendChild(c));
+    return wrap;
+  }
+
+  function section(icon,title,desc,bodyFn){
+    const sec=document.createElement('div');
+    sec.className='gg-section';
+    sec.innerHTML=`<div class="gg-section-hdr"><span class="gg-section-icon">${icon}</span><span class="gg-section-title">${title}</span>${desc?`<span class="gg-section-desc">${esc(desc)}</span>`:''}</div>`;
+    const body=document.createElement('div');
+    body.className='gg-section-body';
+    bodyFn(body);
+    sec.appendChild(body);
+    return sec;
+  }
+
+  const wrap=document.createElement('div');
+  wrap.className='gg-wrap';
+
+  /* Back button */
+  const backBtn=document.createElement('button');
+  backBtn.className='gg-back';
+  backBtn.innerHTML='← Kembali ke Proyek';
+  backBtn.addEventListener('click',()=>{
+    hideAllViews();
+    const pv=document.getElementById('projectView');
+    pv.style.display='flex';
+    document.getElementById('btnProjectView').classList.add('active');
+    renderProject();
+  });
+  wrap.appendChild(backBtn);
+
+  /* Header */
+  const hdr=document.createElement('div');
+  hdr.innerHTML=`<div class="gg-title">Panduan Git — Siklus Kerja Tim</div><div class="gg-subtitle">Alur standar kolaborasi tim menggunakan Git. Klik command untuk copy.</div>`;
+  wrap.appendChild(hdr);
+
+  /* Diagram */
+  const diagram=document.createElement('div');
+  diagram.className='gg-diagram';
+  const nodes=[
+    {label:'Init / Clone',phase:'init',sub:'awal project'},
+    null,
+    {label:'Buat Branch',phase:'branch',sub:'per fitur/tugas'},
+    null,
+    {label:'Commit',phase:'commit',sub:'simpan perubahan'},
+    null,
+    {label:'Push',phase:'push',sub:'ke remote'},
+    null,
+    {label:'Pull Request',phase:'pr',sub:'+ assign reviewer'},
+    null,
+    {label:'Review & Approve',phase:'review',sub:'cek kode'},
+    null,
+    {label:'Merge',phase:'merge',sub:'ke main/develop'},
+  ];
+  nodes.forEach(n=>{
+    if(!n){ const arr=document.createElement('div'); arr.className='gg-arrow'; arr.textContent='→'; diagram.appendChild(arr); return; }
+    const nd=document.createElement('div');
+    nd.className='gg-node';
+    nd.innerHTML=`<div class="gg-box phase-${n.phase}">${n.label}</div><div class="gg-label">${n.sub}</div>`;
+    diagram.appendChild(nd);
+  });
+  /* Conflict note */
+  const conflictNote=document.createElement('div');
+  conflictNote.style.cssText='width:100%;margin-top:10px;display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--dim)';
+  conflictNote.innerHTML=`<span style="color:#ef4444;font-weight:700">⚡ Conflict?</span> Jika merge ditolak karena conflict → resolve conflict di lokal → commit ulang → push → PR lagi`;
+  diagram.appendChild(conflictNote);
+  wrap.appendChild(diagram);
+
+  /* Sections */
+  const sections=document.createElement('div');
+  sections.className='gg-sections';
+
+  sections.appendChild(section('🚀','1. Inisialisasi Project','Lakukan sekali di awal',body=>{
+    body.appendChild(cmdGroup('Mulai project baru',
+      cmd('git init','inisialisasi repo lokal'),
+      cmd('git remote add origin <url>','hubungkan ke GitHub/GitLab'),
+    ));
+    body.appendChild(cmdGroup('Atau clone dari remote',
+      cmd('git clone <url>','clone repo ke lokal'),
+      cmd('git clone <url> nama-folder','clone dengan nama folder custom'),
+    ));
+    body.appendChild(note('Setelah init, buat file README.md lalu commit pertama sebelum mulai kerja tim.'));
+  }));
+
+  sections.appendChild(section('🌿','2. Buat Branch','Satu branch = satu fitur atau tugas',body=>{
+    body.appendChild(cmdGroup('Buat & pindah branch',
+      cmd('git checkout -b nama-fitur','buat branch baru + langsung pindah'),
+      cmd('git switch -c nama-fitur','alternatif modern dari checkout -b'),
+    ));
+    body.appendChild(cmdGroup('Lihat & kelola branch',
+      cmd('git branch','lihat semua branch lokal'),
+      cmd('git branch -a','lihat semua branch termasuk remote'),
+      cmd('git checkout main','kembali ke branch main'),
+    ));
+    body.appendChild(note('Konvensi nama: feat/nama-fitur, fix/nama-bug, hotfix/nama, chore/nama. Jangan kerja langsung di main.','warn'));
+  }));
+
+  sections.appendChild(section('💾','3. Commit — Pengumpulan Perubahan','Simpan snapshot kode',body=>{
+    body.appendChild(cmdGroup('Cek status & tambah file',
+      cmd('git status','lihat file yang berubah'),
+      cmd('git diff','lihat detail perubahan'),
+      cmd('git add .','staging semua perubahan'),
+      cmd('git add nama-file.js','staging file tertentu saja'),
+    ));
+    body.appendChild(cmdGroup('Commit',
+      cmd('git commit -m "feat: deskripsi singkat"','commit dengan pesan'),
+      cmd('git log --oneline','lihat riwayat commit'),
+    ));
+    body.appendChild(note('Format pesan commit: feat: (fitur baru), fix: (perbaikan bug), docs: (dokumentasi), refactor: (refactor kode).'));
+  }));
+
+  sections.appendChild(section('⬆️','4. Push ke Remote','Upload branch ke server',body=>{
+    body.appendChild(cmdGroup('Push pertama kali',
+      cmd('git push -u origin nama-branch','push + set upstream (sekali saja)'),
+    ));
+    body.appendChild(cmdGroup('Push berikutnya',
+      cmd('git push','push ke upstream yang sudah di-set'),
+      cmd('git pull','ambil perubahan terbaru dari remote'),
+      cmd('git pull origin main','pull dari branch main remote'),
+    ));
+  }));
+
+  sections.appendChild(section('👥','5. Assign & Pull Request','Minta review sebelum merge',body=>{
+    body.appendChild(note('Buat Pull Request (PR) di GitHub/GitLab dari branch kamu ke branch target (main/develop).'));
+    body.appendChild(cmdGroup('Sebelum PR — pastikan up-to-date',
+      cmd('git fetch origin','ambil info remote terbaru'),
+      cmd('git rebase origin/main','rebase ke main terbaru (lebih rapi dari merge)'),
+      cmd('git merge origin/main','alternatif: merge main ke branch kamu'),
+    ));
+    body.appendChild(note('Di GitHub PR: isi title, description, assign reviewer (kolom Reviewers kanan), dan assign dirimu sendiri di kolom Assignees.','warn'));
+  }));
+
+  sections.appendChild(section('🔍','6. Review Kode','Sebagai reviewer',body=>{
+    body.appendChild(cmdGroup('Lihat kode branch orang lain secara lokal',
+      cmd('git fetch origin','update remote refs'),
+      cmd('git checkout nama-branch-mereka','pindah ke branch yang di-review'),
+      cmd('git pull','pastikan latest'),
+    ));
+    body.appendChild(note('Di GitHub PR: klik tab "Files changed", berikan komentar di baris kode, pilih "Request changes" atau "Approve". Jangan merge sebelum semua reviewer approve.'));
+  }));
+
+  sections.appendChild(section('🔀','7. Merge','Gabungkan ke branch utama',body=>{
+    body.appendChild(cmdGroup('Merge via GitHub (direkomendasikan)',
+      cmd('Klik tombol "Merge pull request" di GitHub','setelah semua review approve'),
+    ));
+    body.appendChild(cmdGroup('Atau merge lokal',
+      cmd('git checkout main','pindah ke branch tujuan'),
+      cmd('git merge nama-branch','merge branch fitur'),
+      cmd('git push','push hasil merge'),
+    ));
+    body.appendChild(cmdGroup('Bersihkan branch setelah merge',
+      cmd('git branch -d nama-branch','hapus branch lokal'),
+      cmd('git push origin --delete nama-branch','hapus branch remote'),
+    ));
+  }));
+
+  sections.appendChild(section('⚡','8. Resolve Conflict','Ketika dua perubahan bentrok',body=>{
+    body.appendChild(note('Conflict terjadi ketika dua orang mengubah baris yang sama. Git menandainya di dalam file.','danger'));
+    body.appendChild(cmdGroup('Alur resolve conflict',
+      cmd('git status','lihat file yang conflict (marked "both modified")'),
+    ));
+    body.appendChild(note('Buka file conflict. Cari marker:\n<<<<<<< HEAD (kode kamu)\n=======\n>>>>>>> branch-lain (kode mereka)\n\nHapus marker, pilih/gabung kode yang benar, save file.'));
+    body.appendChild(cmdGroup('Setelah edit file conflict',
+      cmd('git add nama-file-yang-difix','tandai conflict sudah resolved'),
+      cmd('git commit -m "fix: resolve conflict"','commit hasil resolve'),
+      cmd('git push','push ke remote'),
+    ));
+  }));
+
+  wrap.appendChild(sections);
+  area.appendChild(wrap);
 }
 
 /* ══════════════════════════════════════════
