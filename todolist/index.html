@@ -103,34 +103,27 @@ input[type="date"].form-input{color-scheme:dark}
 .app{flex:1;display:flex;overflow:hidden}
 
 /* ── Sidebar ── */
-.sidebar{width:260px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s,width .2s}
+.sidebar{flex-shrink:0;display:flex;flex-direction:row;overflow:hidden;background:var(--surface);transition:background .25s}
+.feature-rail{width:48px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s}
+.feature-rail .sidebar-head{justify-content:center;padding:10px 4px 6px}
 .sidebar-head{padding:10px 12px 6px;flex-shrink:0;display:flex;align-items:center;transition:border-color .25s}
-.feature-nav{display:flex;flex-direction:column;gap:1px;padding:4px 6px 6px;flex-shrink:0;border-bottom:1px solid var(--bd);transition:border-color .25s}
-.feature-nav-group{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:6px 10px 2px;margin-top:2px;transition:opacity .15s}
-.feature-nav-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;text-align:left;width:100%;transition:background .15s,color .15s,justify-content .15s;font-size:.78rem;font-weight:500}
+.feature-nav{display:flex;flex-direction:column;gap:1px;padding:4px 4px 4px;flex-shrink:0;transition:border-color .25s}
+.feature-nav-group{display:none}
+.feature-nav-item{display:flex;align-items:center;justify-content:center;gap:0;padding:8px 4px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;text-align:left;width:100%;transition:background .15s,color .15s;font-size:.78rem;font-weight:500;position:relative}
 .feature-nav-item:hover{background:var(--card);color:var(--text)}
-.feature-nav-item.active{background:rgba(108,111,245,.12);color:var(--accent);font-weight:600}
-.feature-nav-ico{font-size:.9rem;flex-shrink:0;width:18px;text-align:center}
-.feature-nav-label{flex:1;transition:opacity .15s,width .15s}
-.sidebar-head-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);flex:1;transition:opacity .15s}
-/* sidebar toggle button */
-.sb-toggle-btn{width:22px;height:22px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;flex-shrink:0;transition:all .15s;line-height:1}
-.sb-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
-/* minimized sidebar */
-.sidebar.sb-mini{width:48px}
-.sidebar.sb-mini .sidebar-head-title,
-.sidebar.sb-mini .feature-nav-group,
-.sidebar.sb-mini .feature-nav-label,
-.sidebar.sb-mini .all-label,
-.sidebar.sb-mini .all-count,
-.sidebar.sb-mini .all-avatar,
-.sidebar.sb-mini .people-scroll,
-.sidebar.sb-mini .sb-mini-hide{display:none!important}
-.sidebar.sb-mini .sidebar-head{justify-content:center;padding:10px 6px 6px}
-.sidebar.sb-mini .feature-nav{padding:4px 4px 6px}
-.sidebar.sb-mini .feature-nav-item{justify-content:center;padding:7px 4px;gap:0}
-.sidebar.sb-mini .all-item{justify-content:center;padding:7px 4px}
-.sidebar.sb-mini .feature-nav-ico{width:auto}
+.feature-nav-item.active{background:rgba(108,111,245,.15);color:var(--accent);font-weight:600}
+.feature-nav-ico{font-size:1rem;flex-shrink:0;width:auto;text-align:center}
+.feature-nav-label{display:none}
+.sidebar-head-title{display:none}
+/* tooltip on hover */
+.feature-nav-item::after{content:attr(data-label);position:absolute;left:52px;top:50%;transform:translateY(-50%);background:var(--surface);color:var(--text);padding:4px 10px;border-radius:6px;font-size:.74rem;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:200;border:1px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.feature-nav-item:hover::after{opacity:1}
+/* mp-toggle-btn */
+.mp-toggle-btn{margin:auto auto 8px;width:28px;height:28px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0;line-height:1}
+.mp-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* member-panel */
+.member-panel{width:220px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;transition:width .2s;border-right:1px solid var(--bd);background:var(--surface)}
+.member-panel.mp-hidden{width:0;border-right:none}
 .add-btn{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
 .add-btn:hover{border-color:var(--accent);color:var(--accent)}
 .admin-only{display:none!important}
@@ -563,8 +556,17 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   .nav-title{font-size:.78rem}
 
   /* Sidebar drawer */
-  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;width:260px}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;flex-direction:column;width:280px}
   .sidebar.mobile-open{transform:translateX(0)}
+  .feature-rail{width:100%;flex-direction:row;height:auto;border-right:none;border-bottom:1px solid var(--bd)}
+  .feature-rail .sidebar-head{display:none}
+  .feature-nav{flex-direction:row;flex-wrap:wrap;padding:4px 6px}
+  .feature-nav-item{width:auto;padding:6px 10px;gap:6px;justify-content:flex-start}
+  .feature-nav-label{display:inline}
+  .feature-nav-item::after{display:none}
+  .mp-toggle-btn{display:none}
+  .member-panel{width:100%!important;flex:1;border-right:none}
+  .member-panel.mp-hidden{width:100%!important;height:0}
 
   /* Touch: always show hover-only actions */
   .grp-actions{opacity:1}
@@ -701,75 +703,75 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   <!-- Sidebar -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <div class="sidebar">
-    <div class="sidebar-head">
-      <span class="sidebar-head-title">Fitur</span>
-      <button class="sb-toggle-btn" id="sbToggleBtn" title="Perkecil sidebar">‹</button>
-    </div>
-    <div class="feature-nav">
-      <div class="feature-nav-group">Organisasi</div>
-      <button class="feature-nav-item" id="btnOrgView">
-        <span class="feature-nav-ico">🏢</span>
-        <span class="feature-nav-label">Bagan</span>
-      </button>
-      <button class="feature-nav-item" id="btnKomunitasView">
-        <span class="feature-nav-ico">📋</span>
-        <span class="feature-nav-label">Regulasi</span>
-      </button>
-      <button class="feature-nav-item" id="btnCultureView">
-        <span class="feature-nav-ico">🌱</span>
-        <span class="feature-nav-label">Sejarah</span>
-      </button>
-      <div class="feature-nav-group">Manajemen</div>
-      <button class="feature-nav-item project-access" id="btnProjectView">
-        <span class="feature-nav-ico">🗂️</span>
-        <span class="feature-nav-label">Proyek</span>
-      </button>
-      <button class="feature-nav-item" id="btnBroadcastView">
-        <span class="feature-nav-ico">📣</span>
-        <span class="feature-nav-label">Broadcast</span>
-      </button>
-      <button class="feature-nav-item" id="btnLombaView">
-        <span class="feature-nav-ico">🏆</span>
-        <span class="feature-nav-label">Lomba</span>
-      </button>
-      <button class="feature-nav-item" id="btnPersView">
-        <span class="feature-nav-ico">📰</span>
-        <span class="feature-nav-label">Pers</span>
-      </button>
-      <div class="feature-nav-group">Administrasi</div>
-      <button class="feature-nav-item" id="btnRuanganView">
-        <span class="feature-nav-ico">🏠</span>
-        <span class="feature-nav-label">Ruangan</span>
-      </button>
-      <button class="feature-nav-item" id="btnNotulensiView">
-        <span class="feature-nav-ico">📝</span>
-        <span class="feature-nav-label">Notulensi</span>
-      </button>
-      <button class="feature-nav-item" id="btnAssetView">
-        <span class="feature-nav-ico">📦</span>
-        <span class="feature-nav-label">Inventaris</span>
-      </button>
-      <button class="feature-nav-item" id="btnInfoView">
-        <span class="feature-nav-ico">🔔</span>
-        <span class="feature-nav-label">Pemberitahuan</span>
-      </button>
-      <button class="feature-nav-item admin-only" id="btnSettingsView">
-        <span class="feature-nav-ico">⚙️</span>
-        <span class="feature-nav-label">Pengaturan</span>
-      </button>
+    <div class="feature-rail">
+      <div class="sidebar-head">
+        <span class="sidebar-head-title">Fitur</span>
+      </div>
+      <div class="feature-nav">
+        <button class="feature-nav-item" id="btnOrgView" data-label="Bagan">
+          <span class="feature-nav-ico">🏢</span>
+          <span class="feature-nav-label">Bagan</span>
+        </button>
+        <button class="feature-nav-item" id="btnKomunitasView" data-label="Regulasi">
+          <span class="feature-nav-ico">📋</span>
+          <span class="feature-nav-label">Regulasi</span>
+        </button>
+        <button class="feature-nav-item" id="btnCultureView" data-label="Sejarah">
+          <span class="feature-nav-ico">🌱</span>
+          <span class="feature-nav-label">Sejarah</span>
+        </button>
+        <button class="feature-nav-item project-access" id="btnProjectView" data-label="Proyek">
+          <span class="feature-nav-ico">🗂️</span>
+          <span class="feature-nav-label">Proyek</span>
+        </button>
+        <button class="feature-nav-item" id="btnBroadcastView" data-label="Broadcast">
+          <span class="feature-nav-ico">📣</span>
+          <span class="feature-nav-label">Broadcast</span>
+        </button>
+        <button class="feature-nav-item" id="btnLombaView" data-label="Lomba">
+          <span class="feature-nav-ico">🏆</span>
+          <span class="feature-nav-label">Lomba</span>
+        </button>
+        <button class="feature-nav-item" id="btnPersView" data-label="Pers">
+          <span class="feature-nav-ico">📰</span>
+          <span class="feature-nav-label">Pers</span>
+        </button>
+        <button class="feature-nav-item" id="btnRuanganView" data-label="Ruangan">
+          <span class="feature-nav-ico">🏠</span>
+          <span class="feature-nav-label">Ruangan</span>
+        </button>
+        <button class="feature-nav-item" id="btnNotulensiView" data-label="Notulensi">
+          <span class="feature-nav-ico">📝</span>
+          <span class="feature-nav-label">Notulensi</span>
+        </button>
+        <button class="feature-nav-item" id="btnAssetView" data-label="Inventaris">
+          <span class="feature-nav-ico">📦</span>
+          <span class="feature-nav-label">Inventaris</span>
+        </button>
+        <button class="feature-nav-item" id="btnInfoView" data-label="Pemberitahuan">
+          <span class="feature-nav-ico">🔔</span>
+          <span class="feature-nav-label">Pemberitahuan</span>
+        </button>
+        <button class="feature-nav-item admin-only" id="btnSettingsView" data-label="Pengaturan">
+          <span class="feature-nav-ico">⚙️</span>
+          <span class="feature-nav-label">Pengaturan</span>
+        </button>
+      </div>
+      <button class="mp-toggle-btn" id="mpToggleBtn" title="Sembunyikan panel anggota">‹</button>
     </div>
 
-    <div class="all-item" id="allItem">
-      <div class="all-avatar">☰</div>
-      <span class="all-label">Semua Anggota</span>
-      <span class="all-count" id="allCount"></span>
-    </div>
-    <div class="divider"></div>
-
-    <div class="people-scroll" id="peopleScroll"></div>
-    <div class="admin-only sb-mini-hide" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
-      <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
-      <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
+    <div class="member-panel" id="memberPanel">
+      <div class="all-item" id="allItem">
+        <div class="all-avatar">☰</div>
+        <span class="all-label">Semua Anggota</span>
+        <span class="all-count" id="allCount"></span>
+      </div>
+      <div class="divider"></div>
+      <div class="people-scroll" id="peopleScroll"></div>
+      <div class="admin-only" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
+        <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
+        <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
+      </div>
     </div>
   </div>
 
@@ -1353,23 +1355,22 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
   if(localStorage.getItem('theme')==='light') html.setAttribute('data-theme','light');
 })();
 
-/* ── Sidebar minimize toggle ── */
+/* ── Member panel toggle ── */
 (function(){
-  const sidebar=document.querySelector('.sidebar');
-  const btn=document.getElementById('sbToggleBtn');
-  if(!sidebar||!btn) return;
-  const SB_KEY='sb_minimized';
-  function applyMini(mini){
-    sidebar.classList.toggle('sb-mini',mini);
-    btn.textContent=mini?'›':'‹';
-    btn.title=mini?'Perlebar sidebar':'Perkecil sidebar';
-    localStorage.setItem(SB_KEY,mini?'1':'0');
+  const panel=document.getElementById('memberPanel');
+  const btn=document.getElementById('mpToggleBtn');
+  if(!panel||!btn) return;
+  const MP_KEY='mp_hidden';
+  function applyPanel(hidden){
+    panel.classList.toggle('mp-hidden',hidden);
+    btn.textContent=hidden?'›':'‹';
+    btn.title=hidden?'Tampilkan panel anggota':'Sembunyikan panel anggota';
+    localStorage.setItem(MP_KEY,hidden?'1':'0');
   }
-  // restore on load
-  applyMini(localStorage.getItem(SB_KEY)==='1');
+  applyPanel(localStorage.getItem(MP_KEY)==='1');
   btn.addEventListener('click',e=>{
     e.stopPropagation();
-    applyMini(!sidebar.classList.contains('sb-mini'));
+    applyPanel(!panel.classList.contains('mp-hidden'));
   });
 })();
 
