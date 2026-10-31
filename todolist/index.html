@@ -3231,6 +3231,13 @@ function openModal(mode, ctx){
     const usedKelIds=new Set((l?.peserta||[]).filter(x=>!x.deleted&&x.id!==(p?.id)).map(x=>x.kelompokId));
     const kelList=(db.kelompoks||[]).filter(k=>!k.deleted&&!usedKelIds.has(k.id));
     const kelOpts=kelList.map(k=>`<option value="${k.id}" ${p?.kelompokId===k.id?'selected':''}>${esc(k.name)}</option>`).join('');
+    /* members per kelompok for dynamic PIC dropdown */
+    const membersByKel={};
+    (db.kelompoks||[]).filter(k=>!k.deleted).forEach(k=>{
+      membersByKel[k.id]=(db.members||[]).filter(m=>!m.deleted&&m.kelompokId===k.id).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+    });
+    const initKelId=p?.kelompokId||'';
+    const initPicOpts=(membersByKel[initKelId]||[]).map(m=>`<option value="${esc(m.name)}" ${p?.pic===m.name?'selected':''}>${esc(m.name)}</option>`).join('');
     /* ide from pool excluding already used in this lomba (except current peserta's ide) */
     const usedIdeIds=new Set((l?.peserta||[]).filter(x=>!x.deleted&&x.ideSource==='pool'&&x.id!==(p?.id)).map(x=>x.ideId));
     const idePool=(db.lombaIde||[]).filter(x=>!x.deleted&&!usedIdeIds.has(x.id));
@@ -3245,8 +3252,11 @@ function openModal(mode, ctx){
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">PIC / Nama Penanggung Jawab *</label>
-        <input class="form-input" id="fi-peserta-pic" type="text" value="${esc(p?.pic||'')}" placeholder="Nama anggota yang jadi PIC" maxlength="100"/>
+        <label class="form-label">PIC *</label>
+        <select class="form-select" id="fi-peserta-pic">
+          <option value="">— Pilih Anggota —</option>
+          ${initPicOpts}
+        </select>
       </div>
       <div class="form-group">
         <label class="form-label">Sumber Ide *</label>
@@ -3269,6 +3279,14 @@ function openModal(mode, ctx){
         </select>
       </div>
     `;
+    document.getElementById('fi-peserta-kel').addEventListener('change',function(){
+      const picSel=document.getElementById('fi-peserta-pic');
+      picSel.innerHTML='<option value="">— Pilih Anggota —</option>';
+      (membersByKel[this.value]||[]).forEach(m=>{
+        const o=document.createElement('option');
+        o.value=m.name; o.textContent=m.name; picSel.appendChild(o);
+      });
+    });
     document.getElementById('fi-ide-src-pool').addEventListener('change',function(){
       document.getElementById('fi-ide-pool-wrap').style.display=this.checked?'':'none';
     });
@@ -5780,54 +5798,57 @@ function renderLomba(){
   /* ════════════════════════════════
      SECTION 1 — Pool Ide Global
   ════════════════════════════════ */
+  /* ── Section 1 wrapper card ── */
   const ideSection=document.createElement('div');
-  ideSection.style.cssText='margin:0 0 8px';
+  ideSection.className='notul-topik';
+  ideSection.style.cssText='margin:16px 0;border-radius:12px';
 
   const ideHdr=document.createElement('div');
-  ideHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px';
-  ideHdr.innerHTML=`<div style="font-size:.72rem;font-weight:800;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">💡 Kumpulan Ide</div>`;
+  ideHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px';
+  ideHdr.innerHTML=`<div style="font-size:.8rem;font-weight:700;color:var(--text)">💡 Kumpulan Ide</div><div style="font-size:.72rem;color:var(--dim)">Siapapun dapat menambahkan ide</div>`;
   const ideAddBtn=document.createElement('button');
   ideAddBtn.className='task-add-inline-btn';
+  ideAddBtn.style.cssText='margin-left:12px;flex-shrink:0';
   ideAddBtn.textContent='＋ Tambah Ide';
   ideAddBtn.addEventListener('click',()=>openModal('lomba-ide-global-add',{}));
   ideHdr.appendChild(ideAddBtn);
   ideSection.appendChild(ideHdr);
 
+  function doVoteIde(ide,voteType){
+    const prev=getLombaVoteForIde(ide.id);
+    if(prev===voteType){
+      if(voteType==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
+      else ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
+      setLombaVoteForIde(ide.id,null);
+    } else {
+      if(prev==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
+      else if(prev==='dislike') ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
+      if(voteType==='like') ide.likes=(ide.likes||0)+1;
+      else ide.dislikes=(ide.dislikes||0)+1;
+      setLombaVoteForIde(ide.id,voteType);
+    }
+    touch(ide); save(); renderLomba();
+  }
+
   const idePool=(db.lombaIde||[]).filter(x=>!x.deleted);
   if(!idePool.length){
     const emp=document.createElement('div');
-    emp.style.cssText='padding:10px 20px 18px;font-size:.8rem;color:var(--dim);font-style:italic';
+    emp.style.cssText='padding:4px 16px 16px;font-size:.8rem;color:var(--dim);font-style:italic';
     emp.textContent='Belum ada ide. Jadilah yang pertama menambahkan!';
     ideSection.appendChild(emp);
   } else {
-    function doVoteIde(ide,voteType){
-      const prev=getLombaVoteForIde(ide.id);
-      if(prev===voteType){
-        /* undo */
-        if(voteType==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
-        else ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
-        setLombaVoteForIde(ide.id,null);
-      } else {
-        /* remove opposite */
-        if(prev==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
-        else if(prev==='dislike') ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
-        /* apply new */
-        if(voteType==='like') ide.likes=(ide.likes||0)+1;
-        else ide.dislikes=(ide.dislikes||0)+1;
-        setLombaVoteForIde(ide.id,voteType);
-      }
-      touch(ide); save(); renderLomba();
-    }
-    idePool.forEach(ide=>{
+    const ideList=document.createElement('div');
+    ideList.style.cssText='border-top:1px solid var(--bd)';
+    idePool.forEach((ide,idx)=>{
       const myVote=getLombaVoteForIde(ide.id);
       const ideEl=document.createElement('div');
-      ideEl.className='lomba-ide-row';
+      ideEl.style.cssText=`display:flex;align-items:flex-start;gap:12px;padding:12px 16px;${idx<idePool.length-1?'border-bottom:1px solid var(--bd)':''}`;
       ideEl.innerHTML=`
         <div style="flex:1;min-width:0">
-          <div style="font-size:.82rem;font-weight:600;color:var(--text)">${esc(ide.judul)}</div>
-          ${ide.desc?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px;white-space:pre-wrap;line-height:1.5">${esc(ide.desc)}</div>`:''}
+          <div style="font-size:.84rem;font-weight:600;color:var(--text)">${esc(ide.judul)}</div>
+          ${ide.desc?`<div style="font-size:.75rem;color:var(--dim);margin-top:3px;white-space:pre-wrap;line-height:1.5">${esc(ide.desc)}</div>`:''}
         </div>
-        <div class="lomba-ide-acts">
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <button class="lomba-vote-btn${myVote==='like'?' active':''}" data-gi-like="${ide.id}">👍 <span>${ide.likes||0}</span></button>
           <button class="lomba-vote-btn${myVote==='dislike'?' active-dis':''}" data-gi-dislike="${ide.id}">👎 <span>${ide.dislikes||0}</span></button>
           ${isSuperAdmin?`<button class="asset-act-btn" data-gi-edit="${ide.id}" title="Edit">✎</button>
@@ -5841,21 +5862,17 @@ function renderLomba(){
         if(!confirm(`Hapus ide "${ide.judul}"?`)) return;
         touch(Object.assign(ide,{deleted:true})); save(); renderLomba();
       });
-      ideSection.appendChild(ideEl);
+      ideList.appendChild(ideEl);
     });
+    ideSection.appendChild(ideList);
   }
   area.appendChild(ideSection);
-
-  /* separator */
-  const sep=document.createElement('div');
-  sep.style.cssText='height:1px;background:var(--bd);margin:4px 0 16px';
-  area.appendChild(sep);
 
   /* ════════════════════════════════
      SECTION 2 — Daftar Lomba
   ════════════════════════════════ */
   const lombaHdr=document.createElement('div');
-  lombaHdr.style.cssText='padding:0 20px 10px;font-size:.72rem;font-weight:800;color:var(--muted);letter-spacing:.08em;text-transform:uppercase';
+  lombaHdr.style.cssText='padding:8px 4px 10px;font-size:.72rem;font-weight:800;color:var(--muted);letter-spacing:.08em;text-transform:uppercase';
   lombaHdr.textContent='🏆 Daftar Lomba';
   area.appendChild(lombaHdr);
 
