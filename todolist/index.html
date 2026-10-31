@@ -5780,18 +5780,37 @@ function renderLomba(){
   /* ── Section 1 wrapper card ── */
   const ideSection=document.createElement('div');
   ideSection.className='notul-topik';
-  ideSection.style.cssText='margin:16px 0;border-radius:12px';
+  ideSection.style.cssText='margin:16px 0';
 
+  const idePool=(db.lombaIde||[]).filter(x=>!x.deleted);
+
+  /* header — notul-topik-head pattern */
   const ideHdr=document.createElement('div');
-  ideHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px';
-  ideHdr.innerHTML=`<div style="font-size:.8rem;font-weight:700;color:var(--text)">💡 Kumpulan Ide</div><div style="font-size:.72rem;color:var(--dim)">Siapapun dapat menambahkan ide</div>`;
+  ideHdr.className='notul-topik-head';
+  ideHdr.style.cursor='pointer';
+  ideHdr.innerHTML=`
+    <div class="notul-topik-icon">💡</div>
+    <div class="notul-topik-info">
+      <div class="notul-topik-title">Kumpulan Ide</div>
+      <div class="notul-topik-meta">${idePool.length} ide · siapapun dapat menambahkan</div>
+    </div>
+    <div class="notul-topik-acts"></div>
+    <span class="notul-chevron">▼</span>
+  `;
   const ideAddBtn=document.createElement('button');
   ideAddBtn.className='task-add-inline-btn';
-  ideAddBtn.style.cssText='margin-left:12px;flex-shrink:0';
   ideAddBtn.textContent='＋ Tambah Ide';
-  ideAddBtn.addEventListener('click',()=>openModal('lomba-ide-global-add',{}));
-  ideHdr.appendChild(ideAddBtn);
+  ideAddBtn.addEventListener('click',e=>{ e.stopPropagation(); openModal('lomba-ide-global-add',{}); });
+  ideHdr.querySelector('.notul-topik-acts').appendChild(ideAddBtn);
+  ideHdr.addEventListener('click',e=>{
+    if(e.target.closest('.notul-topik-acts')) return;
+    ideSection.classList.toggle('open');
+  });
   ideSection.appendChild(ideHdr);
+
+  /* body */
+  const ideBody=document.createElement('div');
+  ideBody.className='notul-topik-body';
 
   function doVoteIde(ide,voteType){
     const prev=getLombaVoteForIde(ide.id);
@@ -5809,25 +5828,24 @@ function renderLomba(){
     touch(ide); save(); renderLomba();
   }
 
-  const idePool=(db.lombaIde||[]).filter(x=>!x.deleted);
   if(!idePool.length){
     const emp=document.createElement('div');
-    emp.style.cssText='padding:4px 16px 16px;font-size:.8rem;color:var(--dim);font-style:italic';
+    emp.style.cssText='padding:12px 16px;font-size:.8rem;color:var(--dim);font-style:italic';
     emp.textContent='Belum ada ide. Jadilah yang pertama menambahkan!';
-    ideSection.appendChild(emp);
+    ideBody.appendChild(emp);
   } else {
     const ideList=document.createElement('div');
-    ideList.style.cssText='border-top:1px solid var(--bd)';
+    if(idePool.length>6) ideList.style.cssText='max-height:340px;overflow-y:auto';
     idePool.forEach((ide,idx)=>{
       const myVote=getLombaVoteForIde(ide.id);
       const ideEl=document.createElement('div');
-      ideEl.style.cssText=`display:flex;align-items:flex-start;gap:12px;padding:12px 16px;${idx<idePool.length-1?'border-bottom:1px solid var(--bd)':''}`;
+      ideEl.style.cssText=`display:flex;align-items:flex-start;gap:12px;padding:11px 16px;${idx<idePool.length-1?'border-bottom:1px solid var(--bd)':''}`;
       ideEl.innerHTML=`
         <div style="flex:1;min-width:0">
           <div style="font-size:.84rem;font-weight:600;color:var(--text)">${esc(ide.judul)}</div>
-          ${ide.desc?`<div style="font-size:.75rem;color:var(--dim);margin-top:3px;white-space:pre-wrap;line-height:1.5">${esc(ide.desc)}</div>`:''}
+          ${ide.desc?`<div style="font-size:.74rem;color:var(--dim);margin-top:3px;white-space:pre-wrap;line-height:1.5">${esc(ide.desc)}</div>`:''}
         </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-top:1px">
           <button class="lomba-vote-btn${myVote==='like'?' active':''}" data-gi-like="${ide.id}">👍 <span>${ide.likes||0}</span></button>
           <button class="lomba-vote-btn${myVote==='dislike'?' active-dis':''}" data-gi-dislike="${ide.id}">👎 <span>${ide.dislikes||0}</span></button>
           ${isSuperAdmin?`<button class="asset-act-btn" data-gi-edit="${ide.id}" title="Edit">✎</button>
@@ -5843,8 +5861,10 @@ function renderLomba(){
       });
       ideList.appendChild(ideEl);
     });
-    ideSection.appendChild(ideList);
+    ideBody.appendChild(ideList);
   }
+  ideSection.appendChild(ideBody);
+  ideSection.classList.add('open');
   area.appendChild(ideSection);
 
   /* ════════════════════════════════
