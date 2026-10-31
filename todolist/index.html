@@ -99,31 +99,26 @@ input[type="date"].form-input{color-scheme:dark}
 .theme-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s,color .2s;font-size:14px;line-height:1}
 .theme-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 
+/* ── Feature bar ── */
+.feature-bar{display:flex;align-items:center;gap:0;padding:0 8px;background:var(--surface);border-bottom:1px solid var(--bd);overflow-x:auto;flex-shrink:0;scrollbar-width:none;transition:background .25s,border-color .25s}
+.feature-bar::-webkit-scrollbar{display:none}
+.fb-group{display:flex;align-items:center;gap:1px;flex-shrink:0}
+.fb-divider{width:1px;height:20px;background:var(--bd);margin:0 6px;flex-shrink:0;transition:background .25s}
+.fb-item{display:flex;align-items:center;gap:5px;padding:8px 10px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:6px;font-size:.75rem;font-weight:500;white-space:nowrap;transition:background .15s,color .15s;flex-shrink:0}
+.fb-item:hover{background:var(--card);color:var(--text)}
+.fb-item.active{background:rgba(108,111,245,.12);color:var(--accent);font-weight:600}
+.fb-label{font-size:.75rem}
+
 /* ── App ── */
 .app{flex:1;display:flex;overflow:hidden}
 
 /* ── Sidebar ── */
-.sidebar{flex-shrink:0;display:flex;flex-direction:row;overflow:hidden;background:var(--surface);transition:background .25s}
-.feature-rail{width:48px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);transition:background .25s,border-color .25s}
-.feature-rail .sidebar-head{justify-content:center;padding:10px 4px 6px}
-.sidebar-head{padding:10px 12px 6px;flex-shrink:0;display:flex;align-items:center;transition:border-color .25s}
-.feature-nav{display:flex;flex-direction:column;gap:1px;padding:4px 4px 4px;flex-shrink:0;transition:border-color .25s}
-.feature-nav-group{display:none}
-.feature-nav-item{display:flex;align-items:center;justify-content:center;gap:0;padding:8px 4px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;text-align:left;width:100%;transition:background .15s,color .15s;font-size:.78rem;font-weight:500;position:relative}
-.feature-nav-item:hover{background:var(--card);color:var(--text)}
-.feature-nav-item.active{background:rgba(108,111,245,.15);color:var(--accent);font-weight:600}
-.feature-nav-ico{font-size:1rem;flex-shrink:0;width:auto;text-align:center}
-.feature-nav-label{display:none}
-.sidebar-head-title{display:none}
-/* tooltip on hover */
-.feature-nav-item::after{content:attr(data-label);position:absolute;left:52px;top:50%;transform:translateY(-50%);background:var(--surface);color:var(--text);padding:4px 10px;border-radius:6px;font-size:.74rem;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:200;border:1px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.feature-nav-item:hover::after{opacity:1}
-/* mp-toggle-btn */
-.mp-toggle-btn{margin:auto auto 8px;width:28px;height:28px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;transition:all .15s;flex-shrink:0;line-height:1}
-.mp-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
-/* member-panel */
-.member-panel{width:220px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;transition:width .2s;border-right:1px solid var(--bd);background:var(--surface)}
-.member-panel.mp-hidden{width:0;border-right:none}
+.sidebar{flex-shrink:0;width:280px;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border-right:1px solid var(--bd);transition:background .25s,border-color .25s,width .2s}
+.sidebar.sb-mini{width:0;border-right:none}
+.sidebar-head{padding:10px 12px 6px;flex-shrink:0;display:flex;align-items:center;gap:6px;transition:border-color .25s}
+.sidebar-head-title{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;flex:1}
+.sb-toggle-btn{flex-shrink:0;width:24px;height:24px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;transition:all .15s;line-height:1}
+.sb-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
 .add-btn{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--card);color:var(--muted);transition:all .15s}
 .add-btn:hover{border-color:var(--accent);color:var(--accent)}
 .admin-only{display:none!important}
@@ -555,18 +550,14 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   .nav-back{display:none}
   .nav-title{font-size:.78rem}
 
+  /* Feature bar mobile: icon-only */
+  .fb-label{display:none}
+  .fb-item{padding:8px 8px}
+
   /* Sidebar drawer */
-  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;flex-direction:column;width:280px}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;flex-direction:column;width:280px!important;border-right:none}
+  .sidebar.sb-mini{width:280px!important;transform:translateX(-100%)}
   .sidebar.mobile-open{transform:translateX(0)}
-  .feature-rail{width:100%;flex-direction:row;height:auto;border-right:none;border-bottom:1px solid var(--bd)}
-  .feature-rail .sidebar-head{display:none}
-  .feature-nav{flex-direction:row;flex-wrap:wrap;padding:4px 6px}
-  .feature-nav-item{width:auto;padding:6px 10px;gap:6px;justify-content:flex-start}
-  .feature-nav-label{display:inline}
-  .feature-nav-item::after{display:none}
-  .mp-toggle-btn{display:none}
-  .member-panel{width:100%!important;flex:1;border-right:none}
-  .member-panel.mp-hidden{width:100%!important;height:0}
 
   /* Touch: always show hover-only actions */
   .grp-actions{opacity:1}
@@ -697,81 +688,50 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   <span id="bellBadge" style="display:none">0</span>
 </nav>
 
+<!-- Feature bar -->
+<div class="feature-bar" id="featureBar">
+  <div class="fb-group">
+    <button class="fb-item" id="btnOrgView"><span>🏢</span><span class="fb-label">Bagan</span></button>
+    <button class="fb-item" id="btnKomunitasView"><span>📋</span><span class="fb-label">Regulasi</span></button>
+    <button class="fb-item" id="btnCultureView"><span>🌱</span><span class="fb-label">Sejarah</span></button>
+    <button class="fb-item project-access" id="btnProjectView"><span>🗂️</span><span class="fb-label">Proyek</span></button>
+  </div>
+  <div class="fb-divider"></div>
+  <div class="fb-group">
+    <button class="fb-item" id="btnBroadcastView"><span>📣</span><span class="fb-label">Broadcast</span></button>
+    <button class="fb-item" id="btnLombaView"><span>🏆</span><span class="fb-label">Lomba</span></button>
+    <button class="fb-item" id="btnPersView"><span>📰</span><span class="fb-label">Pers</span></button>
+  </div>
+  <div class="fb-divider"></div>
+  <div class="fb-group">
+    <button class="fb-item" id="btnRuanganView"><span>🏠</span><span class="fb-label">Ruangan</span></button>
+    <button class="fb-item" id="btnNotulensiView"><span>📝</span><span class="fb-label">Notulensi</span></button>
+    <button class="fb-item" id="btnAssetView"><span>📦</span><span class="fb-label">Inventaris</span></button>
+    <button class="fb-item" id="btnInfoView"><span>🔔</span><span class="fb-label">Pemberitahuan</span></button>
+    <button class="fb-item admin-only" id="btnSettingsView"><span>⚙️</span><span class="fb-label">Pengaturan</span></button>
+  </div>
+</div>
+
 <!-- App -->
 <div class="app">
 
   <!-- Sidebar -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <div class="sidebar">
-    <div class="feature-rail">
-      <div class="sidebar-head">
-        <span class="sidebar-head-title">Fitur</span>
-      </div>
-      <div class="feature-nav">
-        <button class="feature-nav-item" id="btnOrgView" data-label="Bagan">
-          <span class="feature-nav-ico">🏢</span>
-          <span class="feature-nav-label">Bagan</span>
-        </button>
-        <button class="feature-nav-item" id="btnKomunitasView" data-label="Regulasi">
-          <span class="feature-nav-ico">📋</span>
-          <span class="feature-nav-label">Regulasi</span>
-        </button>
-        <button class="feature-nav-item" id="btnCultureView" data-label="Sejarah">
-          <span class="feature-nav-ico">🌱</span>
-          <span class="feature-nav-label">Sejarah</span>
-        </button>
-        <button class="feature-nav-item project-access" id="btnProjectView" data-label="Proyek">
-          <span class="feature-nav-ico">🗂️</span>
-          <span class="feature-nav-label">Proyek</span>
-        </button>
-        <button class="feature-nav-item" id="btnBroadcastView" data-label="Broadcast">
-          <span class="feature-nav-ico">📣</span>
-          <span class="feature-nav-label">Broadcast</span>
-        </button>
-        <button class="feature-nav-item" id="btnLombaView" data-label="Lomba">
-          <span class="feature-nav-ico">🏆</span>
-          <span class="feature-nav-label">Lomba</span>
-        </button>
-        <button class="feature-nav-item" id="btnPersView" data-label="Pers">
-          <span class="feature-nav-ico">📰</span>
-          <span class="feature-nav-label">Pers</span>
-        </button>
-        <button class="feature-nav-item" id="btnRuanganView" data-label="Ruangan">
-          <span class="feature-nav-ico">🏠</span>
-          <span class="feature-nav-label">Ruangan</span>
-        </button>
-        <button class="feature-nav-item" id="btnNotulensiView" data-label="Notulensi">
-          <span class="feature-nav-ico">📝</span>
-          <span class="feature-nav-label">Notulensi</span>
-        </button>
-        <button class="feature-nav-item" id="btnAssetView" data-label="Inventaris">
-          <span class="feature-nav-ico">📦</span>
-          <span class="feature-nav-label">Inventaris</span>
-        </button>
-        <button class="feature-nav-item" id="btnInfoView" data-label="Pemberitahuan">
-          <span class="feature-nav-ico">🔔</span>
-          <span class="feature-nav-label">Pemberitahuan</span>
-        </button>
-        <button class="feature-nav-item admin-only" id="btnSettingsView" data-label="Pengaturan">
-          <span class="feature-nav-ico">⚙️</span>
-          <span class="feature-nav-label">Pengaturan</span>
-        </button>
-      </div>
-      <button class="mp-toggle-btn" id="mpToggleBtn" title="Sembunyikan panel anggota">‹</button>
+    <div class="sidebar-head">
+      <span class="sidebar-head-title">Anggota</span>
+      <button class="sb-toggle-btn" id="sbToggleBtn" title="Sembunyikan sidebar">‹</button>
     </div>
-
-    <div class="member-panel" id="memberPanel">
-      <div class="all-item" id="allItem">
-        <div class="all-avatar">☰</div>
-        <span class="all-label">Semua Anggota</span>
-        <span class="all-count" id="allCount"></span>
-      </div>
-      <div class="divider"></div>
-      <div class="people-scroll" id="peopleScroll"></div>
-      <div class="admin-only" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
-        <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
-        <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
-      </div>
+    <div class="all-item" id="allItem">
+      <div class="all-avatar">☰</div>
+      <span class="all-label">Semua Anggota</span>
+      <span class="all-count" id="allCount"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="people-scroll" id="peopleScroll"></div>
+    <div class="admin-only" style="padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;transition:border-color .25s;flex-direction:column;gap:4px">
+      <button class="task-add-inline-btn" id="btnAddKelompokon" style="font-size:.68rem">＋ Kelompok</button>
+      <button class="task-add-inline-btn" id="btnAddMemberRoot" style="font-size:.68rem">＋ Anggota</button>
     </div>
   </div>
 
@@ -1355,22 +1315,22 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
   if(localStorage.getItem('theme')==='light') html.setAttribute('data-theme','light');
 })();
 
-/* ── Member panel toggle ── */
+/* ── Sidebar mini toggle ── */
 (function(){
-  const panel=document.getElementById('memberPanel');
-  const btn=document.getElementById('mpToggleBtn');
-  if(!panel||!btn) return;
-  const MP_KEY='mp_hidden';
-  function applyPanel(hidden){
-    panel.classList.toggle('mp-hidden',hidden);
-    btn.textContent=hidden?'›':'‹';
-    btn.title=hidden?'Tampilkan panel anggota':'Sembunyikan panel anggota';
-    localStorage.setItem(MP_KEY,hidden?'1':'0');
+  const sidebar=document.querySelector('.sidebar');
+  const btn=document.getElementById('sbToggleBtn');
+  if(!sidebar||!btn) return;
+  const SB_KEY='sb_mini';
+  function applyMini(mini){
+    sidebar.classList.toggle('sb-mini',mini);
+    btn.textContent=mini?'›':'‹';
+    btn.title=mini?'Tampilkan sidebar':'Sembunyikan sidebar';
+    localStorage.setItem(SB_KEY,mini?'1':'0');
   }
-  applyPanel(localStorage.getItem(MP_KEY)==='1');
+  applyMini(localStorage.getItem(SB_KEY)==='1');
   btn.addEventListener('click',e=>{
     e.stopPropagation();
-    applyPanel(!panel.classList.contains('mp-hidden'));
+    applyMini(!sidebar.classList.contains('sb-mini'));
   });
 })();
 
@@ -1384,7 +1344,10 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
   function closeSidebar(){ sidebar.classList.remove('mobile-open'); overlay.classList.remove('open'); }
   toggle.addEventListener('click',openSidebar);
   overlay.addEventListener('click',closeSidebar);
-  sidebar.querySelectorAll('.feature-nav-item,[data-grp-add-mem],#btnAddKelompokon,#btnAddMemberRoot').forEach(el=>{
+  sidebar.querySelectorAll('[data-grp-add-mem],#btnAddKelompokon,#btnAddMemberRoot').forEach(el=>{
+    el.addEventListener('click',()=>{ if(window.innerWidth<=768) closeSidebar(); });
+  });
+  document.querySelectorAll('.fb-item').forEach(el=>{
     el.addEventListener('click',()=>{ if(window.innerWidth<=768) closeSidebar(); });
   });
   const allItem=document.getElementById('allItem');
