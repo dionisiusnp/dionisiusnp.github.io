@@ -82,11 +82,13 @@ input[type="date"].form-input{color-scheme:dark}
 .btn-save:hover{background:var(--accent2)}
 
 /* ── Nav ── */
-.nav{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--bd);transition:background .25s,border-color .25s}
+.nav{flex-shrink:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--bd);transition:background .25s,border-color .25s}
+.nav-left{display:flex;align-items:center;gap:8px}
+.nav-center{display:flex;align-items:center;gap:4px;justify-content:center}
+.nav-right{display:flex;align-items:center;gap:8px;justify-content:flex-end}
 .nav-back{font-size:.72rem;font-weight:600;color:var(--muted);padding:4px 12px;border:1px solid var(--bd);border-radius:5px;text-decoration:none;transition:color .15s,border-color .15s}
 .nav-back:hover{color:var(--accent);border-color:var(--accent)}
 .nav-title{font-size:.82rem;font-weight:700}
-.nav-spacer{flex:1}
 .nav-role-badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid;letter-spacing:.05em;text-transform:uppercase}
 .role-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);min-width:160px;z-index:9000;overflow:hidden;display:none}
 .role-menu.open{display:block}
@@ -99,15 +101,18 @@ input[type="date"].form-input{color-scheme:dark}
 .theme-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s,color .2s;font-size:14px;line-height:1}
 .theme-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 
-/* ── Feature bar ── */
-.feature-bar{display:flex;align-items:center;justify-content:center;gap:0;padding:0 8px;background:var(--surface);border-bottom:1px solid var(--bd);overflow-x:auto;flex-shrink:0;scrollbar-width:none;transition:background .25s,border-color .25s}
-.feature-bar::-webkit-scrollbar{display:none}
-.fb-group{display:flex;align-items:center;gap:1px;flex-shrink:0}
-.fb-divider{width:1px;height:20px;background:var(--bd);margin:0 6px;flex-shrink:0;transition:background .25s}
-.fb-item{display:flex;align-items:center;gap:5px;padding:8px 10px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:6px;font-size:.75rem;font-weight:500;white-space:nowrap;transition:background .15s,color .15s;flex-shrink:0}
-.fb-item:hover{background:var(--card);color:var(--text)}
-.fb-item.active{background:rgba(108,111,245,.12);color:var(--accent);font-weight:600}
-.fb-label{font-size:.75rem}
+/* ── Navbar dropdowns ── */
+.nb-group{position:relative}
+.nb-trigger{display:flex;align-items:center;gap:5px;padding:7px 12px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:7px;font-size:.78rem;font-weight:600;white-space:nowrap;transition:background .15s,color .15s}
+.nb-trigger:hover{background:var(--card);color:var(--text)}
+.nb-trigger.active{background:rgba(108,111,245,.12);color:var(--accent)}
+.nb-trigger.open .nb-arrow{transform:rotate(180deg)}
+.nb-arrow{font-size:.55rem;transition:transform .2s;display:inline-block;opacity:.6}
+.nb-dropdown{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:5px;min-width:170px;z-index:200;display:none;flex-direction:column;gap:1px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.nb-dropdown.open{display:flex}
+.nb-feature-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:7px;border:none;background:transparent;color:var(--text);font-size:.78rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;text-align:left;width:100%}
+.nb-feature-item:hover{background:var(--surface)}
+.nb-feature-item.active{background:rgba(108,111,245,.12);color:var(--accent);font-weight:600}
 
 /* ── App ── */
 .app{flex:1;display:flex;overflow:hidden}
@@ -552,9 +557,9 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   .nav-back{display:none}
   .nav-title{font-size:.78rem}
 
-  /* Feature bar mobile: icon-only */
-  .fb-label{display:none}
-  .fb-item{padding:8px 8px}
+  /* Nav center mobile: label hidden, emoji only */
+  .nb-tl{display:none}
+  .nb-trigger{padding:7px 8px}
 
   /* Sidebar drawer */
   .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease,background .25s;flex-direction:column;width:280px!important;border-right:none}
@@ -669,50 +674,58 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 
 <!-- Nav -->
 <nav class="nav">
-  <a href="../index.html" class="nav-back">
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:3px"><path d="M15 18l-6-6 6-6"/></svg>
-    Kembali
-  </a>
-  <button class="hamburger-btn" id="sidebarToggle">☰</button>
-  <span class="nav-title admin-only" id="navOrgName" style="margin-left:4px;cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s" title="Klik untuk edit nama organisasi">Alteco</span>
-  <span class="nav-title viewer-only" id="navOrgNameView" style="margin-left:4px">Alteco</span>
-  <span class="nav-spacer"></span>
-  <div style="position:relative;display:flex;align-items:center">
-    <span class="nav-role-badge" id="roleBadge" style="cursor:pointer">— <span style="font-size:.5rem;opacity:.6">▾</span></span>
-    <div class="role-menu" id="roleMenu">
-      <button class="role-menu-item" id="rmNotif">🔔 Pemberitahuan <span id="rmNotifBadge" style="display:none;background:var(--red,#f87171);color:#fff;font-size:.55rem;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">0</span></button>
-      <button class="role-menu-item" id="rmTheme">🌙 Ganti Tema</button>
-      <button class="role-menu-item" id="rmSync">↻ Perbarui Data</button>
-      <div class="role-menu-divider"></div>
-      <button class="role-menu-item danger" id="rmLogout">⏏ Logout</button>
+  <div class="nav-left">
+    <a href="../index.html" class="nav-back">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:3px"><path d="M15 18l-6-6 6-6"/></svg>
+      Kembali
+    </a>
+    <button class="hamburger-btn" id="sidebarToggle">☰</button>
+    <span class="nav-title admin-only" id="navOrgName" style="cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .15s" title="Klik untuk edit nama organisasi">Alteco</span>
+    <span class="nav-title viewer-only" id="navOrgNameView">Alteco</span>
+  </div>
+  <div class="nav-center">
+    <div class="nb-group" id="nbgOrg">
+      <button class="nb-trigger" id="nbtOrg">🏢 <span class="nb-tl">Organisasi</span> <span class="nb-arrow">▾</span></button>
+      <div class="nb-dropdown" id="nbdOrg">
+        <button class="nb-feature-item" id="btnOrgView">🏢 Bagan</button>
+        <button class="nb-feature-item" id="btnKomunitasView">📋 Regulasi</button>
+        <button class="nb-feature-item" id="btnCultureView">🌱 Sejarah</button>
+        <button class="nb-feature-item project-access" id="btnProjectView">🗂️ Proyek</button>
+      </div>
+    </div>
+    <div class="nb-group" id="nbgProgram">
+      <button class="nb-trigger" id="nbtProgram">📣 <span class="nb-tl">Program</span> <span class="nb-arrow">▾</span></button>
+      <div class="nb-dropdown" id="nbdProgram">
+        <button class="nb-feature-item" id="btnBroadcastView">📣 Broadcast</button>
+        <button class="nb-feature-item" id="btnLombaView">🏆 Lomba</button>
+        <button class="nb-feature-item" id="btnPersView">📰 Pers</button>
+      </div>
+    </div>
+    <div class="nb-group" id="nbgFasilitas">
+      <button class="nb-trigger" id="nbtFasilitas">🏠 <span class="nb-tl">Fasilitas</span> <span class="nb-arrow">▾</span></button>
+      <div class="nb-dropdown" id="nbdFasilitas">
+        <button class="nb-feature-item" id="btnRuanganView">🏠 Ruangan</button>
+        <button class="nb-feature-item" id="btnNotulensiView">📝 Notulensi</button>
+        <button class="nb-feature-item" id="btnAssetView">📦 Inventaris</button>
+        <button class="nb-feature-item" id="btnInfoView">🔔 Pemberitahuan</button>
+        <button class="nb-feature-item admin-only" id="btnSettingsView">⚙️ Pengaturan</button>
+      </div>
     </div>
   </div>
-  <span id="bellBadge" style="display:none">0</span>
+  <div class="nav-right">
+    <div style="position:relative;display:flex;align-items:center">
+      <span class="nav-role-badge" id="roleBadge" style="cursor:pointer">— <span style="font-size:.5rem;opacity:.6">▾</span></span>
+      <div class="role-menu" id="roleMenu">
+        <button class="role-menu-item" id="rmNotif">🔔 Pemberitahuan <span id="rmNotifBadge" style="display:none;background:var(--red,#f87171);color:#fff;font-size:.55rem;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px">0</span></button>
+        <button class="role-menu-item" id="rmTheme">🌙 Ganti Tema</button>
+        <button class="role-menu-item" id="rmSync">↻ Perbarui Data</button>
+        <div class="role-menu-divider"></div>
+        <button class="role-menu-item danger" id="rmLogout">⏏ Logout</button>
+      </div>
+    </div>
+    <span id="bellBadge" style="display:none">0</span>
+  </div>
 </nav>
-
-<!-- Feature bar -->
-<div class="feature-bar" id="featureBar">
-  <div class="fb-group">
-    <button class="fb-item" id="btnOrgView"><span>🏢</span><span class="fb-label">Bagan</span></button>
-    <button class="fb-item" id="btnKomunitasView"><span>📋</span><span class="fb-label">Regulasi</span></button>
-    <button class="fb-item" id="btnCultureView"><span>🌱</span><span class="fb-label">Sejarah</span></button>
-    <button class="fb-item project-access" id="btnProjectView"><span>🗂️</span><span class="fb-label">Proyek</span></button>
-  </div>
-  <div class="fb-divider"></div>
-  <div class="fb-group">
-    <button class="fb-item" id="btnBroadcastView"><span>📣</span><span class="fb-label">Broadcast</span></button>
-    <button class="fb-item" id="btnLombaView"><span>🏆</span><span class="fb-label">Lomba</span></button>
-    <button class="fb-item" id="btnPersView"><span>📰</span><span class="fb-label">Pers</span></button>
-  </div>
-  <div class="fb-divider"></div>
-  <div class="fb-group">
-    <button class="fb-item" id="btnRuanganView"><span>🏠</span><span class="fb-label">Ruangan</span></button>
-    <button class="fb-item" id="btnNotulensiView"><span>📝</span><span class="fb-label">Notulensi</span></button>
-    <button class="fb-item" id="btnAssetView"><span>📦</span><span class="fb-label">Inventaris</span></button>
-    <button class="fb-item" id="btnInfoView"><span>🔔</span><span class="fb-label">Pemberitahuan</span></button>
-    <button class="fb-item admin-only" id="btnSettingsView"><span>⚙️</span><span class="fb-label">Pengaturan</span></button>
-  </div>
-</div>
 
 <!-- App -->
 <div class="app">
@@ -1336,6 +1349,46 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
   });
 })();
 
+/* ── Navbar dropdowns ── */
+(function(){
+  const groups=document.querySelectorAll('.nb-group');
+  function closeAll(except){
+    groups.forEach(g=>{
+      if(g===except) return;
+      g.querySelector('.nb-trigger').classList.remove('open');
+      g.querySelector('.nb-dropdown').classList.remove('open');
+    });
+  }
+  groups.forEach(grp=>{
+    const trigger=grp.querySelector('.nb-trigger');
+    const dropdown=grp.querySelector('.nb-dropdown');
+    trigger.addEventListener('click',e=>{
+      e.stopPropagation();
+      const isOpen=dropdown.classList.contains('open');
+      closeAll(grp);
+      trigger.classList.toggle('open',!isOpen);
+      dropdown.classList.toggle('open',!isOpen);
+    });
+    dropdown.querySelectorAll('.nb-feature-item').forEach(item=>{
+      item.addEventListener('click',()=>{
+        closeAll();
+        trigger.classList.remove('open');
+        dropdown.classList.remove('open');
+      });
+    });
+  });
+  document.addEventListener('click',()=>closeAll());
+  function syncGroupActive(){
+    groups.forEach(grp=>{
+      const trigger=grp.querySelector('.nb-trigger');
+      const hasActive=[...grp.querySelectorAll('.nb-feature-item')].some(b=>b.classList.contains('active'));
+      trigger.classList.toggle('active',hasActive);
+    });
+  }
+  const navCenter=document.querySelector('.nav-center');
+  if(navCenter) new MutationObserver(syncGroupActive).observe(navCenter,{subtree:true,attributeFilter:['class']});
+})();
+
 /* ── Mobile sidebar toggle ── */
 (function(){
   const toggle=document.getElementById('sidebarToggle');
@@ -1349,7 +1402,7 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
   sidebar.querySelectorAll('[data-grp-add-mem],#btnAddKelompokon,#btnAddMemberRoot').forEach(el=>{
     el.addEventListener('click',()=>{ if(window.innerWidth<=768) closeSidebar(); });
   });
-  document.querySelectorAll('.fb-item').forEach(el=>{
+  document.querySelectorAll('.nb-feature-item').forEach(el=>{
     el.addEventListener('click',()=>{ if(window.innerWidth<=768) closeSidebar(); });
   });
   const allItem=document.getElementById('allItem');
