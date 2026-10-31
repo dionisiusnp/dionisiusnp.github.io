@@ -261,6 +261,8 @@ body.is-admin .viewer-only{display:none!important}
 .org-kelompok-node.depth-1{background:var(--card);border:1.5px solid var(--bd);color:var(--muted)}
 .org-kelompok-node:hover{background:rgba(108,111,245,.15);border-color:var(--accent);color:var(--accent)}
 .org-k-name{font-size:.78rem;font-weight:700}
+.org-k-info-btn{background:none;border:none;cursor:pointer;font-size:.72rem;color:var(--muted);padding:0 0 0 3px;line-height:1;vertical-align:middle;opacity:.7}
+.org-k-info-btn:hover{opacity:1;color:var(--accent)}
 .org-k-meta{font-size:.6rem;color:var(--muted);margin-top:3px;font-family:var(--mono)}
 /* modal anggota list */
 .modal-member-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto}
@@ -1394,7 +1396,6 @@ function renderSidebar(){
         ${memberCount?`<span class="kelompok-chevron" style="transform:rotate(${expanded?90:0}deg);cursor:pointer" data-toggle-grp="${k.id}">▶</span>`:''}
         <span class="kelompok-name-text">${esc(k.name)}</span>
         ${!isJoinable?`<span style="font-size:.75rem;color:var(--dim);margin-left:4px">(${k.jumlah??0})</span>`:''}
-        ${k.deskripsi?`<span style="display:block;font-size:.68rem;color:var(--dim);font-weight:400;margin-top:2px;line-height:1.4;white-space:normal">${esc(k.deskripsi)}</span>`:''}
         ${role==='admin'?`<span class="grp-actions">
           ${idx>0?`<button class="grp-order-btn" data-grp-up="${k.id}" title="Naik">▲</button>`:''}
           ${idx<siblings.length-1?`<button class="grp-order-btn" data-grp-dn="${k.id}" title="Turun">▼</button>`:''}
@@ -2306,7 +2307,13 @@ function renderOrgChart(){
     el.className='org-kelompok-node'+(k.parentId?' depth-1':'');
     el.dataset.kid=k.id;
     el.style.cssText=`position:absolute;left:${posX[k.id]-NW/2}px;top:${y}px;width:${NW}px`;
-    el.innerHTML=`<div class="org-k-name">${esc(k.name)}</div><div class="org-k-meta">${mc} anggota${tc?` · ${tc} tugas`:''}</div>`;
+    el.innerHTML=`<div class="org-k-name">${esc(k.name)}${k.deskripsi?` <button class="org-k-info-btn" title="Lihat deskripsi">ℹ</button>`:''}</div><div class="org-k-meta">${mc} anggota${tc?` · ${tc} tugas`:''}</div>`;
+    if(k.deskripsi){
+      el.querySelector('.org-k-info-btn').addEventListener('click',e=>{
+        e.stopPropagation();
+        openModal('kelompok-deskripsi',{id:k.id});
+      });
+    }
     if(isJoinable) el.addEventListener('click',()=>openModal('kelompok-members',{kelompokId:k.id}));
     else el.style.cursor='default';
     canvas.appendChild(el);
@@ -2505,6 +2512,14 @@ function openModal(mode, ctx){
       <div class="form-group"><label class="form-label">Keterangan</label><textarea class="form-textarea" id="fi-anotes">${esc(a.notes||'')}</textarea></div>
     `;
     return;
+  }
+
+  else if(mode==='kelompok-deskripsi'){
+    const k=db.kelompoks.find(x=>x.id===mCtx.id);
+    if(!k) return;
+    title.textContent=k.name;
+    document.getElementById('modalSave').style.display='none';
+    body.innerHTML=`<div style="font-size:.88rem;line-height:1.7;color:var(--text);white-space:pre-wrap">${esc(k.deskripsi||'')}</div>`;
   }
 
   else if(mode==='kelompok-members'){
