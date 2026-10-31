@@ -249,8 +249,16 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 | Array top-level (`tasks`, `members`, `kelompoks`, `assets`, `events`, `cultures`, `notulensi`, `notulensiTopik`, `bahanPers`, `ruangan`) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
 | `projects[].members[].tasks[]` | Deep merge 3 level — per-task `updatedAt` menang |
 | `broadcastProduk[].kondisi[].items[]` | Deep merge 3 level — per-item `updatedAt` menang |
-| `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.keuntungan` / `regulasi.sanksi` | Merge by `id` + `updatedAt` |
+| `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.keuntungan` / `regulasi.sanksi` | Merge by `id` + `updatedAt`; **urutan array browser menang** (mendukung drag & drop reorder) |
 | `settings`, `orgName`, `visi`, `misi` | Browser always wins (last write) |
+
+### Field tambahan terbaru
+
+| Field | Entitas | Keterangan |
+|-------|---------|-----------|
+| `deskripsi` | `kelompoks[]` | Deskripsi/jobdesk kelompok — opsional, `null` jika kosong |
+| `tglKegiatan`, `waktuMulai`, `waktuSelesai` | `ruangan[]` | Jadwal kegiatan — opsional, diisi saat tandai aktif |
+| `url` | `events[]` | Link opsional di pemberitahuan |
 
 Ini mencegah data hilang saat dua user edit data berbeda secara bersamaan (race condition).
 
