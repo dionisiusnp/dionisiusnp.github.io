@@ -905,10 +905,10 @@ function setNotulKey(id,kode){ const m=getNotulKeys(); m[id]=kode; localStorage.
 function isTopikUnlocked(t){ if(role==='admin') return true; if(!t.kode) return true; return getNotulKeys()[t.id]===t.kode; }
 let broadcastSearch  = '';
 let bcSession        = false; /* true after viewer enters global broadcastKode */
-const LOMBA_VOTES_LS = 'alteco_lomba_votes_v1';
-/* { [lombaId]: { ideId, vote: 'like'|'dislike' } } — 1 vote per lomba per device */
+const LOMBA_VOTES_LS = 'alteco_lomba_ide_votes_v1';
+/* { [ideId]: 'like'|'dislike' } — 1 vote per ideId per device */
 function getLombaVotes(){ try{ return JSON.parse(localStorage.getItem(LOMBA_VOTES_LS)||'{}'); }catch{ return {}; } }
-function getLombaVoteForLomba(lombaId){ return getLombaVotes()[lombaId]||null; }
+function getLombaVoteForIde(ideId){ return getLombaVotes()[ideId]||null; }
 function memberPopupText(fullName, angkatan){
   return [fullName||null, angkatan?`Angkatan ${angkatan}`:null].filter(Boolean).join('\n');
 }
@@ -969,9 +969,9 @@ function makeMemberSearchSelect(id, members, currentId, placeholder){
   });
   return wrap;
 }
-function setLombaVoteForLomba(lombaId,ideId,vote){
+function setLombaVoteForIde(ideId,vote){
   const m=getLombaVotes();
-  if(!vote) delete m[lombaId]; else m[lombaId]={ideId,vote};
+  if(!vote) delete m[ideId]; else m[ideId]=vote;
   localStorage.setItem(LOMBA_VOTES_LS,JSON.stringify(m));
 }
 function isBroadcastUnlocked(){ return role==='admin'||!db.settings.broadcastKode||bcSession; }
@@ -1005,6 +1005,21 @@ function migrate(d){
   if(!d.notulensiTopik) d.notulensiTopik=[];
   if(!d.broadcastProduk) d.broadcastProduk=[];
   if(!d.lombas) d.lombas=[];
+  if(!d.lombaIde) d.lombaIde=[];
+  /* migrate ide[] from each lomba into global lombaIde pool */
+  d.lombas.forEach(l=>{
+    if(l.ide&&l.ide.length){
+      const existIds=new Set(d.lombaIde.map(x=>x.id));
+      l.ide.forEach(ide=>{
+        if(!existIds.has(ide.id)){
+          d.lombaIde.push(Object.assign({updatedAt:0,likes:0,dislikes:0,submittedBy:''},ide));
+          existIds.add(ide.id);
+        }
+      });
+      delete l.ide;
+    }
+    if(!l.peserta) l.peserta=[];
+  });
   if(!d.bahanPers) d.bahanPers=[];
   if(!d.ruangan) d.ruangan=[];
   if(!d.settings) d.settings={pushNotifEnabled:false,notifTime:'07:00',notifDaysBefore:1};
@@ -1096,7 +1111,7 @@ function mergeBcProdukClient(a=[],b=[]){
   });
   return [...b.map(x=>merged.find(m=>m.id===x.id)).filter(Boolean),...merged.filter(x=>!bIds.has(x.id))];
 }
-function mergeLombaIdeClient(a=[],b=[]){
+function mergeLombaPesertaClient(a=[],b=[]){
   const map=new Map();
   for(const t of a) map.set(t.id,t);
   for(const t of b){const ex=map.get(t.id);if(!ex||(t.updatedAt||0)>=(ex.updatedAt||0))map.set(t.id,t);}
@@ -1111,7 +1126,7 @@ function mergeLombasClient(a=[],b=[]){
     const ai=aMap.get(id),bi=bMap.get(id);
     if(!ai) return bi; if(!bi) return ai;
     const newer=(bi.updatedAt||0)>=(ai.updatedAt||0)?bi:ai;
-    return {...ai,...newer,ide:mergeLombaIdeClient(ai.ide||[],bi.ide||[])};
+    return {...ai,...newer,peserta:mergeLombaPesertaClient(ai.peserta||[],bi.peserta||[])};
   });
   return [...b.map(x=>merged.find(m=>m.id===x.id)).filter(Boolean),...merged.filter(x=>!bIds.has(x.id))];
 }
@@ -1140,6 +1155,7 @@ function mergeDbOnLoad(gist,local){
     notulensiTopik:  mergeArrClient(gist.notulensiTopik||[],  local.notulensiTopik||[]),
     broadcastProduk: mergeBcProdukClient(gist.broadcastProduk||[],local.broadcastProduk||[]),
     lombas:    mergeLombasClient(gist.lombas||[],local.lombas||[]),
+    lombaIde:  mergeArrClient(gist.lombaIde||[],local.lombaIde||[]),
     bahanPers: mergeArrClient(gist.bahanPers||[],local.bahanPers||[]),
     ruangan:   mergeArrClient(gist.ruangan||[],local.ruangan||[]),
     regulasi:   mergeRegulasisClient(gist.regulasi||{},local.regulasi||{}),
@@ -3172,10 +3188,6 @@ function openModal(mode, ctx){
         <input class="form-input" id="fi-lomba-nama" type="text" value="${esc(l?.nama||'')}" placeholder="Contoh: Hackathon Nasional 2026" maxlength="150"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Nama Tim <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
-        <input class="form-input" id="fi-lomba-tim" type="text" value="${esc(l?.tim||'')}" placeholder="Nama tim yang ikut lomba ini" maxlength="100"/>
-      </div>
-      <div class="form-group">
         <label class="form-label">Periode Registrasi <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
         <div style="display:flex;gap:8px;align-items:center">
           <input class="form-input" id="fi-lomba-reg-start" type="date" value="${esc(l?.regStart||'')}" style="flex:1"/>
@@ -3184,7 +3196,7 @@ function openModal(mode, ctx){
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Tim Mendaftar <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
+        <label class="form-label">Tanggal Mendaftar <span style="font-size:.65rem;color:var(--dim);font-weight:400">(opsional)</span></label>
         <input class="form-input" id="fi-lomba-daftar" type="date" value="${esc(l?.tanggalDaftar||'')}"/>
       </div>
       <div class="form-group">
@@ -3195,10 +3207,9 @@ function openModal(mode, ctx){
     document.getElementById('fi-lomba-nama').focus();
   }
 
-  else if(mode==='lomba-ide-add'||mode==='lomba-ide-edit'){
-    const l=(db.lombas||[]).find(x=>x.id===ctx.lombaId);
-    const ide=mode==='lomba-ide-edit'?(l?.ide||[]).find(x=>x.id===ctx.id):null;
-    title.textContent=mode==='lomba-ide-add'?`Tambah Ide${l?' — '+l.nama:''}`:'Edit Ide';
+  else if(mode==='lomba-ide-global-add'||mode==='lomba-ide-global-edit'){
+    const ide=mode==='lomba-ide-global-edit'?(db.lombaIde||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='lomba-ide-global-add'?'Tambah Ide':'Edit Ide';
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Judul Ide *</label>
@@ -3210,6 +3221,61 @@ function openModal(mode, ctx){
       </div>
     `;
     document.getElementById('fi-ide-judul').focus();
+  }
+
+  else if(mode==='lomba-peserta-add'||mode==='lomba-peserta-edit'){
+    const l=(db.lombas||[]).find(x=>x.id===ctx.lombaId);
+    const p=mode==='lomba-peserta-edit'?(l?.peserta||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='lomba-peserta-add'?'Tambah Peserta':'Edit Peserta';
+    /* kelompoks excluding already registered (except current if editing) */
+    const usedKelIds=new Set((l?.peserta||[]).filter(x=>!x.deleted&&x.id!==(p?.id)).map(x=>x.kelompokId));
+    const kelList=(db.kelompoks||[]).filter(k=>!k.deleted&&!usedKelIds.has(k.id));
+    const kelOpts=kelList.map(k=>`<option value="${k.id}" ${p?.kelompokId===k.id?'selected':''}>${esc(k.name)}</option>`).join('');
+    /* ide from pool excluding already used in this lomba (except current peserta's ide) */
+    const usedIdeIds=new Set((l?.peserta||[]).filter(x=>!x.deleted&&x.ideSource==='pool'&&x.id!==(p?.id)).map(x=>x.ideId));
+    const idePool=(db.lombaIde||[]).filter(x=>!x.deleted&&!usedIdeIds.has(x.id));
+    const ideOpts=idePool.map(i=>`<option value="${i.id}" ${p?.ideId===i.id?'selected':''}>${esc(i.judul)}</option>`).join('');
+    const isPool=p?.ideSource==='pool'||(!p);
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Kelompok *</label>
+        <select class="form-select" id="fi-peserta-kel">
+          <option value="">— Pilih Kelompok —</option>
+          ${kelOpts}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">PIC / Nama Penanggung Jawab *</label>
+        <input class="form-input" id="fi-peserta-pic" type="text" value="${esc(p?.pic||'')}" placeholder="Nama anggota yang jadi PIC" maxlength="100"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sumber Ide *</label>
+        <div style="display:flex;gap:16px;margin-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
+            <input type="radio" name="ide-source" id="fi-ide-src-pool" value="pool" ${isPool?'checked':''} style="accent-color:var(--accent)"/>
+            Pilih dari Pool Ide
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
+            <input type="radio" name="ide-source" id="fi-ide-src-sendiri" value="sendiri" ${!isPool?'checked':''} style="accent-color:var(--accent)"/>
+            Ide Sendiri
+          </label>
+        </div>
+      </div>
+      <div class="form-group" id="fi-ide-pool-wrap" style="${isPool?'':'display:none'}">
+        <label class="form-label">Pilih Ide dari Pool *</label>
+        <select class="form-select" id="fi-peserta-ide">
+          <option value="">— Pilih Ide —</option>
+          ${ideOpts}
+        </select>
+      </div>
+    `;
+    document.getElementById('fi-ide-src-pool').addEventListener('change',function(){
+      document.getElementById('fi-ide-pool-wrap').style.display=this.checked?'':'none';
+    });
+    document.getElementById('fi-ide-src-sendiri').addEventListener('change',function(){
+      document.getElementById('fi-ide-pool-wrap').style.display=this.checked?'none':'';
+    });
+    document.getElementById('fi-peserta-kel').focus();
   }
 
   else if(mode==='vismis-edit'){
@@ -3812,36 +3878,71 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='lomba-add'||mMode==='lomba-edit'){
     const nama_v=document.getElementById('fi-lomba-nama').value.trim();
     if(!nama_v) return;
-    const tim_v=document.getElementById('fi-lomba-tim').value.trim()||null;
     const regStart_v=document.getElementById('fi-lomba-reg-start').value||null;
     const regEnd_v=document.getElementById('fi-lomba-reg-end').value||null;
     const daftar_v=document.getElementById('fi-lomba-daftar').value||null;
     const url_v=document.getElementById('fi-lomba-url').value.trim()||null;
     if(!db.lombas) db.lombas=[];
     if(mMode==='lomba-add'){
-      db.lombas.push(touch({id:uid(),nama:nama_v,tim:tim_v,regStart:regStart_v,regEnd:regEnd_v,tanggalDaftar:daftar_v,url:url_v,ide:[],createdAt:Date.now()}));
+      db.lombas.push(touch({id:uid(),nama:nama_v,regStart:regStart_v,regEnd:regEnd_v,tanggalDaftar:daftar_v,url:url_v,peserta:[],createdAt:Date.now()}));
     } else {
       const l=db.lombas.find(x=>x.id===mCtx.id);
       if(!l) return;
-      l.nama=nama_v; l.tim=tim_v; l.regStart=regStart_v; l.regEnd=regEnd_v; l.tanggalDaftar=daftar_v; l.url=url_v; touch(l);
+      l.nama=nama_v; l.regStart=regStart_v; l.regEnd=regEnd_v; l.tanggalDaftar=daftar_v; l.url=url_v; touch(l);
     }
     save(); renderLomba(); closeModal();
   }
 
-  /* ── Lomba ide save ── */
-  else if(mMode==='lomba-ide-add'||mMode==='lomba-ide-edit'){
+  /* ── Lomba ide global save ── */
+  else if(mMode==='lomba-ide-global-add'||mMode==='lomba-ide-global-edit'){
     const judul_v=document.getElementById('fi-ide-judul').value.trim();
     if(!judul_v) return;
     const desc_v=document.getElementById('fi-ide-desc').value.trim()||null;
-    const l=(db.lombas||[]).find(x=>x.id===mCtx.lombaId);
-    if(!l) return;
-    if(!l.ide) l.ide=[];
-    if(mMode==='lomba-ide-add'){
-      l.ide.push(touch({id:uid(),judul:judul_v,desc:desc_v,createdAt:Date.now()}));
+    if(!db.lombaIde) db.lombaIde=[];
+    if(mMode==='lomba-ide-global-add'){
+      db.lombaIde.push(touch({id:uid(),judul:judul_v,desc:desc_v,likes:0,dislikes:0,createdAt:Date.now()}));
     } else {
-      const ide=l.ide.find(x=>x.id===mCtx.id);
+      const ide=db.lombaIde.find(x=>x.id===mCtx.id);
       if(!ide) return;
       ide.judul=judul_v; ide.desc=desc_v; touch(ide);
+    }
+    save(); renderLomba(); closeModal();
+  }
+
+  /* ── Lomba peserta save ── */
+  else if(mMode==='lomba-peserta-add'||mMode==='lomba-peserta-edit'){
+    const kelId=document.getElementById('fi-peserta-kel').value;
+    const pic_v=document.getElementById('fi-peserta-pic').value.trim();
+    const ideSource_v=document.querySelector('input[name="ide-source"]:checked')?.value||'pool';
+    const ideId_v=ideSource_v==='pool'?document.getElementById('fi-peserta-ide').value:null;
+    if(!kelId){ alert('Pilih kelompok terlebih dahulu.'); return; }
+    if(!pic_v){ alert('Nama PIC wajib diisi.'); return; }
+    if(ideSource_v==='pool'&&!ideId_v){ alert('Pilih ide dari pool atau pilih "Ide Sendiri".'); return; }
+    const l=(db.lombas||[]).find(x=>x.id===mCtx.lombaId);
+    if(!l) return;
+    if(!l.peserta) l.peserta=[];
+    const kel=db.kelompoks.find(k=>k.id===kelId);
+    if(mMode==='lomba-peserta-add'){
+      /* validate: kelompok belum terdaftar */
+      if(l.peserta.some(x=>!x.deleted&&x.kelompokId===kelId)){
+        alert('Kelompok ini sudah terdaftar di lomba ini.'); return;
+      }
+      /* validate: ide pool tidak duplikat */
+      if(ideSource_v==='pool'&&l.peserta.some(x=>!x.deleted&&x.ideSource==='pool'&&x.ideId===ideId_v)){
+        alert('Ide ini sudah dipakai kelompok lain di lomba ini.'); return;
+      }
+      l.peserta.push(touch({id:uid(),kelompokId:kelId,kelompokNama:kel?.name||kelId,pic:pic_v,ideSource:ideSource_v,ideId:ideId_v||null,createdAt:Date.now()}));
+    } else {
+      const p=l.peserta.find(x=>x.id===mCtx.id);
+      if(!p) return;
+      /* validate for edit (exclude self) */
+      if(l.peserta.some(x=>!x.deleted&&x.id!==p.id&&x.kelompokId===kelId)){
+        alert('Kelompok ini sudah terdaftar di lomba ini.'); return;
+      }
+      if(ideSource_v==='pool'&&l.peserta.some(x=>!x.deleted&&x.id!==p.id&&x.ideSource==='pool'&&x.ideId===ideId_v)){
+        alert('Ide ini sudah dipakai kelompok lain di lomba ini.'); return;
+      }
+      p.kelompokId=kelId; p.kelompokNama=kel?.name||kelId; p.pic=pic_v; p.ideSource=ideSource_v; p.ideId=ideId_v||null; touch(p);
     }
     touch(l); save(); renderLomba(); closeModal();
   }
@@ -5654,7 +5755,7 @@ function renderLomba(){
   area.innerHTML='';
   const isSuperAdmin=role==='admin';
 
-  /* Toolbar */
+  /* ── Toolbar ── */
   const toolbar=document.createElement('div');
   toolbar.className='notul-toolbar';
   toolbar.innerHTML=`<span class="notul-toolbar-title">🏆 Lomba</span>
@@ -5673,21 +5774,103 @@ function renderLomba(){
     const pos=e.target.selectionStart;
     renderLomba();
     const inp=document.getElementById('lombaSearchInp');
-    if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
+    if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(_){}}
   });
+
+  /* ════════════════════════════════
+     SECTION 1 — Pool Ide Global
+  ════════════════════════════════ */
+  const ideSection=document.createElement('div');
+  ideSection.style.cssText='margin:0 0 8px';
+
+  const ideHdr=document.createElement('div');
+  ideHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px';
+  ideHdr.innerHTML=`<div style="font-size:.72rem;font-weight:800;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">💡 Kumpulan Ide</div>`;
+  const ideAddBtn=document.createElement('button');
+  ideAddBtn.className='task-add-inline-btn';
+  ideAddBtn.textContent='＋ Tambah Ide';
+  ideAddBtn.addEventListener('click',()=>openModal('lomba-ide-global-add',{}));
+  ideHdr.appendChild(ideAddBtn);
+  ideSection.appendChild(ideHdr);
+
+  const idePool=(db.lombaIde||[]).filter(x=>!x.deleted);
+  if(!idePool.length){
+    const emp=document.createElement('div');
+    emp.style.cssText='padding:10px 20px 18px;font-size:.8rem;color:var(--dim);font-style:italic';
+    emp.textContent='Belum ada ide. Jadilah yang pertama menambahkan!';
+    ideSection.appendChild(emp);
+  } else {
+    function doVoteIde(ide,voteType){
+      const prev=getLombaVoteForIde(ide.id);
+      if(prev===voteType){
+        /* undo */
+        if(voteType==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
+        else ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
+        setLombaVoteForIde(ide.id,null);
+      } else {
+        /* remove opposite */
+        if(prev==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
+        else if(prev==='dislike') ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
+        /* apply new */
+        if(voteType==='like') ide.likes=(ide.likes||0)+1;
+        else ide.dislikes=(ide.dislikes||0)+1;
+        setLombaVoteForIde(ide.id,voteType);
+      }
+      touch(ide); save(); renderLomba();
+    }
+    idePool.forEach(ide=>{
+      const myVote=getLombaVoteForIde(ide.id);
+      const ideEl=document.createElement('div');
+      ideEl.className='lomba-ide-row';
+      ideEl.innerHTML=`
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82rem;font-weight:600;color:var(--text)">${esc(ide.judul)}</div>
+          ${ide.desc?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px;white-space:pre-wrap;line-height:1.5">${esc(ide.desc)}</div>`:''}
+        </div>
+        <div class="lomba-ide-acts">
+          <button class="lomba-vote-btn${myVote==='like'?' active':''}" data-gi-like="${ide.id}">👍 <span>${ide.likes||0}</span></button>
+          <button class="lomba-vote-btn${myVote==='dislike'?' active-dis':''}" data-gi-dislike="${ide.id}">👎 <span>${ide.dislikes||0}</span></button>
+          ${isSuperAdmin?`<button class="asset-act-btn" data-gi-edit="${ide.id}" title="Edit">✎</button>
+          <button class="asset-act-btn del" data-gi-del="${ide.id}" title="Hapus">✕</button>`:''}
+        </div>
+      `;
+      ideEl.querySelector('[data-gi-like]').addEventListener('click',()=>doVoteIde(ide,'like'));
+      ideEl.querySelector('[data-gi-dislike]').addEventListener('click',()=>doVoteIde(ide,'dislike'));
+      ideEl.querySelector('[data-gi-edit]')?.addEventListener('click',()=>openModal('lomba-ide-global-edit',{id:ide.id}));
+      ideEl.querySelector('[data-gi-del]')?.addEventListener('click',()=>{
+        if(!confirm(`Hapus ide "${ide.judul}"?`)) return;
+        touch(Object.assign(ide,{deleted:true})); save(); renderLomba();
+      });
+      ideSection.appendChild(ideEl);
+    });
+  }
+  area.appendChild(ideSection);
+
+  /* separator */
+  const sep=document.createElement('div');
+  sep.style.cssText='height:1px;background:var(--bd);margin:4px 0 16px';
+  area.appendChild(sep);
+
+  /* ════════════════════════════════
+     SECTION 2 — Daftar Lomba
+  ════════════════════════════════ */
+  const lombaHdr=document.createElement('div');
+  lombaHdr.style.cssText='padding:0 20px 10px;font-size:.72rem;font-weight:800;color:var(--muted);letter-spacing:.08em;text-transform:uppercase';
+  lombaHdr.textContent='🏆 Daftar Lomba';
+  area.appendChild(lombaHdr);
 
   const q=lombaSearch.trim().toLowerCase();
   const list=(db.lombas||[]).filter(l=>!l.deleted&&(!q||l.nama.toLowerCase().includes(q)));
   if(!list.length){
     const empty=document.createElement('div');
-    empty.style.cssText='padding:40px;text-align:center;color:var(--dim);font-size:.82rem';
-    empty.textContent=q?'Tidak ada lomba yang cocok.':'Belum ada lomba. Tambah lomba pertama!';
+    empty.style.cssText='padding:10px 20px 40px;color:var(--dim);font-size:.82rem;font-style:italic';
+    empty.textContent=q?'Tidak ada lomba yang cocok.':'Belum ada lomba.';
     area.appendChild(empty);
     return;
   }
 
   list.forEach(l=>{
-    const ideList=(l.ide||[]).filter(x=>!x.deleted);
+    const pesertaList=(l.peserta||[]).filter(x=>!x.deleted);
     /* countdown */
     let countdownHtml='';
     if(l.regEnd){
@@ -5706,12 +5889,11 @@ function renderLomba(){
         <div class="notul-topik-info">
           <div class="notul-topik-title">${esc(l.nama)}</div>
           <div class="notul-topik-meta">${[
-            l.tim?`Tim: ${esc(l.tim)}`:'',
             (l.regStart||l.regEnd)?`Reg: ${esc(l.regStart||'?')} — ${esc(l.regEnd||'?')}`:'',
             countdownHtml,
             l.tanggalDaftar?`Daftar: ${esc(l.tanggalDaftar)}`:'',
             l.url?`<a href="${esc(l.url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">🔗 Link</a>`:'',
-            `${ideList.length} ide`
+            `${pesertaList.length} kelompok`
           ].filter(Boolean).join(' · ')}</div>
         </div>
         <div class="notul-topik-acts">
@@ -5720,113 +5902,57 @@ function renderLomba(){
         </div>
         <span class="notul-chevron">▼</span>
       </div>
-      <div class="notul-topik-body" id="lomba-ide-list-${l.id}">
-        ${isSuperAdmin?`<button class="notul-topik-add-btn" data-add-ide="${l.id}">＋ Tambah Ide</button>`:''}
+      <div class="notul-topik-body" id="lomba-peserta-list-${l.id}">
+        ${isSuperAdmin?`<button class="notul-topik-add-btn" data-add-peserta="${l.id}">＋ Tambah Peserta</button>`:''}
       </div>
     `;
 
-    /* Toggle open */
     card.querySelector('.notul-topik-head').addEventListener('click',e=>{
-      if(e.target.closest('.notul-topik-acts')||e.target.closest('[data-add-ide]')) return;
+      if(e.target.closest('.notul-topik-acts')||e.target.closest('[data-add-peserta]')) return;
       card.classList.toggle('open');
     });
-
-    /* Edit lomba */
-    card.querySelector('[data-lomba-edit]')?.addEventListener('click',e=>{
-      e.stopPropagation();
-      openModal('lomba-edit',{id:l.id});
-    });
-
-    /* Delete lomba (cascade) */
+    card.querySelector('[data-lomba-edit]')?.addEventListener('click',e=>{ e.stopPropagation(); openModal('lomba-edit',{id:l.id}); });
     card.querySelector('[data-lomba-del]')?.addEventListener('click',e=>{
       e.stopPropagation();
-      if(!confirm(`Hapus lomba "${l.nama}" dan ${ideList.length} idenya?`)) return;
-      (l.ide||[]).forEach(ide=>touch(Object.assign(ide,{deleted:true})));
+      if(!confirm(`Hapus lomba "${l.nama}"?`)) return;
+      (l.peserta||[]).forEach(p=>touch(Object.assign(p,{deleted:true})));
       touch(Object.assign(l,{deleted:true}));
       save(); renderLomba();
     });
+    card.querySelector('[data-add-peserta]')?.addEventListener('click',e=>{ e.stopPropagation(); openModal('lomba-peserta-add',{lombaId:l.id}); });
 
-    /* Add ide */
-    card.querySelector('[data-add-ide]')?.addEventListener('click',e=>{
-      e.stopPropagation();
-      openModal('lomba-ide-add',{lombaId:l.id});
-    });
-
-    /* Render ide list */
-    const ideContainer=card.querySelector(`#lomba-ide-list-${l.id}`);
-    const lombaVote=getLombaVoteForLomba(l.id); // { ideId, vote } | null
-
-    function doVote(ide,voteType){
-      const prevIdeId=lombaVote?.ideId;
-      const prevVote=lombaVote?.vote;
-      /* undo: same ide same vote */
-      if(prevIdeId===ide.id && prevVote===voteType){
-        if(voteType==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
-        else ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
-        touch(ide);
-        setLombaVoteForLomba(l.id,null,null);
-      } else {
-        /* remove old vote from previous ide if different ide */
-        if(prevIdeId && prevIdeId!==ide.id){
-          const prevIde=(l.ide||[]).find(x=>x.id===prevIdeId);
-          if(prevIde){
-            if(prevVote==='like') prevIde.likes=Math.max(0,(prevIde.likes||0)-1);
-            else prevIde.dislikes=Math.max(0,(prevIde.dislikes||0)-1);
-            touch(prevIde);
-          }
-        }
-        /* remove same-ide opposite vote */
-        if(prevIdeId===ide.id && prevVote && prevVote!==voteType){
-          if(prevVote==='like') ide.likes=Math.max(0,(ide.likes||0)-1);
-          else ide.dislikes=Math.max(0,(ide.dislikes||0)-1);
-        }
-        /* apply new vote */
-        if(voteType==='like') ide.likes=(ide.likes||0)+1;
-        else ide.dislikes=(ide.dislikes||0)+1;
-        touch(ide);
-        setLombaVoteForLomba(l.id,ide.id,voteType);
-      }
-      touch(l); save(); renderLomba();
+    /* Peserta rows */
+    const pesertaContainer=card.querySelector(`#lomba-peserta-list-${l.id}`);
+    if(pesertaList.length){
+      const tbl=document.createElement('div');
+      tbl.style.cssText='padding:4px 14px 8px';
+      const thead=document.createElement('div');
+      thead.style.cssText='display:grid;grid-template-columns:1fr 1fr 1.5fr auto;gap:8px;padding:6px 8px;font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bd)';
+      thead.innerHTML='<span>Kelompok</span><span>PIC</span><span>Ide</span><span></span>';
+      tbl.appendChild(thead);
+      pesertaList.forEach(p=>{
+        const ideObj=p.ideSource==='pool'&&p.ideId?(db.lombaIde||[]).find(x=>x.id===p.ideId):null;
+        const ideLabel=p.ideSource==='sendiri'?'<span style="font-size:.68rem;color:var(--muted);font-style:italic">Ide Sendiri</span>':(ideObj?`<span style="font-size:.75rem;color:var(--text)">${esc(ideObj.judul)}</span>`:'<span style="font-size:.68rem;color:var(--dim)">—</span>');
+        const row=document.createElement('div');
+        row.style.cssText='display:grid;grid-template-columns:1fr 1fr 1.5fr auto;gap:8px;padding:7px 8px;align-items:center;border-bottom:1px solid var(--bd)';
+        row.innerHTML=`
+          <span style="font-size:.78rem;font-weight:600;color:var(--text)">${esc(p.kelompokNama||p.kelompokId)}</span>
+          <span style="font-size:.75rem;color:var(--dim)">${esc(p.pic||'')}</span>
+          <div>${ideLabel}</div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            ${isSuperAdmin?`<button class="asset-act-btn" data-p-edit="${p.id}" title="Edit">✎</button>
+            <button class="asset-act-btn del" data-p-del="${p.id}" title="Hapus">✕</button>`:''}
+          </div>
+        `;
+        row.querySelector('[data-p-edit]')?.addEventListener('click',()=>openModal('lomba-peserta-edit',{lombaId:l.id,id:p.id}));
+        row.querySelector('[data-p-del]')?.addEventListener('click',()=>{
+          if(!confirm(`Hapus peserta "${p.kelompokNama||p.kelompokId}"?`)) return;
+          touch(Object.assign(p,{deleted:true})); touch(l); save(); renderLomba();
+        });
+        tbl.appendChild(row);
+      });
+      pesertaContainer.insertBefore(tbl,pesertaContainer.querySelector('[data-add-peserta]'));
     }
-
-    ideList.forEach(ide=>{
-      const myVote=(lombaVote?.ideId===ide.id)?lombaVote.vote:null;
-      const likes=ide.likes||0;
-      const dislikes=ide.dislikes||0;
-      const ideEl=document.createElement('div');
-      ideEl.className='lomba-ide-row';
-      ideEl.innerHTML=`
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.8rem;font-weight:600;color:var(--text)">${esc(ide.judul)}</div>
-          ${ide.desc?`<div style="font-size:.72rem;color:var(--dim);margin-top:2px;white-space:pre-wrap;line-height:1.5">${esc(ide.desc)}</div>`:''}
-        </div>
-        <div class="lomba-ide-acts" style="opacity:1">
-          <button class="lomba-vote-btn${myVote==='like'?' active':''}" data-ide-like="${ide.id}" title="Suka">👍 <span>${likes}</span></button>
-          <button class="lomba-vote-btn${myVote==='dislike'?' active-dis':''}" data-ide-dislike="${ide.id}" title="Tidak suka">👎 <span>${dislikes}</span></button>
-          ${isSuperAdmin?`<button class="asset-act-btn" data-ide-edit="${ide.id}" title="Edit">✎</button>
-          <button class="asset-act-btn del" data-ide-del="${ide.id}" title="Hapus">✕</button>`:''}
-        </div>
-      `;
-
-      ideEl.querySelector('[data-ide-like]').addEventListener('click',e=>{ e.stopPropagation(); doVote(ide,'like'); });
-      ideEl.querySelector('[data-ide-dislike]').addEventListener('click',e=>{ e.stopPropagation(); doVote(ide,'dislike'); });
-
-      /* Edit ide */
-      ideEl.querySelector('[data-ide-edit]')?.addEventListener('click',e=>{
-        e.stopPropagation();
-        openModal('lomba-ide-edit',{id:ide.id,lombaId:l.id});
-      });
-
-      /* Delete ide */
-      ideEl.querySelector('[data-ide-del]')?.addEventListener('click',e=>{
-        e.stopPropagation();
-        if(!confirm(`Hapus ide "${ide.judul}"?`)) return;
-        touch(Object.assign(ide,{deleted:true}));
-        touch(l); save(); renderLomba();
-      });
-
-      ideContainer.insertBefore(ideEl,ideContainer.querySelector('[data-add-ide]'));
-    });
 
     area.appendChild(card);
   });

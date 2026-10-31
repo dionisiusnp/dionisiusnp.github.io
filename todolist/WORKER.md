@@ -166,10 +166,10 @@ export default {
         });
       }
 
-      function mergeLombaIde(gi = [], bi = []) {
+      function mergeLombaPeserta(gp = [], bp = []) {
         const map = new Map();
-        for (const t of gi) map.set(t.id, t);
-        for (const t of bi) {
+        for (const t of gp) map.set(t.id, t);
+        for (const t of bp) {
           const ex = map.get(t.id);
           if (!ex || (t.updatedAt || 0) >= (ex.updatedAt || 0)) map.set(t.id, t);
         }
@@ -184,7 +184,7 @@ export default {
           const g = gMap.get(id), b = bMap.get(id);
           if (!g) return b;
           if (!b) return g;
-          return { ...g, ...b, ide: mergeLombaIde(g.ide || [], b.ide || []) };
+          return { ...g, ...b, peserta: mergeLombaPeserta(g.peserta || [], b.peserta || []) };
         });
       }
 
@@ -215,6 +215,7 @@ export default {
         notulensiTopik:  mergeArr(gistDb.notulensiTopik || [], browserDb.notulensiTopik || []),
         broadcastProduk: mergeBroadcastProduk(gistDb.broadcastProduk || [], browserDb.broadcastProduk || []),
         lombas:     mergeLombas(gistDb.lombas || [], browserDb.lombas || []),
+        lombaIde:   mergeArr(gistDb.lombaIde || [], browserDb.lombaIde || []),
         bahanPers:  mergeArr(gistDb.bahanPers || [], browserDb.bahanPers || []),
         ruangan:    mergeArr(gistDb.ruangan   || [], browserDb.ruangan   || []),
         projects:   mergeProjects(gistDb.projects || [], browserDb.projects || []),
@@ -249,6 +250,8 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 | Array top-level (`tasks`, `members`, `kelompoks`, `assets`, `events`, `cultures`, `notulensi`, `notulensiTopik`, `bahanPers`, `ruangan`) | Merge by `id`, item dengan `updatedAt` lebih baru menang |
 | `projects[].members[].tasks[]` | Deep merge 3 level — per-task `updatedAt` menang |
 | `broadcastProduk[].kondisi[].items[]` | Deep merge 3 level — per-item `updatedAt` menang |
+| `lombaIde` | Merge by `id` + `updatedAt` — pool ide global (siapapun bisa input) |
+| `lombas[].peserta[]` | Deep merge 2 level — per-peserta `updatedAt` menang |
 | `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.keuntungan` / `regulasi.sanksi` | Merge by `id` + `updatedAt`; **urutan array browser menang** (mendukung drag & drop reorder) |
 | `settings`, `orgName`, `visi`, `misi` | Browser always wins (last write) |
 
