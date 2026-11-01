@@ -6623,11 +6623,18 @@ function renderSpinner(){
   spinBtn.style='font-size:1.1rem;padding:14px 52px';
   spinBtn.textContent='🎡 Putar!';
 
+  const resetBtn=document.createElement('button');
+  resetBtn.style='display:none;padding:5px 14px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--muted);font-size:.74rem;cursor:pointer;transition:background .15s,color .15s';
+  resetBtn.onmouseenter=()=>{ resetBtn.style.background='var(--card)'; resetBtn.style.color='var(--text)'; };
+  resetBtn.onmouseleave=()=>{ resetBtn.style.background='transparent'; resetBtn.style.color='var(--muted)'; };
+  resetBtn.textContent='↺ Reset spinner';
+
   rightPanel.appendChild(pointerEl);
   rightPanel.appendChild(canvas);
   rightPanel.appendChild(resultBadge);
   rightPanel.appendChild(removeBtn);
   rightPanel.appendChild(spinBtn);
+  rightPanel.appendChild(resetBtn);
   mainBody.appendChild(rightPanel);
   wrap.appendChild(mainBody);
   view.appendChild(wrap);
@@ -6698,6 +6705,7 @@ function renderSpinner(){
     ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--bd').trim()||'#333'; ctx.lineWidth=2; ctx.stroke();
   }
 
+  const originalLabels=[...activeLabels];
   let currentRot=0,spinning=false,lastWinner=null;
   requestAnimationFrame(()=>drawWheel(currentRot,activeLabels));
   spinBtn.disabled=activeLabels.length<2;
@@ -6777,7 +6785,17 @@ function renderSpinner(){
     resultBadge.style.display='none'; removeBtn.style.display='none';
     drawWheel(currentRot,activeLabels);
     spinBtn.disabled=activeLabels.length<2;
+    resetBtn.style.display=activeLabels.length<originalLabels.length?'block':'none';
     lastWinner=null;
+  });
+
+  // Reset spinner ke daftar semula
+  resetBtn.addEventListener('click',()=>{
+    activeLabels=[...originalLabels];
+    currentRot=0; lastWinner=null;
+    resultBadge.style.display='none'; removeBtn.style.display='none'; resetBtn.style.display='none';
+    drawWheel(0,activeLabels);
+    spinBtn.disabled=activeLabels.length<2;
   });
 
   document.getElementById('spinBackBtn')?.addEventListener('click',()=>{ spinnerState=null; renderSpinner(); });
