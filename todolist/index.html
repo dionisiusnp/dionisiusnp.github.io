@@ -6631,8 +6631,17 @@ function renderSpinner(){
       ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=1.5; ctx.stroke();
       ctx.save(); ctx.translate(cx,cy); ctx.rotate(start+arc/2);
       ctx.textAlign='right'; ctx.fillStyle='#fff';
-      ctx.font=`bold ${Math.round(Math.min(SIZE*0.048, SIZE*1.1/labels.length))}px Inter,sans-serif`;
-      ctx.fillText(label.length>18?label.slice(0,17)+'\u2026':label,r-12,Math.round(SIZE*0.015));
+      // Auto-fit text: scale font down then truncate if needed
+      const maxW=r-(SIZE*0.08);
+      let fSize=Math.round(Math.min(SIZE*0.052,SIZE*1.2/labels.length,22));
+      let txt=label;
+      ctx.font=`bold ${fSize}px Inter,sans-serif`;
+      while(ctx.measureText(txt).width>maxW&&fSize>9){ fSize--; ctx.font=`bold ${fSize}px Inter,sans-serif`; }
+      if(ctx.measureText(txt).width>maxW){
+        while(txt.length>1&&ctx.measureText(txt+'\u2026').width>maxW) txt=txt.slice(0,-1);
+        txt+='\u2026';
+      }
+      ctx.fillText(txt,r-(SIZE*0.022),Math.round(SIZE*0.014));
       ctx.restore();
     });
     ctx.beginPath(); ctx.arc(cx,cy,24,0,2*Math.PI);
