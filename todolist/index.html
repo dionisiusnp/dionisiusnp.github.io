@@ -6484,6 +6484,7 @@ function renderSpinner(){
   if(!spinnerState){
     const toolbar=document.createElement('div');
     toolbar.className='notul-toolbar';
+    toolbar.style='padding:10px 14px;margin-bottom:0;border-bottom:1px solid var(--bd);background:var(--surface);transition:background .25s,border-color .25s;flex-shrink:0';
     toolbar.innerHTML=`<span class="notul-toolbar-title">🎡 Spinner</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnAddSpinner" style="margin:0;width:auto">＋ Spinner</button>`:''}`;
     view.appendChild(toolbar);
     const list=document.createElement('div');
@@ -6525,7 +6526,8 @@ function renderSpinner(){
 
   const toolbar=document.createElement('div');
   toolbar.className='notul-toolbar';
-  toolbar.innerHTML=`<button class="spin-back-btn" id="spinBackBtn" style="padding:4px 10px 4px 2px">← Kembali</button><span class="notul-toolbar-title" style="flex:1">${esc(s.name)}</span>`;
+  toolbar.style='padding:10px 14px;margin-bottom:0;border-bottom:1px solid var(--bd);background:var(--surface);transition:background .25s,border-color .25s;flex-shrink:0';
+  toolbar.innerHTML=`<button class="spin-back-btn" id="spinBackBtn" style="padding:4px 10px 4px 0">← Kembali</button><span class="notul-toolbar-title" style="flex:1">${esc(s.name)}</span>`;
   wrap.appendChild(toolbar);
 
   const mainBody=document.createElement('div');
@@ -6779,6 +6781,7 @@ function renderBracket(){
   if(!bracketState){
     const toolbar=document.createElement('div');
     toolbar.className='notul-toolbar';
+    toolbar.style='padding:10px 14px;margin-bottom:0;border-bottom:1px solid var(--bd);background:var(--surface);transition:background .25s,border-color .25s;flex-shrink:0';
     toolbar.innerHTML=`<span class="notul-toolbar-title">🏅 Bracket Turnamen</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnAddBracket" style="margin:0;width:auto">＋ Bracket</button>`:''}`;
     view.appendChild(toolbar);
     const list=document.createElement('div');
