@@ -6973,6 +6973,8 @@ function renderBracket(){
     const maxRound=Math.max(...matches.map(m=>m.round),0);
     const tree=document.createElement('div');
     tree.className='brac-tree';
+    tree.style.position='relative';
+    const matchEls={}; // key: "r-pos" → DOM element
     for(let r=1;r<=maxRound;r++){
       const roundMatches=matches.filter(m=>m.round===r).sort((a,c)=>a.pos-c.pos);
       const col=document.createElement('div');
@@ -6988,6 +6990,7 @@ function renderBracket(){
         const decided=!!match.winnerId;
         const matchEl=document.createElement('div');
         matchEl.className='brac-match'+(decided?' decided':'');
+        matchEl.dataset.bracR=r; matchEl.dataset.bracP=match.pos;
         const p1Cls='brac-p'+(match.winnerId===match.p1Id&&decided?' winner':'')+(isBye&&!match.p1Id?' bye':'')+((!match.p1Id&&!isBye)?' empty':'');
         const p2Cls='brac-p'+(match.winnerId===match.p2Id&&decided?' winner':'')+(isBye&&!match.p2Id?' bye':'')+((!match.p2Id&&!isBye)?' empty':'');
         matchEl.innerHTML=`<div class="${p1Cls}">${esc(p1Name||(isBye&&!match.p1Id?'BYE':'TBD'))}</div><div style="height:1px;background:var(--bd)"></div><div class="${p2Cls}">${esc(p2Name||(isBye&&!match.p2Id?'BYE':'TBD'))}</div>`;
@@ -6995,13 +6998,59 @@ function renderBracket(){
           matchEl.title='Klik untuk tentukan pemenang';
           matchEl.addEventListener('click',()=>openModal('bracket-winner',{bracketId:b.id,matchId:match.id}));
         }
+        matchEls[`${r}-${match.pos}`]=matchEl;
         mWrap.appendChild(matchEl);
       });
       col.appendChild(mWrap);
       tree.appendChild(col);
-      if(r<maxRound){ const conn=document.createElement('div'); conn.style='width:20px;flex-shrink:0'; tree.appendChild(conn); }
+      if(r<maxRound){ const conn=document.createElement('div'); conn.style='width:32px;flex-shrink:0'; tree.appendChild(conn); }
     }
     view.appendChild(tree);
+    // Draw SVG connector lines after layout
+    setTimeout(()=>{
+      const tr=tree.getBoundingClientRect();
+      if(!tr.width) return;
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:0';
+      const lineColor=getComputedStyle(document.documentElement).getPropertyValue('--bd').trim()||'#ccc';
+      function ln(x1,y1,x2,y2){
+        const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+        l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+        l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+        l.setAttribute('stroke',lineColor); l.setAttribute('stroke-width','1.5');
+        svg.appendChild(l);
+      }
+      for(let r=1;r<maxRound;r++){
+        const srcMatches=matches.filter(m=>m.round===r).sort((a,c)=>a.pos-c.pos);
+        // group in pairs: pos 0+1 → next pos 0, pos 2+3 → next pos 1, etc.
+        for(let k=0;k<srcMatches.length;k+=2){
+          const m1=matchEls[`${r}-${srcMatches[k]?.pos}`];
+          const m2=matchEls[`${r}-${srcMatches[k+1]?.pos}`];
+          const mt=matchEls[`${r+1}-${Math.floor(srcMatches[k]?.pos/2)}`];
+          if(!m1||!mt) continue;
+          const r1=m1.getBoundingClientRect();
+          const rt=mt.getBoundingClientRect();
+          const x1=r1.right-tr.left, cy1=r1.top+r1.height/2-tr.top;
+          const xt=rt.left-tr.left, cyt=rt.top+rt.height/2-tr.top;
+          const midX=(x1+xt)/2;
+          if(m2){
+            const r2=m2.getBoundingClientRect();
+            const cy2=r2.top+r2.height/2-tr.top;
+            const midY=(cy1+cy2)/2;
+            const x2r=r2.right-tr.left;
+            ln(x1,cy1,midX,cy1);
+            ln(x2r,cy2,midX,cy2);
+            ln(midX,cy1,midX,cy2);
+            ln(midX,midY,xt,cyt);
+          } else {
+            // single source (bye case — already won, just draw stub)
+            ln(x1,cy1,midX,cy1);
+            ln(midX,cy1,xt,cyt);
+          }
+        }
+      }
+      tree.insertBefore(svg,tree.firstChild);
+    },0);
   }
 
   document.getElementById('bracBackBtn')?.addEventListener('click',()=>{ bracketState=null; renderBracket(); });
