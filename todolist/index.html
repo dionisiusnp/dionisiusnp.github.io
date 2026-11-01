@@ -648,6 +648,44 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
   .modal-body{padding:14px 16px}
   .modal-foot{padding:10px 16px 14px}
 }
+/* ── Spinner ── */
+.spin-list{display:flex;flex-direction:column;gap:8px;padding:12px}
+.spin-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s}
+.spin-card:hover{border-color:var(--accent)}
+.spin-card-name{font-size:.85rem;font-weight:600;flex:1}
+.spin-card-count{font-size:.7rem;color:var(--dim);font-family:var(--mono)}
+.spin-back-btn{display:flex;align-items:center;gap:6px;font-size:.75rem;font-weight:600;color:var(--muted);border:none;background:transparent;cursor:pointer;padding:4px 0;transition:color .15s}
+.spin-back-btn:hover{color:var(--text)}
+.spin-wheel-wrap{display:flex;flex-direction:column;align-items:center;gap:20px;padding:24px;flex:1;overflow-y:auto}
+.spin-wheel-container{position:relative;display:flex;align-items:center;justify-content:center}
+.spin-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:28px;z-index:2;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+#spinCanvas{border-radius:50%;box-shadow:0 4px 24px rgba(0,0,0,.2)}
+.spin-btn{padding:12px 40px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .15s;margin-top:4px}
+.spin-btn:hover{background:var(--accent2,#5254cc)}
+.spin-btn:disabled{opacity:.5;cursor:not-allowed}
+.spin-result-badge{font-size:1.1rem;font-weight:800;color:var(--accent);background:rgba(108,111,245,.1);border:2px solid rgba(108,111,245,.3);border-radius:12px;padding:10px 24px;min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;transition:all .3s}
+.spin-items-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:400px}
+.spin-item-chip{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:500;color:#fff}
+/* ── Bracket ── */
+.brac-list{display:flex;flex-direction:column;gap:8px;padding:12px}
+.brac-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s}
+.brac-card:hover{border-color:var(--accent)}
+.brac-card-name{font-size:.85rem;font-weight:600;flex:1}
+.brac-status-pill{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.04em}
+.brac-status-pill.draft{background:rgba(148,148,184,.12);color:var(--muted)}
+.brac-status-pill.ongoing{background:rgba(251,191,36,.12);color:#b45309}
+.brac-status-pill.selesai{background:rgba(52,211,153,.12);color:#065f46}
+.brac-toolbar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;background:var(--surface);transition:background .25s,border-color .25s}
+.brac-tree{display:flex;gap:0;overflow:auto;padding:20px;flex:1;align-items:flex-start}
+.brac-round{display:flex;flex-direction:column;gap:0;flex-shrink:0;min-width:140px}
+.brac-round-label{font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:0 8px 10px}
+.brac-match{background:var(--card);border:1px solid var(--bd);border-radius:8px;width:130px;overflow:hidden;cursor:pointer;transition:border-color .15s;margin:8px 0}
+.brac-match:hover{border-color:var(--accent)}
+.brac-match.decided{cursor:default}
+.brac-match.decided:hover{border-color:var(--bd)}
+.brac-p{display:flex;align-items:center;gap:6px;padding:6px 8px;font-size:.75rem;min-height:30px;transition:background .15s}
+.brac-p.winner{background:rgba(52,211,153,.12);font-weight:700;color:#065f46}
+.brac-p.bye,.brac-p.empty{color:var(--dim);font-style:italic}
 </style>
 </head>
 <body>
@@ -721,6 +759,13 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
         <button class="nb-feature-item project-access" id="btnProjectView"><span class="nb-ico">🗂️</span> Proyek</button>
       </div>
     </div>
+    <div class="nb-group" id="nbgPermainan">
+      <button class="nb-trigger" id="nbtPermainan"><span class="nb-ico">🎮</span><span class="nb-tl">Permainan</span> <span class="nb-arrow">▾</span></button>
+      <div class="nb-dropdown" id="nbdPermainan">
+        <button class="nb-feature-item" id="btnSpinnerView"><span class="nb-ico">🎡</span> Spinner</button>
+        <button class="nb-feature-item" id="btnBracketView"><span class="nb-ico">🏅</span> Bracket</button>
+      </div>
+    </div>
     <div class="nb-group" id="nbgOrg">
       <button class="nb-trigger" id="nbtOrg"><span class="nb-ico">🏢</span><span class="nb-tl">Organisasi</span> <span class="nb-arrow">▾</span></button>
       <div class="nb-dropdown" id="nbdOrg">
@@ -774,6 +819,9 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <button class="sb-nav-item" id="sbn-lom"><span class="sb-ico">🏆</span>Lomba</button>
       <button class="sb-nav-item" id="sbn-per"><span class="sb-ico">📰</span>Pers</button>
       <button class="sb-nav-item project-access" id="sbn-prj"><span class="sb-ico">🗂️</span>Proyek</button>
+      <div class="sb-nav-label">Permainan</div>
+      <button class="sb-nav-item" id="sbn-spin"><span class="sb-ico">🎡</span>Spinner</button>
+      <button class="sb-nav-item" id="sbn-bra"><span class="sb-ico">🏅</span>Bracket</button>
       <div class="sb-nav-label">Organisasi</div>
       <button class="sb-nav-item" id="sbn-org"><span class="sb-ico">🏢</span>Bagan</button>
       <button class="sb-nav-item" id="sbn-kom"><span class="sb-ico">📋</span>Regulasi</button>
@@ -890,6 +938,12 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <div class="asset-view" id="ruanganArea"></div>
     </div>
 
+    <!-- Spinner view -->
+    <div id="spinnerView" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
+
+    <!-- Bracket view -->
+    <div id="bracketView" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
+
     <!-- Git Guide view -->
     <div id="gitGuideView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="gitGuideArea"></div>
@@ -916,7 +970,7 @@ const WORKER_URL= 'https://alteco-writer.dionisiusn1.workers.dev';
 /* ══════════════════════════════════════════
    STATE
 ══════════════════════════════════════════ */
-let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'}};
+let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'},spinners:[],brackets:[]};
 let role         = null;   /* 'viewer' | 'admin' */
 let projSession = null; /* null | {memberName} — single global viewer session for fitur proyek */
 let activeId     = null;   /* null | ALL | memberId */
@@ -1471,7 +1525,8 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
     'sbn-org':'btnOrgView','sbn-kom':'btnKomunitasView','sbn-cul':'btnCultureView','sbn-prj':'btnProjectView',
     'sbn-bc':'btnBroadcastView','sbn-lom':'btnLombaView','sbn-per':'btnPersView',
     'sbn-rua':'btnRuanganView','sbn-not':'btnNotulensiView','sbn-ast':'btnAssetView',
-    'sbn-inf':'btnInfoView','sbn-set':'btnSettingsView'
+    'sbn-inf':'btnInfoView','sbn-set':'btnSettingsView',
+    'sbn-spin':'btnSpinnerView','sbn-bra':'btnBracketView'
   };
   Object.entries(map).forEach(([sbnId,btnId])=>{
     const sbn=document.getElementById(sbnId);
@@ -1700,10 +1755,10 @@ function select(id){
   activeId=id; activeFilter='all'; filterMemberName=null; memberSearchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   /* deactivate feature nav */
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView']
-    .forEach(id=>document.getElementById(id)?.classList.remove('active'));
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   viewMode='tasks';
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','gitGuideView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   renderSidebar(); renderMain();
 }
@@ -1716,10 +1771,10 @@ document.getElementById('allItem').addEventListener('click',()=>select(ALL));
 function renderMain(){
   const empty=document.getElementById('emptyState');
   const tv=document.getElementById('taskView');
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','gitGuideView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnOrgView','btnPersView','btnRuanganView']
-    .forEach(id=>document.getElementById(id).classList.remove('active'));
+  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnOrgView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   viewMode='tasks';
 
   if(!activeId){
@@ -2119,10 +2174,10 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 ══════════════════════════════════════════ */
 /* helper: hide all feature views, deactivate all nav buttons */
 function hideAllViews(){
-  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','gitGuideView']
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView']
-    .forEach(id=>document.getElementById(id).classList.remove('active'));
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   document.getElementById('emptyState').style.display='none';
   document.getElementById('fabCulture').style.display='none';
 }
@@ -2342,6 +2397,42 @@ document.getElementById('btnPersView').addEventListener('click',()=>{
     pv.style.display='flex';
     document.getElementById('btnPersView').classList.add('active');
     renderSidebar(); renderPers();
+  }
+});
+
+document.getElementById('btnSpinnerView').addEventListener('click',()=>{
+  const sv=document.getElementById('spinnerView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(sv.style.display!=='none'){
+    sv.style.display='none';
+    document.getElementById('btnSpinnerView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    sv.style.display='flex';
+    document.getElementById('btnSpinnerView').classList.add('active');
+    spinnerState=null; renderSidebar(); renderSpinner();
+  }
+});
+
+document.getElementById('btnBracketView').addEventListener('click',()=>{
+  const bv=document.getElementById('bracketView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(bv.style.display!=='none'){
+    bv.style.display='none';
+    document.getElementById('btnBracketView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    bv.style.display='flex';
+    document.getElementById('btnBracketView').classList.add('active');
+    bracketState=null; renderSidebar(); renderBracket();
   }
 });
 
@@ -3491,6 +3582,47 @@ function openModal(mode, ctx){
     });
     document.getElementById('fi-kt-nama').focus();
   }
+
+  else if(mode==='spinner-add'||mode==='spinner-edit'){
+    const s=mode==='spinner-edit'?(db.spinners||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='spinner-add'?'Spinner Baru':'Edit Spinner';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Spinner *</label>
+        <input class="form-input" id="fi-spin-name" value="${esc(s?.name||'')}" placeholder="mis. Pilih Pemenang, Pembagian Tugas…" maxlength="100"/>
+      </div>
+    `;
+    document.getElementById('fi-spin-name').focus();
+  }
+
+  else if(mode==='bracket-add'||mode==='bracket-edit'){
+    const b=mode==='bracket-edit'?(db.brackets||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=mode==='bracket-add'?'Bracket Baru':'Edit Bracket';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Turnamen *</label>
+        <input class="form-input" id="fi-brac-name" value="${esc(b?.name||'')}" placeholder="mis. Turnamen Catur Internal…" maxlength="100"/>
+      </div>
+    `;
+    document.getElementById('fi-brac-name').focus();
+  }
+
+  else if(mode==='bracket-winner'){
+    const b=(db.brackets||[]).find(x=>x.id===ctx.bracketId);
+    const match=(b?.matches||[]).find(x=>x.id===ctx.matchId);
+    const p1=(b?.participants||[]).find(x=>x.id===match?.p1Id);
+    const p2=(b?.participants||[]).find(x=>x.id===match?.p2Id);
+    title.textContent='Hasil Match';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Pemenang</label>
+        <select class="form-select" id="fi-brac-winner">
+          <option value="${esc(p1?.id||'')}">🥇 ${esc(p1?.name||'?')}</option>
+          <option value="${esc(p2?.id||'')}">🥇 ${esc(p2?.name||'?')}</option>
+        </select>
+      </div>
+    `;
+  }
 }
 
 function closeModal(){
@@ -4031,6 +4163,47 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       p.kelompokNama=kelNama_v; p.pic=pic_v; p.ideSource=ideSource_v; p.ideId=ideId_v||null; touch(p);
     }
     touch(l); save(); renderLomba(); closeModal();
+  }
+
+  else if(mMode==='spinner-add'||mMode==='spinner-edit'){
+    const name=document.getElementById('fi-spin-name').value.trim();
+    if(!name){ alert('Nama spinner wajib diisi'); return; }
+    if(!db.spinners) db.spinners=[];
+    if(mMode==='spinner-add'){
+      db.spinners.push(touch({id:uid(),name,items:[],createdAt:Date.now()}));
+    } else {
+      const s=db.spinners.find(x=>x.id===mCtx.id);
+      if(!s) return;
+      s.name=name; touch(s);
+    }
+    save(); renderSpinner(); closeModal();
+  }
+
+  else if(mMode==='bracket-add'||mMode==='bracket-edit'){
+    const name=document.getElementById('fi-brac-name').value.trim();
+    if(!name){ alert('Nama turnamen wajib diisi'); return; }
+    if(!db.brackets) db.brackets=[];
+    if(mMode==='bracket-add'){
+      db.brackets.push(touch({id:uid(),name,participants:[],matches:[],status:'draft',createdAt:Date.now()}));
+    } else {
+      const b=db.brackets.find(x=>x.id===mCtx.id);
+      if(!b) return;
+      b.name=name; touch(b);
+    }
+    save(); renderBracket(); closeModal();
+  }
+
+  else if(mMode==='bracket-winner'){
+    const wId=document.getElementById('fi-brac-winner').value;
+    const b=(db.brackets||[]).find(x=>x.id===mCtx.bracketId);
+    const match=b?(b.matches||[]).find(x=>x.id===mCtx.matchId):null;
+    if(!b||!match) return;
+    match.winnerId=wId;
+    advanceWinner(b,match);
+    const maxRound=Math.max(...(b.matches||[]).map(m=>m.round),0);
+    const finalMatch=(b.matches||[]).find(m=>m.round===maxRound);
+    if(finalMatch?.winnerId) b.status='selesai';
+    touch(b); save(); renderBracket(); closeModal();
   }
 });
 
@@ -6293,6 +6466,348 @@ function renderPers(){
     });
 
     area.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════
+   SPINNER
+══════════════════════════════════════════ */
+let spinnerState = null; // null = list, {id} = wheel
+
+function renderSpinner(){
+  const view=document.getElementById('spinnerView');
+  if(!view) return;
+  view.innerHTML='';
+  const isAdmin=role==='admin';
+  const spinners=(db.spinners||[]).filter(s=>!s.deleted);
+
+  if(!spinnerState){
+    const toolbar=document.createElement('div');
+    toolbar.className='notul-toolbar';
+    toolbar.innerHTML=`<span class="notul-toolbar-title">🎡 Spinner</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnAddSpinner" style="margin:0;width:auto">＋ Spinner</button>`:''}`;
+    view.appendChild(toolbar);
+    const list=document.createElement('div');
+    list.className='spin-list';
+    if(!spinners.length){
+      list.innerHTML=`<div style="padding:40px;text-align:center;color:var(--dim);font-size:.82rem">${isAdmin?'Belum ada spinner. Klik ＋ untuk membuat.':'Belum ada spinner.'}</div>`;
+    } else {
+      spinners.forEach(s=>{
+        const card=document.createElement('div');
+        card.className='spin-card';
+        card.innerHTML=`<span style="font-size:1.3rem">🎡</span><span class="spin-card-name">${esc(s.name)}</span><span class="spin-card-count">${(s.items||[]).filter(i=>!i.deleted).length} item</span>${isAdmin?`<button class="asset-act-btn" data-spin-edit="${s.id}" title="Edit">✎</button><button class="asset-act-btn del" data-spin-del="${s.id}" title="Hapus">✕</button>`:''}`;
+        card.addEventListener('click',e=>{
+          if(e.target.closest('[data-spin-edit],[data-spin-del]')) return;
+          spinnerState={id:s.id}; renderSpinner();
+        });
+        list.appendChild(card);
+      });
+    }
+    view.appendChild(list);
+    document.getElementById('btnAddSpinner')?.addEventListener('click',()=>openModal('spinner-add',{}));
+    view.querySelectorAll('[data-spin-edit]').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); openModal('spinner-edit',{id:btn.dataset.spinEdit}); }));
+    view.querySelectorAll('[data-spin-del]').forEach(btn=>btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm('Hapus spinner ini?')) return;
+      const s=db.spinners.find(x=>x.id===btn.dataset.spinDel);
+      if(s){ touch(Object.assign(s,{deleted:true})); save(); renderSpinner(); }
+    }));
+    return;
+  }
+
+  const s=(db.spinners||[]).find(x=>x.id===spinnerState.id);
+  if(!s){ spinnerState=null; renderSpinner(); return; }
+  const items=(s.items||[]).filter(i=>!i.deleted);
+  const COLORS=['#6c6ff5','#a78bfa','#34d399','#fbbf24','#f87171','#60a5fa','#2dd4bf','#fb923c','#e879f9','#4ade80'];
+
+  const wrap=document.createElement('div');
+  wrap.style='display:flex;flex-direction:column;flex:1;overflow:hidden';
+
+  const toolbar=document.createElement('div');
+  toolbar.className='notul-toolbar';
+  toolbar.innerHTML=`<button class="spin-back-btn" id="spinBackBtn">← Kembali</button><span class="notul-toolbar-title" style="flex:1">${esc(s.name)}</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnAddSpinItem" style="margin:0;width:auto">＋ Item</button>`:''}`;
+  wrap.appendChild(toolbar);
+
+  const body=document.createElement('div');
+  body.className='spin-wheel-wrap';
+
+  if(items.length<2){
+    body.innerHTML=`<div style="color:var(--dim);text-align:center;padding:40px;font-size:.82rem">${isAdmin?'Tambahkan minimal 2 item untuk memutar spinner.':'Spinner belum siap (butuh minimal 2 item).'}</div>`;
+  } else {
+    const SIZE=280;
+    const container=document.createElement('div');
+    container.className='spin-wheel-container';
+    container.innerHTML=`<div class="spin-pointer">▼</div><canvas id="spinCanvas" width="${SIZE}" height="${SIZE}"></canvas>`;
+    body.appendChild(container);
+
+    const resultBadge=document.createElement('div');
+    resultBadge.className='spin-result-badge';
+    resultBadge.style='min-width:200px';
+    resultBadge.textContent='Putar untuk mulai!';
+    body.appendChild(resultBadge);
+
+    const spinBtn=document.createElement('button');
+    spinBtn.className='spin-btn';
+    spinBtn.textContent='🎡 Putar!';
+    body.appendChild(spinBtn);
+
+    const chipWrap=document.createElement('div');
+    chipWrap.className='spin-items-list';
+    items.forEach((item,i)=>{ const chip=document.createElement('span'); chip.className='spin-item-chip'; chip.style.background=COLORS[i%COLORS.length]; chip.textContent=item.label; chipWrap.appendChild(chip); });
+    body.appendChild(chipWrap);
+
+    function drawWheel(rotation){
+      const canvas=document.getElementById('spinCanvas');
+      if(!canvas) return;
+      const ctx=canvas.getContext('2d');
+      const cx=SIZE/2,cy=SIZE/2,r=SIZE/2-4;
+      const arc=2*Math.PI/items.length;
+      ctx.clearRect(0,0,SIZE,SIZE);
+      items.forEach((item,i)=>{
+        const start=rotation+i*arc-Math.PI/2;
+        const end=start+arc;
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,end);
+        ctx.fillStyle=COLORS[i%COLORS.length]; ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=1.5; ctx.stroke();
+        ctx.save(); ctx.translate(cx,cy); ctx.rotate(start+arc/2);
+        ctx.textAlign='right'; ctx.fillStyle='#fff';
+        ctx.font=`bold ${Math.min(13,160/items.length)}px Inter,sans-serif`;
+        ctx.fillText(item.label.length>14?item.label.slice(0,13)+'…':item.label,r-8,4);
+        ctx.restore();
+      });
+      ctx.beginPath(); ctx.arc(cx,cy,22,0,2*Math.PI);
+      ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--surface')||'#1e1e2e';
+      ctx.fill(); ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--bd')||'#333'; ctx.lineWidth=2; ctx.stroke();
+    }
+
+    let currentRot=0;
+    drawWheel(currentRot);
+    let spinning=false;
+    spinBtn.addEventListener('click',()=>{
+      if(spinning) return;
+      spinning=true; spinBtn.disabled=true; resultBadge.textContent='…';
+      const extraSpins=5+Math.random()*5;
+      const targetItem=Math.floor(Math.random()*items.length);
+      const arc=2*Math.PI/items.length;
+      const targetRot=extraSpins*2*Math.PI+(2*Math.PI-(targetItem*arc))-arc/2;
+      const duration=3000+Math.random()*1000;
+      const start=performance.now();
+      const startRot=currentRot%(2*Math.PI);
+      function animate(now){
+        const elapsed=now-start;
+        const t=Math.min(elapsed/duration,1);
+        const ease=1-Math.pow(1-t,4);
+        drawWheel(startRot+targetRot*ease);
+        if(t<1){ requestAnimationFrame(animate); return; }
+        currentRot=startRot+targetRot;
+        spinning=false; spinBtn.disabled=false;
+        resultBadge.textContent='🎉 '+items[targetItem].label;
+      }
+      requestAnimationFrame(animate);
+    });
+  }
+
+  if(isAdmin&&items.length){
+    const delList=document.createElement('div');
+    delList.style='padding:0 12px 12px;display:flex;flex-direction:column;gap:4px;width:100%;max-width:400px';
+    items.forEach(item=>{
+      const row=document.createElement('div');
+      row.style='display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);background:var(--card);border-radius:6px;padding:5px 10px';
+      row.innerHTML=`<span style="flex:1">${esc(item.label)}</span><button class="asset-act-btn del" data-del-item="${item.id}" title="Hapus" style="padding:2px 6px">✕</button>`;
+      delList.appendChild(row);
+    });
+    body.appendChild(delList);
+    body.querySelectorAll('[data-del-item]').forEach(btn=>btn.addEventListener('click',()=>{
+      const it=(s.items||[]).find(x=>x.id===btn.dataset.delItem);
+      if(it){ touch(Object.assign(it,{deleted:true})); save(); renderSpinner(); }
+    }));
+  }
+
+  wrap.appendChild(body);
+  view.appendChild(wrap);
+
+  document.getElementById('spinBackBtn')?.addEventListener('click',()=>{ spinnerState=null; renderSpinner(); });
+  document.getElementById('btnAddSpinItem')?.addEventListener('click',()=>{
+    const label=prompt('Nama item:','');
+    if(!label?.trim()) return;
+    if(!s.items) s.items=[];
+    s.items.push(touch({id:uid(),label:label.trim(),createdAt:Date.now()}));
+    touch(s); save(); renderSpinner();
+  });
+}
+
+/* ══════════════════════════════════════════
+   BRACKET TURNAMEN
+══════════════════════════════════════════ */
+let bracketState = null; // null = list, {id} = detail
+
+function advanceWinner(b,match){
+  if(!match.winnerId) return;
+  const nextRound=match.round+1;
+  const nextPos=Math.floor(match.pos/2);
+  const nextMatch=(b.matches||[]).find(m=>m.round===nextRound&&m.pos===nextPos);
+  if(!nextMatch) return;
+  if(match.pos%2===0) nextMatch.p1Id=match.winnerId;
+  else nextMatch.p2Id=match.winnerId;
+  // auto-advance if only one participant (bye on the other side)
+  if(nextMatch.p1Id&&!nextMatch.p2Id){ nextMatch.winnerId=nextMatch.p1Id; advanceWinner(b,nextMatch); }
+  else if(!nextMatch.p1Id&&nextMatch.p2Id){ nextMatch.winnerId=nextMatch.p2Id; advanceWinner(b,nextMatch); }
+}
+
+function generateBracket(b){
+  const participants=[...(b.participants||[]).filter(p=>!p.deleted)];
+  for(let i=participants.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [participants[i],participants[j]]=[participants[j],participants[i]]; }
+  let n=1; while(n<participants.length) n*=2;
+  const seeded=[...participants]; while(seeded.length<n) seeded.push(null);
+  b.matches=[];
+  for(let i=0;i<n/2;i++){
+    const p1=seeded[i*2]; const p2=seeded[i*2+1];
+    b.matches.push({id:uid(),round:1,pos:i,p1Id:p1?.id||null,p2Id:p2?.id||null,winnerId:null,s1:'',s2:''});
+  }
+  const totalRounds=Math.log2(n);
+  for(let r=2;r<=totalRounds;r++){
+    const prevCount=n/Math.pow(2,r-1);
+    for(let i=0;i<prevCount/2;i++) b.matches.push({id:uid(),round:r,pos:i,p1Id:null,p2Id:null,winnerId:null,s1:'',s2:''});
+  }
+  b.matches.filter(m=>m.round===1).forEach(m=>{
+    if(m.p1Id&&!m.p2Id){ m.winnerId=m.p1Id; advanceWinner(b,m); }
+    else if(!m.p1Id&&m.p2Id){ m.winnerId=m.p2Id; advanceWinner(b,m); }
+  });
+  b.status='ongoing'; touch(b);
+}
+
+function getParticipantName(b,id){ const p=(b.participants||[]).find(x=>x.id===id); return p?p.name:null; }
+
+function renderBracket(){
+  const view=document.getElementById('bracketView');
+  if(!view) return;
+  view.innerHTML='';
+  const isAdmin=role==='admin';
+  const brackets=(db.brackets||[]).filter(b=>!b.deleted);
+
+  if(!bracketState){
+    const toolbar=document.createElement('div');
+    toolbar.className='notul-toolbar';
+    toolbar.innerHTML=`<span class="notul-toolbar-title">🏅 Bracket Turnamen</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnAddBracket" style="margin:0;width:auto">＋ Bracket</button>`:''}`;
+    view.appendChild(toolbar);
+    const list=document.createElement('div');
+    list.className='brac-list';
+    if(!brackets.length){
+      list.innerHTML=`<div style="padding:40px;text-align:center;color:var(--dim);font-size:.82rem">${isAdmin?'Belum ada bracket. Klik ＋ untuk membuat.':'Belum ada bracket.'}</div>`;
+    } else {
+      brackets.forEach(b=>{
+        const card=document.createElement('div');
+        card.className='brac-card';
+        const st=b.status||'draft';
+        const stLabel={draft:'Draft',ongoing:'Berlangsung',selesai:'Selesai'}[st];
+        card.innerHTML=`<span style="font-size:1.3rem">🏅</span><span class="brac-card-name">${esc(b.name)}</span><span class="brac-status-pill ${st}">${stLabel}</span>${isAdmin?`<button class="asset-act-btn" data-brac-edit="${b.id}" title="Edit">✎</button><button class="asset-act-btn del" data-brac-del="${b.id}" title="Hapus">✕</button>`:''}`;
+        card.addEventListener('click',e=>{ if(e.target.closest('[data-brac-edit],[data-brac-del]')) return; bracketState={id:b.id}; renderBracket(); });
+        list.appendChild(card);
+      });
+    }
+    view.appendChild(list);
+    document.getElementById('btnAddBracket')?.addEventListener('click',()=>openModal('bracket-add',{}));
+    view.querySelectorAll('[data-brac-edit]').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); openModal('bracket-edit',{id:btn.dataset.bracEdit}); }));
+    view.querySelectorAll('[data-brac-del]').forEach(btn=>btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!confirm('Hapus bracket ini?')) return;
+      const b=db.brackets.find(x=>x.id===btn.dataset.bracDel);
+      if(b){ touch(Object.assign(b,{deleted:true})); save(); renderBracket(); }
+    }));
+    return;
+  }
+
+  const b=(db.brackets||[]).find(x=>x.id===bracketState.id);
+  if(!b){ bracketState=null; renderBracket(); return; }
+  const participants=(b.participants||[]).filter(p=>!p.deleted);
+  const matches=b.matches||[];
+  const st=b.status||'draft';
+  const stLabel={draft:'Draft',ongoing:'Berlangsung',selesai:'Selesai'}[st];
+
+  const toolbar=document.createElement('div');
+  toolbar.className='brac-toolbar';
+  toolbar.innerHTML=`<button class="spin-back-btn" id="bracBackBtn">← Kembali</button><span style="font-size:.85rem;font-weight:700;flex:1">${esc(b.name)}</span><span class="brac-status-pill ${st}">${stLabel}</span>${isAdmin&&st!=='selesai'?`<button class="notul-topik-add-btn" id="btnAddBracParticipant" style="margin:0;width:auto">＋ Peserta</button>`:''}`;
+  view.appendChild(toolbar);
+
+  if(participants.length<2){
+    const msg=document.createElement('div');
+    msg.style='padding:40px;text-align:center;color:var(--dim);font-size:.82rem;display:flex;flex-direction:column;align-items:center;gap:12px';
+    msg.innerHTML=`<div>${isAdmin?'Tambahkan minimal 2 peserta untuk generate bracket.':'Bracket belum siap.'}</div>`;
+    const plist=document.createElement('div');
+    plist.style='display:flex;flex-direction:column;gap:4px;width:100%;max-width:300px';
+    participants.forEach(p=>{
+      const row=document.createElement('div');
+      row.style='display:flex;align-items:center;gap:8px;font-size:.8rem;background:var(--card);border-radius:6px;padding:6px 10px';
+      row.innerHTML=`<span style="flex:1">${esc(p.name)}</span>${isAdmin?`<button class="asset-act-btn del" data-del-p="${p.id}">✕</button>`:''}`;
+      plist.appendChild(row);
+    });
+    msg.appendChild(plist);
+    view.appendChild(msg);
+    if(isAdmin) msg.querySelectorAll('[data-del-p]').forEach(btn=>btn.addEventListener('click',()=>{ const p=b.participants.find(x=>x.id===btn.dataset.delP); if(p){ touch(Object.assign(p,{deleted:true})); save(); renderBracket(); } }));
+  } else if(!matches.length){
+    const msg=document.createElement('div');
+    msg.style='padding:40px;text-align:center;color:var(--dim);font-size:.82rem;display:flex;flex-direction:column;align-items:center;gap:12px';
+    msg.innerHTML=`<div>${participants.length} peserta siap.</div>`;
+    if(isAdmin){
+      const genBtn=document.createElement('button');
+      genBtn.className='btn-save'; genBtn.textContent='Generate Bracket';
+      genBtn.addEventListener('click',()=>{ generateBracket(b); save(); renderBracket(); });
+      msg.appendChild(genBtn);
+    }
+    const plist=document.createElement('div');
+    plist.style='display:flex;flex-direction:column;gap:4px;width:100%;max-width:300px';
+    participants.forEach(p=>{
+      const row=document.createElement('div');
+      row.style='display:flex;align-items:center;gap:8px;font-size:.8rem;background:var(--card);border-radius:6px;padding:6px 10px';
+      row.innerHTML=`<span style="flex:1">${esc(p.name)}</span>${isAdmin&&st==='draft'?`<button class="asset-act-btn del" data-del-p="${p.id}">✕</button>`:''}`;
+      plist.appendChild(row);
+    });
+    msg.appendChild(plist);
+    view.appendChild(msg);
+    if(isAdmin) msg.querySelectorAll('[data-del-p]').forEach(btn=>btn.addEventListener('click',()=>{ const p=b.participants.find(x=>x.id===btn.dataset.delP); if(p){ touch(Object.assign(p,{deleted:true})); save(); renderBracket(); } }));
+  } else {
+    // Render bracket tree
+    const maxRound=Math.max(...matches.map(m=>m.round),0);
+    const tree=document.createElement('div');
+    tree.className='brac-tree';
+    for(let r=1;r<=maxRound;r++){
+      const roundMatches=matches.filter(m=>m.round===r).sort((a,c)=>a.pos-c.pos);
+      const col=document.createElement('div');
+      col.className='brac-round';
+      const rLabel=r===maxRound?'Final':r===maxRound-1&&maxRound>1?'Semifinal':`Round ${r}`;
+      col.innerHTML=`<div class="brac-round-label">${rLabel}</div>`;
+      const mWrap=document.createElement('div');
+      mWrap.style='display:flex;flex-direction:column;justify-content:space-around;flex:1';
+      roundMatches.forEach(match=>{
+        const p1Name=getParticipantName(b,match.p1Id);
+        const p2Name=getParticipantName(b,match.p2Id);
+        const isBye=(match.p1Id&&!match.p2Id)||(!match.p1Id&&match.p2Id);
+        const decided=!!match.winnerId;
+        const matchEl=document.createElement('div');
+        matchEl.className='brac-match'+(decided?' decided':'');
+        const p1Cls='brac-p'+(match.winnerId===match.p1Id&&decided?' winner':'')+(isBye&&!match.p1Id?' bye':'')+((!match.p1Id&&!isBye)?' empty':'');
+        const p2Cls='brac-p'+(match.winnerId===match.p2Id&&decided?' winner':'')+(isBye&&!match.p2Id?' bye':'')+((!match.p2Id&&!isBye)?' empty':'');
+        matchEl.innerHTML=`<div class="${p1Cls}">${esc(p1Name||(isBye&&!match.p1Id?'BYE':'TBD'))}</div><div style="height:1px;background:var(--bd)"></div><div class="${p2Cls}">${esc(p2Name||(isBye&&!match.p2Id?'BYE':'TBD'))}</div>`;
+        if(isAdmin&&match.p1Id&&match.p2Id&&!decided&&st!=='selesai'){
+          matchEl.title='Klik untuk tentukan pemenang';
+          matchEl.addEventListener('click',()=>openModal('bracket-winner',{bracketId:b.id,matchId:match.id}));
+        }
+        mWrap.appendChild(matchEl);
+      });
+      col.appendChild(mWrap);
+      tree.appendChild(col);
+      if(r<maxRound){ const conn=document.createElement('div'); conn.style='width:20px;flex-shrink:0'; tree.appendChild(conn); }
+    }
+    view.appendChild(tree);
+  }
+
+  document.getElementById('bracBackBtn')?.addEventListener('click',()=>{ bracketState=null; renderBracket(); });
+  document.getElementById('btnAddBracParticipant')?.addEventListener('click',()=>{
+    if(matches.length){ alert('Reset bracket untuk menambah peserta baru.'); return; }
+    const name=prompt('Nama peserta:','');
+    if(!name?.trim()) return;
+    if(!b.participants) b.participants=[];
+    b.participants.push(touch({id:uid(),name:name.trim(),createdAt:Date.now()}));
+    touch(b); save(); renderBracket();
   });
 }
 

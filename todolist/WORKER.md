@@ -220,6 +220,8 @@ export default {
         ruangan:    mergeArr(gistDb.ruangan   || [], browserDb.ruangan   || []),
         projects:   mergeProjects(gistDb.projects || [], browserDb.projects || []),
         regulasi:   mergeRegulasi(gistDb.regulasi || gistDb.komunitas || {}, browserDb.regulasi || {}),
+        spinners:   mergeArr(gistDb.spinners || [], browserDb.spinners || []),
+        brackets:   mergeArr(gistDb.brackets || [], browserDb.brackets || []),
         settings:   browserDb.settings,
         orgName:    browserDb.orgName,
       };
@@ -254,6 +256,8 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 | `lombas[].peserta[]` | Deep merge 2 level — per-peserta `updatedAt` menang |
 | `regulasi.syaratAnggota` / `regulasi.syaratTim` / `regulasi.keuntungan` / `regulasi.sanksi` | Merge by `id` + `updatedAt`; **urutan array browser menang** (mendukung drag & drop reorder) |
 | `settings`, `orgName`, `visi`, `misi` | Browser always wins (last write) |
+| `spinners` | Merge by `id` + `updatedAt` |
+| `brackets` | Merge by `id` + `updatedAt`; matches array replaced by browser version (matches regenerated on demand) |
 
 ### Field tambahan terbaru
 
