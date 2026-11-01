@@ -6616,7 +6616,7 @@ function renderSpinner(){
   removeBtn.style='display:none;padding:7px 18px;border-radius:10px;border:1px solid var(--bd);background:transparent;color:var(--muted);font-size:.85rem;cursor:pointer;transition:background .15s,color .15s';
   removeBtn.onmouseenter=()=>{ removeBtn.style.background='var(--card)'; removeBtn.style.color='var(--text)'; };
   removeBtn.onmouseleave=()=>{ removeBtn.style.background='transparent'; removeBtn.style.color='var(--muted)'; };
-  removeBtn.textContent='\u2715 Hapus dari daftar';
+  removeBtn.textContent='\u2715 Hapus dari spinner';
 
   const spinBtn=document.createElement('button');
   spinBtn.className='spin-btn';
@@ -6770,21 +6770,13 @@ function renderSpinner(){
     requestAnimationFrame(animate);
   });
 
-  // Remove winner
+  // Remove winner from current wheel session only (tidak mengubah daftar tersimpan)
   removeBtn.addEventListener('click',()=>{
     if(!lastWinner) return;
     activeLabels=activeLabels.filter(l=>l!==lastWinner);
     resultBadge.style.display='none'; removeBtn.style.display='none';
     drawWheel(currentRot,activeLabels);
     spinBtn.disabled=activeLabels.length<2;
-    if(isAdmin){
-      const ta=document.getElementById('spinItemsTA');
-      if(ta) ta.value=activeLabels.join('\n');
-      const countEl=document.getElementById('spinItemCount');
-      if(countEl) countEl.textContent=`${activeLabels.length} item`;
-      (s.items||[]).forEach(i=>{ if(!i.deleted&&i.label===lastWinner){ Object.assign(i,{deleted:true}); touch(i); } });
-      touch(s); save();
-    }
     lastWinner=null;
   });
 
