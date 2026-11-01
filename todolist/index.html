@@ -715,7 +715,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     <div class="nb-group" id="nbgTim">
       <button class="nb-trigger" id="nbtTim"><span class="nb-ico">📣</span><span class="nb-tl">Tim</span> <span class="nb-arrow">▾</span></button>
       <div class="nb-dropdown" id="nbdTim">
-        <button class="nb-feature-item" id="btnBroadcastView"><span class="nb-ico">📣</span> Broadcast</button>
+        <button class="nb-feature-item" id="btnBroadcastView"><span class="nb-ico">📣</span> Pemasar</button>
         <button class="nb-feature-item" id="btnLombaView"><span class="nb-ico">🏆</span> Lomba</button>
         <button class="nb-feature-item" id="btnPersView"><span class="nb-ico">📰</span> Pers</button>
         <button class="nb-feature-item project-access" id="btnProjectView"><span class="nb-ico">🗂️</span> Proyek</button>
@@ -770,7 +770,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <button class="sb-nav-item" id="sbn-rua"><span class="sb-ico">🏠</span>Ruangan</button>
       <button class="sb-nav-item" id="sbn-inf"><span class="sb-ico">🔔</span>Pemberitahuan</button>
       <div class="sb-nav-label">Tim</div>
-      <button class="sb-nav-item" id="sbn-bc"><span class="sb-ico">📣</span>Broadcast</button>
+      <button class="sb-nav-item" id="sbn-bc"><span class="sb-ico">📣</span>Pemasar</button>
       <button class="sb-nav-item" id="sbn-lom"><span class="sb-ico">🏆</span>Lomba</button>
       <button class="sb-nav-item" id="sbn-per"><span class="sb-ico">📰</span>Pers</button>
       <button class="sb-nav-item project-access" id="sbn-prj"><span class="sb-ico">🗂️</span>Proyek</button>
@@ -5607,7 +5607,7 @@ function renderBroadcast(){
   const toolbar=document.createElement('div');
   toolbar.className='notul-toolbar';
   toolbar.innerHTML=`
-    <span class="notul-toolbar-title">📣 Broadcast Marketing</span>
+    <span class="notul-toolbar-title">📣 Pemasar</span>
     <input class="asset-search" id="bcSearchInp" placeholder="Cari produk…" value="${esc(broadcastSearch)}" style="max-width:200px"/>
   `;
   if(isAdmin){
