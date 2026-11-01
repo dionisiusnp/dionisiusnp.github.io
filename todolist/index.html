@@ -3597,14 +3597,47 @@ function openModal(mode, ctx){
 
   else if(mode==='bracket-add'||mode==='bracket-edit'){
     const b=mode==='bracket-edit'?(db.brackets||[]).find(x=>x.id===ctx.id):null;
+    const bMode=b?.mode||'eliminasi';
+    const canChangeMode=!b||(b.status||'draft')==='draft';
     title.textContent=mode==='bracket-add'?'Bracket Baru':'Edit Bracket';
     body.innerHTML=`
       <div class="form-group">
         <label class="form-label">Nama Turnamen *</label>
         <input class="form-input" id="fi-brac-name" value="${esc(b?.name||'')}" placeholder="mis. Turnamen Catur Internal…" maxlength="100"/>
       </div>
+      <div class="form-group">
+        <label class="form-label">Mode</label>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:${canChangeMode?'pointer':'not-allowed'}">
+            <input type="radio" name="brac-mode" value="eliminasi" ${bMode==='eliminasi'?'checked':''} ${!canChangeMode?'disabled':''}> Eliminasi (bracket biner)
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:${canChangeMode?'pointer':'not-allowed'}">
+            <input type="radio" name="brac-mode" value="kuota" ${bMode==='kuota'?'checked':''} ${!canChangeMode?'disabled':''}> Kuota (multi-tahap)
+          </label>
+        </div>
+        ${!canChangeMode?'<div style="font-size:.7rem;color:var(--dim);margin-top:4px">Mode tidak bisa diubah setelah dimulai.</div>':''}
+      </div>
     `;
     document.getElementById('fi-brac-name').focus();
+  }
+
+  else if(mode==='bracket-stage-add'){
+    const b=(db.brackets||[]).find(x=>x.id===ctx.bracketId);
+    const stages=(b?.stages||[]).filter(s=>!s.deleted).sort((a,c)=>a.order-c.order);
+    const prevQuota=stages.length===0?(b?.participants||[]).filter(p=>!p.deleted).length:stages[stages.length-1].quota;
+    title.textContent='Tambah Tahap Seleksi';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Tahap *</label>
+        <input class="form-input" id="fi-stage-name" placeholder="mis. Seleksi 1, Semifinal, Final"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kuota Lolos *</label>
+        <input class="form-input" id="fi-stage-quota" type="number" min="1" placeholder="mis. 25"/>
+        <div style="font-size:.72rem;color:var(--dim);margin-top:4px">Peserta masuk tahap ini: <strong>${prevQuota}</strong></div>
+      </div>
+    `;
+    setTimeout(()=>document.getElementById('fi-stage-name')?.focus(),50);
   }
 
   else if(mode==='bracket-winner'){
@@ -4182,15 +4215,31 @@ document.getElementById('modalSave').addEventListener('click',()=>{
   else if(mMode==='bracket-add'||mMode==='bracket-edit'){
     const name=document.getElementById('fi-brac-name').value.trim();
     if(!name){ alert('Nama turnamen wajib diisi'); return; }
+    const mode=(document.querySelector('input[name="brac-mode"]:checked')?.value)||'eliminasi';
     if(!db.brackets) db.brackets=[];
     if(mMode==='bracket-add'){
-      db.brackets.push(touch({id:uid(),name,participants:[],matches:[],status:'draft',createdAt:Date.now()}));
+      db.brackets.push(touch({id:uid(),name,mode,participants:[],matches:[],stages:[],status:'draft',createdAt:Date.now()}));
     } else {
       const b=db.brackets.find(x=>x.id===mCtx.id);
       if(!b) return;
-      b.name=name; touch(b);
+      b.name=name;
+      if((b.status||'draft')==='draft') b.mode=mode;
+      touch(b);
     }
     save(); renderBracket(); closeModal();
+  }
+
+  else if(mMode==='bracket-stage-add'){
+    const b=(db.brackets||[]).find(x=>x.id===mCtx.bracketId);
+    if(!b) return;
+    const name=document.getElementById('fi-stage-name').value.trim();
+    const quota=parseInt(document.getElementById('fi-stage-quota').value)||0;
+    if(!name){ alert('Nama tahap wajib diisi'); return; }
+    if(quota<1){ alert('Kuota harus minimal 1'); return; }
+    if(!b.stages) b.stages=[];
+    const maxOrder=Math.max(0,...b.stages.filter(s=>!s.deleted).map(s=>s.order||0));
+    b.stages.push(touch({id:uid(),name,quota,order:maxOrder+1,advancedIds:[],createdAt:Date.now()}));
+    touch(b); save(); renderBracket(); closeModal();
   }
 
   else if(mMode==='bracket-winner'){
@@ -6831,6 +6880,7 @@ function renderBracket(){
 
   const b=(db.brackets||[]).find(x=>x.id===bracketState.id);
   if(!b){ bracketState=null; renderBracket(); return; }
+  if((b.mode||'eliminasi')==='kuota'){ renderBracketKuota(b,view); return; }
   const participants=(b.participants||[]).filter(p=>!p.deleted);
   const matches=b.matches||[];
   const st=b.status||'draft';
@@ -6922,6 +6972,183 @@ function renderBracket(){
     b.participants.push(touch({id:uid(),name:name.trim(),createdAt:Date.now()}));
     touch(b); save(); renderBracket();
   });
+}
+
+/* ══════════════════════════════════════════
+   BRACKET — MODE KUOTA
+══════════════════════════════════════════ */
+function renderBracketKuota(b,view){
+  const isAdmin=role==='admin';
+  const participants=(b.participants||[]).filter(p=>!p.deleted);
+  const stages=(b.stages||[]).filter(s=>!s.deleted).sort((a,c)=>a.order-c.order);
+
+  const wrap=document.createElement('div');
+  wrap.style='display:flex;flex-direction:column;flex:1;overflow:hidden';
+
+  const toolbar=document.createElement('div');
+  toolbar.className='brac-toolbar';
+  const stLabel={draft:'Draft',ongoing:'Berlangsung',selesai:'Selesai'}[b.status||'draft'];
+  toolbar.innerHTML=`<button class="spin-back-btn" id="bracKuotaBack" style="padding:4px 10px 4px 0">← Kembali</button><span style="font-size:.85rem;font-weight:700;flex:1">${esc(b.name)}</span><span class="brac-status-pill ${b.status||'draft'}">${stLabel}</span>`;
+  wrap.appendChild(toolbar);
+
+  const body=document.createElement('div');
+  body.style='flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:20px';
+
+  if(b.status==='draft'){
+    // ── Peserta section ──
+    const pSection=document.createElement('div');
+    pSection.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:.75rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;flex:1">Peserta (${participants.length})</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnBkAddP" style="margin:0;width:auto;font-size:.72rem">＋ Peserta</button>`:''}</div>`;
+    const pList=document.createElement('div');
+    pList.style='display:flex;flex-wrap:wrap;gap:6px';
+    if(!participants.length){
+      pList.innerHTML=`<span style="font-size:.78rem;color:var(--dim)">Belum ada peserta.</span>`;
+    } else {
+      participants.forEach(p=>{
+        const chip=document.createElement('span');
+        chip.style='display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--card);border:1px solid var(--bd);border-radius:20px;font-size:.75rem';
+        chip.innerHTML=`${esc(p.name)}${isAdmin?`<button data-del-p="${p.id}" style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:.7rem;padding:0 2px" title="Hapus">✕</button>`:''}`;
+        pList.appendChild(chip);
+      });
+    }
+    pSection.appendChild(pList);
+    body.appendChild(pSection);
+
+    // ── Tahap section ──
+    const sSection=document.createElement('div');
+    sSection.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:.75rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;flex:1">Tahap Seleksi (${stages.length})</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnBkAddStage" style="margin:0;width:auto;font-size:.72rem">＋ Tahap</button>`:''}</div>`;
+    const sList=document.createElement('div');
+    sList.style='display:flex;flex-direction:column;gap:8px';
+    if(!stages.length){
+      sList.innerHTML=`<span style="font-size:.78rem;color:var(--dim)">Belum ada tahap seleksi. Tambah tahap (mis. Seleksi 1 → Seleksi 2 → Final).</span>`;
+    } else {
+      stages.forEach((st,idx)=>{
+        const prevQuota=idx===0?participants.length:(stages[idx-1].quota||0);
+        const row=document.createElement('div');
+        row.style='display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--bd);border-radius:8px';
+        row.innerHTML=`<span style="font-size:.75rem;color:var(--dim);width:20px;text-align:center;flex-shrink:0">${idx+1}</span><span style="flex:1;font-size:.82rem;font-weight:600">${esc(st.name)}</span><span style="font-size:.72rem;color:var(--dim);white-space:nowrap">${prevQuota} → <strong>${st.quota||'?'}</strong></span>${isAdmin?`<button class="asset-act-btn del" data-del-stage="${st.id}">✕</button>`:''}`;
+        sList.appendChild(row);
+      });
+    }
+    sSection.appendChild(sList);
+    body.appendChild(sSection);
+
+    if(isAdmin&&participants.length>=2&&stages.length>=1){
+      const startBtn=document.createElement('button');
+      startBtn.className='btn-save'; startBtn.style='align-self:flex-start';
+      startBtn.textContent='▶ Mulai Seleksi';
+      startBtn.addEventListener('click',()=>{ b.status='ongoing'; touch(b); save(); renderBracket(); });
+      body.appendChild(startBtn);
+    }
+
+    wrap.appendChild(body);
+    view.appendChild(wrap);
+
+    document.getElementById('bracKuotaBack')?.addEventListener('click',()=>{ bracketState=null; renderBracket(); });
+    if(isAdmin){
+      document.getElementById('btnBkAddP')?.addEventListener('click',()=>{
+        const name=prompt('Nama peserta:','');
+        if(!name?.trim()) return;
+        if(!b.participants) b.participants=[];
+        b.participants.push(touch({id:uid(),name:name.trim(),createdAt:Date.now()}));
+        touch(b); save(); renderBracket();
+      });
+      document.getElementById('btnBkAddStage')?.addEventListener('click',()=>openModal('bracket-stage-add',{bracketId:b.id}));
+      wrap.querySelectorAll('[data-del-p]').forEach(btn=>btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        const p=b.participants.find(x=>x.id===btn.dataset.delP);
+        if(p){ touch(Object.assign(p,{deleted:true})); save(); renderBracket(); }
+      }));
+      wrap.querySelectorAll('[data-del-stage]').forEach(btn=>btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        const st=(b.stages||[]).find(x=>x.id===btn.dataset.delStage);
+        if(st){ touch(Object.assign(st,{deleted:true})); save(); renderBracket(); }
+      }));
+    }
+    return;
+  }
+
+  // ── ONGOING / SELESAI: render stage cards ──
+  stages.forEach((st,idx)=>{
+    const eligible=idx===0?participants:participants.filter(p=>(stages[idx-1].advancedIds||[]).includes(p.id));
+    const advancedIds=st.advancedIds||[];
+    const quota=st.quota||0;
+    const isFull=advancedIds.length>=quota;
+    const isLast=idx===stages.length-1;
+
+    const card=document.createElement('div');
+    card.style='background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden';
+
+    const hdr=document.createElement('div');
+    hdr.style='display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd);background:var(--surface);transition:background .25s,border-color .25s';
+    hdr.innerHTML=`<span style="font-size:.82rem;font-weight:700;flex:1">${esc(st.name)}</span><span style="font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px;background:${advancedIds.length>0?'rgba(52,211,153,.12)':'rgba(148,148,184,.1)'};color:${advancedIds.length>0?'var(--green,#10b981)':'var(--muted)'}">${advancedIds.length}/${quota} lolos</span>`;
+    card.appendChild(hdr);
+
+    const pList=document.createElement('div');
+    pList.style='display:flex;flex-direction:column';
+    if(!eligible.length){
+      pList.innerHTML=`<div style="padding:14px;font-size:.78rem;color:var(--dim);text-align:center">Tidak ada peserta.</div>`;
+    } else {
+      eligible.forEach(p=>{
+        const advanced=advancedIds.includes(p.id);
+        const row=document.createElement('div');
+        row.style=`display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--bd);transition:background .15s${advanced?';background:rgba(52,211,153,.06)':''}`;
+        if(isAdmin&&b.status==='ongoing'){
+          const cb=document.createElement('input');
+          cb.type='checkbox'; cb.checked=advanced;
+          cb.disabled=!advanced&&isFull;
+          cb.style='accent-color:var(--green,#10b981);cursor:pointer;width:15px;height:15px;flex-shrink:0';
+          cb.addEventListener('change',()=>{
+            const stObj=(b.stages||[]).find(x=>x.id===st.id);
+            if(!stObj) return;
+            if(!stObj.advancedIds) stObj.advancedIds=[];
+            if(cb.checked){ if(!stObj.advancedIds.includes(p.id)) stObj.advancedIds.push(p.id); }
+            else stObj.advancedIds=stObj.advancedIds.filter(id=>id!==p.id);
+            touch(stObj); touch(b); save(); renderBracket();
+          });
+          row.appendChild(cb);
+        } else {
+          const dot=document.createElement('span');
+          dot.style=`width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${advanced?'var(--green,#10b981)':'var(--bd)'}`;
+          row.appendChild(dot);
+        }
+        const nameEl=document.createElement('span');
+        nameEl.style=`flex:1;font-size:.8rem;font-weight:${advanced?'700':'400'}`;
+        nameEl.textContent=p.name;
+        row.appendChild(nameEl);
+        if(advanced){ const tick=document.createElement('span'); tick.style='font-size:.72rem;color:var(--green,#10b981);font-weight:700'; tick.textContent='Lolos ✓'; row.appendChild(tick); }
+        pList.appendChild(row);
+      });
+    }
+    card.appendChild(pList);
+
+    if(isAdmin&&b.status==='ongoing'&&isLast&&advancedIds.length>0){
+      const footer=document.createElement('div');
+      footer.style='padding:10px 14px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end';
+      const doneBtn=document.createElement('button');
+      doneBtn.className='btn-save'; doneBtn.style='font-size:.76rem;padding:6px 16px';
+      doneBtn.textContent='🏆 Selesaikan Turnamen';
+      doneBtn.addEventListener('click',()=>{ b.status='selesai'; touch(b); save(); renderBracket(); });
+      footer.appendChild(doneBtn);
+      card.appendChild(footer);
+    }
+    body.appendChild(card);
+  });
+
+  // ── Winner box ──
+  if(b.status==='selesai'){
+    const lastStage=stages[stages.length-1];
+    const winners=participants.filter(p=>(lastStage?.advancedIds||[]).includes(p.id));
+    if(winners.length){
+      const winBox=document.createElement('div');
+      winBox.style='padding:20px;background:rgba(52,211,153,.08);border:2px solid rgba(52,211,153,.3);border-radius:12px;text-align:center';
+      winBox.innerHTML=`<div style="font-size:1.8rem;margin-bottom:6px">🏆</div><div style="font-size:.72rem;font-weight:700;color:var(--green,#10b981);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Lolos Final</div>${winners.map(w=>`<div style="font-size:1rem;font-weight:800;color:var(--text)">${esc(w.name)}</div>`).join('')}`;
+      body.appendChild(winBox);
+    }
+  }
+
+  wrap.appendChild(body);
+  view.appendChild(wrap);
+  document.getElementById('bracKuotaBack')?.addEventListener('click',()=>{ bracketState=null; renderBracket(); });
 }
 
 /* ══════════════════════════════════════════
