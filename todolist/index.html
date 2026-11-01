@@ -6482,15 +6482,17 @@ function renderSpinner(){
   const spinners=(db.spinners||[]).filter(s=>!s.deleted);
 
   if(!spinnerState){
+    const area=document.createElement('div');
+    area.className='asset-view';
     const toolbar=document.createElement('div');
     toolbar.className='notul-toolbar';
-    toolbar.style='padding:10px 14px;margin-bottom:0;border-bottom:1px solid var(--bd);background:var(--surface);transition:background .25s,border-color .25s;flex-shrink:0';
     toolbar.innerHTML=`<span class="notul-toolbar-title">🎡 Spinner</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnAddSpinner" style="margin:0;width:auto">＋ Spinner</button>`:''}`;
-    view.appendChild(toolbar);
+    area.appendChild(toolbar);
     const list=document.createElement('div');
     list.className='spin-list';
+    list.style='padding:0';
     if(!spinners.length){
-      list.innerHTML=`<div style="padding:40px;text-align:center;color:var(--dim);font-size:.82rem">${isAdmin?'Belum ada spinner. Klik ＋ untuk membuat.':'Belum ada spinner.'}</div>`;
+      list.innerHTML=`<div style="padding:40px 0;text-align:center;color:var(--dim);font-size:.82rem">${isAdmin?'Belum ada spinner. Klik ＋ untuk membuat.':'Belum ada spinner.'}</div>`;
     } else {
       spinners.forEach(s=>{
         const card=document.createElement('div');
@@ -6503,7 +6505,8 @@ function renderSpinner(){
         list.appendChild(card);
       });
     }
-    view.appendChild(list);
+    area.appendChild(list);
+    view.appendChild(area);
     document.getElementById('btnAddSpinner')?.addEventListener('click',()=>openModal('spinner-add',{}));
     view.querySelectorAll('[data-spin-edit]').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); openModal('spinner-edit',{id:btn.dataset.spinEdit}); }));
     view.querySelectorAll('[data-spin-del]').forEach(btn=>btn.addEventListener('click',e=>{
@@ -6526,7 +6529,7 @@ function renderSpinner(){
 
   const toolbar=document.createElement('div');
   toolbar.className='notul-toolbar';
-  toolbar.style='padding:10px 14px;margin-bottom:0;border-bottom:1px solid var(--bd);background:var(--surface);transition:background .25s,border-color .25s;flex-shrink:0';
+  toolbar.style='padding:10px 18px;margin-bottom:0;border-bottom:1px solid var(--bd);background:var(--surface);transition:background .25s,border-color .25s;flex-shrink:0';
   toolbar.innerHTML=`<button class="spin-back-btn" id="spinBackBtn" style="padding:4px 10px 4px 0">← Kembali</button><span class="notul-toolbar-title" style="flex:1">${esc(s.name)}</span>`;
   wrap.appendChild(toolbar);
 
@@ -6779,15 +6782,17 @@ function renderBracket(){
   const brackets=(db.brackets||[]).filter(b=>!b.deleted);
 
   if(!bracketState){
+    const area=document.createElement('div');
+    area.className='asset-view';
     const toolbar=document.createElement('div');
     toolbar.className='notul-toolbar';
-    toolbar.style='padding:10px 14px;margin-bottom:0;border-bottom:1px solid var(--bd);background:var(--surface);transition:background .25s,border-color .25s;flex-shrink:0';
     toolbar.innerHTML=`<span class="notul-toolbar-title">🏅 Bracket Turnamen</span>${isAdmin?`<button class="notul-topik-add-btn" id="btnAddBracket" style="margin:0;width:auto">＋ Bracket</button>`:''}`;
-    view.appendChild(toolbar);
+    area.appendChild(toolbar);
     const list=document.createElement('div');
     list.className='brac-list';
+    list.style='padding:0';
     if(!brackets.length){
-      list.innerHTML=`<div style="padding:40px;text-align:center;color:var(--dim);font-size:.82rem">${isAdmin?'Belum ada bracket. Klik ＋ untuk membuat.':'Belum ada bracket.'}</div>`;
+      list.innerHTML=`<div style="padding:40px 0;text-align:center;color:var(--dim);font-size:.82rem">${isAdmin?'Belum ada bracket. Klik ＋ untuk membuat.':'Belum ada bracket.'}</div>`;
     } else {
       brackets.forEach(b=>{
         const card=document.createElement('div');
@@ -6799,7 +6804,8 @@ function renderBracket(){
         list.appendChild(card);
       });
     }
-    view.appendChild(list);
+    area.appendChild(list);
+    view.appendChild(area);
     document.getElementById('btnAddBracket')?.addEventListener('click',()=>openModal('bracket-add',{}));
     view.querySelectorAll('[data-brac-edit]').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); openModal('bracket-edit',{id:btn.dataset.bracEdit}); }));
     view.querySelectorAll('[data-brac-del]').forEach(btn=>btn.addEventListener('click',e=>{
