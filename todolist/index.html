@@ -6969,20 +6969,36 @@ function renderBracket(){
     view.appendChild(msg);
     if(isAdmin) msg.querySelectorAll('[data-del-p]').forEach(btn=>btn.addEventListener('click',()=>{ const p=b.participants.find(x=>x.id===btn.dataset.delP); if(p){ touch(Object.assign(p,{deleted:true})); save(); renderBracket(); } }));
   } else {
-    // Render bracket tree
+    // Bracket tree — vertical, round 1 at BOTTOM, final at TOP (like org chart)
     const maxRound=Math.max(...matches.map(m=>m.round),0);
+    const MW=160,MH=62,HG=28,VG=80,PAD=32,LH=22;
+    const n1=Math.pow(2,maxRound-1); // matches in round 1
+    const canvasW=n1*(MW+HG)-HG+PAD*2;
+    const canvasH=maxRound*(MH+LH)+(maxRound-1)*VG+PAD*2;
+
+    // X center for match (round r, pos p) — round 1 evenly spaced, higher rounds average
+    function mcx(r,p){
+      if(r===1) return PAD+p*(MW+HG)+MW/2;
+      return (mcx(r-1,p*2)+mcx(r-1,p*2+1))/2;
+    }
+    // Top Y for round r: Final (maxRound) at top, Round 1 at bottom
+    function mcy(r){ return PAD+LH+(maxRound-r)*(MH+LH+VG); }
+
     const tree=document.createElement('div');
     tree.className='brac-tree';
-    tree.style.position='relative';
-    const matchEls={}; // key: "r-pos" → DOM element
+    tree.style.cssText='flex:1;overflow:auto;padding:0';
+
+    const canvas=document.createElement('div');
+    canvas.style.cssText=`position:relative;width:${canvasW}px;min-height:${canvasH}px;margin:0 auto;padding:0`;
+
+    const matchEls={};
     for(let r=1;r<=maxRound;r++){
       const roundMatches=matches.filter(m=>m.round===r).sort((a,c)=>a.pos-c.pos);
-      const col=document.createElement('div');
-      col.className='brac-round';
       const rLabel=r===maxRound?'Final':r===maxRound-1&&maxRound>1?'Semifinal':`Round ${r}`;
-      col.innerHTML=`<div class="brac-round-label">${rLabel}</div>`;
-      const mWrap=document.createElement('div');
-      mWrap.style='display:flex;flex-direction:column;justify-content:space-around;flex:1';
+      const labelEl=document.createElement('div');
+      labelEl.style.cssText=`position:absolute;top:${mcy(r)-LH}px;left:0;width:100%;text-align:center;font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.08em`;
+      labelEl.textContent=rLabel;
+      canvas.appendChild(labelEl);
       roundMatches.forEach(match=>{
         const p1Name=getParticipantName(b,match.p1Id);
         const p2Name=getParticipantName(b,match.p2Id);
@@ -6990,7 +7006,7 @@ function renderBracket(){
         const decided=!!match.winnerId;
         const matchEl=document.createElement('div');
         matchEl.className='brac-match'+(decided?' decided':'');
-        matchEl.dataset.bracR=r; matchEl.dataset.bracP=match.pos;
+        matchEl.style.cssText=`position:absolute;left:${Math.round(mcx(r,match.pos)-MW/2)}px;top:${mcy(r)}px;width:${MW}px;margin:0`;
         const p1Cls='brac-p'+(match.winnerId===match.p1Id&&decided?' winner':'')+(isBye&&!match.p1Id?' bye':'')+((!match.p1Id&&!isBye)?' empty':'');
         const p2Cls='brac-p'+(match.winnerId===match.p2Id&&decided?' winner':'')+(isBye&&!match.p2Id?' bye':'')+((!match.p2Id&&!isBye)?' empty':'');
         matchEl.innerHTML=`<div class="${p1Cls}">${esc(p1Name||(isBye&&!match.p1Id?'BYE':'TBD'))}</div><div style="height:1px;background:var(--bd)"></div><div class="${p2Cls}">${esc(p2Name||(isBye&&!match.p2Id?'BYE':'TBD'))}</div>`;
@@ -6999,57 +7015,55 @@ function renderBracket(){
           matchEl.addEventListener('click',()=>openModal('bracket-winner',{bracketId:b.id,matchId:match.id}));
         }
         matchEls[`${r}-${match.pos}`]=matchEl;
-        mWrap.appendChild(matchEl);
+        canvas.appendChild(matchEl);
       });
-      col.appendChild(mWrap);
-      tree.appendChild(col);
-      if(r<maxRound){ const conn=document.createElement('div'); conn.style='width:32px;flex-shrink:0'; tree.appendChild(conn); }
     }
+    tree.appendChild(canvas);
     view.appendChild(tree);
-    // Draw SVG connector lines after layout
+
+    // SVG connector lines — same pattern as org chart
     setTimeout(()=>{
-      const tr=tree.getBoundingClientRect();
-      if(!tr.width) return;
+      const cr=canvas.getBoundingClientRect();
+      if(!cr.width) return;
       const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
       svg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:0';
-      const lineColor=getComputedStyle(document.documentElement).getPropertyValue('--bd').trim()||'#ccc';
-      function ln(x1,y1,x2,y2){
+      const lc=getComputedStyle(document.documentElement).getPropertyValue('--bd').trim()||'#ccc';
+      function seg(x1,y1,x2,y2){
         const l=document.createElementNS('http://www.w3.org/2000/svg','line');
-        l.setAttribute('x1',x1); l.setAttribute('y1',y1);
-        l.setAttribute('x2',x2); l.setAttribute('y2',y2);
-        l.setAttribute('stroke',lineColor); l.setAttribute('stroke-width','1.5');
+        l.setAttribute('x1',Math.round(x1));l.setAttribute('y1',Math.round(y1));
+        l.setAttribute('x2',Math.round(x2));l.setAttribute('y2',Math.round(y2));
+        l.setAttribute('stroke',lc);l.setAttribute('stroke-width','1.5');l.setAttribute('stroke-linecap','round');
         svg.appendChild(l);
       }
-      for(let r=1;r<maxRound;r++){
-        const srcMatches=matches.filter(m=>m.round===r).sort((a,c)=>a.pos-c.pos);
-        // group in pairs: pos 0+1 → next pos 0, pos 2+3 → next pos 1, etc.
-        for(let k=0;k<srcMatches.length;k+=2){
-          const m1=matchEls[`${r}-${srcMatches[k]?.pos}`];
-          const m2=matchEls[`${r}-${srcMatches[k+1]?.pos}`];
-          const mt=matchEls[`${r+1}-${Math.floor(srcMatches[k]?.pos/2)}`];
-          if(!m1||!mt) continue;
-          const r1=m1.getBoundingClientRect();
-          const rt=mt.getBoundingClientRect();
-          const x1=r1.right-tr.left, cy1=r1.top+r1.height/2-tr.top;
-          const xt=rt.left-tr.left, cyt=rt.top+rt.height/2-tr.top;
-          const midX=(x1+xt)/2;
-          if(m2){
-            const r2=m2.getBoundingClientRect();
-            const cy2=r2.top+r2.height/2-tr.top;
-            const midY=(cy1+cy2)/2;
-            const x2r=r2.right-tr.left;
-            ln(x1,cy1,midX,cy1);
-            ln(x2r,cy2,midX,cy2);
-            ln(midX,cy1,midX,cy2);
-            ln(midX,midY,xt,cyt);
+      function elBot(el){ return el.getBoundingClientRect().bottom-cr.top; }
+      function elTop(el){ return el.getBoundingClientRect().top-cr.top; }
+      function elCX(el){ const r=el.getBoundingClientRect(); return r.left+r.width/2-cr.left; }
+
+      // parent = higher round (top), children = lower round (bottom) — same as org chart
+      for(let r=maxRound;r>1;r--){
+        matches.filter(m=>m.round===r).forEach(parentMatch=>{
+          const pEl=matchEls[`${r}-${parentMatch.pos}`];
+          if(!pEl) return;
+          const c1=matchEls[`${r-1}-${parentMatch.pos*2}`];
+          const c2=matchEls[`${r-1}-${parentMatch.pos*2+1}`];
+          const children=[c1,c2].filter(Boolean);
+          if(!children.length) return;
+          const pBot=elBot(pEl), pCX=elCX(pEl);
+          const cTop=elTop(children[0]);
+          const midY=(pBot+cTop)/2;
+          seg(pCX,pBot,pCX,midY);
+          if(children.length===1){
+            const cCX=elCX(children[0]);
+            seg(pCX,midY,cCX,midY);
+            seg(cCX,midY,cCX,cTop);
           } else {
-            // single source (bye case — already won, just draw stub)
-            ln(x1,cy1,midX,cy1);
-            ln(midX,cy1,xt,cyt);
+            const xs=children.map(elCX);
+            seg(xs[0],midY,xs[xs.length-1],midY);
+            children.forEach((c,i)=>seg(xs[i],midY,xs[i],elTop(c)));
           }
-        }
+        });
       }
-      tree.insertBefore(svg,tree.firstChild);
+      canvas.insertBefore(svg,canvas.firstChild);
     },0);
   }
 
