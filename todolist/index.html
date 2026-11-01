@@ -2554,10 +2554,11 @@ function renderOrgChart(){
 
   area.appendChild(canvas);
 
-  /* SVG connector lines after DOM is painted */
-  requestAnimationFrame(()=>{
+  /* SVG connector lines after DOM is painted — setTimeout ensures layout is stable */
+  setTimeout(()=>{
     const bdColor=getComputedStyle(document.documentElement).getPropertyValue('--bd').trim()||'#888';
     const cr=canvas.getBoundingClientRect();
+    if(cr.width===0) return;
     const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
     svg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible';
 
@@ -2602,7 +2603,7 @@ function renderOrgChart(){
     });
 
     canvas.insertBefore(svg,canvas.firstChild);
-  });
+  },0);
 }
 
 /* ══════════════════════════════════════════
@@ -3656,6 +3657,28 @@ function openModal(mode, ctx){
       </div>
     `;
   }
+
+  else if(mode==='bracket-participant-edit'){
+    const br=(db.brackets||[]).find(x=>x.id===ctx.bracketId);
+    const existing=(br?.participants||[]).filter(p=>!p.deleted).map(p=>p.name).join('\n');
+    title.textContent='Daftar Peserta';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Daftar Peserta <span style="font-weight:400;color:var(--dim)">(satu per baris)</span></label>
+        <textarea class="form-input" id="fi-peserta-list" style="min-height:180px;resize:vertical;font-family:inherit;line-height:1.65" placeholder="Andi&#10;Budi&#10;Cici&#10;Dina">${esc(existing)}</textarea>
+        <div id="fi-peserta-count" style="font-size:.72rem;color:var(--dim);margin-top:4px">${(br?.participants||[]).filter(p=>!p.deleted).length} peserta</div>
+      </div>
+    `;
+    setTimeout(()=>{
+      const ta=document.getElementById('fi-peserta-list');
+      ta?.focus();
+      const countEl=document.getElementById('fi-peserta-count');
+      ta?.addEventListener('input',()=>{
+        const n=ta.value.split('\n').map(l=>l.trim()).filter(Boolean).length;
+        if(countEl) countEl.textContent=n+' peserta';
+      });
+    },50);
+  }
 }
 
 function closeModal(){
@@ -4240,6 +4263,17 @@ document.getElementById('modalSave').addEventListener('click',()=>{
     const maxOrder=Math.max(0,...b.stages.filter(s=>!s.deleted).map(s=>s.order||0));
     b.stages.push(touch({id:uid(),name,quota,order:maxOrder+1,advancedIds:[],createdAt:Date.now()}));
     touch(b); save(); renderBracket(); closeModal();
+  }
+
+  else if(mMode==='bracket-participant-edit'){
+    const br=(db.brackets||[]).find(x=>x.id===mCtx.bracketId);
+    if(!br) return;
+    const names=document.getElementById('fi-peserta-list').value.split('\n').map(l=>l.trim()).filter(Boolean);
+    const existing=(br.participants||[]).filter(p=>!p.deleted);
+    const newParticipants=names.map(name=>existing.find(p=>p.name===name)||touch({id:uid(),name,createdAt:Date.now()}));
+    (br.participants||[]).forEach(p=>{ if(!p.deleted&&!newParticipants.find(n=>n.id===p.id)){ Object.assign(p,{deleted:true}); touch(p); } });
+    br.participants=newParticipants;
+    touch(br); save(); renderBracket(); closeModal();
   }
 
   else if(mMode==='bracket-winner'){
@@ -6816,9 +6850,6 @@ function advanceWinner(b,match){
   if(!nextMatch) return;
   if(match.pos%2===0) nextMatch.p1Id=match.winnerId;
   else nextMatch.p2Id=match.winnerId;
-  // auto-advance if only one participant (bye on the other side)
-  if(nextMatch.p1Id&&!nextMatch.p2Id){ nextMatch.winnerId=nextMatch.p1Id; advanceWinner(b,nextMatch); }
-  else if(!nextMatch.p1Id&&nextMatch.p2Id){ nextMatch.winnerId=nextMatch.p2Id; advanceWinner(b,nextMatch); }
 }
 
 function generateBracket(b){
@@ -6976,11 +7007,7 @@ function renderBracket(){
   document.getElementById('bracBackBtn')?.addEventListener('click',()=>{ bracketState=null; renderBracket(); });
   document.getElementById('btnAddBracParticipant')?.addEventListener('click',()=>{
     if(matches.length){ alert('Reset bracket untuk menambah peserta baru.'); return; }
-    const name=prompt('Nama peserta:','');
-    if(!name?.trim()) return;
-    if(!b.participants) b.participants=[];
-    b.participants.push(touch({id:uid(),name:name.trim(),createdAt:Date.now()}));
-    touch(b); save(); renderBracket();
+    openModal('bracket-participant-edit',{bracketId:b.id});
   });
 }
 
@@ -7056,11 +7083,7 @@ function renderBracketKuota(b,view){
     document.getElementById('bracKuotaBack')?.addEventListener('click',()=>{ bracketState=null; renderBracket(); });
     if(isAdmin){
       document.getElementById('btnBkAddP')?.addEventListener('click',()=>{
-        const name=prompt('Nama peserta:','');
-        if(!name?.trim()) return;
-        if(!b.participants) b.participants=[];
-        b.participants.push(touch({id:uid(),name:name.trim(),createdAt:Date.now()}));
-        touch(b); save(); renderBracket();
+        openModal('bracket-participant-edit',{bracketId:b.id});
       });
       document.getElementById('btnBkAddStage')?.addEventListener('click',()=>openModal('bracket-stage-add',{bracketId:b.id}));
       wrap.querySelectorAll('[data-del-p]').forEach(btn=>btn.addEventListener('click',e=>{
@@ -7077,8 +7100,22 @@ function renderBracketKuota(b,view){
     return;
   }
 
-  // ── ONGOING / SELESAI: render stage cards ──
-  stages.forEach((st,idx)=>{
+  // ── Winner box at top if selesai ──
+  if(b.status==='selesai'){
+    const lastStage=stages[stages.length-1];
+    const winners=participants.filter(p=>(lastStage?.advancedIds||[]).includes(p.id));
+    if(winners.length){
+      const winBox=document.createElement('div');
+      winBox.style='padding:20px;background:rgba(52,211,153,.08);border:2px solid rgba(52,211,153,.3);border-radius:12px;text-align:center';
+      winBox.innerHTML=`<div style="font-size:1.8rem;margin-bottom:6px">🏆</div><div style="font-size:.72rem;font-weight:700;color:var(--green,#10b981);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Lolos Final</div>${winners.map(w=>`<div style="font-size:1rem;font-weight:800;color:var(--text)">${esc(w.name)}</div>`).join('')}`;
+      body.appendChild(winBox);
+    }
+  }
+
+  // ── ONGOING / SELESAI: render stage cards (reversed — final/juara at top) ──
+  const reversedStages=[...stages].reverse();
+  reversedStages.forEach((st)=>{
+    const idx=stages.indexOf(st);
     const eligible=idx===0?participants:participants.filter(p=>(stages[idx-1].advancedIds||[]).includes(p.id));
     const advancedIds=st.advancedIds||[];
     const quota=st.quota||0;
@@ -7143,18 +7180,6 @@ function renderBracketKuota(b,view){
     }
     body.appendChild(card);
   });
-
-  // ── Winner box ──
-  if(b.status==='selesai'){
-    const lastStage=stages[stages.length-1];
-    const winners=participants.filter(p=>(lastStage?.advancedIds||[]).includes(p.id));
-    if(winners.length){
-      const winBox=document.createElement('div');
-      winBox.style='padding:20px;background:rgba(52,211,153,.08);border:2px solid rgba(52,211,153,.3);border-radius:12px;text-align:center';
-      winBox.innerHTML=`<div style="font-size:1.8rem;margin-bottom:6px">🏆</div><div style="font-size:.72rem;font-weight:700;color:var(--green,#10b981);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Lolos Final</div>${winners.map(w=>`<div style="font-size:1rem;font-weight:800;color:var(--text)">${esc(w.name)}</div>`).join('')}`;
-      body.appendChild(winBox);
-    }
-  }
 
   wrap.appendChild(body);
   view.appendChild(wrap);
