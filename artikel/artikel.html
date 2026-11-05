@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Artikel — Aliria Tech Community</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0b0b12;--surface:#12121c;--card:#181825;--bd:#23233a;--text:#e2e2f0;--muted:#9494b8;--dim:#5c5c7a;--accent:#6c6ff5;--accent2:#a78bfa;--green:#34d399;--gold:#fbbf24;--blue:#60a5fa;--font:'Inter',system-ui,sans-serif}
+[data-theme="light"]{--bg:#f4f4f9;--surface:#eaeaef;--card:#dfdfec;--bd:#c5c5d4;--text:#15152a;--muted:#6a6a88;--dim:#8a8aa0;--accent:#5356d1;--accent2:#8b5cf6;--green:#059669;--gold:#ca8a04;--blue:#2563eb}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;transition:background .25s,color .25s}
+a{text-decoration:none;color:inherit}
+.nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--surface);border-bottom:1px solid var(--bd);transition:background .25s,border-color .25s}
+.nav-back{font-size:.72rem;font-weight:600;color:var(--muted);padding:4px 12px;border:1px solid var(--bd);border-radius:5px;transition:color .15s,border-color .15s}
+.nav-back:hover{color:var(--accent);border-color:var(--accent)}
+.nav-title{font-size:.82rem;font-weight:700}
+.nav-spacer{flex:1}
+.theme-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--bd);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s;font-size:14px;line-height:1}
+.theme-btn:hover{background:var(--accent);border-color:var(--accent)}
+.page{max-width:760px;margin:0 auto;padding:40px 24px 80px}
+.article-tag{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(108,111,245,.1);border:1px solid rgba(108,111,245,.25);padding:4px 12px;border-radius:100px;margin-bottom:14px}
+.article-title{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;letter-spacing:-.03em;line-height:1.15;margin-bottom:12px}
+.article-meta{font-size:.75rem;color:var(--muted);margin-bottom:24px}
+.article-hero{width:100%;height:260px;border-radius:12px;margin-bottom:28px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:linear-gradient(135deg,rgba(108,111,245,.25),rgba(167,139,250,.15));border:1px solid var(--bd)}
+.article-body p{font-size:.92rem;color:var(--muted);line-height:1.85;margin-bottom:18px}
+.article-body p:first-of-type{color:var(--text)}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:24px;transition:color .15s}
+.back-link:hover{color:var(--accent)}
+.related{margin-top:48px;padding-top:24px;border-top:1px solid var(--bd)}
+.related h3{font-size:1rem;font-weight:800;margin-bottom:16px}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.related-card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px;transition:border-color .15s}
+.related-card:hover{border-color:var(--accent)}
+.related-card .rt{font-size:.78rem;font-weight:700;margin-bottom:4px;line-height:1.3}
+.related-card .rd{font-size:.68rem;color:var(--dim)}
+.not-found{text-align:center;padding:80px 24px}
+.not-found h2{font-size:1.4rem;font-weight:800;margin-bottom:8px}
+.not-found p{color:var(--muted);margin-bottom:20px}
+.btn{display:inline-block;padding:9px 20px;background:var(--accent);color:#fff;border-radius:7px;font-size:.78rem;font-weight:700}
+@media(max-width:640px){.related-grid{grid-template-columns:1fr}.article-hero{height:180px}.page{padding:24px 16px 60px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-back"><svg width="9" height="9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M19 12H5m7-7-7 7 7 7"/></svg>Beranda</a>
+  <span class="nav-title">Artikel</span>
+  <span class="nav-spacer"></span>
+  <button class="theme-btn" id="themeBtn">🌙</button>
+</nav>
+<div class="page" id="page"></div>
+<script src="data.js"></script>
+<script>
+(function(){
+  const html=document.documentElement;
+  if(localStorage.getItem('theme')==='light'){html.setAttribute('data-theme','light');document.getElementById('themeBtn').textContent='☀️'}
+  document.getElementById('themeBtn').addEventListener('click',()=>{
+    if(html.getAttribute('data-theme')==='light'){html.removeAttribute('data-theme');document.getElementById('themeBtn').textContent='🌙';localStorage.setItem('theme','dark')}
+    else{html.setAttribute('data-theme','light');document.getElementById('themeBtn').textContent='☀️';localStorage.setItem('theme','light')}
+  });
+  const params=new URLSearchParams(location.search);
+  const slug=params.get('slug');
+  const articles=window.ALIRIA_ARTICLES||[];
+  const a=articles.find(x=>x.slug===slug);
+  const page=document.getElementById('page');
+  const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  if(!a){
+    page.innerHTML=`<div class="not-found"><h2>Artikel tidak ditemukan</h2><p>Slug "${slug||''}" tidak tersedia.</p><a class="btn" href="../index.html">Kembali ke Beranda</a></div>`;
+    return;
+  }
+  document.title=a.title+' — Aliria';
+  const related=articles.filter(x=>x.slug!==a.slug).slice(0,3);
+  page.innerHTML=`
+    <a class="back-link" href="../index.html">← Kembali ke Beranda</a>
+    <span class="article-tag">${a.tag}</span>
+    <h1 class="article-title">${a.title}</h1>
+    <div class="article-meta">${fmt(a.date)} · Aliria Tech Community</div>
+    <div class="article-hero">📰</div>
+    <div class="article-body">${a.content.map(p=>`<p>${p}</p>`).join('')}</div>
+    <div class="related">
+      <h3>Artikel Lainnya</h3>
+      <div class="related-grid">
+        ${related.map(r=>`<a class="related-card" href="artikel.html?slug=${r.slug}"><div class="rt">${r.title}</div><div class="rd">${fmt(r.date)}</div></a>`).join('')}
+      </div>
+    </div>
+  `;
+})();
+</script>
+</body>
+</html>

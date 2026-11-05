@@ -8,16 +8,24 @@ Portal multi-halaman berisi alat kerja tim + **Kelola Alteco** — aplikasi mana
 
 ```
 /
-├── index.html              ← Homepage (nav ke semua rak)
-├── proyekan/index.html     ← Referensi command & AI tools
-├── pengajar/index.html     ← Sektor industri + modul ERP
-├── pemasaran/index.html    ← Siklus penawaran
-├── mitra/index.html        ← Logo & info mitra
-├── todolist/index.html     ← Kelola Alteco (app utama)
-├── OneSignalSDKWorker.js   ← Service worker push notif
+├── index.html                      ← Homepage (landing Aliria)
+├── artikel/
+│   ├── artikel.html                ← Template detail artikel (1 halaman)
+│   └── data.js                     ← Data artikel (slug, judul, isi)
+├── proyekan/index.html             ← Referensi command & AI tools
+├── todolist/index.html             ← Kelola Alteco (app utama)
+├── PANDUAN_KONTEN_LANDING_PAGE.md  ← Panduan edit konten landing page
+├── landing-page.md                 ← Spec lokal landing page (gitignored)
+├── OneSignalSDKWorker.js           ← Service worker push notif
 └── .github/workflows/
-    └── daily-notif.yml     ← Cron harian kirim push notif
+    └── daily-notif.yml             ← Cron harian kirim push notif
 ```
+
+---
+
+## Konten Landing Page
+
+Landing page (`index.html`) bersifat statis. Untuk mengubah teks, gambar, artikel, dokumentasi, dan kemitraan, ikuti panduan di [`PANDUAN_KONTEN_LANDING_PAGE.md`](PANDUAN_KONTEN_LANDING_PAGE.md).
 
 ---
 
