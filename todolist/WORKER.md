@@ -222,6 +222,7 @@ export default {
         regulasi:   mergeRegulasi(gistDb.regulasi || gistDb.komunitas || {}, browserDb.regulasi || {}),
         spinners:   mergeArr(gistDb.spinners || [], browserDb.spinners || []),
         brackets:   mergeArr(gistDb.brackets || [], browserDb.brackets || []),
+        kas:        mergeArr(gistDb.kas || [], browserDb.kas || []),
         settings:   browserDb.settings,
         orgName:    browserDb.orgName,
       };
@@ -258,6 +259,7 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 | `settings`, `orgName`, `visi`, `misi` | Browser always wins (last write) |
 | `spinners` | Merge by `id` + `updatedAt` |
 | `brackets` | Merge by `id` + `updatedAt`; `matches[]` dan `stages[]` (termasuk `advancedIds`) browser always wins |
+| `kas` | Merge by `id` + `updatedAt` |
 
 ### Field tambahan terbaru
 
