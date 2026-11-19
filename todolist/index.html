@@ -6713,10 +6713,10 @@ function renderKas(){
   const summary=document.createElement('div');
   summary.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px';
   summary.innerHTML=`
-    <div style="background:var(--card);border:2px solid #fbbf2466;border-radius:12px;padding:14px 16px">
+    <div style="background:var(--card);border:2px solid #b4530966;border-radius:12px;padding:14px 16px">
       <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Saldo Kas</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#fbbf24">${fmt(saldoKas)}</div>
-      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">dari \${txs.length} transaksi</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#b45309">${fmt(saldoKas)}</div>
+      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">dari ${txs.length} transaksi</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
       <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Masuk</div>
@@ -6768,7 +6768,7 @@ function renderKas(){
           </div>
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
             <span style="font-size:.85rem;font-weight:700;color:${isMasuk?'var(--green,#34d399)':'var(--red,#f87171)'}">${isMasuk?'+':'−'} ${fmt(t.jumlah||0)}</span>
-            <span style="font-size:.7rem;color:#fbbf24;font-weight:600">→ kas ${t.iuranPersen??10}% = ${fmt(iuranKas)}</span>
+            <span style="font-size:.7rem;color:#b45309;font-weight:600">→ kas ${t.iuranPersen??10}% = ${fmt(iuranKas)}</span>
             ${dateStr?`<span style="font-size:.68rem;color:var(--dim)">${dateStr}</span>`:''}
           </div>
           ${t.catatan?`<div style="font-size:.72rem;color:var(--dim);margin-top:4px;white-space:pre-wrap;line-height:1.5">${esc(t.catatan)}</div>`:''}
