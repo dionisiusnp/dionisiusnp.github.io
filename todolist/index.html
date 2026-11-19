@@ -3704,7 +3704,7 @@ function openModal(mode, ctx){
         <label class="form-label">Keterangan *</label>
         <input class="form-input" id="fi-kas-judul" placeholder="Iuran bulan Oktober" value="${esc(t?.judul||'')}">
       </div>
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:8px">
         <div class="form-group">
           <label class="form-label">Jumlah (Rp) *</label>
           <input class="form-input" id="fi-kas-jumlah" type="number" min="0" placeholder="500000" value="${t?.jumlah||''}">
@@ -3713,10 +3713,10 @@ function openModal(mode, ctx){
           <label class="form-label">Iuran Kas (%)</label>
           <input class="form-input" id="fi-kas-persen" type="number" min="0" max="100" step="0.1" placeholder="10" value="${defPersen}">
         </div>
-        <div class="form-group">
-          <label class="form-label">Nominal Kas</label>
-          <div id="fi-kas-nominal" style="padding:7px 10px;background:var(--surface);border:1px solid var(--bd);border-radius:6px;font-size:.78rem;color:#fbbf24;font-weight:600;min-height:34px;line-height:1.4">${defNominal?'Rp '+defNominal.toLocaleString('id-ID'):'—'}</div>
-        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="form-label">Nominal Kas</label>
+        <div id="fi-kas-nominal" style="padding:7px 12px;background:var(--surface);border:1px solid var(--bd);border-radius:6px;font-size:.88rem;color:#fbbf24;font-weight:700">${defNominal?'Rp '+defNominal.toLocaleString('id-ID'):'—'}</div>
       </div>
       <div class="form-group" style="margin-bottom:12px">
         <label class="form-label">Tanggal *</label>
