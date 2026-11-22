@@ -6725,7 +6725,14 @@ function renderKas(){
   area.appendChild(searchBar);
   setTimeout(()=>{
     const inp=document.getElementById('kasSearchInp');
-    if(inp) inp.addEventListener('input',()=>{ kasSearch=inp.value.toLowerCase(); kasPage=0; renderKas(); });
+    if(!inp) return;
+    inp.addEventListener('input',()=>{
+      kasSearch=inp.value.toLowerCase();
+      kasPage=0;
+      renderKas();
+      const ni=document.getElementById('kasSearchInp');
+      if(ni){ const l=ni.value.length; ni.focus(); try{ ni.setSelectionRange(l,l); }catch(e){} }
+    });
   },0);
 
   const wrap=document.createElement('div');
