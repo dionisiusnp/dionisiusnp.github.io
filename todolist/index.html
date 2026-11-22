@@ -6760,9 +6760,9 @@ function renderKas(){
       <div style="font-size:.62rem;color:var(--dim);margin-top:3px">${sub}</div>
     </div>`;
   summary.innerHTML=
-    card('Saldo Kas',fmt(saldoKas),'#b45309',`iuran ${masuks.length} transaksi masuk`,'#b4530966')+
+    card('Saldo Kas',fmt(saldoKas),'var(--text)',`iuran ${masuks.length} transaksi masuk`,'#b4530966')+
     card('Total Masuk',fmt(totalMasuk),'var(--green,#34d399)','kas + komisi')+
-    card('Total Komisi',fmt(totalKomisi),'var(--green,#34d399)','masuk − iuran kas')+
+    card('Total Komisi',fmt(totalKomisi),'#ca8a04','masuk − iuran kas')+
     card('Total Keluar',fmt(totalKeluar),'var(--red,#f87171)',txs.filter(t=>t.type==='keluar').length+' transaksi')+
     card('Tagihan Belum Lunas',fmt(totalBelumLunas),'var(--red,#f87171)',nBelumLunas+' transaksi','#f8717166');
   wrap.appendChild(summary);
