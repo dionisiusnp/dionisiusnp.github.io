@@ -6731,36 +6731,96 @@ function renderKas(){
   const totalBelumLunas=txs.reduce((s,t)=>s+Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0)),0);
   const fmt=n=>'Rp '+n.toLocaleString('id-ID');
 
+  // ── Summary cards ──
   const summary=document.createElement('div');
-  summary.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px';
+  summary.style.cssText='display:flex;flex-direction:column;gap:10px;margin-bottom:20px';
   summary.innerHTML=`
-    <div style="background:var(--card);border:2px solid #b4530966;border-radius:12px;padding:14px 16px">
-      <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Saldo Kas</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#b45309">${fmt(saldoKas)}</div>
-      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">iuran dari ${masuks.length} masuk</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--card);border:2px solid #b4530966;border-radius:12px;padding:16px 18px">
+        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Saldo Kas</div>
+        <div style="font-size:1.25rem;font-weight:700;color:#b45309;line-height:1.1">${fmt(saldoKas)}</div>
+        <div style="font-size:.65rem;color:var(--dim);margin-top:5px">iuran dari ${masuks.length} transaksi masuk</div>
+      </div>
+      <div style="background:var(--card);border:2px solid #f8717144;border-radius:12px;padding:16px 18px">
+        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Tagihan Belum Lunas</div>
+        <div style="font-size:1.25rem;font-weight:700;color:var(--red,#f87171);line-height:1.1">${fmt(totalBelumLunas)}</div>
+        <div style="font-size:.65rem;color:var(--dim);margin-top:5px">${txs.filter(t=>Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0))>0).length} transaksi belum lunas</div>
+      </div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
-      <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Masuk</div>
-      <div style="font-size:.95rem;font-weight:700;color:var(--green,#34d399)">${fmt(totalMasuk)}</div>
-      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">kas + komisi</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
-      <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Komisi</div>
-      <div style="font-size:.95rem;font-weight:700;color:var(--green,#34d399)">${fmt(totalKomisi)}</div>
-      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">masuk − iuran kas</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
-      <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Keluar</div>
-      <div style="font-size:.95rem;font-weight:700;color:var(--red,#f87171)">${fmt(totalKeluar)}</div>
-      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">${txs.filter(t=>t.type==='keluar').length} transaksi</div>
-    </div>
-    <div style="background:var(--card);border:2px solid #f8717166;border-radius:12px;padding:14px 16px">
-      <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Tagihan Belum Lunas</div>
-      <div style="font-size:.95rem;font-weight:700;color:var(--red,#f87171)">${fmt(totalBelumLunas)}</div>
-      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">${txs.filter(t=>Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0))>0).length} transaksi</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px">
+        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Total Masuk</div>
+        <div style="font-size:.92rem;font-weight:700;color:var(--green,#34d399)">${fmt(totalMasuk)}</div>
+        <div style="font-size:.62rem;color:var(--dim);margin-top:3px">kas + komisi</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px">
+        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Total Komisi</div>
+        <div style="font-size:.92rem;font-weight:700;color:var(--green,#34d399)">${fmt(totalKomisi)}</div>
+        <div style="font-size:.62rem;color:var(--dim);margin-top:3px">masuk − iuran kas</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px">
+        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Total Keluar</div>
+        <div style="font-size:.92rem;font-weight:700;color:var(--red,#f87171)">${fmt(totalKeluar)}</div>
+        <div style="font-size:.62rem;color:var(--dim);margin-top:3px">${txs.filter(t=>t.type==='keluar').length} transaksi</div>
+      </div>
     </div>
   `;
   wrap.appendChild(summary);
+
+  // ── Bar chart per bulan ──
+  if(txs.length){
+    const monthMap=new Map();
+    txs.forEach(t=>{
+      const ym=t.tanggal?(t.tanggal.slice(0,7)):'';
+      if(!ym) return;
+      if(!monthMap.has(ym)) monthMap.set(ym,{masuk:0,keluar:0,kas:0});
+      const m=monthMap.get(ym);
+      if(t.type==='masuk'){
+        m.masuk+=(t.jumlah||0);
+        m.kas+=Math.round((t.jumlah||0)*(Number(t.iuranPersen)||0)/100);
+      } else {
+        m.keluar+=(t.jumlah||0);
+      }
+    });
+    const months=[...monthMap.keys()].sort().slice(-8);
+    const data=months.map(ym=>({ym,...monthMap.get(ym)}));
+    const maxVal=Math.max(...data.map(d=>Math.max(d.masuk,d.keluar)),1);
+    const fmtM=ym=>{ const[y,m]=ym.split('-'); return new Date(+y,+m-1).toLocaleDateString('id-ID',{month:'short',year:'2-digit'}); };
+    const fmtShort=n=>{ if(n>=1e9) return 'Rp '+(n/1e9).toFixed(1)+'M'; if(n>=1e6) return 'Rp '+(n/1e6).toFixed(1)+'jt'; return 'Rp '+(n/1e3).toFixed(0)+'rb'; };
+    const BW=28,BG=8,GRP=BW*2+BG,MG=8,PL=10,PR=10,PT=16,PB=32,CH=120;
+    const totalW=PL+months.length*(GRP+MG)-MG+PR;
+    const barH=d=>Math.round((d/maxVal)*CH);
+    const grpX=(i)=>PL+i*(GRP+MG);
+    const bars=data.map((d,i)=>{
+      const x=grpX(i);
+      const hM=barH(d.masuk), hK=barH(d.keluar), hKas=barH(d.kas);
+      const yM=PT+CH-hM, yK=PT+CH-hK, yKas=PT+CH-hKas;
+      return `
+        <rect x="${x}" y="${yM}" width="${BW}" height="${hM}" rx="3" fill="#34d39966"/>
+        <rect x="${x+BW+BG}" y="${yK}" width="${BW}" height="${hK}" rx="3" fill="#f8717166"/>
+        ${hKas>2?`<rect x="${x+2}" y="${yKas}" width="${BW-4}" height="${hKas}" rx="2" fill="#b45309aa"/>`:''}
+        ${d.masuk?`<text x="${x+BW/2}" y="${yM-3}" text-anchor="middle" font-size="7" fill="#34d399">${fmtShort(d.masuk)}</text>`:''}
+        ${d.keluar?`<text x="${x+BW+BG+BW/2}" y="${yK-3}" text-anchor="middle" font-size="7" fill="#f87171">${fmtShort(d.keluar)}</text>`:''}
+        <text x="${x+GRP/2}" y="${PT+CH+14}" text-anchor="middle" font-size="8" fill="currentColor" opacity=".5">${fmtM(d.ym)}</text>
+      `;
+    }).join('');
+    const chartBox=document.createElement('div');
+    chartBox.style.cssText='background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:20px';
+    chartBox.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:.7rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em">Transaksi per Bulan</span>
+        <span style="display:flex;gap:10px;font-size:.65rem;color:var(--dim)">
+          <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:#34d39966;display:inline-block"></span>Masuk</span>
+          <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:#f8717166;display:inline-block"></span>Keluar</span>
+          <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:#b45309aa;display:inline-block"></span>Kas</span>
+        </span>
+      </div>
+      <div style="overflow-x:auto">
+        <svg width="${totalW}" height="${PT+CH+PB}" viewBox="0 0 ${totalW} ${PT+CH+PB}" style="display:block;min-width:100%">${bars}</svg>
+      </div>
+    `;
+    wrap.appendChild(chartBox);
+  }
 
   const tabs=document.createElement('div');
   tabs.style.cssText='display:flex;gap:6px;margin-bottom:16px';
