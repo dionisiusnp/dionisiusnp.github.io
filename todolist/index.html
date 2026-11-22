@@ -6744,7 +6744,7 @@ function renderKas(){
   const masuks=txs.filter(t=>t.type==='masuk');
   const totalMasuk=masuks.reduce((s,t)=>s+(t.jumlah||0),0);
   const totalKeluar=txs.filter(t=>t.type==='keluar').reduce((s,t)=>s+(t.jumlah||0),0);
-  const saldoKas=masuks.reduce((s,t)=>s+Math.round((t.jumlah||0)*(Number(t.iuranPersen)||0)/100),0);
+  const saldoKas=masuks.reduce((s,t)=>s+Math.round((Number(t.terbayar)||0)*(Number(t.iuranPersen)||0)/100),0);
   const totalKomisi=totalMasuk-saldoKas;
   const totalBelumLunas=txs.reduce((s,t)=>s+Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0)),0);
   const fmt=n=>'Rp '+n.toLocaleString('id-ID');
@@ -6769,23 +6769,23 @@ function renderKas(){
 
   // ── Comparison chart: masuk vs keluar ──
   if(txs.length){
-    const total=totalMasuk+totalKeluar||1;
-    const pctM=Math.round(totalMasuk/total*100);
+    const total=saldoKas+totalKeluar||1;
+    const pctM=Math.round(saldoKas/total*100);
     const pctK=100-pctM;
     const fmtShort=n=>{ if(n>=1e9) return 'Rp '+(n/1e9).toFixed(1)+'M'; if(n>=1e6) return 'Rp '+(n/1e6).toFixed(1)+'jt'; if(n>=1e3) return 'Rp '+(n/1e3).toFixed(0)+'rb'; return 'Rp '+n; };
     const chartBox=document.createElement('div');
     chartBox.style.cssText='background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:20px';
     chartBox.innerHTML=`
-      <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Perbandingan Masuk vs Keluar</div>
+      <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Saldo Kas vs Pengeluaran</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <span style="font-size:.72rem;color:var(--dim);width:40px;text-align:right;flex-shrink:0">Masuk</span>
+        <span style="font-size:.72rem;color:var(--dim);width:52px;text-align:right;flex-shrink:0">Saldo Kas</span>
         <div style="flex:1;background:var(--surface);border-radius:6px;height:18px;overflow:hidden">
-          <div style="height:100%;width:${pctM}%;background:linear-gradient(90deg,#34d39988,#34d399cc);border-radius:6px;transition:width .4s;min-width:${pctM>0?2:0}px"></div>
+          <div style="height:100%;width:${pctM}%;background:linear-gradient(90deg,#b4530988,#b45309cc);border-radius:6px;transition:width .4s;min-width:${pctM>0?2:0}px"></div>
         </div>
-        <span style="font-size:.72rem;font-weight:700;color:var(--green,#34d399);width:80px;flex-shrink:0">${fmtShort(totalMasuk)} <span style="font-weight:400;color:var(--dim)">(${pctM}%)</span></span>
+        <span style="font-size:.72rem;font-weight:700;color:#b45309;width:80px;flex-shrink:0">${fmtShort(saldoKas)} <span style="font-weight:400;color:var(--dim)">(${pctM}%)</span></span>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:.72rem;color:var(--dim);width:40px;text-align:right;flex-shrink:0">Keluar</span>
+        <span style="font-size:.72rem;color:var(--dim);width:52px;text-align:right;flex-shrink:0">Keluar</span>
         <div style="flex:1;background:var(--surface);border-radius:6px;height:18px;overflow:hidden">
           <div style="height:100%;width:${pctK}%;background:linear-gradient(90deg,#f8717188,#f87171cc);border-radius:6px;transition:width .4s;min-width:${pctK>0?2:0}px"></div>
         </div>
@@ -6824,7 +6824,7 @@ function renderKas(){
 
   paged.forEach(t=>{
     const persen=Number(t.iuranPersen)||0;
-    const iuranKas=Math.round((t.jumlah||0)*persen/100);
+    const iuranKas=Math.round((Number(t.terbayar)||0)*persen/100);
     const isMasuk=t.type==='masuk';
     const terbayar=Number(t.terbayar)||0;
     const sisa=Math.max(0,(t.jumlah||0)-terbayar);
