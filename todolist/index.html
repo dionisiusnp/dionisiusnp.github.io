@@ -6723,9 +6723,11 @@ function renderKas(){
 
   const txs=(db.kas||[]).filter(t=>!t.deleted).sort((a,b)=>(b.tanggal||'').localeCompare(a.tanggal||'')||(b.createdAt||0)-(a.createdAt||0));
 
-  const totalMasuk=txs.filter(t=>t.type==='masuk').reduce((s,t)=>s+(t.jumlah||0),0);
+  const masuks=txs.filter(t=>t.type==='masuk');
+  const totalMasuk=masuks.reduce((s,t)=>s+(t.jumlah||0),0);
   const totalKeluar=txs.filter(t=>t.type==='keluar').reduce((s,t)=>s+(t.jumlah||0),0);
-  const saldoKas=txs.reduce((s,t)=>s+Math.round((t.jumlah||0)*(Number(t.iuranPersen)||0)/100),0);
+  const saldoKas=masuks.reduce((s,t)=>s+Math.round((t.jumlah||0)*(Number(t.iuranPersen)||0)/100),0);
+  const totalKomisi=totalMasuk-saldoKas;
   const totalBelumLunas=txs.reduce((s,t)=>s+Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0)),0);
   const fmt=n=>'Rp '+n.toLocaleString('id-ID');
 
@@ -6735,12 +6737,17 @@ function renderKas(){
     <div style="background:var(--card);border:2px solid #b4530966;border-radius:12px;padding:14px 16px">
       <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Saldo Kas</div>
       <div style="font-size:1.1rem;font-weight:700;color:#b45309">${fmt(saldoKas)}</div>
-      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">dari ${txs.length} transaksi</div>
+      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">iuran dari ${masuks.length} masuk</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
       <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Masuk</div>
       <div style="font-size:.95rem;font-weight:700;color:var(--green,#34d399)">${fmt(totalMasuk)}</div>
-      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">${txs.filter(t=>t.type==='masuk').length} transaksi</div>
+      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">kas + komisi</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
+      <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Komisi</div>
+      <div style="font-size:.95rem;font-weight:700;color:var(--green,#34d399)">${fmt(totalKomisi)}</div>
+      <div style="font-size:.65rem;color:var(--dim);margin-top:3px">masuk − iuran kas</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px">
       <div style="font-size:.62rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Keluar</div>
@@ -6795,7 +6802,7 @@ function renderKas(){
           </div>
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
             <span style="font-size:.85rem;font-weight:700;color:${isMasuk?'var(--green,#34d399)':'var(--red,#f87171)'}">${isMasuk?'+':'−'} ${fmt(t.jumlah||0)}</span>
-            ${iuranKas?`<span style="font-size:.7rem;color:#b45309;font-weight:600">→ kas ${persen}% = ${fmt(iuranKas)}</span>`:''}
+            ${isMasuk&&iuranKas?`<span style="font-size:.7rem;color:#b45309;font-weight:600">→ kas ${persen}% = ${fmt(iuranKas)}</span>`:''}
             ${dateStr?`<span style="font-size:.68rem;color:var(--dim)">${dateStr}</span>`:''}
           </div>
           ${sisa>0?`<div style="font-size:.72rem;color:var(--red,#f87171);margin-top:4px;font-weight:600">Belum dibayar ${fmt(sisa)} dari ${fmt(t.jumlah||0)}${terbayar?` · sudah ${fmt(terbayar)}`:''}</div>`:(terbayar>0?`<div style="font-size:.72rem;color:var(--green,#34d399);margin-top:4px;font-weight:600">✅ Lunas ${fmt(terbayar)}</div>`:'')}
