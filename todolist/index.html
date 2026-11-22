@@ -6762,10 +6762,10 @@ function renderKas(){
     </div>`;
   summary.innerHTML=
     card('Saldo Kas',fmt(saldoKas),'var(--text)',`iuran ${masuks.length} transaksi masuk`,'#b4530966')+
-    card('Total Masuk',fmt(totalMasuk),'var(--green,#34d399)','sudah diterima')+
-    card('Total Komisi',fmt(totalKomisi),'#ca8a04','diterima − iuran kas')+
-    card('Total Keluar',fmt(totalKeluar),'var(--red,#f87171)',txs.filter(t=>t.type==='keluar').length+' transaksi')+
-    card('Tagihan Belum Lunas',fmt(totalBelumLunas),'var(--red,#f87171)',nBelumLunas+' transaksi','#f8717166');
+    card('Total Masuk',fmt(totalMasuk),'var(--text)','sudah diterima')+
+    card('Total Komisi',fmt(totalKomisi),'var(--text)','diterima − iuran kas')+
+    card('Total Keluar',fmt(totalKeluar),'var(--text)',txs.filter(t=>t.type==='keluar').length+' transaksi')+
+    card('Tagihan Belum Lunas',fmt(totalBelumLunas),'var(--text)',nBelumLunas+' transaksi','#f8717166');
   wrap.appendChild(summary);
 
   // ── Comparison chart: masuk vs keluar ──
