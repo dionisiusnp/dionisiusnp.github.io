@@ -1072,6 +1072,8 @@ let showMemberProjects = localStorage.getItem('show_mem_proj')==='1';
 let persSearch = '';
 let ruanganSearch = '';
 let kasFilterState = 'semua';
+let kasSearch = '';
+let kasPage = 0;
 let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
@@ -6717,6 +6719,15 @@ function renderKas(){
   }
   area.appendChild(toolbar);
 
+  const searchBar=document.createElement('div');
+  searchBar.style.cssText='padding:8px 18px;border-bottom:1px solid var(--bd);background:var(--surface)';
+  searchBar.innerHTML=`<input id="kasSearchInp" class="form-input" placeholder="🔍 Cari transaksi…" style="margin:0;font-size:.82rem;padding:6px 10px" value="${esc(kasSearch)}">`;
+  area.appendChild(searchBar);
+  setTimeout(()=>{
+    const inp=document.getElementById('kasSearchInp');
+    if(inp) inp.addEventListener('input',()=>{ kasSearch=inp.value.toLowerCase(); kasPage=0; renderKas(); });
+  },0);
+
   const wrap=document.createElement('div');
   wrap.className='asset-view';
   area.appendChild(wrap);
@@ -6732,39 +6743,21 @@ function renderKas(){
   const fmt=n=>'Rp '+n.toLocaleString('id-ID');
 
   // ── Summary cards ──
+  const nBelumLunas=txs.filter(t=>Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0))>0).length;
   const summary=document.createElement('div');
-  summary.style.cssText='display:flex;flex-direction:column;gap:10px;margin-bottom:20px';
-  summary.innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="background:var(--card);border:2px solid #b4530966;border-radius:12px;padding:16px 18px">
-        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Saldo Kas</div>
-        <div style="font-size:1.25rem;font-weight:700;color:#b45309;line-height:1.1">${fmt(saldoKas)}</div>
-        <div style="font-size:.65rem;color:var(--dim);margin-top:5px">iuran dari ${masuks.length} transaksi masuk</div>
-      </div>
-      <div style="background:var(--card);border:2px solid #f8717144;border-radius:12px;padding:16px 18px">
-        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Tagihan Belum Lunas</div>
-        <div style="font-size:1.25rem;font-weight:700;color:var(--red,#f87171);line-height:1.1">${fmt(totalBelumLunas)}</div>
-        <div style="font-size:.65rem;color:var(--dim);margin-top:5px">${txs.filter(t=>Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0))>0).length} transaksi belum lunas</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px">
-        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Total Masuk</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--green,#34d399)">${fmt(totalMasuk)}</div>
-        <div style="font-size:.62rem;color:var(--dim);margin-top:3px">kas + komisi</div>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px">
-        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Total Komisi</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--green,#34d399)">${fmt(totalKomisi)}</div>
-        <div style="font-size:.62rem;color:var(--dim);margin-top:3px">masuk − iuran kas</div>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px">
-        <div style="font-size:.6rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Total Keluar</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--red,#f87171)">${fmt(totalKeluar)}</div>
-        <div style="font-size:.62rem;color:var(--dim);margin-top:3px">${txs.filter(t=>t.type==='keluar').length} transaksi</div>
-      </div>
-    </div>
-  `;
+  summary.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:16px';
+  const card=(label,val,color,sub,border='var(--bd)')=>`
+    <div style="background:var(--card);border:1.5px solid ${border};border-radius:10px;padding:12px 14px">
+      <div style="font-size:.58rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">${label}</div>
+      <div style="font-size:.95rem;font-weight:700;color:${color};line-height:1.2">${val}</div>
+      <div style="font-size:.62rem;color:var(--dim);margin-top:3px">${sub}</div>
+    </div>`;
+  summary.innerHTML=
+    card('Saldo Kas',fmt(saldoKas),'#b45309',`iuran ${masuks.length} transaksi masuk`,'#b4530966')+
+    card('Total Masuk',fmt(totalMasuk),'var(--green,#34d399)','kas + komisi')+
+    card('Total Komisi',fmt(totalKomisi),'var(--green,#34d399)','masuk − iuran kas')+
+    card('Total Keluar',fmt(totalKeluar),'var(--red,#f87171)',txs.filter(t=>t.type==='keluar').length+' transaksi')+
+    card('Tagihan Belum Lunas',fmt(totalBelumLunas),'var(--red,#f87171)',nBelumLunas+' transaksi','#f8717166');
   wrap.appendChild(summary);
 
   // ── Comparison chart: masuk vs keluar ──
@@ -6801,22 +6794,28 @@ function renderKas(){
     const tb=document.createElement('button');
     tb.style.cssText=`padding:5px 14px;border-radius:20px;font-size:.72rem;font-weight:600;border:1px solid var(--bd);cursor:pointer;transition:all .15s;background:${kasFilterState===f?'var(--accent)':'var(--card)'};color:${kasFilterState===f?'#fff':'var(--text)'}`;
     tb.textContent=f==='semua'?'Semua':f==='masuk'?'💚 Masuk':'🔴 Keluar';
-    tb.addEventListener('click',()=>{ kasFilterState=f; renderKas(); });
+    tb.addEventListener('click',()=>{ kasFilterState=f; kasPage=0; renderKas(); });
     tabs.appendChild(tb);
   });
   wrap.appendChild(tabs);
 
-  const filtered=kasFilterState==='semua'?txs:txs.filter(t=>t.type===kasFilterState);
+  let filtered=kasFilterState==='semua'?txs:txs.filter(t=>t.type===kasFilterState);
+  if(kasSearch) filtered=filtered.filter(t=>(t.judul||'').toLowerCase().includes(kasSearch)||(t.catatan||'').toLowerCase().includes(kasSearch));
 
   if(!filtered.length){
     const empty=document.createElement('div');
     empty.style.cssText='padding:40px;text-align:center;color:var(--dim);font-size:.82rem';
-    empty.textContent=kasFilterState!=='semua'?'Tidak ada transaksi '+kasFilterState+'.':'Belum ada transaksi. Tambah transaksi pertama!';
+    empty.textContent=kasSearch?'Tidak ada transaksi yang cocok.':kasFilterState!=='semua'?'Tidak ada transaksi '+kasFilterState+'.':'Belum ada transaksi. Tambah transaksi pertama!';
     wrap.appendChild(empty);
     return;
   }
 
-  filtered.forEach(t=>{
+  const KAS_PAGE_SIZE=10;
+  const totalPages=Math.ceil(filtered.length/KAS_PAGE_SIZE);
+  if(kasPage>=totalPages) kasPage=totalPages-1;
+  const paged=filtered.slice(kasPage*KAS_PAGE_SIZE,(kasPage+1)*KAS_PAGE_SIZE);
+
+  paged.forEach(t=>{
     const persen=Number(t.iuranPersen)||0;
     const iuranKas=Math.round((t.jumlah||0)*persen/100);
     const isMasuk=t.type==='masuk';
@@ -6849,6 +6848,26 @@ function renderKas(){
     `;
     wrap.appendChild(card);
   });
+
+  if(totalPages>1){
+    const pg=document.createElement('div');
+    pg.style.cssText='display:flex;align-items:center;justify-content:center;gap:8px;padding:16px 0 4px';
+    const pgBtn=(label,page,disabled)=>{
+      const b=document.createElement('button');
+      b.textContent=label;
+      b.disabled=disabled;
+      b.style.cssText=`padding:5px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:${disabled?'var(--dim)':'var(--text)'};cursor:${disabled?'default':'pointer'};font-size:.78rem`;
+      if(!disabled) b.addEventListener('click',()=>{ kasPage=page; renderKas(); });
+      return b;
+    };
+    pg.appendChild(pgBtn('←',kasPage-1,kasPage===0));
+    const info=document.createElement('span');
+    info.style.cssText='font-size:.75rem;color:var(--dim)';
+    info.textContent=`${kasPage+1} / ${totalPages}  (${filtered.length} transaksi)`;
+    pg.appendChild(info);
+    pg.appendChild(pgBtn('→',kasPage+1,kasPage>=totalPages-1));
+    wrap.appendChild(pg);
+  }
 
   if(isAdmin){
     wrap.querySelectorAll('[data-kas-edit]').forEach(btn=>{
