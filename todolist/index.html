@@ -6743,7 +6743,7 @@ function renderKas(){
   const txs=(db.kas||[]).filter(t=>!t.deleted).sort((a,b)=>(b.tanggal||'').localeCompare(a.tanggal||'')||(b.createdAt||0)-(a.createdAt||0));
 
   const masuks=txs.filter(t=>t.type==='masuk');
-  const totalMasuk=masuks.reduce((s,t)=>s+(t.jumlah||0),0);
+  const totalMasuk=masuks.reduce((s,t)=>s+(Number(t.terbayar)||0),0);
   const totalKeluar=txs.filter(t=>t.type==='keluar').reduce((s,t)=>s+(t.jumlah||0),0);
   const saldoKas=masuks.reduce((s,t)=>s+Math.round((Number(t.terbayar)||0)*(Number(t.iuranPersen)||0)/100),0);
   const totalKomisi=totalMasuk-saldoKas;
@@ -6762,8 +6762,8 @@ function renderKas(){
     </div>`;
   summary.innerHTML=
     card('Saldo Kas',fmt(saldoKas),'var(--text)',`iuran ${masuks.length} transaksi masuk`,'#b4530966')+
-    card('Total Masuk',fmt(totalMasuk),'var(--green,#34d399)','kas + komisi')+
-    card('Total Komisi',fmt(totalKomisi),'#ca8a04','masuk − iuran kas')+
+    card('Total Masuk',fmt(totalMasuk),'var(--green,#34d399)','sudah diterima')+
+    card('Total Komisi',fmt(totalKomisi),'#ca8a04','diterima − iuran kas')+
     card('Total Keluar',fmt(totalKeluar),'var(--red,#f87171)',txs.filter(t=>t.type==='keluar').length+' transaksi')+
     card('Tagihan Belum Lunas',fmt(totalBelumLunas),'var(--red,#f87171)',nBelumLunas+' transaksi','#f8717166');
   wrap.appendChild(summary);
@@ -6781,9 +6781,9 @@ function renderKas(){
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
         <span style="font-size:.72rem;color:var(--dim);width:52px;text-align:right;flex-shrink:0">Saldo Kas</span>
         <div style="flex:1;background:var(--surface);border-radius:6px;height:18px;overflow:hidden">
-          <div style="height:100%;width:${pctM}%;background:linear-gradient(90deg,#b4530988,#b45309cc);border-radius:6px;transition:width .4s;min-width:${pctM>0?2:0}px"></div>
+          <div style="height:100%;width:${pctM}%;background:linear-gradient(90deg,#34d39988,#34d399cc);border-radius:6px;transition:width .4s;min-width:${pctM>0?2:0}px"></div>
         </div>
-        <span style="font-size:.72rem;font-weight:700;color:#b45309;width:90px;flex-shrink:0">${fmtShort(saldoKas)}</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--green,#34d399);width:90px;flex-shrink:0">${fmtShort(saldoKas)}</span>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <span style="font-size:.72rem;color:var(--dim);width:52px;text-align:right;flex-shrink:0">Keluar</span>
