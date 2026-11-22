@@ -491,8 +491,8 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
 .culture-timeline-item.tl-left .culture-tl-acts{justify-content:flex-end}
 .culture-timeline-item.tl-right .culture-tl-acts{justify-content:flex-start}
 .culture-tl-card:hover .culture-tl-acts{display:flex}
-.fab-culture{position:fixed;bottom:24px;right:24px;z-index:200;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:1.4rem;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(108,111,245,.45);transition:transform .15s,box-shadow .15s}
-.fab-culture:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(108,111,245,.6)}
+.fab-culture{position:fixed;bottom:24px;right:24px;z-index:200;height:44px;padding:0 20px;border-radius:22px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:700;letter-spacing:.02em;display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(108,111,245,.4);transition:box-shadow .15s,background .15s;white-space:nowrap}
+.fab-culture:hover{box-shadow:0 6px 24px rgba(108,111,245,.65);background:color-mix(in srgb,var(--accent) 90%,#fff)}
 /* ── Notulensi ── */
 .notul-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .notul-toolbar-title{font-size:.82rem;font-weight:800;flex:1;color:var(--text)}
@@ -828,6 +828,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <button class="sb-nav-item" id="sbn-org"><span class="sb-ico">🏢</span>Bagan</button>
       <button class="sb-nav-item" id="sbn-kom"><span class="sb-ico">📋</span>Regulasi</button>
       <button class="sb-nav-item" id="sbn-cul"><span class="sb-ico">🌱</span>Sejarah</button>
+      <button class="sb-nav-item" id="sbn-kas"><span class="sb-ico">💰</span>Kas</button>
       <div class="sb-nav-label">Utilitas</div>
       <button class="sb-nav-item" id="sbn-ast"><span class="sb-ico">📦</span>Inventaris</button>
       <button class="sb-nav-item admin-only" id="sbn-set"><span class="sb-ico">⚙️</span>Pengaturan</button>
@@ -957,7 +958,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
     </div>
   </div>
 </div>
-<button class="fab-culture" id="fabCulture" title="Tambah Sejarah">＋</button>
+<button class="fab-culture" id="fabCulture" title="Tambah Sejarah"><span style="font-size:1rem;line-height:1">＋</span> Tambah Sejarah</button>
 
 <script>
 /* ══════════════════════════════════════════
@@ -1538,7 +1539,7 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
     'sbn-bc':'btnBroadcastView','sbn-lom':'btnLombaView','sbn-per':'btnPersView',
     'sbn-rua':'btnRuanganView','sbn-not':'btnNotulensiView','sbn-ast':'btnAssetView',
     'sbn-inf':'btnInfoView','sbn-set':'btnSettingsView',
-    'sbn-spin':'btnSpinnerView','sbn-bra':'btnBracketView'
+    'sbn-spin':'btnSpinnerView','sbn-bra':'btnBracketView','sbn-kas':'btnKasView'
   };
   Object.entries(map).forEach(([sbnId,btnId])=>{
     const sbn=document.getElementById(sbnId);
@@ -6782,14 +6783,14 @@ function renderKas(){
         <div style="flex:1;background:var(--surface);border-radius:6px;height:18px;overflow:hidden">
           <div style="height:100%;width:${pctM}%;background:linear-gradient(90deg,#b4530988,#b45309cc);border-radius:6px;transition:width .4s;min-width:${pctM>0?2:0}px"></div>
         </div>
-        <span style="font-size:.72rem;font-weight:700;color:#b45309;width:80px;flex-shrink:0">${fmtShort(saldoKas)} <span style="font-weight:400;color:var(--dim)">(${pctM}%)</span></span>
+        <span style="font-size:.72rem;font-weight:700;color:#b45309;width:90px;flex-shrink:0">${fmtShort(saldoKas)}</span>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <span style="font-size:.72rem;color:var(--dim);width:52px;text-align:right;flex-shrink:0">Keluar</span>
         <div style="flex:1;background:var(--surface);border-radius:6px;height:18px;overflow:hidden">
           <div style="height:100%;width:${pctK}%;background:linear-gradient(90deg,#f8717188,#f87171cc);border-radius:6px;transition:width .4s;min-width:${pctK>0?2:0}px"></div>
         </div>
-        <span style="font-size:.72rem;font-weight:700;color:var(--red,#f87171);width:80px;flex-shrink:0">${fmtShort(totalKeluar)} <span style="font-weight:400;color:var(--dim)">(${pctK}%)</span></span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--red,#f87171);width:90px;flex-shrink:0">${fmtShort(totalKeluar)}</span>
       </div>
     `;
     wrap.appendChild(chartBox);
