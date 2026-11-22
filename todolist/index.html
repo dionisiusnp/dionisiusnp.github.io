@@ -6751,7 +6751,9 @@ function renderKas(){
   const fmt=n=>'Rp '+n.toLocaleString('id-ID');
 
   // ── Summary cards ──
-  const nBelumLunas=txs.filter(t=>Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0))>0).length;
+  const nBelumBayar=masuks.filter(t=>Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0))>0).length;
+  const nBelumGanti=txs.filter(t=>t.type==='keluar'&&Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0))>0).length;
+  const nBelumLunas=nBelumBayar+nBelumGanti;
   const summary=document.createElement('div');
   summary.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:16px';
   const card=(label,val,color,sub,border='var(--bd)')=>`
@@ -6765,7 +6767,7 @@ function renderKas(){
     card('Total Masuk',fmt(totalMasuk),'var(--text)','sudah diterima')+
     card('Total Komisi',fmt(totalKomisi),'var(--text)','diterima − iuran kas')+
     card('Total Keluar',fmt(totalKeluar),'var(--text)',txs.filter(t=>t.type==='keluar').length+' transaksi')+
-    card('Tagihan Belum Lunas',fmt(totalBelumLunas),'var(--text)',nBelumLunas+' transaksi','#f8717166');
+    card('Tagihan Belum Lunas',fmt(totalBelumLunas),'var(--text)',`${nBelumBayar} belum dibayar · ${nBelumGanti} belum diganti`,'#f8717166');
   wrap.appendChild(summary);
 
   // ── Comparison chart: masuk vs keluar ──
@@ -6845,7 +6847,7 @@ function renderKas(){
             ${isMasuk&&iuranKas?`<span style="font-size:.7rem;color:#b45309;font-weight:600">→ kas ${persen}% = ${fmt(iuranKas)}</span>`:''}
             ${dateStr?`<span style="font-size:.68rem;color:var(--dim)">${dateStr}</span>`:''}
           </div>
-          ${sisa>0?`<div style="font-size:.72rem;color:var(--red,#f87171);margin-top:4px;font-weight:600">Belum dibayar ${fmt(sisa)} dari ${fmt(t.jumlah||0)}${terbayar?` · sudah ${fmt(terbayar)}`:''}</div>`:(terbayar>0?`<div style="font-size:.72rem;color:var(--green,#34d399);margin-top:4px;font-weight:600">✅ Lunas ${fmt(terbayar)}</div>`:'')}
+          ${sisa>0?`<div style="font-size:.72rem;color:var(--red,#f87171);margin-top:4px;font-weight:600">${isMasuk?'Belum dibayar':'Belum diganti'} ${fmt(sisa)} dari ${fmt(t.jumlah||0)}${terbayar?` · sudah ${fmt(terbayar)}`:''}</div>`:(terbayar>0?`<div style="font-size:.72rem;color:var(--green,#34d399);margin-top:4px;font-weight:600">✅ Lunas ${fmt(terbayar)}</div>`:'')}
           ${t.catatan?`<div style="font-size:.72rem;color:var(--dim);margin-top:4px;white-space:pre-wrap;line-height:1.5">${esc(t.catatan)}</div>`:''}
           ${t.bukti?`<div style="margin-top:4px"><a href="${esc(t.bukti)}" target="_blank" rel="noopener" style="font-size:.68rem;color:var(--accent);text-decoration:none">📎 Lihat Bukti →</a></div>`:''}
         </div>
