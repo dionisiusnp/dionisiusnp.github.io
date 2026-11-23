@@ -6771,12 +6771,12 @@ function renderKas(){
       <div style="font-size:.62rem;color:var(--dim);margin-top:3px">${sub}</div>
     </div>`;
   summary.innerHTML=
-    card('Saldo Kas',fmt(saldoKas),'var(--text)',`iuran ${masuks.length} transaksi masuk`,'#b4530966')+
+    card('Saldo Kas',fmt(saldoKas),'var(--text)',`iuran ${masuks.length} transaksi masuk`)+
     card('Total Masuk',fmt(totalMasuk),'var(--text)','sudah diterima')+
     card('Total Komisi',fmt(totalKomisi),'var(--text)','diterima − iuran kas')+
     card('Total Keluar',fmt(totalKeluar),'var(--text)',keluars.length+' transaksi')+
-    card('Belum Dibayar',fmt(totalBelumBayar),'var(--text)',nBelumBayar+' pemasukan','#f8717166')+
-    card('Belum Diganti',fmt(totalBelumGanti),'var(--text)',nBelumGanti+' pengeluaran','#f8717166');
+    card('Belum Dibayar',fmt(totalBelumBayar),'var(--text)',nBelumBayar+' pemasukan')+
+    card('Belum Diganti',fmt(totalBelumGanti),'var(--text)',nBelumGanti+' pengeluaran');
   wrap.appendChild(summary);
 
   // ── Comparison chart: masuk vs keluar ──
