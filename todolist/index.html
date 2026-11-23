@@ -6750,14 +6750,16 @@ function renderKas(){
   const txs=(db.kas||[]).filter(t=>!t.deleted).sort((a,b)=>(b.tanggal||'').localeCompare(a.tanggal||'')||(b.createdAt||0)-(a.createdAt||0));
 
   const masuks=txs.filter(t=>t.type==='masuk');
+  const keluars=txs.filter(t=>t.type==='keluar');
   const totalMasuk=masuks.reduce((s,t)=>s+(Number(t.terbayar)||0),0);
-  const totalKeluar=txs.filter(t=>t.type==='keluar').reduce((s,t)=>s+(t.jumlah||0),0);
-  const saldoKas=masuks.reduce((s,t)=>s+Math.round((Number(t.terbayar)||0)*(Number(t.iuranPersen)||0)/100),0);
-  const totalKomisi=totalMasuk-saldoKas;
+  const totalKeluar=keluars.reduce((s,t)=>s+(t.jumlah||0),0);
+  const totalIuranMasuk=masuks.reduce((s,t)=>s+Math.round((Number(t.terbayar)||0)*(Number(t.iuranPersen)||0)/100),0);
+  const totalDiganti=keluars.reduce((s,t)=>s+(Number(t.terbayar)||0),0);
+  const saldoKas=totalIuranMasuk-totalDiganti;
+  const totalKomisi=totalMasuk-totalIuranMasuk;
   const fmt=n=>'Rp '+n.toLocaleString('id-ID');
 
   // ── Summary cards ──
-  const keluars=txs.filter(t=>t.type==='keluar');
   const totalBelumBayar=masuks.reduce((s,t)=>s+Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0)),0);
   const totalBelumGanti=keluars.reduce((s,t)=>s+Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0)),0);
   const nBelumBayar=masuks.filter(t=>Math.max(0,(t.jumlah||0)-(Number(t.terbayar)||0))>0).length;
@@ -6771,7 +6773,7 @@ function renderKas(){
       <div style="font-size:.62rem;color:var(--dim);margin-top:3px">${sub}</div>
     </div>`;
   summary.innerHTML=
-    card('Saldo Kas',fmt(saldoKas),'var(--text)',`iuran ${masuks.length} transaksi masuk`)+
+    card('Saldo Kas',fmt(saldoKas),'var(--text)','iuran masuk − pengeluaran diganti')+
     card('Total Masuk',fmt(totalMasuk),'var(--text)','sudah diterima')+
     card('Total Komisi',fmt(totalKomisi),'var(--text)','diterima − iuran kas')+
     card('Total Keluar',fmt(totalKeluar),'var(--text)',keluars.length+' transaksi')+
