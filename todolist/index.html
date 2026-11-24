@@ -7171,6 +7171,8 @@ function renderPapanTulis(){
   let tempHand=false;
   let activePointers=new Map();
   let lastPinchDist=0;
+  let resizing=false, resizeHandle=null, resizeOrigStroke=null;
+  let resizeAnchor={wx:0,wy:0}, resizeOrigHandle={wx:0,wy:0};
 
   function getPosScreen(e){
     const r=canvas.getBoundingClientRect();
@@ -7188,6 +7190,46 @@ function renderPapanTulis(){
     else if(activeTool==='eraser') canvas.style.cursor='cell';
     else if(activeTool==='text') canvas.style.cursor='text';
     else canvas.style.cursor='crosshair';
+  }
+
+  function getHandles(s){
+    if(!s||s.deleted) return [];
+    if(s.tool==='line'||s.tool==='arrow') return [{id:'p1',wx:s.x1,wy:s.y1},{id:'p2',wx:s.x2,wy:s.y2}];
+    if(s.tool==='text') return [];
+    if(s.tool==='pen'||s.tool==='eraser'){
+      const xs=s.pts.map(p=>p[0]),ys=s.pts.map(p=>p[1]);
+      const mx=Math.min(...xs),my=Math.min(...ys),Mx=Math.max(...xs),My=Math.max(...ys);
+      return [{id:'tl',wx:mx,wy:my},{id:'tr',wx:Mx,wy:my},{id:'bl',wx:mx,wy:My},{id:'br',wx:Mx,wy:My}];
+    }
+    const lx=Math.min(s.x1,s.x2),rx=Math.max(s.x1,s.x2),ty=Math.min(s.y1,s.y2),by=Math.max(s.y1,s.y2);
+    return [{id:'tl',wx:lx,wy:ty},{id:'tr',wx:rx,wy:ty},{id:'bl',wx:lx,wy:by},{id:'br',wx:rx,wy:by}];
+  }
+
+  function hitHandle(scx, scy, s){
+    const r=8;
+    for(const h of getHandles(s)){
+      if(Math.abs(scx-(h.wx*vp.scale+vp.ox))<=r && Math.abs(scy-(h.wy*vp.scale+vp.oy))<=r) return h.id;
+    }
+    return null;
+  }
+
+  function applyResize(s, wx, wy){
+    const dxOrig=resizeOrigHandle.wx-resizeAnchor.wx||1;
+    const dyOrig=resizeOrigHandle.wy-resizeAnchor.wy||1;
+    const scaleX=(wx-resizeAnchor.wx)/dxOrig;
+    const scaleY=(wy-resizeAnchor.wy)/dyOrig;
+    const ax=resizeAnchor.wx, ay=resizeAnchor.wy;
+    if(s.tool==='line'||s.tool==='arrow'){
+      if(resizeHandle==='p1'){ s.x1=wx; s.y1=wy; }
+      else { s.x2=wx; s.y2=wy; }
+    } else if(s.tool==='pen'||s.tool==='eraser'){
+      s.pts=resizeOrigStroke.pts.map(p=>[ax+(p[0]-ax)*scaleX, ay+(p[1]-ay)*scaleY]);
+    } else {
+      if(resizeHandle==='tl'){ s.x1=wx; s.y1=wy; }
+      else if(resizeHandle==='tr'){ s.x2=wx; s.y1=wy; }
+      else if(resizeHandle==='bl'){ s.x1=wx; s.y2=wy; }
+      else if(resizeHandle==='br'){ s.x2=wx; s.y2=wy; }
+    }
   }
 
   function updateZoomLabel(){
@@ -7243,9 +7285,9 @@ function renderPapanTulis(){
     if(selectedId){
       const s=(board.strokes||[]).find(x=>x.id===selectedId&&!x.deleted);
       if(s){
-        ctx.save(); ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
-        const pad=6;
         const toSx=wx=>wx*vp.scale+vp.ox, toSy=wy=>wy*vp.scale+vp.oy;
+        const pad=6;
+        ctx.save(); ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
         if(s.tool==='pen'||s.tool==='eraser'){
           const xs=s.pts.map(p=>p[0]),ys=s.pts.map(p=>p[1]);
           ctx.strokeRect(toSx(Math.min(...xs))-pad,toSy(Math.min(...ys))-pad,(Math.max(...xs)-Math.min(...xs))*vp.scale+pad*2,(Math.max(...ys)-Math.min(...ys))*vp.scale+pad*2);
@@ -7255,6 +7297,17 @@ function renderPapanTulis(){
           ctx.strokeRect(toSx(Math.min(s.x1,s.x2))-pad,toSy(Math.min(s.y1,s.y2))-pad,Math.abs(s.x2-s.x1)*vp.scale+pad*2,Math.abs(s.y2-s.y1)*vp.scale+pad*2);
         }
         ctx.restore();
+        // resize handles
+        const handles=getHandles(s);
+        if(handles.length){
+          ctx.save(); ctx.setLineDash([]);
+          handles.forEach(h=>{
+            const hsx=h.wx*vp.scale+vp.ox, hsy=h.wy*vp.scale+vp.oy;
+            ctx.fillStyle='#fff'; ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=1.5;
+            ctx.beginPath(); ctx.rect(hsx-5,hsy-5,10,10); ctx.fill(); ctx.stroke();
+          });
+          ctx.restore();
+        }
       }
     }
   }
@@ -7283,6 +7336,25 @@ function renderPapanTulis(){
     }
     const {x,y}=getPos(e);
     if(activeTool==='select'){
+      // check resize handles first
+      if(selectedId){
+        const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
+        if(selS){
+          const hid=hitHandle(sc.x,sc.y,selS);
+          if(hid){
+            resizing=true; resizeHandle=hid;
+            resizeOrigStroke=JSON.parse(JSON.stringify(selS));
+            const handles=getHandles(selS);
+            const opp={tl:'br',tr:'bl',bl:'tr',br:'tl',p1:'p2',p2:'p1'};
+            const anchor=handles.find(h=>h.id===opp[hid]);
+            resizeAnchor=anchor?{wx:anchor.wx,wy:anchor.wy}:{wx:selS.x1,wy:selS.y1};
+            const dragged=handles.find(h=>h.id===hid);
+            resizeOrigHandle=dragged?{wx:dragged.wx,wy:dragged.wy}:{wx:selS.x2,wy:selS.y2};
+            canvas.style.cursor='crosshair';
+            return;
+          }
+        }
+      }
       const strokes=[...(board.strokes||[])].reverse();
       const hit=strokes.find(s=>!s.deleted&&ptlHitTest(s,x,y));
       selectedId=hit?hit.id:null;
@@ -7333,6 +7405,12 @@ function renderPapanTulis(){
       vp.oy=panOrigin.oy+(sc.y-panStartY);
       redraw(); return;
     }
+    if(resizing){
+      const {x:wx,y:wy}=getPos(e);
+      const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
+      if(selS){ applyResize(selS,wx,wy); redraw(); }
+      return;
+    }
     if(!drawing) return;
     const {x,y}=getPos(e);
     if(activeTool==='select'&&dragStroke){
@@ -7375,6 +7453,12 @@ function renderPapanTulis(){
     activePointers.delete(e.pointerId);
     if(activePointers.size<2) lastPinchDist=0;
     if(panning){ panning=false; setCursor(); return; }
+    if(resizing){
+      resizing=false; resizeHandle=null; resizeOrigStroke=null;
+      const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
+      if(selS){ touch(selS); touch(board); save(); }
+      setCursor(); return;
+    }
     if(!drawing) return;
     drawing=false;
     if(activeTool==='select'){
