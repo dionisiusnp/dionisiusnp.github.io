@@ -7111,19 +7111,15 @@ function renderPapanTulis(){
   toolbar.className='notul-toolbar';
   toolbar.style.padding='10px 18px';
 
-  const tools=[
-    {id:'pen',   label:'✏️ Pen'},
-    {id:'eraser',label:'⬜ Hapus'},
-  ];
   let activeTool='pen';
   let activeColor='#222222';
   let activeSize=3;
   let drawing=false;
   let currentStroke=null;
 
-  // tool definitions
   const PTL_TOOLS=[
     {id:'select',label:'↖ Pilih'},
+    {id:'hand',  label:'✋ Geser'},
     {id:'pen',   label:'✏️ Pena'},
     {id:'eraser',label:'◻ Hapus'},
     {id:'line',  label:'╱ Garis'},
@@ -7148,6 +7144,12 @@ function renderPapanTulis(){
     </select>
     <button id="ptl-undo" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--text);border:1px solid var(--bd);font-size:.78rem">↩ Undo</button>
     ${isAdmin?`<button id="ptl-reset" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--red,#f87171);border:1px solid var(--red,#f87171);font-size:.78rem">🗑 Reset</button>`:''}
+    <div style="display:flex;align-items:center;gap:1px;border:1px solid var(--bd);border-radius:6px;overflow:hidden;flex-shrink:0;margin-left:auto">
+      <button id="ptl-zoom-out" style="padding:4px 9px;border:none;cursor:pointer;background:var(--surface);color:var(--text);font-size:.9rem;font-weight:700;line-height:1">−</button>
+      <button id="ptl-zoom-reset" style="padding:4px 6px;border:none;border-left:1px solid var(--bd);border-right:1px solid var(--bd);cursor:pointer;background:var(--surface);color:var(--text);font-size:.72rem;min-width:48px;white-space:nowrap">100%</button>
+      <button id="ptl-zoom-in" style="padding:4px 9px;border:none;cursor:pointer;background:var(--surface);color:var(--text);font-size:.9rem;font-weight:700;line-height:1">+</button>
+    </div>
+    <button id="ptl-fit" title="Fit semua konten" style="padding:4px 9px;border:1px solid var(--bd);border-radius:6px;cursor:pointer;background:var(--surface);color:var(--text);font-size:.85rem;flex-shrink:0">⊡</button>
   `;
   area.appendChild(toolbar);
 
@@ -7162,43 +7164,93 @@ function renderPapanTulis(){
   // ── State ──
   let selectedId=null, clipboard=null;
   let dragOffX=0, dragOffY=0, dragStroke=null;
+  let vp={ox:0,oy:0,scale:1};
+  let panning=false, panStartX=0, panStartY=0, panOrigin={ox:0,oy:0};
+  let tempHand=false;
+  let activePointers=new Map();
+  let lastPinchDist=0;
 
-  function getPos(e){
+  function getPosScreen(e){
     const r=canvas.getBoundingClientRect();
     const sx=canvas.width/r.width, sy=canvas.height/r.height;
     return {x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy};
   }
+  function getPos(e){
+    const sc=getPosScreen(e);
+    return {x:(sc.x-vp.ox)/vp.scale, y:(sc.y-vp.oy)/vp.scale};
+  }
 
   function setCursor(){
-    if(activeTool==='select') canvas.style.cursor='default';
+    if(tempHand||activeTool==='hand') canvas.style.cursor=panning?'grabbing':'grab';
+    else if(activeTool==='select') canvas.style.cursor='default';
     else if(activeTool==='eraser') canvas.style.cursor='cell';
     else if(activeTool==='text') canvas.style.cursor='text';
     else canvas.style.cursor='crosshair';
   }
 
+  function updateZoomLabel(){
+    const btn=document.getElementById('ptl-zoom-reset');
+    if(btn) btn.textContent=Math.round(vp.scale*100)+'%';
+  }
+
+  function zoomTo(newScale, cx, cy){
+    if(cx===undefined){ cx=canvas.width/2; cy=canvas.height/2; }
+    newScale=Math.min(Math.max(newScale,0.08),16);
+    vp.ox=cx-(cx-vp.ox)*newScale/vp.scale;
+    vp.oy=cy-(cy-vp.oy)*newScale/vp.scale;
+    vp.scale=newScale;
+    updateZoomLabel(); redraw();
+  }
+
+  function fitAll(){
+    const strokes=(board.strokes||[]).filter(s=>!s.deleted);
+    if(!strokes.length){ vp={ox:0,oy:0,scale:1}; updateZoomLabel(); redraw(); return; }
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    strokes.forEach(s=>{
+      if(s.tool==='pen'||s.tool==='eraser'){
+        s.pts.forEach(p=>{ minX=Math.min(minX,p[0]);minY=Math.min(minY,p[1]);maxX=Math.max(maxX,p[0]);maxY=Math.max(maxY,p[1]); });
+      } else {
+        [s.x1||0,s.x2||0].forEach(x=>{minX=Math.min(minX,x);maxX=Math.max(maxX,x);});
+        [s.y1||0,s.y2||0].forEach(y=>{minY=Math.min(minY,y);maxY=Math.max(maxY,y);});
+      }
+    });
+    const pad=60, W=canvas.width, H=canvas.height;
+    const bw=maxX-minX||1, bh=maxY-minY||1;
+    vp.scale=Math.min((W-pad*2)/bw,(H-pad*2)/bh,4);
+    vp.ox=W/2-(minX+bw/2)*vp.scale;
+    vp.oy=H/2-(minY+bh/2)*vp.scale;
+    updateZoomLabel(); redraw();
+  }
+
   function redraw(previewStroke){
     const ctx=canvas.getContext('2d');
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    // subtle grid
+    // grid in screen space (tiles with vp offset)
+    const gs=Math.max(20,40*vp.scale);
+    const ox=((vp.ox%gs)+gs)%gs, oy=((vp.oy%gs)+gs)%gs;
     ctx.strokeStyle='rgba(0,0,0,0.05)'; ctx.lineWidth=1;
-    for(let x=40;x<canvas.width;x+=40){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke(); }
-    for(let y=40;y<canvas.height;y+=40){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke(); }
+    for(let x=ox;x<canvas.width;x+=gs){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke(); }
+    for(let y=oy;y<canvas.height;y+=gs){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke(); }
+    // content with viewport transform
+    ctx.save();
+    ctx.setTransform(vp.scale,0,0,vp.scale,vp.ox,vp.oy);
     ptlDrawStrokes(ctx, board.strokes||[], selectedId);
     if(previewStroke) ptlDrawStroke(ctx, previewStroke, null);
-    // selection handle
+    ctx.restore();
+    // selection handle in screen space
     if(selectedId){
       const s=(board.strokes||[]).find(x=>x.id===selectedId&&!x.deleted);
       if(s){
         ctx.save(); ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
         const pad=6;
+        const toSx=wx=>wx*vp.scale+vp.ox, toSy=wy=>wy*vp.scale+vp.oy;
         if(s.tool==='pen'||s.tool==='eraser'){
           const xs=s.pts.map(p=>p[0]),ys=s.pts.map(p=>p[1]);
-          const bx=Math.min(...xs)-pad,by=Math.min(...ys)-pad;
-          ctx.strokeRect(bx,by,Math.max(...xs)-Math.min(...xs)+pad*2,Math.max(...ys)-Math.min(...ys)+pad*2);
+          ctx.strokeRect(toSx(Math.min(...xs))-pad,toSy(Math.min(...ys))-pad,(Math.max(...xs)-Math.min(...xs))*vp.scale+pad*2,(Math.max(...ys)-Math.min(...ys))*vp.scale+pad*2);
         } else if(s.tool==='text'){
-          ctx.strokeRect(s.x1-pad,s.y1-(s.size||16)-pad,(s.text||'').length*(s.size||16)*0.6+pad*2,(s.size||16)+pad*2);
+          ctx.strokeRect(toSx(s.x1)-pad,toSy(s.y1-(s.size||16))-pad,(s.text||'').length*(s.size||16)*0.6*vp.scale+pad*2,(s.size||16)*vp.scale+pad*2);
         } else {
-          ctx.strokeRect(Math.min(s.x1,s.x2)-pad,Math.min(s.y1,s.y2)-pad,Math.abs(s.x2-s.x1)+pad*2,Math.abs(s.y2-s.y1)+pad*2);
+          ctx.strokeRect(toSx(Math.min(s.x1,s.x2))-pad,toSy(Math.min(s.y1,s.y2))-pad,Math.abs(s.x2-s.x1)*vp.scale+pad*2,Math.abs(s.y2-s.y1)*vp.scale+pad*2);
         }
         ctx.restore();
       }
@@ -7216,16 +7268,26 @@ function renderPapanTulis(){
   // ── Pointer events ──
   canvas.addEventListener('pointerdown',e=>{
     canvas.setPointerCapture(e.pointerId);
+    const sc=getPosScreen(e);
+    activePointers.set(e.pointerId,sc);
+    if(activePointers.size===2){
+      const pts=[...activePointers.values()];
+      lastPinchDist=Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y);
+      drawing=false; panning=false; return;
+    }
+    if(activeTool==='hand'||tempHand){
+      panning=true; panStartX=sc.x; panStartY=sc.y; panOrigin={ox:vp.ox,oy:vp.oy};
+      setCursor(); return;
+    }
     const {x,y}=getPos(e);
     if(activeTool==='select'){
-      // hit test: reverse order (top first)
       const strokes=[...(board.strokes||[])].reverse();
       const hit=strokes.find(s=>!s.deleted&&ptlHitTest(s,x,y));
       selectedId=hit?hit.id:null;
       if(hit){
         drawing=true; dragStroke=hit;
-        const cx=hit.tool==='pen'||hit.tool==='eraser'?(hit.pts[0][0]):hit.x1;
-        const cy=hit.tool==='pen'||hit.tool==='eraser'?(hit.pts[0][1]):hit.y1;
+        const cx=hit.tool==='pen'||hit.tool==='eraser'?hit.pts[0][0]:hit.x1;
+        const cy=hit.tool==='pen'||hit.tool==='eraser'?hit.pts[0][1]:hit.y1;
         dragOffX=x-cx; dragOffY=y-cy;
       }
       redraw(); return;
@@ -7249,6 +7311,26 @@ function renderPapanTulis(){
   });
 
   canvas.addEventListener('pointermove',e=>{
+    const sc=getPosScreen(e);
+    activePointers.set(e.pointerId,sc);
+    if(activePointers.size>=2){
+      const pts=[...activePointers.values()];
+      const dist=Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y);
+      if(lastPinchDist>0){
+        const factor=dist/lastPinchDist;
+        const cx=(pts[0].x+pts[1].x)/2, cy=(pts[0].y+pts[1].y)/2;
+        const ns=Math.min(Math.max(vp.scale*factor,0.08),16);
+        vp.ox=cx-(cx-vp.ox)*ns/vp.scale;
+        vp.oy=cy-(cy-vp.oy)*ns/vp.scale;
+        vp.scale=ns; updateZoomLabel(); redraw();
+      }
+      lastPinchDist=dist; return;
+    }
+    if(panning){
+      vp.ox=panOrigin.ox+(sc.x-panStartX);
+      vp.oy=panOrigin.oy+(sc.y-panStartY);
+      redraw(); return;
+    }
     if(!drawing) return;
     const {x,y}=getPos(e);
     if(activeTool==='select'&&dragStroke){
@@ -7268,12 +7350,14 @@ function renderPapanTulis(){
       currentStroke.pts.push([x,y]);
       redraw(currentStroke); return;
     }
-    // shape preview
     currentStroke.x2=x; currentStroke.y2=y;
     redraw(currentStroke);
   });
 
   const endDraw=e=>{
+    activePointers.delete(e.pointerId);
+    if(activePointers.size<2) lastPinchDist=0;
+    if(panning){ panning=false; setCursor(); return; }
     if(!drawing) return;
     drawing=false;
     if(activeTool==='select'){
@@ -7292,7 +7376,15 @@ function renderPapanTulis(){
   canvas.addEventListener('pointerup',endDraw);
   canvas.addEventListener('pointercancel',endDraw);
 
-  // ── Keyboard: delete selected, copy/paste, esc ──
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const sc=getPosScreen(e);
+    const delta=e.deltaY||e.deltaX;
+    const factor=delta>0?0.9:1/0.9;
+    zoomTo(vp.scale*factor,sc.x,sc.y);
+  },{passive:false});
+
+  // ── Keyboard: delete selected, copy/paste, undo, esc, ctrl+0 ──
   function onKey(e){
     if(document.activeElement&&document.activeElement!==document.body&&document.activeElement!==canvas) return;
     if((e.key==='Delete'||e.key==='Backspace')&&selectedId){
@@ -7313,14 +7405,26 @@ function renderPapanTulis(){
       touch(board); save(); redraw();
     }
     if((e.ctrlKey||e.metaKey)&&e.key==='z'){
+      e.preventDefault();
       const strokes=(board.strokes||[]).filter(x=>!x.deleted);
       if(!strokes.length) return;
       touch(Object.assign(strokes[strokes.length-1],{deleted:true}));
       touch(board); save(); redraw();
     }
+    if((e.ctrlKey||e.metaKey)&&e.key==='0'){ e.preventDefault(); vp={ox:0,oy:0,scale:1}; updateZoomLabel(); redraw(); }
     if(e.key==='Escape'){ selectedId=null; redraw(); }
   }
+  function onSpaceDown(e){
+    if(e.code!=='Space'||tempHand||activeTool==='hand') return;
+    if(document.activeElement&&document.activeElement!==document.body&&document.activeElement!==canvas) return;
+    e.preventDefault(); tempHand=true; setCursor();
+  }
+  function onSpaceUp(e){
+    if(e.code==='Space'&&tempHand){ tempHand=false; setCursor(); }
+  }
   document.addEventListener('keydown',onKey);
+  document.addEventListener('keydown',onSpaceDown);
+  document.addEventListener('keyup',onSpaceUp);
 
   // ── Toolbar controls ──
   function setTool(t){
@@ -7334,7 +7438,13 @@ function renderPapanTulis(){
   PTL_TOOLS.forEach(t=>toolbar.querySelector(`#ptl-tool-${t.id}`)?.addEventListener('click',()=>setTool(t.id)));
   toolbar.querySelector('#ptl-color').addEventListener('input',e=>{ activeColor=e.target.value; });
   toolbar.querySelector('#ptl-size').addEventListener('change',e=>{ activeSize=Number(e.target.value); });
-  toolbar.querySelector('#ptl-back').addEventListener('click',()=>{ ro.disconnect(); document.removeEventListener('keydown',onKey); ptlActiveBoardId=null; renderSidebar(); renderPapanTulis(); });
+  toolbar.querySelector('#ptl-back').addEventListener('click',()=>{
+    ro.disconnect();
+    document.removeEventListener('keydown',onKey);
+    document.removeEventListener('keydown',onSpaceDown);
+    document.removeEventListener('keyup',onSpaceUp);
+    ptlActiveBoardId=null; renderSidebar(); renderPapanTulis();
+  });
   toolbar.querySelector('#ptl-undo')?.addEventListener('click',()=>{
     const strokes=(board.strokes||[]).filter(s=>!s.deleted);
     if(!strokes.length) return;
@@ -7346,6 +7456,11 @@ function renderPapanTulis(){
     (board.strokes||[]).forEach(s=>Object.assign(s,{deleted:true}));
     touch(board); save(); selectedId=null; redraw();
   });
+  toolbar.querySelector('#ptl-zoom-in')?.addEventListener('click',()=>zoomTo(vp.scale*1.25));
+  toolbar.querySelector('#ptl-zoom-out')?.addEventListener('click',()=>zoomTo(vp.scale*0.8));
+  toolbar.querySelector('#ptl-zoom-reset')?.addEventListener('click',()=>{ vp={ox:0,oy:0,scale:1}; updateZoomLabel(); redraw(); });
+  toolbar.querySelector('#ptl-fit')?.addEventListener('click',fitAll);
+  updateZoomLabel();
   setCursor();
 }
 
