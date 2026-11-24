@@ -7163,6 +7163,11 @@ function renderPapanTulis(){
   canvasWrap.appendChild(canvas);
   area.appendChild(canvasWrap);
 
+  // selection property panel (absolute inside canvasWrap)
+  const selPanel=document.createElement('div');
+  selPanel.style.cssText='position:absolute;top:8px;right:8px;display:none;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;font-size:.75rem;color:var(--text);z-index:5;box-shadow:0 2px 8px rgba(0,0,0,.12)';
+  canvasWrap.appendChild(selPanel);
+
   // ── State ──
   let selectedId=null, clipboard=null;
   let dragOffX=0, dragOffY=0, dragStroke=null;
@@ -7173,6 +7178,7 @@ function renderPapanTulis(){
   let lastPinchDist=0;
   let resizing=false, resizeHandle=null, resizeOrigStroke=null;
   let resizeAnchor={wx:0,wy:0}, resizeOrigHandle={wx:0,wy:0};
+  let selPanelStrokeId=null;
 
   function getPosScreen(e){
     const r=canvas.getBoundingClientRect();
@@ -7192,44 +7198,85 @@ function renderPapanTulis(){
     else canvas.style.cursor='crosshair';
   }
 
-  function getHandles(s){
+  // Returns handles with both screen pos (sx,sy) at selection-rect corners AND world pos (wx,wy)
+  function getSelHandles(s){
     if(!s||s.deleted) return [];
-    if(s.tool==='line'||s.tool==='arrow') return [{id:'p1',wx:s.x1,wy:s.y1},{id:'p2',wx:s.x2,wy:s.y2}];
     if(s.tool==='text') return [];
+    const pad=6;
+    const toSx=wx=>wx*vp.scale+vp.ox, toSy=wy=>wy*vp.scale+vp.oy;
+    if(s.tool==='line'||s.tool==='arrow') return [
+      {id:'p1',sx:toSx(s.x1),sy:toSy(s.y1),wx:s.x1,wy:s.y1},
+      {id:'p2',sx:toSx(s.x2),sy:toSy(s.y2),wx:s.x2,wy:s.y2},
+    ];
+    let minX,minY,maxX,maxY;
     if(s.tool==='pen'||s.tool==='eraser'){
       const xs=s.pts.map(p=>p[0]),ys=s.pts.map(p=>p[1]);
-      const mx=Math.min(...xs),my=Math.min(...ys),Mx=Math.max(...xs),My=Math.max(...ys);
-      return [{id:'tl',wx:mx,wy:my},{id:'tr',wx:Mx,wy:my},{id:'bl',wx:mx,wy:My},{id:'br',wx:Mx,wy:My}];
+      minX=Math.min(...xs);minY=Math.min(...ys);maxX=Math.max(...xs);maxY=Math.max(...ys);
+    } else {
+      minX=Math.min(s.x1,s.x2);minY=Math.min(s.y1,s.y2);maxX=Math.max(s.x1,s.x2);maxY=Math.max(s.y1,s.y2);
     }
-    const lx=Math.min(s.x1,s.x2),rx=Math.max(s.x1,s.x2),ty=Math.min(s.y1,s.y2),by=Math.max(s.y1,s.y2);
-    return [{id:'tl',wx:lx,wy:ty},{id:'tr',wx:rx,wy:ty},{id:'bl',wx:lx,wy:by},{id:'br',wx:rx,wy:by}];
+    return [
+      {id:'tl',sx:toSx(minX)-pad,sy:toSy(minY)-pad,wx:minX,wy:minY},
+      {id:'tr',sx:toSx(maxX)+pad,sy:toSy(minY)-pad,wx:maxX,wy:minY},
+      {id:'bl',sx:toSx(minX)-pad,sy:toSy(maxY)+pad,wx:minX,wy:maxY},
+      {id:'br',sx:toSx(maxX)+pad,sy:toSy(maxY)+pad,wx:maxX,wy:maxY},
+    ];
   }
 
-  function hitHandle(scx, scy, s){
-    const r=8;
-    for(const h of getHandles(s)){
-      if(Math.abs(scx-(h.wx*vp.scale+vp.ox))<=r && Math.abs(scy-(h.wy*vp.scale+vp.oy))<=r) return h.id;
+  function hitHandle(scx,scy,s){
+    const r=11;
+    for(const h of getSelHandles(s)){
+      if(Math.abs(scx-h.sx)<=r && Math.abs(scy-h.sy)<=r) return h.id;
     }
     return null;
   }
 
-  function applyResize(s, wx, wy){
+  function applyResize(s,wx,wy){
     const dxOrig=resizeOrigHandle.wx-resizeAnchor.wx||1;
     const dyOrig=resizeOrigHandle.wy-resizeAnchor.wy||1;
     const scaleX=(wx-resizeAnchor.wx)/dxOrig;
     const scaleY=(wy-resizeAnchor.wy)/dyOrig;
-    const ax=resizeAnchor.wx, ay=resizeAnchor.wy;
+    const ax=resizeAnchor.wx,ay=resizeAnchor.wy;
     if(s.tool==='line'||s.tool==='arrow'){
-      if(resizeHandle==='p1'){ s.x1=wx; s.y1=wy; }
-      else { s.x2=wx; s.y2=wy; }
+      if(resizeHandle==='p1'){s.x1=wx;s.y1=wy;}else{s.x2=wx;s.y2=wy;}
     } else if(s.tool==='pen'||s.tool==='eraser'){
-      s.pts=resizeOrigStroke.pts.map(p=>[ax+(p[0]-ax)*scaleX, ay+(p[1]-ay)*scaleY]);
+      s.pts=resizeOrigStroke.pts.map(p=>[ax+(p[0]-ax)*scaleX,ay+(p[1]-ay)*scaleY]);
     } else {
-      if(resizeHandle==='tl'){ s.x1=wx; s.y1=wy; }
-      else if(resizeHandle==='tr'){ s.x2=wx; s.y1=wy; }
-      else if(resizeHandle==='bl'){ s.x1=wx; s.y2=wy; }
-      else if(resizeHandle==='br'){ s.x2=wx; s.y2=wy; }
+      if(resizeHandle==='tl'){s.x1=wx;s.y1=wy;}
+      else if(resizeHandle==='tr'){s.x2=wx;s.y1=wy;}
+      else if(resizeHandle==='bl'){s.x1=wx;s.y2=wy;}
+      else if(resizeHandle==='br'){s.x2=wx;s.y2=wy;}
     }
+  }
+
+  function updateSelPanel(){
+    if(selPanelStrokeId===selectedId) return;
+    selPanelStrokeId=selectedId;
+    if(!selectedId){selPanel.style.display='none';return;}
+    const s=(board.strokes||[]).find(x=>x.id===selectedId&&!x.deleted);
+    if(!s){selPanel.style.display='none';return;}
+    const hasSize=s.tool!=='text';
+    const hasColor=s.tool!=='text';
+    selPanel.innerHTML=`
+      ${hasSize?`<label style="display:flex;align-items:center;gap:5px;color:var(--dim)">Tebal
+        <input id="spnl-size" type="number" min="1" max="100" value="${s.size||3}"
+          style="width:48px;padding:2px 5px;border:1px solid var(--bd);border-radius:4px;font-size:.75rem;background:var(--surface);color:var(--text);text-align:center">
+      </label>`:''}
+      ${hasColor?`<label style="display:flex;align-items:center;gap:5px;color:var(--dim)">Warna
+        <input id="spnl-color" type="color" value="${s.color||'#222222'}"
+          style="width:26px;height:26px;border:none;padding:0;cursor:pointer;border-radius:3px">
+      </label>`:''}
+    `;
+    selPanel.style.display='flex';
+    selPanel.querySelector('#spnl-size')?.addEventListener('change',e=>{
+      const v=Math.max(1,Math.min(100,Number(e.target.value)));
+      s.size=v; e.target.value=v;
+      touch(s);touch(board);save();redraw();
+    });
+    selPanel.querySelector('#spnl-color')?.addEventListener('input',e=>{
+      s.color=e.target.value;
+      touch(s);touch(board);save();redraw();
+    });
   }
 
   function updateZoomLabel(){
@@ -7297,19 +7344,20 @@ function renderPapanTulis(){
           ctx.strokeRect(toSx(Math.min(s.x1,s.x2))-pad,toSy(Math.min(s.y1,s.y2))-pad,Math.abs(s.x2-s.x1)*vp.scale+pad*2,Math.abs(s.y2-s.y1)*vp.scale+pad*2);
         }
         ctx.restore();
-        // resize handles
-        const handles=getHandles(s);
+        // resize handles at selection rect corners
+        const handles=getSelHandles(s);
         if(handles.length){
           ctx.save(); ctx.setLineDash([]);
           handles.forEach(h=>{
-            const hsx=h.wx*vp.scale+vp.ox, hsy=h.wy*vp.scale+vp.oy;
-            ctx.fillStyle='#fff'; ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=1.5;
-            ctx.beginPath(); ctx.rect(hsx-5,hsy-5,10,10); ctx.fill(); ctx.stroke();
+            ctx.fillStyle='#fff'; ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=2;
+            ctx.fillRect(h.sx-6,h.sy-6,12,12);
+            ctx.strokeRect(h.sx-6,h.sy-6,12,12);
           });
           ctx.restore();
         }
       }
     }
+    updateSelPanel();
   }
 
   function resizeCanvas(){
@@ -7344,7 +7392,7 @@ function renderPapanTulis(){
           if(hid){
             resizing=true; resizeHandle=hid;
             resizeOrigStroke=JSON.parse(JSON.stringify(selS));
-            const handles=getHandles(selS);
+            const handles=getSelHandles(selS);
             const opp={tl:'br',tr:'bl',bl:'tr',br:'tl',p1:'p2',p2:'p1'};
             const anchor=handles.find(h=>h.id===opp[hid]);
             resizeAnchor=anchor?{wx:anchor.wx,wy:anchor.wy}:{wx:selS.x1,wy:selS.y1};
@@ -7513,7 +7561,7 @@ function renderPapanTulis(){
       touch(board); save(); redraw();
     }
     if((e.ctrlKey||e.metaKey)&&e.key==='0'){ e.preventDefault(); vp={ox:0,oy:0,scale:1}; updateZoomLabel(); redraw(); }
-    if(e.key==='Escape'){ selectedId=null; redraw(); }
+    if(e.key==='Escape'){ selectedId=null; selPanelStrokeId=null; redraw(); }
   }
   function onSpaceDown(e){
     if(e.code!=='Space'||tempHand||activeTool==='hand') return;
