@@ -7118,38 +7118,40 @@ function renderPapanTulis(){
   let currentStroke=null;
 
   const PTL_TOOLS=[
-    {id:'select',label:'↖ Pilih'},
-    {id:'hand',  label:'✋ Geser'},
-    {id:'pen',   label:'✏️ Pena'},
-    {id:'eraser',label:'◻ Hapus'},
-    {id:'line',  label:'╱ Garis'},
-    {id:'arrow', label:'→ Panah'},
-    {id:'rect',  label:'▭ Kotak'},
-    {id:'circle',label:'○ Oval'},
-    {id:'text',  label:'T Teks'},
+    {id:'select',label:'Pilih',  icon:'↖'},
+    {id:'hand',  label:'Geser',  icon:'✋'},
+    {id:'pen',   label:'Pena',   icon:'✏️'},
+    {id:'eraser',label:'Hapus',  icon:'◻'},
+    {id:'line',  label:'Garis',  icon:'╱'},
+    {id:'arrow', label:'Panah',  icon:'→'},
+    {id:'rect',  label:'Kotak',  icon:'▭'},
+    {id:'circle',label:'Oval',   icon:'○'},
+    {id:'text',  label:'Teks',   icon:'T'},
   ];
 
   toolbar.innerHTML=`
-    <button id="ptl-back" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--text);border:1px solid var(--bd);font-size:.78rem">← Papan</button>
-    <span class="notul-toolbar-title" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(board.nama)}</span>
-    <div style="display:flex;gap:3px;background:var(--surface);border:1px solid var(--bd);border-radius:7px;padding:2px" id="ptl-toolgroup">
-      ${PTL_TOOLS.map(t=>`<button id="ptl-tool-${t.id}" style="padding:4px 8px;border-radius:5px;border:none;cursor:pointer;font-size:.75rem;font-weight:600;background:${t.id==='pen'?'var(--accent)':'transparent'};color:${t.id==='pen'?'#fff':'var(--text)'};white-space:nowrap" title="${t.label}">${t.label}</button>`).join('')}
+    <button id="ptl-back" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--text);border:1px solid var(--bd);font-size:.78rem;flex-shrink:0">← Papan</button>
+    <span class="notul-toolbar-title" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:1">${esc(board.nama)}</span>
+    <div style="display:flex;gap:2px;background:var(--surface);border:1px solid var(--bd);border-radius:7px;padding:2px;flex-shrink:0" id="ptl-toolgroup">
+      ${PTL_TOOLS.map(t=>`<button id="ptl-tool-${t.id}" style="padding:5px 8px;border-radius:5px;border:none;cursor:pointer;font-size:.82rem;line-height:1;background:${t.id==='pen'?'var(--accent)':'transparent'};color:${t.id==='pen'?'#fff':'var(--text)'}" title="${t.label}">${t.icon}</button>`).join('')}
     </div>
-    <input type="color" id="ptl-color" value="${activeColor}" style="width:28px;height:28px;border:none;padding:0;cursor:pointer;border-radius:4px;flex-shrink:0">
-    <select id="ptl-size" style="font-size:.78rem;padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--surface);flex-shrink:0">
+    <input type="color" id="ptl-color" value="${activeColor}" title="Warna" style="width:26px;height:26px;border:none;padding:0;cursor:pointer;border-radius:4px;flex-shrink:0">
+    <select id="ptl-size" title="Ukuran garis" style="font-size:.75rem;padding:3px 4px;border:1px solid var(--bd);border-radius:6px;background:var(--surface);flex-shrink:0;max-width:72px">
       <option value="2">Tipis</option>
       <option value="4" selected>Normal</option>
       <option value="8">Tebal</option>
-      <option value="16">Sangat Tebal</option>
+      <option value="16">XL</option>
     </select>
-    <button id="ptl-undo" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--text);border:1px solid var(--bd);font-size:.78rem">↩ Undo</button>
-    ${isAdmin?`<button id="ptl-reset" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--red,#f87171);border:1px solid var(--red,#f87171);font-size:.78rem">🗑 Reset</button>`:''}
-    <div style="display:flex;align-items:center;gap:1px;border:1px solid var(--bd);border-radius:6px;overflow:hidden;flex-shrink:0;margin-left:auto">
-      <button id="ptl-zoom-out" style="padding:4px 9px;border:none;cursor:pointer;background:var(--surface);color:var(--text);font-size:.9rem;font-weight:700;line-height:1">−</button>
-      <button id="ptl-zoom-reset" style="padding:4px 6px;border:none;border-left:1px solid var(--bd);border-right:1px solid var(--bd);cursor:pointer;background:var(--surface);color:var(--text);font-size:.72rem;min-width:48px;white-space:nowrap">100%</button>
-      <button id="ptl-zoom-in" style="padding:4px 9px;border:none;cursor:pointer;background:var(--surface);color:var(--text);font-size:.9rem;font-weight:700;line-height:1">+</button>
+    <div style="display:flex;gap:2px;flex-shrink:0">
+      <button id="ptl-undo" title="Undo (Ctrl+Z)" style="padding:5px 8px;border:1px solid var(--bd);border-radius:6px;cursor:pointer;background:var(--surface);color:var(--text);font-size:.82rem;line-height:1">↩</button>
+      ${isAdmin?`<button id="ptl-reset" title="Reset papan" style="padding:5px 8px;border:1px solid var(--red,#f87171);border-radius:6px;cursor:pointer;background:var(--surface);color:var(--red,#f87171);font-size:.82rem;line-height:1">🗑</button>`:''}
     </div>
-    <button id="ptl-fit" title="Fit semua konten" style="padding:4px 9px;border:1px solid var(--bd);border-radius:6px;cursor:pointer;background:var(--surface);color:var(--text);font-size:.85rem;flex-shrink:0">⊡</button>
+    <div style="display:flex;align-items:center;gap:1px;border:1px solid var(--bd);border-radius:6px;overflow:hidden;flex-shrink:0;margin-left:auto">
+      <button id="ptl-zoom-out" title="Zoom out" style="padding:4px 8px;border:none;cursor:pointer;background:var(--surface);color:var(--text);font-size:.9rem;font-weight:700;line-height:1">−</button>
+      <button id="ptl-zoom-reset" title="Reset zoom (Ctrl+0)" style="padding:4px 4px;border:none;border-left:1px solid var(--bd);border-right:1px solid var(--bd);cursor:pointer;background:var(--surface);color:var(--text);font-size:.7rem;min-width:44px;white-space:nowrap">100%</button>
+      <button id="ptl-zoom-in" title="Zoom in" style="padding:4px 8px;border:none;cursor:pointer;background:var(--surface);color:var(--text);font-size:.9rem;font-weight:700;line-height:1">+</button>
+    </div>
+    <button id="ptl-fit" title="Fit semua konten" style="padding:4px 8px;border:1px solid var(--bd);border-radius:6px;cursor:pointer;background:var(--surface);color:var(--text);font-size:.85rem;flex-shrink:0">⊡</button>
   `;
   area.appendChild(toolbar);
 
