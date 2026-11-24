@@ -6962,9 +6962,26 @@ function renderKas(){
 /* ══════════════════════════════════════════
    PAPAN TULIS
 ══════════════════════════════════════════ */
+function ptlStrokeCenter(s){
+  if(s.tool==='pen'||s.tool==='eraser'){
+    const xs=s.pts.map(p=>p[0]),ys=s.pts.map(p=>p[1]);
+    return {wx:(Math.min(...xs)+Math.max(...xs))/2,wy:(Math.min(...ys)+Math.max(...ys))/2};
+  }
+  if(s.tool==='text'){
+    const tw=(s.text||'').length*(s.size||16)*0.6;
+    return {wx:s.x1+tw/2,wy:s.y1-(s.size||16)/2};
+  }
+  return {wx:(s.x1+s.x2)/2,wy:(s.y1+s.y2)/2};
+}
+
 function ptlDrawStroke(ctx, stroke, selectedId){
   if(!stroke||stroke.deleted) return;
   ctx.save();
+  const rot=(stroke.rotation||0)*Math.PI/180;
+  if(rot){
+    const c=ptlStrokeCenter(stroke);
+    ctx.translate(c.wx,c.wy); ctx.rotate(rot); ctx.translate(-c.wx,-c.wy);
+  }
   const col=stroke.color||'#222222';
   const sz=stroke.size||3;
   const sel=stroke.id===selectedId;
@@ -7012,6 +7029,12 @@ function ptlDrawStrokes(ctx, strokes, selectedId){
 
 function ptlHitTest(stroke, x, y){
   if(!stroke||stroke.deleted) return false;
+  const rot=(stroke.rotation||0)*Math.PI/180;
+  if(rot){
+    const c=ptlStrokeCenter(stroke);
+    const cos=Math.cos(-rot),sin=Math.sin(-rot),dx=x-c.wx,dy=y-c.wy;
+    x=c.wx+dx*cos-dy*sin; y=c.wy+dx*sin+dy*cos;
+  }
   const tol=Math.max((stroke.size||3)+4,8);
   if(stroke.tool==='pen'||stroke.tool==='eraser'){
     if(!stroke.pts) return false;
@@ -7178,6 +7201,7 @@ function renderPapanTulis(){
   let lastPinchDist=0;
   let resizing=false, resizeHandle=null, resizeOrigStroke=null;
   let resizeAnchor={wx:0,wy:0}, resizeOrigHandle={wx:0,wy:0};
+  let rotating=false, rotCenter={wx:0,wy:0}, rotStartAngle=0, rotOrigRotation=0;
   let selPanelStrokeId=null;
 
   function getPosScreen(e){
@@ -7198,35 +7222,60 @@ function renderPapanTulis(){
     else canvas.style.cursor='crosshair';
   }
 
-  // Returns handles with both screen pos (sx,sy) at selection-rect corners AND world pos (wx,wy)
+  // Returns handles with screen pos (sx,sy) and world pos (wx,wy); rotation applied to screen positions
   function getSelHandles(s){
     if(!s||s.deleted) return [];
-    if(s.tool==='text') return [];
     const pad=6;
+    const rot=(s.rotation||0)*Math.PI/180;
     const toSx=wx=>wx*vp.scale+vp.ox, toSy=wy=>wy*vp.scale+vp.oy;
+
+    // rotate screen point around screen center
+    function rotateScrPt(sx,sy,scrCx,scrCy){
+      if(!rot) return {sx,sy};
+      const dx=sx-scrCx,dy=sy-scrCy;
+      const cos=Math.cos(rot),sin=Math.sin(rot);
+      return {sx:scrCx+dx*cos-dy*sin,sy:scrCy+dx*sin+dy*cos};
+    }
+
     if(s.tool==='line'||s.tool==='arrow') return [
       {id:'p1',sx:toSx(s.x1),sy:toSy(s.y1),wx:s.x1,wy:s.y1},
       {id:'p2',sx:toSx(s.x2),sy:toSy(s.y2),wx:s.x2,wy:s.y2},
     ];
+
     let minX,minY,maxX,maxY;
     if(s.tool==='pen'||s.tool==='eraser'){
       const xs=s.pts.map(p=>p[0]),ys=s.pts.map(p=>p[1]);
       minX=Math.min(...xs);minY=Math.min(...ys);maxX=Math.max(...xs);maxY=Math.max(...ys);
+    } else if(s.tool==='text'){
+      const tw=(s.text||'').length*(s.size||16)*0.6;
+      minX=s.x1;maxX=s.x1+tw;minY=s.y1-(s.size||16);maxY=s.y1;
     } else {
       minX=Math.min(s.x1,s.x2);minY=Math.min(s.y1,s.y2);maxX=Math.max(s.x1,s.x2);maxY=Math.max(s.y1,s.y2);
     }
-    return [
+
+    const c=ptlStrokeCenter(s);
+    const scrCx=toSx(c.wx), scrCy=toSy(c.wy);
+
+    const raw=[
       {id:'tl',sx:toSx(minX)-pad,sy:toSy(minY)-pad,wx:minX,wy:minY},
       {id:'tr',sx:toSx(maxX)+pad,sy:toSy(minY)-pad,wx:maxX,wy:minY},
       {id:'bl',sx:toSx(minX)-pad,sy:toSy(maxY)+pad,wx:minX,wy:maxY},
       {id:'br',sx:toSx(maxX)+pad,sy:toSy(maxY)+pad,wx:maxX,wy:maxY},
-    ];
+    ].map(h=>{ const r2=rotateScrPt(h.sx,h.sy,scrCx,scrCy); return {...h,sx:r2.sx,sy:r2.sy}; });
+
+    // rotation handle: 36px above top-center of selection rect
+    const tcRaw=rotateScrPt((toSx(minX)-pad+toSx(maxX)+pad)/2, toSy(minY)-pad, scrCx, scrCy);
+    const rotH=rotateScrPt(tcRaw.sx, tcRaw.sy-36, tcRaw.sx, tcRaw.sy);
+    raw.push({id:'rot',sx:rotH.sx,sy:rotH.sy,stemSx:tcRaw.sx,stemSy:tcRaw.sy,wx:c.wx,wy:c.wy});
+
+    return raw;
   }
 
   function hitHandle(scx,scy,s){
     const r=11;
     for(const h of getSelHandles(s)){
-      if(Math.abs(scx-h.sx)<=r && Math.abs(scy-h.sy)<=r) return h.id;
+      if(h.id==='rot'){ if(Math.hypot(scx-h.sx,scy-h.sy)<=r) return 'rot'; }
+      else if(Math.abs(scx-h.sx)<=r && Math.abs(scy-h.sy)<=r) return h.id;
     }
     return null;
   }
@@ -7255,17 +7304,20 @@ function renderPapanTulis(){
     if(!selectedId){selPanel.style.display='none';return;}
     const s=(board.strokes||[]).find(x=>x.id===selectedId&&!x.deleted);
     if(!s){selPanel.style.display='none';return;}
-    const hasSize=s.tool!=='text';
-    const hasColor=s.tool!=='text';
+    const sizeLabel=s.tool==='text'?'Ukuran Font':'Tebal';
     selPanel.innerHTML=`
-      ${hasSize?`<label style="display:flex;align-items:center;gap:5px;color:var(--dim)">Tebal
-        <input id="spnl-size" type="number" min="1" max="100" value="${s.size||3}"
-          style="width:48px;padding:2px 5px;border:1px solid var(--bd);border-radius:4px;font-size:.75rem;background:var(--surface);color:var(--text);text-align:center">
-      </label>`:''}
-      ${hasColor?`<label style="display:flex;align-items:center;gap:5px;color:var(--dim)">Warna
+      <label style="display:flex;align-items:center;gap:5px;color:var(--dim)">${sizeLabel}
+        <input id="spnl-size" type="number" min="1" max="200" value="${s.size||(s.tool==='text'?16:3)}"
+          style="width:52px;padding:2px 5px;border:1px solid var(--bd);border-radius:4px;font-size:.75rem;background:var(--surface);color:var(--text);text-align:center">
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;color:var(--dim)">Warna
         <input id="spnl-color" type="color" value="${s.color||'#222222'}"
           style="width:26px;height:26px;border:none;padding:0;cursor:pointer;border-radius:3px">
-      </label>`:''}
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;color:var(--dim)">°
+        <input id="spnl-rot" type="number" min="-360" max="360" value="${Math.round(s.rotation||0)}"
+          style="width:52px;padding:2px 5px;border:1px solid var(--bd);border-radius:4px;font-size:.75rem;background:var(--surface);color:var(--text);text-align:center">
+      </label>
     `;
     selPanel.style.display='flex';
     selPanel.querySelector('#spnl-size')?.addEventListener('change',e=>{
@@ -7276,6 +7328,10 @@ function renderPapanTulis(){
     selPanel.querySelector('#spnl-color')?.addEventListener('input',e=>{
       s.color=e.target.value;
       touch(s);touch(board);save();redraw();
+    });
+    selPanel.querySelector('#spnl-rot')?.addEventListener('change',e=>{
+      s.rotation=Number(e.target.value);
+      touch(s);touch(board);save();selPanelStrokeId=null;redraw();
     });
   }
 
@@ -7334,21 +7390,36 @@ function renderPapanTulis(){
       if(s){
         const toSx=wx=>wx*vp.scale+vp.ox, toSy=wy=>wy*vp.scale+vp.oy;
         const pad=6;
-        ctx.save(); ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+        const rot=(s.rotation||0)*Math.PI/180;
+        const sc2=ptlStrokeCenter(s);
+        const scrCx=toSx(sc2.wx),scrCy=toSy(sc2.wy);
+        ctx.save();
+        if(rot){ ctx.translate(scrCx,scrCy); ctx.rotate(rot); ctx.translate(-scrCx,-scrCy); }
+        ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
         if(s.tool==='pen'||s.tool==='eraser'){
           const xs=s.pts.map(p=>p[0]),ys=s.pts.map(p=>p[1]);
           ctx.strokeRect(toSx(Math.min(...xs))-pad,toSy(Math.min(...ys))-pad,(Math.max(...xs)-Math.min(...xs))*vp.scale+pad*2,(Math.max(...ys)-Math.min(...ys))*vp.scale+pad*2);
         } else if(s.tool==='text'){
-          ctx.strokeRect(toSx(s.x1)-pad,toSy(s.y1-(s.size||16))-pad,(s.text||'').length*(s.size||16)*0.6*vp.scale+pad*2,(s.size||16)*vp.scale+pad*2);
+          const tw=(s.text||'').length*(s.size||16)*0.6;
+          ctx.strokeRect(toSx(s.x1)-pad,toSy(s.y1-(s.size||16))-pad,tw*vp.scale+pad*2,(s.size||16)*vp.scale+pad*2);
         } else {
           ctx.strokeRect(toSx(Math.min(s.x1,s.x2))-pad,toSy(Math.min(s.y1,s.y2))-pad,Math.abs(s.x2-s.x1)*vp.scale+pad*2,Math.abs(s.y2-s.y1)*vp.scale+pad*2);
         }
         ctx.restore();
-        // resize handles at selection rect corners
+        // resize + rotation handles
         const handles=getSelHandles(s);
         if(handles.length){
           ctx.save(); ctx.setLineDash([]);
-          handles.forEach(h=>{
+          const rotH=handles.find(h=>h.id==='rot');
+          if(rotH){
+            ctx.strokeStyle='rgba(108,111,245,.5)'; ctx.lineWidth=1;
+            ctx.setLineDash([3,3]);
+            ctx.beginPath(); ctx.moveTo(rotH.stemSx,rotH.stemSy); ctx.lineTo(rotH.sx,rotH.sy); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle='#fff'; ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=2;
+            ctx.beginPath(); ctx.arc(rotH.sx,rotH.sy,7,0,Math.PI*2); ctx.fill(); ctx.stroke();
+          }
+          handles.filter(h=>h.id!=='rot').forEach(h=>{
             ctx.fillStyle='#fff'; ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=2;
             ctx.fillRect(h.sx-6,h.sy-6,12,12);
             ctx.strokeRect(h.sx-6,h.sy-6,12,12);
@@ -7389,6 +7460,13 @@ function renderPapanTulis(){
         const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
         if(selS){
           const hid=hitHandle(sc.x,sc.y,selS);
+          if(hid==='rot'){
+            rotating=true;
+            rotCenter=ptlStrokeCenter(selS);
+            rotStartAngle=Math.atan2(y-rotCenter.wy,x-rotCenter.wx);
+            rotOrigRotation=selS.rotation||0;
+            canvas.style.cursor='crosshair'; return;
+          }
           if(hid){
             resizing=true; resizeHandle=hid;
             resizeOrigStroke=JSON.parse(JSON.stringify(selS));
@@ -7453,6 +7531,16 @@ function renderPapanTulis(){
       vp.oy=panOrigin.oy+(sc.y-panStartY);
       redraw(); return;
     }
+    if(rotating){
+      const {x:wx,y:wy}=getPos(e);
+      const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
+      if(selS){
+        const curAngle=Math.atan2(wy-rotCenter.wy,wx-rotCenter.wx);
+        selS.rotation=rotOrigRotation+(curAngle-rotStartAngle)*180/Math.PI;
+        redraw();
+      }
+      return;
+    }
     if(resizing){
       const {x:wx,y:wy}=getPos(e);
       const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
@@ -7501,6 +7589,12 @@ function renderPapanTulis(){
     activePointers.delete(e.pointerId);
     if(activePointers.size<2) lastPinchDist=0;
     if(panning){ panning=false; setCursor(); return; }
+    if(rotating){
+      rotating=false;
+      const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
+      if(selS){ touch(selS);touch(board);save(); }
+      setCursor(); return;
+    }
     if(resizing){
       resizing=false; resizeHandle=null; resizeOrigStroke=null;
       const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
