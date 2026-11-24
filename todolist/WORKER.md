@@ -223,6 +223,7 @@ export default {
         spinners:   mergeArr(gistDb.spinners || [], browserDb.spinners || []),
         brackets:   mergeArr(gistDb.brackets || [], browserDb.brackets || []),
         kas:        mergeArr(gistDb.kas || [], browserDb.kas || []),
+        papanTulis: mergeArr(gistDb.papanTulis || [], browserDb.papanTulis || []),
         settings:   browserDb.settings,
         orgName:    browserDb.orgName,
       };
@@ -260,6 +261,7 @@ Worker tidak langsung timpa Gist — melakukan **read-merge-write**:
 | `spinners` | Merge by `id` + `updatedAt` |
 | `brackets` | Merge by `id` + `updatedAt`; `matches[]` dan `stages[]` (termasuk `advancedIds`) browser always wins |
 | `kas` | Merge by `id` + `updatedAt` |
+| `papanTulis` | Merge by `id` + `updatedAt`; `strokes[]` browser always wins (canvas state) |
 
 ### Field tambahan terbaru
 

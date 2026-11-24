@@ -203,6 +203,9 @@ body.is-admin .viewer-only{display:none!important}
 .icon-btn{width:28px;height:28px;border-radius:5px;border:1px solid var(--bd);background:var(--card);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .15s}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
 .icon-btn.danger:hover{border-color:var(--red);color:var(--red)}
+.btn-sm{padding:4px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--text);font-size:.78rem;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm.ptl-tool-active{border-color:var(--accent);background:var(--accent);color:#fff}
 
 /* Task area */
 .task-area{flex:1;overflow-y:auto;padding:10px 14px 16px}
@@ -765,6 +768,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <div class="nb-dropdown" id="nbdPermainan">
         <button class="nb-feature-item" id="btnSpinnerView"><span class="nb-ico">🎡</span> Spinner</button>
         <button class="nb-feature-item" id="btnBracketView"><span class="nb-ico">🏅</span> Bracket</button>
+        <button class="nb-feature-item" id="btnPapanTulisView"><span class="nb-ico">✏️</span> Papan Tulis</button>
       </div>
     </div>
     <div class="nb-group" id="nbgOrg">
@@ -824,6 +828,7 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <div class="sb-nav-label">Permainan</div>
       <button class="sb-nav-item" id="sbn-spin"><span class="sb-ico">🎡</span>Spinner</button>
       <button class="sb-nav-item" id="sbn-bra"><span class="sb-ico">🏅</span>Bracket</button>
+      <button class="sb-nav-item" id="sbn-ptl"><span class="sb-ico">✏️</span>Papan Tulis</button>
       <div class="sb-nav-label">Organisasi</div>
       <button class="sb-nav-item" id="sbn-org"><span class="sb-ico">🏢</span>Bagan</button>
       <button class="sb-nav-item" id="sbn-kom"><span class="sb-ico">📋</span>Regulasi</button>
@@ -952,6 +957,11 @@ body.is-admin .project-access, body.is-viewer .project-access{display:flex!impor
       <div class="asset-view" id="kasArea" style="padding:0;display:flex;flex-direction:column;flex:1;overflow:hidden"></div>
     </div>
 
+    <!-- Papan Tulis view -->
+    <div id="papanTulisView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div id="papanTulisArea" style="display:flex;flex-direction:column;flex:1;overflow:hidden"></div>
+    </div>
+
     <!-- Git Guide view -->
     <div id="gitGuideView" style="display:none;flex-direction:column;flex:1;overflow:hidden">
       <div class="asset-view" id="gitGuideArea"></div>
@@ -978,7 +988,7 @@ const WORKER_URL= 'https://alteco-writer.dionisiusn1.workers.dev';
 /* ══════════════════════════════════════════
    STATE
 ══════════════════════════════════════════ */
-let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'},spinners:[],brackets:[],kas:[]};
+let db = {kelompoks:[],members:[],tasks:[],assets:[],orgName:'Alteco',events:[],settings:{pushNotifEnabled:false,notifTime:'07:00'},spinners:[],brackets:[],kas:[],papanTulis:[]};
 let role         = null;   /* 'viewer' | 'admin' */
 let projSession = null; /* null | {memberName} — single global viewer session for fitur proyek */
 let activeId     = null;   /* null | ALL | memberId */
@@ -1075,6 +1085,7 @@ let ruanganSearch = '';
 let kasFilterState = 'semua';
 let kasSearch = '';
 let kasPage = 0;
+let ptlActiveBoardId = null;
 let viewMode       = 'tasks'; /* 'tasks' | 'org' */
 
 /* modal */
@@ -1539,7 +1550,7 @@ document.getElementById('navOrgName').addEventListener('mouseleave',()=>{
     'sbn-bc':'btnBroadcastView','sbn-lom':'btnLombaView','sbn-per':'btnPersView',
     'sbn-rua':'btnRuanganView','sbn-not':'btnNotulensiView','sbn-ast':'btnAssetView',
     'sbn-inf':'btnInfoView','sbn-set':'btnSettingsView',
-    'sbn-spin':'btnSpinnerView','sbn-bra':'btnBracketView','sbn-kas':'btnKasView'
+    'sbn-spin':'btnSpinnerView','sbn-bra':'btnBracketView','sbn-kas':'btnKasView','sbn-ptl':'btnPapanTulisView'
   };
   Object.entries(map).forEach(([sbnId,btnId])=>{
     const sbn=document.getElementById(sbnId);
@@ -1768,10 +1779,10 @@ function select(id){
   activeId=id; activeFilter='all'; filterMemberName=null; memberSearchQuery='';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='all'));
   /* deactivate feature nav */
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView','btnKasView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView','btnKasView','btnPapanTulisView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   viewMode='tasks';
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView','kasView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView','kasView','papanTulisView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   renderSidebar(); renderMain();
 }
@@ -1784,9 +1795,9 @@ document.getElementById('allItem').addEventListener('click',()=>select(ALL));
 function renderMain(){
   const empty=document.getElementById('emptyState');
   const tv=document.getElementById('taskView');
-  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView','kasView']
+  ['orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView','kasView','papanTulisView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnOrgView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView','btnKasView']
+  ['btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnOrgView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView','btnKasView','btnPapanTulisView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   viewMode='tasks';
 
@@ -2187,9 +2198,9 @@ document.getElementById('memberSearchInput').addEventListener('input',function()
 ══════════════════════════════════════════ */
 /* helper: hide all feature views, deactivate all nav buttons */
 function hideAllViews(){
-  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView','kasView']
+  ['taskView','orgView','assetView','infoView','settingsView','projectView','cultureView','komunitasView','notulensiView','broadcastView','lombaView','persView','ruanganView','spinnerView','bracketView','gitGuideView','kasView','papanTulisView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView','btnKasView']
+  ['btnOrgView','btnAssetView','btnInfoView','btnSettingsView','btnProjectView','btnCultureView','btnKomunitasView','btnNotulensiView','btnBroadcastView','btnLombaView','btnPersView','btnRuanganView','btnSpinnerView','btnBracketView','btnKasView','btnPapanTulisView']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('active'); });
   document.getElementById('emptyState').style.display='none';
   document.getElementById('fabCulture').style.display='none';
@@ -2464,6 +2475,24 @@ document.getElementById('btnBracketView').addEventListener('click',()=>{
     bv.style.display='flex';
     document.getElementById('btnBracketView').classList.add('active');
     bracketState=null; renderSidebar(); renderBracket();
+  }
+});
+
+document.getElementById('btnPapanTulisView').addEventListener('click',()=>{
+  const pv=document.getElementById('papanTulisView');
+  const tv=document.getElementById('taskView');
+  const empty=document.getElementById('emptyState');
+  if(pv.style.display!=='none'){
+    pv.style.display='none';
+    document.getElementById('btnPapanTulisView').classList.remove('active');
+    if(activeId){ tv.style.display='flex'; empty.style.display='none'; }
+    else { empty.style.display='flex'; }
+  } else {
+    activeId=null; viewMode='tasks';
+    hideAllViews();
+    pv.style.display='flex';
+    document.getElementById('btnPapanTulisView').classList.add('active');
+    ptlActiveBoardId=null; renderSidebar(); renderPapanTulis();
   }
 });
 
@@ -3689,6 +3718,19 @@ function openModal(mode, ctx){
     `;
   }
 
+  else if(mode==='papanTulis-add'||mode==='papanTulis-edit'){
+    const isEdit=mode==='papanTulis-edit';
+    const board=isEdit?(db.papanTulis||[]).find(x=>x.id===ctx.id):null;
+    title.textContent=isEdit?'Rename Papan':'Papan Baru';
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="form-label">Nama Papan *</label>
+        <input class="form-input" id="fi-ptl-nama" placeholder="Denah Acara Oktober" value="${esc(board?.nama||'')}">
+      </div>
+    `;
+    setTimeout(()=>document.getElementById('fi-ptl-nama')?.focus(),50);
+  }
+
   else if(mode==='kas-add'||mode==='kas-edit'){
     const isEdit=mode==='kas-edit';
     const t=isEdit?(db.kas||[]).find(x=>x.id===ctx.id):null;
@@ -4437,6 +4479,20 @@ document.getElementById('modalSave').addEventListener('click',()=>{
       db.kas.push(touch({id:uid(),type,judul,jumlah,terbayar,iuranPersen,bukti,catatan,tanggal,deleted:false,createdAt:Date.now()}));
     }
     save(); renderKas(); closeModal();
+  }
+
+  else if(mMode==='papanTulis-add'||mMode==='papanTulis-edit'){
+    const nama=document.getElementById('fi-ptl-nama').value.trim();
+    if(!nama){ alert('Nama papan wajib diisi.'); return; }
+    if(mMode==='papanTulis-edit'){
+      const b=(db.papanTulis||[]).find(x=>x.id===mCtx.id);
+      if(!b) return;
+      Object.assign(b,{nama}); touch(b);
+    } else {
+      if(!db.papanTulis) db.papanTulis=[];
+      db.papanTulis.push(touch({id:uid(),nama,strokes:[],deleted:false,createdAt:Date.now()}));
+    }
+    save(); renderPapanTulis(); closeModal();
   }
 });
 
@@ -6901,6 +6957,240 @@ function renderKas(){
       });
     });
   }
+}
+
+/* ══════════════════════════════════════════
+   PAPAN TULIS
+══════════════════════════════════════════ */
+function ptlDrawStroke(ctx, stroke){
+  if(!stroke||!stroke.pts||stroke.pts.length<2) return;
+  ctx.save();
+  ctx.strokeStyle = stroke.color||'#222';
+  ctx.lineWidth   = stroke.size||3;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+  if(stroke.tool==='eraser') ctx.globalCompositeOperation='destination-out';
+  ctx.beginPath();
+  ctx.moveTo(stroke.pts[0][0], stroke.pts[0][1]);
+  for(let i=1;i<stroke.pts.length;i++) ctx.lineTo(stroke.pts[i][0], stroke.pts[i][1]);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function ptlDrawStrokes(ctx, strokes){
+  (strokes||[]).filter(s=>!s.deleted).forEach(s=>ptlDrawStroke(ctx,s));
+}
+
+function renderPapanTulis(){
+  const area = document.getElementById('papanTulisArea');
+  if(!area) return;
+  area.innerHTML='';
+  const isAdmin = role==='admin';
+  const boards  = (db.papanTulis||[]).filter(b=>!b.deleted);
+
+  /* ── Board list view ── */
+  if(!ptlActiveBoardId){
+    // toolbar
+    const toolbar = document.createElement('div');
+    toolbar.className='notul-toolbar';
+    toolbar.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap';
+    toolbar.innerHTML=`<span style="font-weight:700;font-size:.97rem">Papan Tulis</span><span style="flex:1"></span>`
+      +(isAdmin?`<button class="btn-sm" id="ptl-add-btn">+ Papan Baru</button>`:'');
+    area.appendChild(toolbar);
+    if(isAdmin) toolbar.querySelector('#ptl-add-btn')?.addEventListener('click',()=>openModal('papanTulis-add'));
+
+    if(!boards.length){
+      const empty=document.createElement('div');
+      empty.style.cssText='text-align:center;color:var(--text-muted);padding:60px 20px;font-size:.9rem';
+      empty.textContent='Belum ada papan. Buat papan baru untuk mulai menggambar.';
+      area.appendChild(empty);
+      return;
+    }
+
+    const grid=document.createElement('div');
+    grid.style.cssText='display:flex;flex-wrap:wrap;gap:14px;padding:14px 18px';
+    boards.forEach(board=>{
+      const card=document.createElement('div');
+      card.style.cssText='border:1px solid var(--bd);border-radius:10px;overflow:hidden;cursor:pointer;width:200px;background:var(--surface);flex-shrink:0';
+      // mini canvas preview
+      const previewCanvas=document.createElement('canvas');
+      previewCanvas.width=200; previewCanvas.height=120;
+      previewCanvas.style.cssText='display:block;width:200px;height:120px;background:#fff';
+      const pCtx=previewCanvas.getContext('2d');
+      // scale strokes to preview
+      const boardStrokes=(board.strokes||[]).filter(s=>!s.deleted);
+      if(boardStrokes.length){
+        pCtx.save();
+        pCtx.scale(200/(board.canvasW||800), 120/(board.canvasH||500));
+        ptlDrawStrokes(pCtx, boardStrokes);
+        pCtx.restore();
+      } else {
+        pCtx.fillStyle='#f5f5f5'; pCtx.fillRect(0,0,200,120);
+        pCtx.fillStyle='#ccc'; pCtx.font='13px sans-serif'; pCtx.textAlign='center';
+        pCtx.fillText('Kosong',100,65);
+      }
+      card.appendChild(previewCanvas);
+      const info=document.createElement('div');
+      info.style.cssText='padding:8px 10px;display:flex;align-items:center;gap:6px';
+      info.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(board.nama)}</span>`
+        +(isAdmin?`<button class="btn-sm" data-ptl-rename="${board.id}" title="Rename" style="padding:2px 7px;font-size:.75rem">✏️</button><button class="btn-sm" data-ptl-del="${board.id}" title="Hapus" style="padding:2px 7px;font-size:.75rem;color:var(--danger)">🗑</button>`:'');
+      card.appendChild(info);
+      card.addEventListener('click', e=>{
+        if(e.target.closest('[data-ptl-rename],[data-ptl-del]')) return;
+        ptlActiveBoardId=board.id;
+        renderPapanTulis();
+      });
+      grid.appendChild(card);
+    });
+    area.appendChild(grid);
+
+    // rename / delete events
+    area.querySelectorAll('[data-ptl-rename]').forEach(btn=>{
+      btn.addEventListener('click',e=>{e.stopPropagation();openModal('papanTulis-edit',{id:btn.dataset.ptlRename});});
+    });
+    area.querySelectorAll('[data-ptl-del]').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        if(!confirm('Hapus papan ini?')) return;
+        const b=(db.papanTulis||[]).find(x=>x.id===btn.dataset.ptlDel);
+        if(b){ touch(Object.assign(b,{deleted:true})); save(); renderPapanTulis(); }
+      });
+    });
+    return;
+  }
+
+  /* ── Canvas drawing view ── */
+  const board = (db.papanTulis||[]).find(b=>b.id===ptlActiveBoardId);
+  if(!board){ ptlActiveBoardId=null; renderPapanTulis(); return; }
+
+  // toolbar
+  const toolbar=document.createElement('div');
+  toolbar.className='notul-toolbar';
+  toolbar.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;user-select:none';
+
+  const tools=[
+    {id:'pen',   label:'✏️ Pen'},
+    {id:'eraser',label:'⬜ Hapus'},
+  ];
+  let activeTool='pen';
+  let activeColor='#222222';
+  let activeSize=3;
+  let drawing=false;
+  let currentStroke=null;
+
+  toolbar.innerHTML=`
+    <button id="ptl-back" class="btn-sm" title="Kembali">← Papan</button>
+    <span style="font-weight:700;font-size:.9rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(board.nama)}</span>
+    <span style="flex:1"></span>
+    <label style="font-size:.8rem;display:flex;align-items:center;gap:4px">
+      <input type="color" id="ptl-color" value="${activeColor}" style="width:28px;height:28px;border:none;padding:0;cursor:pointer;border-radius:4px">
+    </label>
+    <select id="ptl-size" style="font-size:.8rem;padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--surface)">
+      <option value="2">Fine</option>
+      <option value="4" selected>Normal</option>
+      <option value="8">Tebal</option>
+      <option value="16">Sangat Tebal</option>
+    </select>
+    <button id="ptl-tool-pen"    class="btn-sm ptl-tool-active">✏️ Pen</button>
+    <button id="ptl-tool-eraser" class="btn-sm">⬜ Hapus</button>
+    <button id="ptl-undo"   class="btn-sm" title="Undo">↩ Undo</button>
+    <button id="ptl-reset"  class="btn-sm" style="color:var(--danger)" title="Hapus semua coretan">🗑 Reset</button>
+  `;
+  area.appendChild(toolbar);
+
+  // canvas wrapper
+  const canvasWrap=document.createElement('div');
+  canvasWrap.style.cssText='flex:1;overflow:hidden;position:relative;background:#fff';
+  const canvas=document.createElement('canvas');
+  canvas.style.cssText='display:block;touch-action:none;cursor:crosshair;width:100%;height:100%';
+  canvasWrap.appendChild(canvas);
+  area.appendChild(canvasWrap);
+
+  // size canvas to wrapper
+  function resizeCanvas(){
+    const w=canvasWrap.clientWidth||800, h=canvasWrap.clientHeight||500;
+    canvas.width=w; canvas.height=h;
+    board.canvasW=w; board.canvasH=h;
+    redraw();
+  }
+
+  function redraw(){
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ptlDrawStrokes(ctx, board.strokes||[]);
+  }
+
+  const ro=new ResizeObserver(()=>resizeCanvas());
+  ro.observe(canvasWrap);
+  setTimeout(resizeCanvas, 50);
+
+  // pointer events
+  canvas.addEventListener('pointerdown', e=>{
+    drawing=true;
+    canvas.setPointerCapture(e.pointerId);
+    const rect=canvas.getBoundingClientRect();
+    const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
+    const x=(e.clientX-rect.left)*scaleX, y=(e.clientY-rect.top)*scaleY;
+    currentStroke={id:uid(),tool:activeTool,color:activeColor,size:activeSize,pts:[[x,y]],deleted:false};
+    if(!board.strokes) board.strokes=[];
+    board.strokes.push(currentStroke);
+    redraw();
+  });
+
+  canvas.addEventListener('pointermove', e=>{
+    if(!drawing||!currentStroke) return;
+    const rect=canvas.getBoundingClientRect();
+    const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
+    const x=(e.clientX-rect.left)*scaleX, y=(e.clientY-rect.top)*scaleY;
+    currentStroke.pts.push([x,y]);
+    redraw();
+  });
+
+  const endDraw=()=>{
+    if(!drawing) return;
+    drawing=false;
+    if(currentStroke && currentStroke.pts.length>1){
+      touch(board); save();
+    } else if(currentStroke){
+      // remove single-point stroke
+      board.strokes=board.strokes.filter(s=>s!==currentStroke);
+    }
+    currentStroke=null;
+  };
+  canvas.addEventListener('pointerup',   endDraw);
+  canvas.addEventListener('pointercancel', endDraw);
+
+  // toolbar controls
+  toolbar.querySelector('#ptl-back').addEventListener('click',()=>{
+    ro.disconnect();
+    ptlActiveBoardId=null; renderSidebar(); renderPapanTulis();
+  });
+
+  toolbar.querySelector('#ptl-color').addEventListener('input', e=>{ activeColor=e.target.value; });
+
+  toolbar.querySelector('#ptl-size').addEventListener('change', e=>{ activeSize=Number(e.target.value); });
+
+  function setTool(t){
+    activeTool=t;
+    toolbar.querySelectorAll('.ptl-tool-active').forEach(b=>b.classList.remove('ptl-tool-active'));
+    toolbar.querySelector(`#ptl-tool-${t}`)?.classList.add('ptl-tool-active');
+  }
+  toolbar.querySelector('#ptl-tool-pen').addEventListener('click',   ()=>setTool('pen'));
+  toolbar.querySelector('#ptl-tool-eraser').addEventListener('click',()=>setTool('eraser'));
+
+  toolbar.querySelector('#ptl-undo').addEventListener('click',()=>{
+    const strokes=(board.strokes||[]).filter(s=>!s.deleted);
+    if(!strokes.length) return;
+    const last=strokes[strokes.length-1];
+    touch(Object.assign(last,{deleted:true}));
+    touch(board); save(); redraw();
+  });
+
+  toolbar.querySelector('#ptl-reset').addEventListener('click',()=>{
+    if(!confirm('Hapus semua coretan di papan ini?')) return;
+    (board.strokes||[]).forEach(s=>Object.assign(s,{deleted:true}));
+    touch(board); save(); redraw();
+  });
 }
 
 /* ══════════════════════════════════════════
