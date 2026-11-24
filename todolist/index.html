@@ -7352,7 +7352,22 @@ function renderPapanTulis(){
       currentStroke.pts.push([x,y]);
       redraw(currentStroke); return;
     }
-    currentStroke.x2=x; currentStroke.y2=y;
+    let cx2=x, cy2=y;
+    if(e.shiftKey){
+      const dx=x-currentStroke.x1, dy=y-currentStroke.y1;
+      if(currentStroke.tool==='rect'||currentStroke.tool==='circle'){
+        const side=Math.min(Math.abs(dx),Math.abs(dy));
+        cx2=currentStroke.x1+Math.sign(dx)*side;
+        cy2=currentStroke.y1+Math.sign(dy)*side;
+      } else if(currentStroke.tool==='line'||currentStroke.tool==='arrow'){
+        const angle=Math.atan2(dy,dx);
+        const snap=Math.round(angle/(Math.PI/4))*(Math.PI/4);
+        const len=Math.hypot(dx,dy);
+        cx2=currentStroke.x1+Math.cos(snap)*len;
+        cy2=currentStroke.y1+Math.sin(snap)*len;
+      }
+    }
+    currentStroke.x2=cx2; currentStroke.y2=cy2;
     redraw(currentStroke);
   });
 
