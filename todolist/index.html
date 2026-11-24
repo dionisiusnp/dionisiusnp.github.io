@@ -6962,23 +6962,66 @@ function renderKas(){
 /* ══════════════════════════════════════════
    PAPAN TULIS
 ══════════════════════════════════════════ */
-function ptlDrawStroke(ctx, stroke){
-  if(!stroke||!stroke.pts||stroke.pts.length<2) return;
+function ptlDrawStroke(ctx, stroke, selectedId){
+  if(!stroke||stroke.deleted) return;
   ctx.save();
-  ctx.strokeStyle = stroke.color||'#222';
-  ctx.lineWidth   = stroke.size||3;
-  ctx.lineCap     = 'round';
-  ctx.lineJoin    = 'round';
-  if(stroke.tool==='eraser') ctx.globalCompositeOperation='destination-out';
-  ctx.beginPath();
-  ctx.moveTo(stroke.pts[0][0], stroke.pts[0][1]);
-  for(let i=1;i<stroke.pts.length;i++) ctx.lineTo(stroke.pts[i][0], stroke.pts[i][1]);
-  ctx.stroke();
+  const col=stroke.color||'#222222';
+  const sz=stroke.size||3;
+  const sel=stroke.id===selectedId;
+  if(sel){ ctx.shadowColor='#6c6ff5'; ctx.shadowBlur=8; }
+  if(stroke.tool==='pen'||stroke.tool==='eraser'){
+    if(!stroke.pts||stroke.pts.length<2){ ctx.restore(); return; }
+    if(stroke.tool==='eraser') ctx.globalCompositeOperation='destination-out';
+    ctx.strokeStyle=col; ctx.lineWidth=sz; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath();
+    ctx.moveTo(stroke.pts[0][0],stroke.pts[0][1]);
+    for(let i=1;i<stroke.pts.length;i++) ctx.lineTo(stroke.pts[i][0],stroke.pts[i][1]);
+    ctx.stroke();
+  } else if(stroke.tool==='line'){
+    ctx.strokeStyle=col; ctx.lineWidth=sz; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(stroke.x1,stroke.y1); ctx.lineTo(stroke.x2,stroke.y2); ctx.stroke();
+  } else if(stroke.tool==='rect'){
+    ctx.strokeStyle=col; ctx.lineWidth=sz;
+    ctx.strokeRect(Math.min(stroke.x1,stroke.x2),Math.min(stroke.y1,stroke.y2),Math.abs(stroke.x2-stroke.x1),Math.abs(stroke.y2-stroke.y1));
+  } else if(stroke.tool==='circle'){
+    ctx.strokeStyle=col; ctx.lineWidth=sz;
+    const cx=(stroke.x1+stroke.x2)/2,cy=(stroke.y1+stroke.y2)/2;
+    const rx=Math.abs(stroke.x2-stroke.x1)/2,ry=Math.abs(stroke.y2-stroke.y1)/2;
+    ctx.beginPath(); ctx.ellipse(cx,cy,rx||1,ry||1,0,0,Math.PI*2); ctx.stroke();
+  } else if(stroke.tool==='text'){
+    ctx.fillStyle=col; ctx.font=`${stroke.size||16}px sans-serif`;
+    ctx.fillText(stroke.text||'',stroke.x1,stroke.y1);
+  } else if(stroke.tool==='arrow'){
+    ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=sz; ctx.lineCap='round';
+    const dx=stroke.x2-stroke.x1,dy=stroke.y2-stroke.y1;
+    const ang=Math.atan2(dy,dx), len=Math.sqrt(dx*dx+dy*dy);
+    const hs=Math.min(sz*4,len*0.4)||8;
+    ctx.beginPath(); ctx.moveTo(stroke.x1,stroke.y1); ctx.lineTo(stroke.x2,stroke.y2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(stroke.x2,stroke.y2);
+    ctx.lineTo(stroke.x2-hs*Math.cos(ang-0.4),stroke.y2-hs*Math.sin(ang-0.4));
+    ctx.lineTo(stroke.x2-hs*Math.cos(ang+0.4),stroke.y2-hs*Math.sin(ang+0.4));
+    ctx.closePath(); ctx.fill();
+  }
   ctx.restore();
 }
 
-function ptlDrawStrokes(ctx, strokes){
-  (strokes||[]).filter(s=>!s.deleted).forEach(s=>ptlDrawStroke(ctx,s));
+function ptlDrawStrokes(ctx, strokes, selectedId){
+  (strokes||[]).filter(s=>!s.deleted).forEach(s=>ptlDrawStroke(ctx,s,selectedId));
+}
+
+function ptlHitTest(stroke, x, y){
+  if(!stroke||stroke.deleted) return false;
+  const tol=Math.max((stroke.size||3)+4,8);
+  if(stroke.tool==='pen'||stroke.tool==='eraser'){
+    if(!stroke.pts) return false;
+    return stroke.pts.some(p=>Math.hypot(p[0]-x,p[1]-y)<tol);
+  } else if(stroke.tool==='text'){
+    return x>=stroke.x1-4&&y<=stroke.y1+4&&x<=stroke.x1+(stroke.text||'').length*(stroke.size||16)*0.6+4&&y>=stroke.y1-(stroke.size||16)-4;
+  } else {
+    const mx=(stroke.x1+stroke.x2)/2,my=(stroke.y1+stroke.y2)/2;
+    return Math.hypot(x-mx,y-my)<Math.max(Math.abs(stroke.x2-stroke.x1),Math.abs(stroke.y2-stroke.y1))/2+tol;
+  }
 }
 
 function renderPapanTulis(){
@@ -7078,119 +7121,232 @@ function renderPapanTulis(){
   let drawing=false;
   let currentStroke=null;
 
+  // tool definitions
+  const PTL_TOOLS=[
+    {id:'select',label:'↖ Pilih'},
+    {id:'pen',   label:'✏️ Pena'},
+    {id:'eraser',label:'◻ Hapus'},
+    {id:'line',  label:'╱ Garis'},
+    {id:'arrow', label:'→ Panah'},
+    {id:'rect',  label:'▭ Kotak'},
+    {id:'circle',label:'○ Oval'},
+    {id:'text',  label:'T Teks'},
+  ];
+
   toolbar.innerHTML=`
-    <button id="ptl-back" class="btn-sm" title="Kembali">← Papan</button>
-    <span style="font-weight:700;font-size:.9rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(board.nama)}</span>
-    <span style="flex:1"></span>
-    <label style="font-size:.8rem;display:flex;align-items:center;gap:4px">
-      <input type="color" id="ptl-color" value="${activeColor}" style="width:28px;height:28px;border:none;padding:0;cursor:pointer;border-radius:4px">
-    </label>
-    <select id="ptl-size" style="font-size:.8rem;padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--surface)">
-      <option value="2">Fine</option>
+    <button id="ptl-back" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--text);border:1px solid var(--bd);font-size:.78rem">← Papan</button>
+    <span class="notul-toolbar-title" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(board.nama)}</span>
+    <div style="display:flex;gap:3px;background:var(--surface);border:1px solid var(--bd);border-radius:7px;padding:2px" id="ptl-toolgroup">
+      ${PTL_TOOLS.map(t=>`<button id="ptl-tool-${t.id}" style="padding:4px 8px;border-radius:5px;border:none;cursor:pointer;font-size:.75rem;font-weight:600;background:${t.id==='pen'?'var(--accent)':'transparent'};color:${t.id==='pen'?'#fff':'var(--text)'};white-space:nowrap" title="${t.label}">${t.label}</button>`).join('')}
+    </div>
+    <input type="color" id="ptl-color" value="${activeColor}" style="width:28px;height:28px;border:none;padding:0;cursor:pointer;border-radius:4px;flex-shrink:0">
+    <select id="ptl-size" style="font-size:.78rem;padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--surface);flex-shrink:0">
+      <option value="2">Tipis</option>
       <option value="4" selected>Normal</option>
       <option value="8">Tebal</option>
       <option value="16">Sangat Tebal</option>
     </select>
-    <button id="ptl-tool-pen"    class="btn-sm ptl-tool-active">✏️ Pen</button>
-    <button id="ptl-tool-eraser" class="btn-sm">⬜ Hapus</button>
-    <button id="ptl-undo"   class="btn-sm" title="Undo">↩ Undo</button>
-    <button id="ptl-reset"  class="btn-sm" style="color:var(--danger)" title="Hapus semua coretan">🗑 Reset</button>
+    <button id="ptl-undo" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--text);border:1px solid var(--bd);font-size:.78rem">↩ Undo</button>
+    ${isAdmin?`<button id="ptl-reset" class="notul-topik-add-btn" style="margin:0;width:auto;background:var(--surface);color:var(--red,#f87171);border:1px solid var(--red,#f87171);font-size:.78rem">🗑 Reset</button>`:''}
   `;
   area.appendChild(toolbar);
 
   // canvas wrapper
   const canvasWrap=document.createElement('div');
-  canvasWrap.style.cssText='flex:1;overflow:hidden;position:relative;background:#fff';
+  canvasWrap.style.cssText='flex:1;overflow:hidden;position:relative;background:#fafafa';
   const canvas=document.createElement('canvas');
-  canvas.style.cssText='display:block;touch-action:none;cursor:crosshair;width:100%;height:100%';
+  canvas.style.cssText='display:block;touch-action:none;width:100%;height:100%';
   canvasWrap.appendChild(canvas);
   area.appendChild(canvasWrap);
 
-  // size canvas to wrapper
-  function resizeCanvas(){
-    const w=canvasWrap.clientWidth||800, h=canvasWrap.clientHeight||500;
-    canvas.width=w; canvas.height=h;
-    board.canvasW=w; board.canvasH=h;
-    redraw();
+  // ── State ──
+  let selectedId=null, clipboard=null;
+  let dragOffX=0, dragOffY=0, dragStroke=null;
+
+  function getPos(e){
+    const r=canvas.getBoundingClientRect();
+    const sx=canvas.width/r.width, sy=canvas.height/r.height;
+    return {x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy};
   }
 
-  function redraw(){
+  function setCursor(){
+    if(activeTool==='select') canvas.style.cursor='default';
+    else if(activeTool==='eraser') canvas.style.cursor='cell';
+    else if(activeTool==='text') canvas.style.cursor='text';
+    else canvas.style.cursor='crosshair';
+  }
+
+  function redraw(previewStroke){
     const ctx=canvas.getContext('2d');
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    ptlDrawStrokes(ctx, board.strokes||[]);
+    // subtle grid
+    ctx.strokeStyle='rgba(0,0,0,0.05)'; ctx.lineWidth=1;
+    for(let x=40;x<canvas.width;x+=40){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke(); }
+    for(let y=40;y<canvas.height;y+=40){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke(); }
+    ptlDrawStrokes(ctx, board.strokes||[], selectedId);
+    if(previewStroke) ptlDrawStroke(ctx, previewStroke, null);
+    // selection handle
+    if(selectedId){
+      const s=(board.strokes||[]).find(x=>x.id===selectedId&&!x.deleted);
+      if(s){
+        ctx.save(); ctx.strokeStyle='#6c6ff5'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+        const pad=6;
+        if(s.tool==='pen'||s.tool==='eraser'){
+          const xs=s.pts.map(p=>p[0]),ys=s.pts.map(p=>p[1]);
+          const bx=Math.min(...xs)-pad,by=Math.min(...ys)-pad;
+          ctx.strokeRect(bx,by,Math.max(...xs)-Math.min(...xs)+pad*2,Math.max(...ys)-Math.min(...ys)+pad*2);
+        } else if(s.tool==='text'){
+          ctx.strokeRect(s.x1-pad,s.y1-(s.size||16)-pad,(s.text||'').length*(s.size||16)*0.6+pad*2,(s.size||16)+pad*2);
+        } else {
+          ctx.strokeRect(Math.min(s.x1,s.x2)-pad,Math.min(s.y1,s.y2)-pad,Math.abs(s.x2-s.x1)+pad*2,Math.abs(s.y2-s.y1)+pad*2);
+        }
+        ctx.restore();
+      }
+    }
   }
 
-  const ro=new ResizeObserver(()=>resizeCanvas());
+  function resizeCanvas(){
+    const w=canvasWrap.clientWidth||800,h=canvasWrap.clientHeight||500;
+    canvas.width=w; canvas.height=h; redraw();
+  }
+  const ro=new ResizeObserver(resizeCanvas);
   ro.observe(canvasWrap);
-  setTimeout(resizeCanvas, 50);
+  setTimeout(resizeCanvas,50);
 
-  // pointer events
-  canvas.addEventListener('pointerdown', e=>{
-    drawing=true;
+  // ── Pointer events ──
+  canvas.addEventListener('pointerdown',e=>{
     canvas.setPointerCapture(e.pointerId);
-    const rect=canvas.getBoundingClientRect();
-    const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
-    const x=(e.clientX-rect.left)*scaleX, y=(e.clientY-rect.top)*scaleY;
-    currentStroke={id:uid(),tool:activeTool,color:activeColor,size:activeSize,pts:[[x,y]],deleted:false};
-    if(!board.strokes) board.strokes=[];
-    board.strokes.push(currentStroke);
-    redraw();
+    const {x,y}=getPos(e);
+    if(activeTool==='select'){
+      // hit test: reverse order (top first)
+      const strokes=[...(board.strokes||[])].reverse();
+      const hit=strokes.find(s=>!s.deleted&&ptlHitTest(s,x,y));
+      selectedId=hit?hit.id:null;
+      if(hit){
+        drawing=true; dragStroke=hit;
+        const cx=hit.tool==='pen'||hit.tool==='eraser'?(hit.pts[0][0]):hit.x1;
+        const cy=hit.tool==='pen'||hit.tool==='eraser'?(hit.pts[0][1]):hit.y1;
+        dragOffX=x-cx; dragOffY=y-cy;
+      }
+      redraw(); return;
+    }
+    if(activeTool==='eraser'){
+      const strokes=[...(board.strokes||[])].reverse();
+      const hit=strokes.find(s=>!s.deleted&&ptlHitTest(s,x,y));
+      if(hit){ touch(Object.assign(hit,{deleted:true})); touch(board); save(); redraw(); }
+      return;
+    }
+    if(activeTool==='text'){
+      const txt=prompt('Teks:');
+      if(!txt) return;
+      const s={id:uid(),tool:'text',x1:x,y1:y,text:txt,size:activeSize*4+8,color:activeColor,deleted:false};
+      if(!board.strokes) board.strokes=[];
+      board.strokes.push(s); selectedId=s.id;
+      touch(board); save(); redraw(); return;
+    }
+    drawing=true;
+    currentStroke={id:uid(),tool:activeTool,color:activeColor,size:activeSize,pts:[[x,y]],x1:x,y1:y,x2:x,y2:y,deleted:false};
   });
 
-  canvas.addEventListener('pointermove', e=>{
-    if(!drawing||!currentStroke) return;
-    const rect=canvas.getBoundingClientRect();
-    const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
-    const x=(e.clientX-rect.left)*scaleX, y=(e.clientY-rect.top)*scaleY;
-    currentStroke.pts.push([x,y]);
-    redraw();
+  canvas.addEventListener('pointermove',e=>{
+    if(!drawing) return;
+    const {x,y}=getPos(e);
+    if(activeTool==='select'&&dragStroke){
+      const s=dragStroke;
+      const nx=x-dragOffX, ny=y-dragOffY;
+      if(s.tool==='pen'||s.tool==='eraser'){
+        const ox=s.pts[0][0],oy=s.pts[0][1];
+        const dx=nx-ox,dy=ny-oy;
+        s.pts=s.pts.map(p=>[p[0]+dx,p[1]+dy]);
+      } else {
+        const dw=s.x2-s.x1,dh=s.y2-s.y1;
+        s.x1=nx; s.y1=ny; s.x2=nx+dw; s.y2=ny+dh;
+      }
+      redraw(); return;
+    }
+    if(activeTool==='pen'||activeTool==='eraser'){
+      currentStroke.pts.push([x,y]);
+      redraw(currentStroke); return;
+    }
+    // shape preview
+    currentStroke.x2=x; currentStroke.y2=y;
+    redraw(currentStroke);
   });
 
-  const endDraw=()=>{
+  const endDraw=e=>{
     if(!drawing) return;
     drawing=false;
-    if(currentStroke && currentStroke.pts.length>1){
-      touch(board); save();
-    } else if(currentStroke){
-      // remove single-point stroke
-      board.strokes=board.strokes.filter(s=>s!==currentStroke);
+    if(activeTool==='select'){
+      if(dragStroke){ touch(dragStroke); touch(board); save(); }
+      dragStroke=null; return;
     }
-    currentStroke=null;
+    if(!currentStroke) return;
+    const valid=(activeTool==='pen'||activeTool==='eraser')?(currentStroke.pts.length>1):(Math.hypot(currentStroke.x2-currentStroke.x1,currentStroke.y2-currentStroke.y1)>4);
+    if(valid){
+      if(!board.strokes) board.strokes=[];
+      board.strokes.push(currentStroke);
+      touch(board); save();
+    }
+    currentStroke=null; redraw();
   };
-  canvas.addEventListener('pointerup',   endDraw);
-  canvas.addEventListener('pointercancel', endDraw);
+  canvas.addEventListener('pointerup',endDraw);
+  canvas.addEventListener('pointercancel',endDraw);
 
-  // toolbar controls
-  toolbar.querySelector('#ptl-back').addEventListener('click',()=>{
-    ro.disconnect();
-    ptlActiveBoardId=null; renderSidebar(); renderPapanTulis();
-  });
-
-  toolbar.querySelector('#ptl-color').addEventListener('input', e=>{ activeColor=e.target.value; });
-
-  toolbar.querySelector('#ptl-size').addEventListener('change', e=>{ activeSize=Number(e.target.value); });
-
-  function setTool(t){
-    activeTool=t;
-    toolbar.querySelectorAll('.ptl-tool-active').forEach(b=>b.classList.remove('ptl-tool-active'));
-    toolbar.querySelector(`#ptl-tool-${t}`)?.classList.add('ptl-tool-active');
+  // ── Keyboard: delete selected, copy/paste, esc ──
+  function onKey(e){
+    if(document.activeElement&&document.activeElement!==document.body&&document.activeElement!==canvas) return;
+    if((e.key==='Delete'||e.key==='Backspace')&&selectedId){
+      const s=(board.strokes||[]).find(x=>x.id===selectedId);
+      if(s){ touch(Object.assign(s,{deleted:true})); touch(board); save(); selectedId=null; redraw(); }
+    }
+    if((e.ctrlKey||e.metaKey)&&e.key==='c'&&selectedId){
+      const s=(board.strokes||[]).find(x=>x.id===selectedId&&!x.deleted);
+      if(s) clipboard=JSON.parse(JSON.stringify(s));
+    }
+    if((e.ctrlKey||e.metaKey)&&e.key==='v'&&clipboard){
+      const s=JSON.parse(JSON.stringify(clipboard));
+      s.id=uid(); s.deleted=false;
+      if(s.pts) s.pts=s.pts.map(p=>[p[0]+20,p[1]+20]);
+      else { s.x1+=20;s.y1+=20;s.x2+=20;s.y2+=20; }
+      if(!board.strokes) board.strokes=[];
+      board.strokes.push(s); selectedId=s.id;
+      touch(board); save(); redraw();
+    }
+    if((e.ctrlKey||e.metaKey)&&e.key==='z'){
+      const strokes=(board.strokes||[]).filter(x=>!x.deleted);
+      if(!strokes.length) return;
+      touch(Object.assign(strokes[strokes.length-1],{deleted:true}));
+      touch(board); save(); redraw();
+    }
+    if(e.key==='Escape'){ selectedId=null; redraw(); }
   }
-  toolbar.querySelector('#ptl-tool-pen').addEventListener('click',   ()=>setTool('pen'));
-  toolbar.querySelector('#ptl-tool-eraser').addEventListener('click',()=>setTool('eraser'));
+  document.addEventListener('keydown',onKey);
 
-  toolbar.querySelector('#ptl-undo').addEventListener('click',()=>{
+  // ── Toolbar controls ──
+  function setTool(t){
+    activeTool=t; selectedId=null; setCursor();
+    toolbar.querySelectorAll('[id^="ptl-tool-"]').forEach(b=>{
+      const tid=b.id.replace('ptl-tool-','');
+      b.style.background=tid===t?'var(--accent)':'transparent';
+      b.style.color=tid===t?'#fff':'var(--text)';
+    });
+  }
+  PTL_TOOLS.forEach(t=>toolbar.querySelector(`#ptl-tool-${t.id}`)?.addEventListener('click',()=>setTool(t.id)));
+  toolbar.querySelector('#ptl-color').addEventListener('input',e=>{ activeColor=e.target.value; });
+  toolbar.querySelector('#ptl-size').addEventListener('change',e=>{ activeSize=Number(e.target.value); });
+  toolbar.querySelector('#ptl-back').addEventListener('click',()=>{ ro.disconnect(); document.removeEventListener('keydown',onKey); ptlActiveBoardId=null; renderSidebar(); renderPapanTulis(); });
+  toolbar.querySelector('#ptl-undo')?.addEventListener('click',()=>{
     const strokes=(board.strokes||[]).filter(s=>!s.deleted);
     if(!strokes.length) return;
-    const last=strokes[strokes.length-1];
-    touch(Object.assign(last,{deleted:true}));
-    touch(board); save(); redraw();
+    touch(Object.assign(strokes[strokes.length-1],{deleted:true}));
+    touch(board); save(); selectedId=null; redraw();
   });
-
-  toolbar.querySelector('#ptl-reset').addEventListener('click',()=>{
+  toolbar.querySelector('#ptl-reset')?.addEventListener('click',()=>{
     if(!confirm('Hapus semua coretan di papan ini?')) return;
     (board.strokes||[]).forEach(s=>Object.assign(s,{deleted:true}));
-    touch(board); save(); redraw();
+    touch(board); save(); selectedId=null; redraw();
   });
+  setCursor();
 }
 
 /* ══════════════════════════════════════════
