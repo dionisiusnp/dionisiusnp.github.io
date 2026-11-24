@@ -7202,6 +7202,7 @@ function renderPapanTulis(){
   let resizing=false, resizeHandle=null, resizeOrigStroke=null;
   let resizeAnchor={wx:0,wy:0}, resizeOrigHandle={wx:0,wy:0};
   let rotating=false, rotCenter={wx:0,wy:0}, rotStartAngle=0, rotOrigRotation=0;
+  let dragInitX=0, dragInitY=0;
   let selPanelStrokeId=null;
 
   function getPosScreen(e){
@@ -7488,7 +7489,7 @@ function renderPapanTulis(){
         drawing=true; dragStroke=hit;
         const cx=hit.tool==='pen'||hit.tool==='eraser'?hit.pts[0][0]:hit.x1;
         const cy=hit.tool==='pen'||hit.tool==='eraser'?hit.pts[0][1]:hit.y1;
-        dragOffX=x-cx; dragOffY=y-cy;
+        dragOffX=x-cx; dragOffY=y-cy; dragInitX=cx; dragInitY=cy;
       }
       redraw(); return;
     }
@@ -7551,7 +7552,11 @@ function renderPapanTulis(){
     const {x,y}=getPos(e);
     if(activeTool==='select'&&dragStroke){
       const s=dragStroke;
-      const nx=x-dragOffX, ny=y-dragOffY;
+      let nx=x-dragOffX, ny=y-dragOffY;
+      if(e.shiftKey){
+        if(Math.abs(nx-dragInitX)>=Math.abs(ny-dragInitY)) ny=dragInitY;
+        else nx=dragInitX;
+      }
       if(s.tool==='pen'||s.tool==='eraser'){
         const ox=s.pts[0][0],oy=s.pts[0][1];
         const dx=nx-ox,dy=ny-oy;
