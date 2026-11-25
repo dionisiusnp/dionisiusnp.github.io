@@ -7859,7 +7859,7 @@ function renderPapanTulis(){
     if(resizing){
       const {x:wx,y:wy}=getPos(e);
       const selS=(board.strokes||[]).find(s=>s.id===selectedId&&!s.deleted);
-      if(selS){ applyResize(selS,wx,wy); redraw(); }
+      if(selS){ applyResize(selS,snapW(wx),snapW(wy)); redraw(); }
       return;
     }
     if(!drawing) return;
@@ -7914,17 +7914,17 @@ function renderPapanTulis(){
     }
     let cx2=snapW(x), cy2=snapW(y);
     if(e.shiftKey){
-      const dx=x-currentStroke.x1, dy=y-currentStroke.y1;
+      const dx=snapW(x)-currentStroke.x1, dy=snapW(y)-currentStroke.y1;
       if(currentStroke.tool==='rect'||currentStroke.tool==='circle'){
-        const side=Math.min(Math.abs(dx),Math.abs(dy));
+        const side=snapEnabled?Math.round(Math.min(Math.abs(dx),Math.abs(dy))/snapSize)*snapSize:Math.min(Math.abs(dx),Math.abs(dy));
         cx2=currentStroke.x1+Math.sign(dx)*side;
         cy2=currentStroke.y1+Math.sign(dy)*side;
       } else if(currentStroke.tool==='line'||currentStroke.tool==='arrow'){
         const angle=Math.atan2(dy,dx);
         const snapAngle=Math.round(angle/(Math.PI/4))*(Math.PI/4);
         const len=Math.hypot(dx,dy);
-        cx2=currentStroke.x1+Math.cos(snapAngle)*len;
-        cy2=currentStroke.y1+Math.sin(snapAngle)*len;
+        cx2=currentStroke.x1+snapW(Math.cos(snapAngle)*len);
+        cy2=currentStroke.y1+snapW(Math.sin(snapAngle)*len);
       }
     }
     currentStroke.x2=cx2; currentStroke.y2=cy2;
