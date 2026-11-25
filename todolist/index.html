@@ -7458,7 +7458,7 @@ function renderPapanTulis(){
         touch(s);touch(board);save();redraw();
       });
       fillInput?.addEventListener('input',e=>{ if(!fillChk.checked) return; s.fill=e.target.value; touch(s);touch(board);save();redraw(); });
-      selPanel.querySelector('#spnl-label')?.addEventListener('input',e=>{ s.label=e.target.value; touch(s);touch(board);save();selPanelStrokeId=null;redraw(); });
+      selPanel.querySelector('#spnl-label')?.addEventListener('input',e=>{ s.label=e.target.value; touch(s);touch(board);save();redraw(); });
       // rundown
       ['setup','acara','bongkar'].forEach(f=>{
         selPanel.querySelector(`#spnl-rd-${f}`)?.addEventListener('change',e=>{
